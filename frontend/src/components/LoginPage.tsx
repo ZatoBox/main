@@ -1,185 +1,179 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Shield, Key, Globe } from 'lucide-react';
+import { icpAuthService } from '../services/icpAuth';
 import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
+  const { setICPUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    setError(''); // Clear error when user types
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleInternetIdentityLogin = async () => {
     setIsLoading(true);
     setError('');
     
     try {
-      await login(formData.email, formData.password);
+      const { user, token } = await icpAuthService.login();
+      
+      // Set the ICP user in auth context
+      setICPUser(user, token);
+      
+      // Navigate to home page
       navigate('/');
     } catch (error: any) {
-      setError(error.message || 'Error logging in');
+      console.error('Internet Identity login failed:', error);
+      setError(error.message || 'Failed to login with Internet Identity');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`);
-    // Navigate to homepage
-    navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-bg-main">
       {/* Desktop Layout */}
       <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6 lg:p-6 min-h-screen">
-        {/* Left Column - Form */}
+        {/* Left Column - Authentication */}
         <div className="flex items-center justify-center">
-          <div className="w-full max-w-md space-y-6">
+          <div className="w-full max-w-md space-y-8">
             {/* Header */}
             <div className="text-center lg:text-left">
+              <div className="flex items-center justify-center lg:justify-start mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-complement rounded-full flex items-center justify-center">
+                  <Shield className="w-8 h-8 text-white" />
+                </div>
+              </div>
               <h1 className="text-3xl font-bold text-text-primary mb-4">
-                Welcome Back 👋
+                Welcome to ZatoBox 🔐
               </h1>
               <p className="text-text-secondary leading-relaxed">
-                Today is a new day. It's your day. You shape it.<br />
-                Sign in to start managing your projects.
+                Access your inventory management system using Internet Computer Digital Identity.<br />
+                Secure, decentralized authentication without passwords.
               </p>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email Input */}
-              <div>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="Example@email.com"
-                  className="w-full h-12 px-4 border border-divider rounded focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-150 ease-in-out bg-bg-surface text-text-primary placeholder-text-secondary hover:shadow-sm"
-                  required
-                />
-              </div>
-
-              {/* Password Input */}
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  placeholder="at least 8 characters"
-                  className="w-full h-12 px-4 pr-12 border border-divider rounded focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-150 ease-in-out bg-bg-surface text-text-primary placeholder-text-secondary hover:shadow-sm"
-                  required
-                  minLength={8}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-
-              {/* Forgot Password */}
-              <div className="text-right">
-                <button
-                  type="button"
-                  className="text-sm text-complement hover:text-complement-600 transition-colors"
-                >
-                  Forgot password?
-                </button>
+            {/* Internet Identity Features */}
+            <div className="space-y-6">
+              {/* Features */}
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Key className="w-3 h-3 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-text-primary">No Passwords</h3>
+                    <p className="text-sm text-text-secondary">Secure authentication using cryptographic keys</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Shield className="w-3 h-3 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-text-primary">Decentralized Security</h3>
+                    <p className="text-sm text-text-secondary">Your identity is owned by you, stored on the blockchain</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Globe className="w-3 h-3 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-text-primary">Universal Access</h3>
+                    <p className="text-sm text-text-secondary">Use the same identity across all Internet Computer apps</p>
+                  </div>
+                </div>
               </div>
 
               {/* Error Message */}
               {error && (
-                <div className="p-3 bg-error-50 border border-error-200 rounded-lg text-error-700 text-sm">
-                  {error}
+                <div className="p-4 bg-error-50 border border-error-200 rounded-lg text-error-700 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <Shield className="w-4 h-4 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
                 </div>
               )}
 
-              {/* Submit Button */}
+              {/* Login Button */}
               <button
-                type="submit"
+                onClick={handleInternetIdentityLogin}
                 disabled={isLoading}
-                className="w-full h-12 bg-primary hover:bg-primary-600 text-black font-medium rounded-lg transition-all duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-sm"
+                className="w-full h-14 bg-gradient-to-r from-primary to-complement hover:from-primary-600 hover:to-complement-600 text-white font-medium rounded-lg transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-3"
               >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <span>Connecting to Internet Identity...</span>
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-5 h-5" />
+                    <span>Login with Internet Identity</span>
+                  </>
+                )}
               </button>
-            </form>
 
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-divider"></div>
+              {/* Info */}
+              <div className="text-center text-sm text-text-secondary">
+                <p>
+                  New to Internet Identity?{' '}
+                  <a 
+                    href="http://ucwa4-rx777-77774-qaada-cai.localhost:4943" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-complement hover:text-complement-600 font-medium transition-colors"
+                  >
+                    Create your digital identity
+                  </a>
+                </p>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-bg-main text-text-secondary">Or continue with</span>
+
+              {/* Registration Info */}
+              <div className="text-center p-4 bg-primary/5 rounded-lg border border-primary/10">
+                <h3 className="font-medium text-text-primary mb-2">First time using ZatoBox?</h3>
+                <p className="text-sm text-text-secondary">
+                  Your account will be automatically created when you login with Internet Identity.
+                  No separate registration required!
+                </p>
               </div>
-            </div>
-
-            {/* Social Login Buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleSocialLogin('google')}
-                className="flex items-center justify-center h-12 px-4 border border-divider rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Google
-              </button>
-              <button
-                onClick={() => handleSocialLogin('github')}
-                className="flex items-center justify-center h-12 px-4 border border-divider rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-                GitHub
-              </button>
-            </div>
-
-            {/* Sign Up Link */}
-            <div className="text-center">
-              <p className="text-text-secondary">
-                Don't have an account?{' '}
-                <button
-                  onClick={() => navigate('/register')}
-                  className="text-complement hover:text-complement-600 font-medium transition-colors"
-                >
-                  Sign up
-                </button>
-              </p>
             </div>
           </div>
         </div>
 
-        {/* Right Column - Image/Illustration */}
-        <div className="hidden lg:flex lg:items-center lg:justify-center lg:bg-gradient-to-br lg:from-primary lg:to-complement lg:p-8">
+        {/* Right Column - Branding */}
+        <div className="hidden lg:flex lg:items-center lg:justify-center lg:bg-gradient-to-br lg:from-primary lg:to-complement lg:p-8 lg:rounded-lg">
           <div className="text-center text-white">
-            <div className="mb-6">
+            <div className="mb-8">
               <img src="/images/logozato.png" alt="ZatoBox Logo" className="w-40 mx-auto object-contain" />
             </div>
-            <h2 className="text-3xl font-bold mb-4">Welcome to ZatoBox</h2>
-            <p className="text-lg opacity-90 leading-relaxed">
-              The complete solution for inventory and sales management.<br />
-              Start managing your business efficiently today.
-            </p>
+            <h2 className="text-3xl font-bold mb-6">Web3 Inventory Management</h2>
+            <div className="space-y-4 text-lg opacity-90 leading-relaxed">
+              <p>Experience the future of business management with blockchain-powered authentication.</p>
+              <p>Secure, private, and completely owned by you.</p>
+            </div>
+            <div className="mt-8 p-6 bg-white/10 rounded-lg backdrop-blur-sm">
+              <h3 className="font-semibold mb-3">Why Internet Identity?</h3>
+              <ul className="text-sm space-y-2 text-left">
+                <li className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <span>No password vulnerabilities</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <span>Decentralized and private</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <span>Cross-device synchronization</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <span>Built on blockchain technology</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -196,88 +190,67 @@ const LoginPage: React.FC = () => {
 
         {/* Content */}
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-sm space-y-6">
+          <div className="w-full max-w-sm space-y-8">
             {/* Header */}
             <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-complement rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
               <h1 className="text-2xl font-bold text-text-primary mb-2">
-                Welcome Back 👋
+                Welcome Back 🔐
               </h1>
-              <p className="text-text-secondary">
-                Sign in to continue managing your inventory
+              <p className="text-text-secondary text-sm">
+                Secure login with Internet Computer Digital Identity
               </p>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email Input */}
-              <div>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="Email address"
-                  className="w-full h-12 px-4 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-150 ease-in-out bg-bg-surface text-text-primary placeholder-text-secondary"
-                  required
-                />
-              </div>
-
-              {/* Password Input */}
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  placeholder="Password"
-                  className="w-full h-12 px-4 pr-12 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-150 ease-in-out bg-bg-surface text-text-primary placeholder-text-secondary"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-
-              {/* Forgot Password */}
-              <div className="text-right">
-                <button
-                  type="button"
-                  className="text-sm text-complement hover:text-complement-600 transition-colors"
-                >
-                  Forgot password?
-                </button>
-              </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="p-3 bg-error-50 border border-error-200 rounded-lg text-error-700 text-sm">
-                  {error}
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 bg-error-50 border border-error-200 rounded-lg text-error-700 text-sm">
+                <div className="flex items-center space-x-2">
+                  <Shield className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
                 </div>
+              </div>
+            )}
+
+            {/* Login Button */}
+            <button
+              onClick={handleInternetIdentityLogin}
+              disabled={isLoading}
+              className="w-full h-14 bg-gradient-to-r from-primary to-complement hover:from-primary-600 hover:to-complement-600 text-white font-medium rounded-lg transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  <span>Connecting...</span>
+                </>
+              ) : (
+                <>
+                  <Shield className="w-5 h-5" />
+                  <span>Login with Internet Identity</span>
+                </>
               )}
+            </button>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-12 bg-primary hover:bg-primary-600 text-black font-medium rounded-lg transition-all duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Signing in...' : 'Sign In'}
-              </button>
-            </form>
-
-            {/* Sign Up Link */}
-            <div className="text-center">
-              <p className="text-text-secondary">
-                Don't have an account?{' '}
-                <button
-                  onClick={() => navigate('/register')}
-                  className="text-complement hover:text-complement-600 font-medium transition-colors"
-                >
-                  Sign up
-                </button>
+            {/* Registration Info */}
+            <div className="text-center p-4 bg-primary/5 rounded-lg border border-primary/10">
+              <p className="text-sm text-text-secondary">
+                <strong className="text-text-primary">First time here?</strong><br />
+                Your account will be created automatically when you login.
               </p>
+            </div>
+
+            {/* Create Identity Link */}
+            <div className="text-center">
+              <a 
+                href="http://ucwa4-rx777-77774-qaada-cai.localhost:4943" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-complement hover:text-complement-600 font-medium transition-colors text-sm"
+              >
+                Create Internet Identity →
+              </a>
             </div>
           </div>
         </div>

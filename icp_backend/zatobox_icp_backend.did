@@ -1,0 +1,27 @@
+type AuthTokenResponse = record {
+  "principal" : text;
+  token : text;
+  expires_at : nat64;
+};
+type Result = variant { Ok : UserProfile; Err : text };
+type Result_1 = variant { Ok : AuthTokenResponse; Err : text };
+type UserProfile = record {
+  last_login : nat64;
+  role : text;
+  created_at : nat64;
+  email : opt text;
+  is_active : bool;
+  principal_id : text;
+  full_name : opt text;
+};
+type UserUpdateRequest = record { email : opt text; full_name : opt text };
+service : () -> {
+  get_current_user : () -> (Result) query;
+  get_user_count : () -> (nat64) query;
+  health_check : () -> (text) query;
+  login : () -> (Result_1);
+  register_user : (opt UserUpdateRequest) -> (Result);
+  update_user_profile : (UserUpdateRequest) -> (Result);
+  validate_principal : (text) -> (Result) query;
+  whoami : () -> (text) query;
+}

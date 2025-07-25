@@ -25,7 +25,7 @@ interface Product {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ searchTerm: externalSearchTerm = '' }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, icpUser, authType } = useAuth();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);

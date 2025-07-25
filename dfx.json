@@ -1,0 +1,36 @@
+{
+  "canisters": {
+    "zatobox_icp_backend": {
+      "type": "rust",
+      "package": "zatobox_icp_backend",
+      "candid": "icp_backend/zatobox_icp_backend.did"
+    },
+    "zatobox_icp_frontend": {
+      "dependencies": ["zatobox_icp_backend"],
+      "frontend": {
+        "entrypoint": "frontend/dist/index.html"
+      },
+      "source": ["frontend/dist"],
+      "type": "assets"
+    },
+    "internet_identity": {
+      "type": "custom",
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "frontend": {}
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
