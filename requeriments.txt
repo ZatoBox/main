@@ -10,3 +10,8 @@ starlette==0.47.2
 typing-inspection==0.4.1
 typing_extensions==4.14.1
 jwt==1.4.0
+
+
+lightspark==2.10.1
+python-dotenv>=1.0.1
+python-dotenv
