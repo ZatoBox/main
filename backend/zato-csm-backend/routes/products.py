@@ -64,7 +64,7 @@ def get_product(
 
 
 @router.put("/{product_id}")
-def update_product(
+async def update_product(
     request: Request,
     product_id: int,
     name: Optional[str] = Form(None),
@@ -97,6 +97,14 @@ def update_product(
 
     if images:
         updates["images"] = images
+
+    if not updates:
+        try:
+            raw = await request.json()
+            if isinstance(raw, dict):
+                updates.update(raw)
+        except Exception:
+            pass
 
     if not updates:
         raise HTTPException(status_code=400, detail="No update fields provided")

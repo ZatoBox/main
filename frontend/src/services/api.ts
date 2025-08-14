@@ -148,6 +148,23 @@ export const productsAPI = {
       body: JSON.stringify(productData),
     }),
 
+  update: (id: number, productData: Partial<Product>): Promise<ProductResponse> => {
+    const removeUndefined = (obj: Record<string, unknown>) => {
+      return Object.entries(obj).reduce<Record<string, unknown>>((acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
+    };
+
+    const payload = removeUndefined(productData as Record<string, unknown>);
+    return apiRequest(`/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+
   uploadImages: async (
     id: number,
     formData: FormData
