@@ -111,9 +111,6 @@ installed.txt
 filter-repo/
 .git/
 
-# Requirements obsoletos
-requirements.txt
-dependencies_*.txt
 # Logs
 logs
 *.log
@@ -227,6 +224,3 @@ installed.txt
 filter-repo/
 .git/
 
-# Requirements obsoletos
-requirements.txt
-dependencies_*.txt

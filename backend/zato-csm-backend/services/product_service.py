@@ -69,11 +69,11 @@ class ProductService:
             raise HTTPException(status_code=404, detail="Product not found")
         return product
 
-    def update_product(self, product_id: int, updates: dict):
+    def update_product(self, product_id: int, updates: dict, user_timezone: str = "UTC"):
         # Validation allowed fields
         allowed_fields = ["name", "description", "price", "stock", "category", "images"]
 
-        for field in updates.keys():
+        for field in list(updates.keys()):
             if field not in allowed_fields:
                 raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
 
@@ -82,7 +82,11 @@ class ProductService:
         if "stock" in updates and updates["stock"] < 0:
             raise HTTPException(status_code=400, detail="Stock cannot be negative")
 
-        return self.product_repo.update_product(product_id, updates)
+        images = updates.get("images")
+        if images and isinstance(images, list):
+            updates["images"] = self._process_images(images)
+
+        return self.product_repo.update_product(product_id, updates, user_timezone)
 
     def delete_product(self, product_id):
         return self.product_repo.delete_product(product_id)
