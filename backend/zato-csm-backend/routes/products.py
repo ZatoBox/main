@@ -65,12 +65,43 @@ def get_product(
 
 @router.put("/{product_id}")
 def update_product(
+    request: Request,
     product_id: int,
-    updates: dict = Body(...),
+    name: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    price: Optional[float] = Form(None),
+    stock: Optional[int] = Form(None),
+    category: Optional[str] = Form(None),
+    images: List[UploadFile] = File(None),
+    body: Optional[dict] = Body(None),
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
-    product_updated = product_service.update_product(product_id, updates)
+    user_timezone = get_user_timezone_from_request(request)
+
+    updates = {}
+
+    if body:
+        updates.update(body)
+
+    if name is not None:
+        updates["name"] = name
+    if description is not None:
+        updates["description"] = description
+    if price is not None:
+        updates["price"] = price
+    if stock is not None:
+        updates["stock"] = stock
+    if category is not None:
+        updates["category"] = category
+
+    if images:
+        updates["images"] = images
+
+    if not updates:
+        raise HTTPException(status_code=400, detail="No update fields provided")
+
+    product_updated = product_service.update_product(product_id, updates, user_timezone)
     return {
         "success": True,
         "message": "Product updated successfully",
