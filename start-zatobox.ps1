@@ -84,19 +84,24 @@ function Set-TesseractPath {
     }
 }
 
-# Función para crear directorios necesarios
-function Create-RequiredDirectories {
+# Función para crear directorios necesarios dentro de OCR
+function Create-OCRDirectories {
+    $ocrPath = Join-Path $PSScriptRoot "OCR"
     $directories = @(
         "uploads",
         "uploads\products",
         "uploads\ocr",
-        "outputs"
+        "outputs",
+        "logs"
     )
-    
+
     foreach ($dir in $directories) {
-        if (-not (Test-Path $dir)) {
-            New-Item -ItemType Directory -Path $dir -Force | Out-Null
-            Write-Status "Directorio creado: $dir" $Green "SUCCESS"
+        $fullPath = Join-Path $ocrPath $dir
+        if (-not (Test-Path $fullPath)) {
+            New-Item -ItemType Directory -Path $fullPath -Force | Out-Null
+            Write-Status "Directorio creado: $fullPath" $Green "SUCCESS"
+        } else {
+            Write-Status "Directorio existente: $fullPath" $Green "SUCCESS"
         }
     }
 }
@@ -135,6 +140,140 @@ function Show-AccessInfo {
     Write-Host ""
 }
 
+# Función para iniciar el frontend
+function Start-Frontend {
+    $frontendPath = Join-Path $PSScriptRoot "frontend"
+
+    Write-Status "Iniciando Frontend (puerto 5173)..." $Yellow
+    try {
+        $frontendJob = Start-Job -ScriptBlock {
+            Set-Location $using:frontendPath
+            npm run dev
+        }
+        Write-Status "Frontend iniciado correctamente" $Green "SUCCESS"
+    } catch {
+        Write-Status "Error al iniciar Frontend: $($_.Exception.Message)" $Red "ERROR"
+        exit 1
+    }
+}
+
+# Función para iniciar el OCR
+function Start-OCR {
+    $ocrPath = Join-Path $PSScriptRoot "OCR"
+    $ocrVenvPath = Join-Path $ocrPath ".venv"
+    $activateScript = Join-Path $ocrVenvPath "Scripts\activate"
+    $ocrScript = Join-Path $ocrPath "app-light-fixed.py"
+
+    if (-not (Test-Path $activateScript)) {
+        Write-Status "Script de activación del OCR no encontrado en: $activateScript" $Red "ERROR"
+        exit 1
+    }
+
+    Write-Status "Iniciando Servidor OCR (puerto 5000)..." $Yellow
+    try {
+        Set-Location $ocrPath
+        & cmd /c "$activateScript && python $ocrScript"
+        Write-Status "Servidor OCR iniciado correctamente" $Green "SUCCESS"
+    } catch {
+        Write-Status "Error al iniciar Servidor OCR: $($_.Exception.Message)" $Red "ERROR"
+        exit 1
+    }
+}
+
+# Función para iniciar todos los servicios en un flujo continuo
+function Start-AllServices {
+    Write-Status "Iniciando todos los servicios..." $Blue
+
+    # Iniciar Frontend
+    $frontendPath = Join-Path $PSScriptRoot "frontend"
+    Write-Status "Iniciando Frontend (puerto 5173)..." $Yellow
+    try {
+        Start-Job -ScriptBlock {
+            Set-Location $using:frontendPath
+            npm run dev
+        } | Out-Null
+        Write-Status "Frontend iniciado correctamente" $Green "SUCCESS"
+    } catch {
+        Write-Status "Error al iniciar Frontend: $($_.Exception.Message)" $Red "ERROR"
+        exit 1
+    }
+
+    Start-Sleep -Seconds 5
+
+    # Iniciar Backend
+    $backendRootPath = Join-Path $PSScriptRoot "backend"
+    $backendPath = Join-Path $backendRootPath "zato-csm-backend"
+    $backendVenvPath = Join-Path $backendPath ".venv"
+    $pythonExecutable = Join-Path $backendVenvPath "Scripts\python.exe"
+    $backendMain = Join-Path $backendPath "main.py"
+
+    if (-not (Test-Path $backendRootPath)) {
+        Write-Status "Ruta backend inexistente: $backendRootPath" $Red "ERROR"
+        exit 1
+    }
+
+    if (-not (Test-Path $backendPath)) {
+        Write-Status "Ruta zato-csm-backend inexistente: $backendPath" $Red "ERROR"
+        exit 1
+    }
+
+    if (-not (Test-Path $pythonExecutable)) {
+        Write-Status "Python del entorno virtual no encontrado en: $pythonExecutable" $Red "ERROR"
+        exit 1
+    }
+
+    if (-not (Test-Path $backendMain)) {
+        Write-Status "Archivo main.py no encontrado en: $backendMain" $Red "ERROR"
+        exit 1
+    }
+
+    Write-Status "Iniciando Backend (puerto 4444)..." $Yellow
+    try {
+        $backendJob = Start-Job -ScriptBlock {
+            Set-Location $using:backendPath
+            & $using:pythonExecutable -m uvicorn main:app --host 0.0.0.0 --port 4444
+        }
+        Start-Sleep -Seconds 5 # Espera para asegurarse de que el backend se inicie correctamente
+        if ($backendJob.State -ne "Running") {
+            Write-Status "Error: El backend no se está ejecutando después de iniciar el job." $Red "ERROR"
+            Receive-Job -Job $backendJob -Keep
+            Remove-Job -Job $backendJob
+            exit 1
+        }
+        Write-Status "Backend iniciado correctamente en segundo plano" $Green "SUCCESS"
+    } catch {
+        Write-Status "Error al iniciar Backend: $($_.Exception.Message)" $Red "ERROR"
+        exit 1
+    }
+
+    Start-Sleep -Seconds 5
+
+    # Iniciar OCR
+    $ocrPath = Join-Path $PSScriptRoot "OCR"
+    $ocrVenvPath = Join-Path $ocrPath ".venv"
+    $activateOCR = Join-Path $ocrVenvPath "Scripts\activate"
+    $ocrScript = Join-Path $ocrPath "app-light-fixed.py"
+
+    if (-not (Test-Path $activateOCR)) {
+        Write-Status "Script de activación del OCR no encontrado en: $activateOCR" $Red "ERROR"
+        exit 1
+    }
+
+    Write-Status "Iniciando Servidor OCR (puerto 5000)..." $Yellow
+    try {
+        Start-Job -ScriptBlock {
+            Set-Location $using:ocrPath
+            & cmd /c "$using:activateOCR && python $using:ocrScript"
+        } | Out-Null
+        Write-Status "Servidor OCR iniciado correctamente" $Green "SUCCESS"
+    } catch {
+        Write-Status "Error al iniciar Servidor OCR: $($_.Exception.Message)" $Red "ERROR"
+        exit 1
+    }
+
+    Write-Status "Todos los servicios han sido iniciados." $Green "SUCCESS"
+}
+
 # ==========================================
 # INICIO DEL SCRIPT
 # ==========================================
@@ -143,48 +282,11 @@ Write-Host "  ZatoBox v2.0 - Inicio Automático" -ForegroundColor $Green
 Write-Host "==========================================" -ForegroundColor $Green
 Write-Host ""
 
-# Verificar requisitos
-Write-Status "Verificando requisitos del sistema..." $Blue
+# Crear directorios necesarios dentro de OCR
+Create-OCRDirectories
 
-# Verificar Node.js
-if (-not (Test-Command "node")) {
-    Write-Status "Node.js no encontrado. Por favor instale Node.js primero." $Red "ERROR"
-    exit 1
-}
-$nodeVersion = node --version
-Write-Status "Node.js detectado: $nodeVersion" $Green "SUCCESS"
-
-# Verificar npm
-if (-not (Test-Command "npm")) {
-    Write-Status "npm no encontrado. Por favor instale Node.js primero." $Red "ERROR"
-    exit 1
-}
-$npmVersion = npm --version
-Write-Status "npm detectado: $npmVersion" $Green "SUCCESS"
-
-# Verificar Python
-$pythonCommand = Get-PythonCommand
-if (-not $pythonCommand) {
-    Write-Status "Python no encontrado. Por favor instale Python 3.12 primero." $Red "ERROR"
-    exit 1
-}
-$pythonVersion = & $pythonCommand --version
-Write-Status "Python detectado: $pythonVersion" $Green "SUCCESS"
-
-# Configurar Tesseract
-if (-not (Set-TesseractPath)) {
-    Write-Status "Tesseract no configurado correctamente" $Red "ERROR"
-    exit 1
-}
-
-# Crear directorios necesarios
-Create-RequiredDirectories
-
-# ==========================================
-# DETENER SERVICIOS EXISTENTES
-# ==========================================
+# Detener servicios existentes
 Write-Status "Deteniendo servicios existentes..." $Yellow
-
 $ports = @(4444, 5173, 5000)
 foreach ($port in $ports) {
     if (Test-Port $port) {
@@ -194,80 +296,17 @@ foreach ($port in $ports) {
 
 Start-Sleep -Seconds 3
 
-# ==========================================
-# INICIAR SERVICIOS
-# ==========================================
-Write-Status "Iniciando servicios de ZatoBox..." $Blue
+# Iniciar todos los servicios
+Start-AllServices
 
-# Iniciar Backend
-Write-Status "Iniciando Backend (puerto 4444)..." $Yellow
-try {
-    $backendJob = Start-Job -ScriptBlock {
-        Set-Location $using:PWD\backend
-        node test-server.js
-    }
-    Write-Status "Backend iniciado correctamente" $Green "SUCCESS"
-} catch {
-    Write-Status "Error al iniciar Backend: $($_.Exception.Message)" $Red "ERROR"
-    exit 1
-}
-
-# Esperar a que el backend esté listo
-Start-Sleep -Seconds 5
-
-# Iniciar Frontend
-Write-Status "Iniciando Frontend (puerto 5173)..." $Yellow
-try {
-    $frontendJob = Start-Job -ScriptBlock {
-        Set-Location $using:PWD\frontend
-        npm run dev
-    }
-    Write-Status "Frontend iniciado correctamente" $Green "SUCCESS"
-} catch {
-    Write-Status "Error al iniciar Frontend: $($_.Exception.Message)" $Red "ERROR"
-    exit 1
-}
-
-# Esperar a que el frontend esté listo
-Start-Sleep -Seconds 5
-
-# Iniciar Servidor OCR
-Write-Status "Iniciando Servidor OCR (puerto 5000)..." $Yellow
-try {
-    $ocrJob = Start-Job -ScriptBlock {
-        Set-Location $using:PWD
-        $env:PATH += ";C:\Program Files\Tesseract-OCR"
-        & $using:pythonCommand app-light-fixed.py
-    }
-    Write-Status "Servidor OCR iniciado correctamente" $Green "SUCCESS"
-} catch {
-    Write-Status "Error al iniciar Servidor OCR: $($_.Exception.Message)" $Red "ERROR"
-    exit 1
-}
-
-# Esperar a que el OCR esté listo
-Start-Sleep -Seconds 5
-
-# ==========================================
-# VERIFICAR SERVICIOS
-# ==========================================
+# Verificar servicios
 Write-Status "Verificando servicios..." $Blue
-
 $servicesStatus = @{
-    "Backend (4444)" = $false
     "Frontend (5173)" = $false
+    "Backend (4444)" = $false
     "OCR (5000)" = $false
 }
 
-# Verificar Backend
-if (Test-Port 4444) {
-    $servicesStatus["Backend (4444)"] = $true
-    Write-Status "Backend: OK" $Green "SUCCESS"
-} else {
-    Write-Status "Backend: ERROR" $Red "ERROR"
-}
-
-# Verificar Frontend
 if (Test-Port 5173) {
     $servicesStatus["Frontend (5173)"] = $true
     Write-Status "Frontend: OK" $Green "SUCCESS"
@@ -275,7 +314,13 @@ if (Test-Port 5173) {
     Write-Status "Frontend: ERROR" $Red "ERROR"
 }
 
-# Verificar OCR
+if (Test-Port 4444) {
+    $servicesStatus["Backend (4444)"] = $true
+    Write-Status "Backend: OK" $Green "SUCCESS"
+} else {
+    Write-Status "Backend: ERROR" $Red "ERROR"
+}
+
 if (Test-Port 5000) {
     $servicesStatus["OCR (5000)"] = $true
     Write-Status "OCR: OK" $Green "SUCCESS"
@@ -283,28 +328,12 @@ if (Test-Port 5000) {
     Write-Status "OCR: ERROR" $Red "ERROR"
 }
 
-# ==========================================
-# RESULTADO FINAL
-# ==========================================
+# Resultado final
 $allServicesRunning = $servicesStatus.Values -notcontains $false
-
 if ($allServicesRunning) {
     Show-AccessInfo
 } else {
-    Write-Host ""
-    Write-Host "Algunos servicios no se iniciaron correctamente" -ForegroundColor $Red
-    Write-Host ""
-    foreach ($service in $servicesStatus.Keys) {
-        $status = if ($servicesStatus[$service]) { "[OK]" } else { "[ERROR]" }
-        $color = if ($servicesStatus[$service]) { $Green } else { $Red }
-        Write-Host "   $service : $status" -ForegroundColor $color
-    }
-    Write-Host ""
-    Write-Host "Solución de problemas:" -ForegroundColor $Yellow
-    Write-Host "   1. Verifica que los puertos 4444, 5173 y 5000 estén libres" -ForegroundColor $White
-    Write-Host "   2. Asegúrate de que todas las dependencias estén instaladas" -ForegroundColor $White
-    Write-Host "   3. Ejecuta .\install-zatobox.ps1 para reinstalar" -ForegroundColor $White
-    Write-Host ""
+    Write-Host ""; Write-Host "Algunos servicios no se iniciaron correctamente" -ForegroundColor $Red
 }
 
 # ==========================================
@@ -339,4 +368,4 @@ if (-not $Silent) {
         
         Write-Status "Servicios detenidos" $Green "SUCCESS"
     }
-} 
+}

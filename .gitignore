@@ -165,7 +165,7 @@ wheels/
 venv/
 venv-linux/
 ENV/
-env/
+.env/
 .venv/
 
 # IDE

@@ -1,0 +1,31 @@
+# REQUIREMENTS OPTIMIZADOS - SIN PYTORCH
+# Sistema inteligente basado solo en patrones
+
+# --- Backend web ---
+Flask==2.3.3
+Flask-CORS==4.0.0
+gunicorn==21.2.0
+Werkzeug==2.3.7
+
+# --- Processing básico ---
+numpy>=2.3.2
+Pillow>=11.3.0
+pandas>=2.3.1
+
+# --- OCR básico (solo Tesseract) ---
+pytesseract==0.3.10
+
+# --- PDF processing ---
+pdf2image==1.16.3
+
+# --- Utilities ---
+requests==2.31.0
+python-dotenv==1.0.0
+tqdm==4.66.1
+
+# --- Image processing básico ---
+opencv-python-headless==4.11.0.86
+
+# --- Text processing ---
+python-bidi==0.4.0
+six==1.16.0

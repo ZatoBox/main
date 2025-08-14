@@ -1,0 +1,267 @@
+
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form, Request
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+import pymysql
+import os
+from typing import List, Optional
+import jwt
+from datetime import datetime, timedelta
+
+
+app = FastAPI()
+
+# JWT config
+SECRET_KEY = "your_jwt_secret_key"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def verify_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+def get_current_user(request: Request, db=Depends(get_db)):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing token")
+    token = auth_header.split(" ")[1]
+    payload = verify_token(token)
+    user_id = payload.get("user_id")
+    with db.cursor() as cursor:
+        cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
+        user = cursor.fetchone()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+# CORS config (adjust origins as needed)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# MySQL connection config
+DB_CONFIG = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'yourpassword',
+    'database': 'zatobox',
+    'cursorclass': pymysql.cursors.DictCursor
+}
+
+def get_db():
+    conn = pymysql.connect(**DB_CONFIG)
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+# User model
+class User:
+    def __init__(self, id, email, fullName, role, phone=None, address=None):
+        self.id = id
+        self.email = email
+        self.fullName = fullName
+        self.role = role
+        self.phone = phone
+        self.address = address
+
+# Product model
+class Product:
+    def __init__(self, id, name, description, price, stock, category, images=None):
+        self.id = id
+        self.name = name
+        self.description = description
+        self.price = price
+        self.stock = stock
+        self.category = category
+        self.images = images or []
+
+# Auth endpoints
+
+# Auth endpoints
+@app.post("/api/auth/register")
+def register(email: str = Form(...), password: str = Form(...), fullName: str = Form(...), phone: str = Form(None), db=Depends(get_db)):
+    with db.cursor() as cursor:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="Email already registered")
+        cursor.execute("INSERT INTO users (email, password, fullName, phone, role) VALUES (%s, %s, %s, %s, 'user')", (email, password, fullName, phone))
+        db.commit()
+        user_id = cursor.lastrowid
+    token = create_access_token({"user_id": user_id})
+    return {"success": True, "message": "User registered successfully", "user": {"id": user_id, "email": email, "fullName": fullName, "role": "user"}, "token": token}
+
+@app.post("/api/auth/login")
+def login(email: str = Form(...), password: str = Form(...), db=Depends(get_db)):
+    with db.cursor() as cursor:
+        cursor.execute("SELECT id, email, fullName, role FROM users WHERE email=%s AND password=%s", (email, password))
+        user = cursor.fetchone()
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+    token = create_access_token({"user_id": user['id']})
+    return {"success": True, "message": "Login successful", "token": token, "user": user}
+
+
+# Example: List products
+@app.get("/api/products")
+def list_products(current_user=Depends(get_current_user), db=Depends(get_db)):
+    with db.cursor() as cursor:
+        cursor.execute("SELECT * FROM products")
+        products = cursor.fetchall()
+    return {"success": True, "products": products}
+
+
+# Example: Create product
+@app.post("/api/products")
+def create_product(
+    name: str = Form(...),
+    description: str = Form(...),
+    price: float = Form(...),
+    stock: int = Form(...),
+    category: str = Form(...),
+    images: List[UploadFile] = File(None),
+    current_user=Depends(get_current_user),
+    db=Depends(get_db)
+):
+    image_paths = []
+    upload_dir = "uploads/products/"
+    os.makedirs(upload_dir, exist_ok=True)
+    if images:
+        for image in images:
+            ext = os.path.splitext(image.filename)[1]
+            filename = f"product-{int(os.times()[4]*1000)}-{os.getpid()}{ext}"
+            filepath = os.path.join(upload_dir, filename)
+            with open(filepath, "wb") as f:
+                f.write(image.file.read())
+            image_paths.append(f"/uploads/products/{filename}")
+    with db.cursor() as cursor:
+        cursor.execute(
+            "INSERT INTO products (name, description, price, stock, category, images) VALUES (%s, %s, %s, %s, %s, %s)",
+            (name, description, price, stock, category, ",".join(image_paths))
+        )
+        db.commit()
+        product_id = cursor.lastrowid
+    return {"success": True, "message": "Product created successfully", "product": {"id": product_id, "name": name, "description": description, "price": price, "stock": stock, "category": category, "images": image_paths}}
+
+
+# Serve static images
+def serve_image(filename: str):
+    filepath = os.path.join("uploads/products", filename)
+    if os.path.exists(filepath):
+        return FileResponse(filepath)
+    raise HTTPException(status_code=404, detail="Image not found")
+
+
+# INVENTORY ENDPOINTS
+@app.get("/api/inventory")
+def get_inventory(current_user=Depends(get_current_user), db=Depends(get_db)):
+    with db.cursor() as cursor:
+        cursor.execute("SELECT * FROM inventory")
+        inventory = cursor.fetchall()
+    return {"success": True, "inventory": inventory}
+
+@app.put("/api/inventory/{id}")
+def update_stock(id: int, quantity: int = Form(...), current_user=Depends(get_current_user), db=Depends(get_db)):
+    with db.cursor() as cursor:
+        cursor.execute("UPDATE inventory SET quantity=%s, lastUpdated=NOW() WHERE id=%s", (quantity, id))
+        db.commit()
+        cursor.execute("SELECT * FROM inventory WHERE id=%s", (id,))
+        inventory = cursor.fetchone()
+    return {"success": True, "message": "Stock updated successfully", "inventory": inventory}
+
+
+# SALES ENDPOINTS
+@app.post("/api/sales")
+def create_sale(items: str = Form(...), total: float = Form(...), paymentMethod: str = Form(...), current_user=Depends(get_current_user), db=Depends(get_db)):
+    # items: JSON stringified list of items
+    import json
+    items_list = json.loads(items)
+    userId = current_user['id']
+    with db.cursor() as cursor:
+        cursor.execute("INSERT INTO sales (items, total, paymentMethod, userId, status, createdAt) VALUES (%s, %s, %s, %s, 'completed', NOW())", (items, total, paymentMethod, userId))
+        db.commit()
+        sale_id = cursor.lastrowid
+        # Update stock for each item
+        updated_products = []
+        for item in items_list:
+            cursor.execute("UPDATE products SET stock = stock - %s WHERE id=%s", (item['quantity'], item['productId']))
+            cursor.execute("SELECT id, name, stock, price FROM products WHERE id=%s", (item['productId'],))
+            updated_products.append(cursor.fetchone())
+    return {"success": True, "message": "Sale created successfully", "sale": {"id": sale_id, "items": items_list, "total": total, "paymentMethod": paymentMethod, "status": "completed", "userId": userId}, "updatedProducts": updated_products}
+
+@app.get("/api/sales")
+def get_sales(current_user=Depends(get_current_user), db=Depends(get_db)):
+    with db.cursor() as cursor:
+        cursor.execute("SELECT * FROM sales")
+        sales = cursor.fetchall()
+    return {"success": True, "sales": sales}
+
+
+# PROFILE ENDPOINTS
+@app.get("/api/profile")
+def get_profile(current_user=Depends(get_current_user), db=Depends(get_db)):
+    userId = current_user['id']
+    with db.cursor() as cursor:
+        cursor.execute("SELECT * FROM users WHERE id=%s", (userId,))
+        profile = cursor.fetchone()
+    return {"success": True, "profile": profile}
+
+@app.put("/api/profile")
+def update_profile(fullName: str = Form(...), phone: str = Form(...), address: str = Form(...), current_user=Depends(get_current_user), db=Depends(get_db)):
+    userId = current_user['id']
+    with db.cursor() as cursor:
+        cursor.execute("UPDATE users SET fullName=%s, phone=%s, address=%s WHERE id=%s", (fullName, phone, address, userId))
+        db.commit()
+        cursor.execute("SELECT * FROM users WHERE id=%s", (userId,))
+        profile = cursor.fetchone()
+    return {"success": True, "message": "Profile updated successfully", "profile": profile}
+
+
+# UPDATE PRODUCT
+@app.put("/api/products/{id}")
+def update_product(id: int, name: str = Form(...), description: str = Form(...), price: float = Form(...), stock: int = Form(...), category: str = Form(...), images: List[UploadFile] = File(None), current_user=Depends(get_current_user), db=Depends(get_db)):
+    image_paths = []
+    upload_dir = "uploads/products/"
+    os.makedirs(upload_dir, exist_ok=True)
+    if images:
+        for image in images:
+            ext = os.path.splitext(image.filename)[1]
+            filename = f"product-{int(os.times()[4]*1000)}-{os.getpid()}{ext}"
+            filepath = os.path.join(upload_dir, filename)
+            with open(filepath, "wb") as f:
+                f.write(image.file.read())
+            image_paths.append(f"/uploads/products/{filename}")
+    with db.cursor() as cursor:
+        cursor.execute("UPDATE products SET name=%s, description=%s, price=%s, stock=%s, category=%s, images=%s WHERE id=%s", (name, description, price, stock, category, ",".join(image_paths), id))
+        db.commit()
+        cursor.execute("SELECT * FROM products WHERE id=%s", (id,))
+        product = cursor.fetchone()
+    return {"success": True, "message": "Product updated successfully", "product": product}
+
+# DELETE PRODUCT
+@app.delete("/api/products/{id}")
+def delete_product(id: int, current_user=Depends(get_current_user), db=Depends(get_db)):
+    with db.cursor() as cursor:
+        cursor.execute("SELECT * FROM products WHERE id=%s", (id,))
+        product = cursor.fetchone()
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        cursor.execute("DELETE FROM products WHERE id=%s", (id,))
+        db.commit()
+    return {"success": True, "message": "Product deleted successfully", "product": product}

@@ -1,21 +1,6 @@
-# 🚀 ZatoBox v2.0 - Intelligent Point of Sale System
-
-A complete point of sale system with intelligent inventory, OCR, advanced product management, and professional configuration.
-
-## ✨ Main Features
-
-- 🛍️ **Product Management**: Complete CRUD with images and categorization
-- 📊 **Intelligent Inventory**: Stock control and movements with AI
-- 🔍 **Advanced OCR**: Automatic document and invoice scanning
-- 💳 **Payment System**: Integrated multiple payment methods
-- 📈 **Sales Reports**: Detailed analysis and export
-- 🔐 **Secure Authentication**: JWT with user roles and 2FA
-- ⚙️ **Complete Configuration**: Professional configuration panel
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
-<a id="readme-top"></a>
-
 <!-- PROJECT SHIELDS -->
-[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url] [![LinkedIn][linkedin-shield]][linkedin-url]
+[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![LinkedIn][linkedin-shield]](https://www.linkedin.com/in/ikhunsa/) [![Discord][discord-shield]](https://discord.com/invite/2zUVsv9aMF)
+
 
 <!-- PROJECT LOGO -->
 <br />
@@ -29,10 +14,10 @@ A complete point of sale system with intelligent inventory, OCR, advanced produc
   <p align="center">
     A complete point of sale system with smart inventory, OCR, advanced product management, and professional configuration.
     <br />
-    <a href="https://github.com/ZatoBox/main"><strong>Explore Documentation »</strong></a>
+    <a href="https://github.com/ZatoBox/Documents"><strong>Explore Documentation »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/ZatoBox/main">View Demo</a>
+    <a href="https://youtu.be/gA_XNPI7Bbs?si=7t28gQsBMOhAyA_X">View Demo</a>
     &middot;
     <a href="https://github.com/ZatoBox/main/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
@@ -80,22 +65,53 @@ A complete point of sale system with intelligent inventory, OCR, advanced produc
   </ol>
 </details>
 
-## ✨ Main Features
+### 🚀 Quick Start
+- [🌐 ICP Integration Setup](#-internet-computer-protocol-icp-integration) - Web3 blockchain integration
+- [🧪 Testing Guide](#-testing) - Run tests and verify functionality
 
-- 🛍️ **Product Management**: Full CRUD with images and categorization
-- 📊 **Smart Inventory**: Stock control and movements with AI
-- 🔍 **Advanced OCR**: Automatic document and invoice scanning
-- 💳 **Payment System**: Multiple integrated payment methods
-- 📈 **Sales Reports**: Detailed analysis and export
-- 🔐 **Secure Authentication**: JWT with user roles and 2FA
-- ⚙️ **Full Configuration**: Professional configuration panel
-- 📱 **Modern Interface**: React + TypeScript + Tailwind CSS
-- ⚡ **Robust Backend**: Node.js + Express + SQLite
-- 🔌 **Plugin System**: Extensible and configurable modules
+### ✨ Main Features
+
+- **🛍️ Product Management:** Full CRUD with images and categorization  
+- **📊 Smart Inventory:** Stock control and movements powered by AI  
+- **🔍 Advanced OCR:** Automatic scanning of documents and invoices  
+- **💳 Payment System:** Multiple integrated payment methods (crypto & fiat)  
+- **📈 Sales Reports:** Detailed analytics with export options  
+- **🔐 Authentication & Security:** Passwordless blockchain-based identity (ICP) with JWT roles and optional 2FA  
+- **🌐 Web3 Integration:** Decentralized Internet Identity via ICP canisters  
+- **📱 Modern Frontend:** React + TypeScript + Tailwind CSS  
+- **⚡ Robust Backend:** Node.js + Express + ICP Canisters  
+- **🔌 Plugin System:** Extensible, configurable modules for customization  
+- **⚙️ Professional Configuration:** Complete control panel for admins
+
+## 🔮 Future Web3(ICP) Integration Plans
+
+### **Phase 1: Token Economy**
+- 🪙 **Simple Token Rewards**: Automatic loyalty points for customer purchases
+- ⚡ **Real-time Inventory Sync**: Blockchain-based multi-store inventory management
+- 💰 **Token Redemption**: Use loyalty tokens for discounts and promotions
+
+### **Phase 2: NFT Commerce**
+- 🎨 **NFT Receipt Generation**: Unique digital receipts as collectible NFTs
+- 🖼️ **Digital Proof of Purchase**: Immutable warranty and return verification
+- 🎁 **Milestone NFTs**: Special collectibles for loyal customers
+
+### **Phase 3: Decentralized Trading**
+- 💹 **Token Trading Interface**: P2P marketplace for loyalty tokens
+- 🔄 **Cross-token Exchange**: Convert loyalty points to ICP or other cryptocurrencies
+- 📊 **Dynamic Pricing**: Market-driven token valuation system
+
+### **Phase 4: Full Decentralization**
+- 🏪 **Multi-store Network**: Connect ZatoBox instances in decentralized marketplace
+- 🤖 **Smart Contract Automation**: Automated reordering and pricing
+- 🌐 **Cross-chain Payments**: Bitcoin and Ethereum integration
+
+*Building the world's first complete Web3 Point of Sale ecosystem with AI integration*
 
 ## 🛠️ Technologies Used
 
 ### Frontend
+- **@dfinity/agent** - Internet Computer integration
+- **@dfinity/auth-client** - ICP authentication client
 - **React 18** - Modern UI library
 - **TypeScript** - Static typing for greater security
 ### Built With
@@ -123,14 +139,16 @@ A complete point of sale system with intelligent inventory, OCR, advanced produc
 - **Tailwind CSS** - Utility-first CSS framework
 - **React Router v6** - Declarative navigation
 - **Lucide React** - Modern and consistent icons
+
 - **Vitest** - Fast testing framework
 - **React Testing Library** - Component testing
 
 ### Backend
+ **Rust** - ICP canister development
+- **Internet Computer (ICP)** - Decentralized blockchain platform
+- **Internet Identity** - Web3 authentication service
 - **Node.js** - JavaScript runtime
 - **Express.js** - Minimalist web framework
-- **SQLite** - Lightweight and efficient database
-- **JWT** - Stateless authentication
 - **Multer** - File upload handling
 - **CORS** - Cross-origin resource sharing
 - **Jest** - Testing framework
@@ -200,6 +218,117 @@ npm run dev
 ### Regular User
 - **Email**: `user@frontposw.com`
 - **Password**: `user12345678`
+
+## 🌐 Internet Computer Protocol (ICP) Integration
+
+### Prerequisites for ICP Integration
+
+1. **Install DFX (Internet Computer SDK)**
+   ```bash
+   sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+   ```
+
+2. **Install Rust (for canister development)**
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   rustup target add wasm32-unknown-unknown
+   ```
+
+3. **Install Node.js dependencies**
+   ```bash
+   npm run install:all
+   ```
+
+### ICP Setup and Development
+
+1. **Start DFX local network**
+   ```bash
+   dfx start --clean --background
+   ```
+
+2. **Deploy Internet Identity locally**
+   ```bash
+   dfx deploy internet_identity
+   ```
+
+3. **Deploy ZatoBox ICP backend**
+   ```bash
+   dfx build zatobox_icp_backend
+   dfx deploy zatobox_icp_backend
+   ```
+
+4. **Start the frontend application**
+   ```bash
+   npm run dev:frontend
+   ```
+
+### ICP Authentication Testing
+
+#### Quick Test Steps
+1. **Access the application**
+   - Navigate to: http://localhost:5173
+
+2. **Test ICP authentication flow**
+   - Should redirect to login page
+   - Click "Login with Internet Identity"
+   - Browser opens Internet Identity interface
+   - Create or select an identity
+   - Authenticate and verify dashboard access
+
+3. **Verify persistent authentication**
+   - Refresh browser - should remain authenticated
+   - Check console for: `Auth check - storedToken: true storedAuthType: icp`
+
+### ICP Environment Configuration
+
+The application automatically detects and configures ICP environment:
+
+- **Local Development**: `http://ucwa4-rx777-77774-qaada-cai.localhost:4943`
+- **Backend Canister**: `umunu-kh777-77774-qaaca-cai`
+- **Network**: Local DFX network
+- **Authentication**: Internet Identity integration
+
+### ICP Commands Reference
+
+```bash
+# Start local ICP network
+dfx start --clean --background
+
+# Deploy all canisters
+dfx deploy
+
+# Deploy specific canister
+dfx deploy zatobox_icp_backend
+dfx deploy internet_identity
+
+# Check canister status
+dfx canister status zatobox_icp_backend
+
+# View canister logs
+dfx canister logs zatobox_icp_backend
+
+# Stop local network
+dfx stop
+```
+
+### Troubleshooting ICP Integration
+
+**Authentication Issues:**
+- If Internet Identity not loading: Verify DFX and local II are running
+- Check browser console for detailed authentication logs
+
+**Canister Issues:**
+```bash
+# Restart with clean state
+dfx stop
+dfx start --clean --background
+dfx deploy
+```
+
+**Development Issues:**
+- Ensure ports 4943 (DFX) and 5173 (frontend) are available
+- Verify Rust and wasm32 target are installed
+- Check that all dependencies are installed with `npm run install:all`
 
 ## 🧪 Testing
 
@@ -1208,6 +1337,7 @@ python app-light-fixed.py
 *Developed with ❤️ to make commerce smarter and more efficient.*
 
 <!-- MARKDOWN LINKS & IMAGES -->
+[discord-shield]: https://img.shields.io/badge/Discord-Join%20Chat-5865F2?style=for-the-badge&logo=discord&logoColor=white
 [invisible-shield]: https://img.shields.io/badge/invisible-shield-gray?style=for-the-badge
 [invisible-url]: https://github.com/ZatoBox/main/graphs/contributors
 [contributors-shield]: https://img.shields.io/github/contributors/ZatoBox/main.svg?style=for-the-badge
