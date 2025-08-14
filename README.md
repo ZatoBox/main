@@ -1,5 +1,5 @@
 <!-- PROJECT SHIELDS -->
-[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![LinkedIn][linkedin-shield]](https://www.linkedin.com/in/ikhunsa/) [![Discord][discord-shield]](https://discord.com/invite/2zUVsv9aMF)
+[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![LinkedIn][linkedin-shield]](https://www.linkedin.com/in/ikhunsa/) [![Discord][discord-shield]](https://discord.gg/FmdyRveX3G)
 
 
 <!-- PROJECT LOGO -->
