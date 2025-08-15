@@ -31,10 +31,12 @@ jobs:
 
       - name: Build and push backend image
         run: |
-          docker build -f Dockerfile.backend -t ghcr.io/${{ github.repository_owner }}/zato-backend:latest .
-          docker push ghcr.io/${{ github.repository_owner }}/zato-backend:latest
+          OWNER_LC="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          docker build -f Dockerfile.backend -t ghcr.io/${OWNER_LC}/zato-backend:latest .
+          docker push ghcr.io/${OWNER_LC}/zato-backend:latest
 
       - name: Build and push ocr image
         run: |
-          docker build -f Dockerfile.ocr -t ghcr.io/${{ github.repository_owner }}/zato-ocr:latest .
-          docker push ghcr.io/${{ github.repository_owner }}/zato-ocr:latest
+          OWNER_LC="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          docker build -f Dockerfile.ocr -t ghcr.io/${OWNER_LC}/zato-ocr:latest .
+          docker push ghcr.io/${OWNER_LC}/zato-ocr:latest
