@@ -1,0 +1,46 @@
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PORT=5000
+ENV WEB_CONCURRENCY=2
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
+WORKDIR /app
+
+# Install system dependencies para OCR and pdf->image
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    tesseract-ocr \
+    poppler-utils \
+    libmagic1 \
+    libzbar0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p ${TESSDATA_PREFIX} && \
+    curl -sL -o ${TESSDATA_PREFIX}/eng.traineddata \
+        https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata || true
+
+# Copy only the requirements-light file and install (mejor cache en CI)
+COPY OCR/requirements-light.txt ./requirements-light.txt
+RUN python -m pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements-light.txt
+
+# Copy the application
+COPY OCR/ ./
+
+# Create a non-root user and adjust permissions
+RUN groupadd -r app && useradd -r -g app app \
+    && chown -R app:app /app
+
+USER app
+
+EXPOSE 5000
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
+    CMD curl -fsS http://127.0.0.1:${PORT}/health || exit 1
+
+# Execute with gunicorn
+CMD ["sh", "-c", "exec gunicorn -w ${WEB_CONCURRENCY:-2} -b 0.0.0.0:${PORT:-5000} app_light_fixed:app"]
