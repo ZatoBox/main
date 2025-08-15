@@ -22,9 +22,10 @@ RUN mkdir -p ${TESSDATA_PREFIX} && \
     curl -sL -o ${TESSDATA_PREFIX}/eng.traineddata \
         https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata || true
 
-# Copy only the requirements and install (better cache in CI)
-COPY OCR/requirements-light.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy only the requirements-light file and install (mejor cache en CI)
+COPY OCR/requirements-light.txt ./requirements-light.txt
+RUN python -m pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements-light.txt
 
 # Copy the application
 COPY OCR/ ./
