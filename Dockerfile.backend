@@ -52,4 +52,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
         except: sys.exit(1)" || exit 1
 
 # Uvicorn en 4444, entrypoint run:main
-CMD ["uvicorn", "run:main", "--host", "0.0.0.0", "--port", "4444"]
+CMD ["uvicorn", "run:app", "--host", "0.0.0.0", "--port", "4444"]
