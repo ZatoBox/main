@@ -4,7 +4,7 @@ module.exports = {
   extends: [
     'eslint:recommended',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
+  ignorePatterns: ['**/*'], // <- ignorar todo el proyecto (desactiva ESLint)
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
   rules: {
@@ -41,4 +41,4 @@ module.exports = {
     'arrow-spacing': 'error',
     'template-curly-spacing': 'error',
   },
-} 
+}

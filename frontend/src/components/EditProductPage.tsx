@@ -302,7 +302,7 @@ const EditProductPage: React.FC = () => {
         payload.stock = stockNum;
         payload.category = category;
         if (formData.sku !== undefined)
-          payload.sku = formData.sku === '' ? null : formData.sku;
+          payload.sku = formData.sku === '' ? undefined : formData.sku;
       } else {
         if (formData.name !== originalProduct.name)
           payload.name = formData.name;
@@ -316,7 +316,7 @@ const EditProductPage: React.FC = () => {
         if (category !== originalProduct.category) payload.category = category;
         if ((formData.sku || '') !== (originalProduct.sku || '')) {
           if (formData.sku) payload.sku = formData.sku;
-          else payload.sku = null;
+          else payload.sku = undefined;
         }
       }
 

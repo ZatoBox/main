@@ -7,19 +7,19 @@ interface User {
   fullName: string;
   phone?: string;
   role: 'admin' | 'user';
-  emailVerified: boolean;
-  phoneVerified: boolean;
-  twoFactorEnabled: boolean;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+  twoFactorEnabled?: boolean;
   address?: string;
-  language: string;
-  timezone: string;
-  dateFormat: string;
-  currency: string;
-  notifications: any;
-  notificationFrequency: string;
+  language?: string;
+  timezone?: string;
+  dateFormat?: string;
+  currency?: string;
+  notifications?: any;
+  notificationFrequency?: string;
   lastAccess?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface AuthContextType {
