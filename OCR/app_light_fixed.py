@@ -44,25 +44,49 @@ if _tessdata:
 # Configurar CORS leyendo orígenes desde env (CORS_ORIGINS separados por comas)
 _origins_env = os.getenv("CORS_ORIGINS", "").strip()
 if _origins_env:
-    _allowed_origins = [o.strip() for o in _origins_env.split(",") if o.strip()]
+    _allowed_origins = []
+    for o in _origins_env.split(","):
+        oo = o.strip()
+        if not oo:
+            continue
+        oo = oo.rstrip("/")
+        if not oo.startswith("http://") and not oo.startswith("https://"):
+            oo = f"https://{oo}"
+        _allowed_origins.append(oo)
 else:
     _allowed_origins = [
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:5175",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5174",
-        "http://127.0.0.1:5175",
+        "https://zatobox.io",
+        "https://www.zatobox.io",
+        "https://zato-ocr.onrender.com",
     ]
 
 app = Flask(__name__)
 CORS(
     app,
     origins=_allowed_origins,
+    supports_credentials=True,
     allow_headers=["Content-Type", "Authorization"],
     methods=["GET", "POST", "OPTIONS"],
 )
 logging.basicConfig(level=logging.INFO)
+
+
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get("Origin")
+    if os.getenv("CORS_ALLOW_ALL", "false").lower() == "true":
+        response.headers["Access-Control-Allow-Origin"] = "*"
+    else:
+        normalized_allowed = [a.rstrip("/") for a in _allowed_origins]
+        if origin and origin.rstrip("/") in normalized_allowed:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Vary"] = "Origin"
+    response.headers.setdefault("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+    response.headers.setdefault(
+        "Access-Control-Allow-Headers", "Content-Type, Authorization"
+    )
+    response.headers.setdefault("Access-Control-Allow-Credentials", "true")
+    return response
 
 
 def clean_text(text):
