@@ -20,6 +20,7 @@ import SettingsPage from './components/SettingsPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import PluginStorePage from './components/PluginStorePage';
+import LandingPage from './components/LandingPage';
 
 function AppLayout() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Routes>
             <Route path='/login' element={<LoginPage />} />
             <Route path='/register' element={<RegisterPage />} />
+            <Route path='/landing' element={<LandingPage />} />
 
             <Route
               path='/'
