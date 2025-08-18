@@ -15,40 +15,76 @@ def create_tables_sql():
         last_updated TIMESTAMP DEFAULT NOW()
     );
     
+    CREATE TABLE IF NOT EXISTS units (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE,
+        code VARCHAR(20) NOT NULL UNIQUE,
+        symbol VARCHAR(20) NOT NULL,
+        creator_id INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (creator_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    );
+        
+    CREATE TABLE IF NOT EXISTS categories (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE
+    );
+    
     CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         description TEXT,
         price DECIMAL(10,2) NOT NULL,
         stock INT NOT NULL,
-        category VARCHAR(100),
-        images TEXT,
+        min_stock INT DEFAULT 0,
+        category_id INT,
+        images JSONB,
+        status VARCHAR(20) DEFAULT 'active',
+        weight DECIMAL(10,2),
+        sku VARCHAR(255) UNIQUE,
+        creator_id INT,
+        unit_id INT NOT NULL,
+        product_type VARCHAR(20) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        last_updated TIMESTAMP DEFAULT NOW()
+        last_updated TIMESTAMP DEFAULT NOW(),
+        localization TEXT,
+        FOREIGN KEY (creator_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+        FOREIGN KEY (unit_id) REFERENCES units(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON UPDATE CASCADE ON DELETE RESTRICT        
     );
         
-    CREATE TABLE IF NOT EXISTS inventory(
+    CREATE TABLE IF NOT EXISTS inventory_movements(
         id SERIAL PRIMARY KEY,
         product_id INT NOT NULL,
-        product_name VARCHAR(255),
+        movement_type VARCHAR(20) NOT NULL,
         quantity INT NOT NULL,
+        reason VARCHAR(100),
+        reference_id INT,
         min_stock INT DEFAULT 0,
         last_updated TIMESTAMP DEFAULT NOW(),
-        FOREIGN KEY (product_id) REFERENCES products(id)
+        FOREIGN KEY (product_id) REFERENCES products(id) ON UPDATE CASCADE ON DELETE RESTRICT
     );
     
     CREATE TABLE IF NOT EXISTS sales(
         id SERIAL PRIMARY KEY,
-        items TEXT,
+        items JSONB NOT NULL,
         total DECIMAL(10,2) NOT NULL,
         payment_method VARCHAR(50),
-        user_id INT,
+        creator_id INT NOT NULL,
         status VARCHAR(20) DEFAULT 'completed',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+        FOREIGN KEY (creator_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT
     );
     """
 
+def default_unit():
+    return """
+        INSERT INTO units (name, code, symbol) VALUES ('Unidad', 'UN', 'UN');
+        INSERT INTO units (name, code, symbol) VALUES ('Kilogram', 'KG', 'kg');
+        INSERT INTO units (name, code, symbol) VALUES ('Liters', 'L', 'l');
+        INSERT INTO units (name, code, symbol) VALUES ('Meters', 'M', 'm');
+        INSERT INTO units (name, code, symbol) VALUES ('Grams', 'G', 'g');
+    """
 
 def init_database():
     conn = None
@@ -59,6 +95,12 @@ def init_database():
 
         # Execute each statement separately
         for statement in create_tables_sql().split(";"):
+            stmt = statement.strip()
+            if stmt:
+                cursor.execute(stmt)
+
+        # Inserindo dados iniciais para as unidades
+        for statement in default_unit().split(";"):
             stmt = statement.strip()
             if stmt:
                 cursor.execute(stmt)

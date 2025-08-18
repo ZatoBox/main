@@ -16,7 +16,6 @@ class InventoryService:
             {
                 "id": p["id"],
                 "productId": p["id"],
-                "productName": p["name"],
                 "quantity": p["stock"],
                 "minStock": p.get("min_stock", 0),
                 "lastUpdated": p.get("last_updated", datetime.now().isoformat() + "Z"),
@@ -51,7 +50,6 @@ class InventoryService:
         return [
             {
                 "id": p["id"],
-                "productName": p["name"],
                 "currentStock": p["stock"],
                 "minStock": min_threshold,
                 "needRestock": True,

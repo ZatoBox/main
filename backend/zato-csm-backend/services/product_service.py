@@ -2,9 +2,9 @@ from fastapi import HTTPException
 from typing import List
 
 from repositories.product_repositories import ProductRepository
-
+from PIL import Image
 import os
-
+import io
 
 class ProductService:
     def __init__(self, product_repo: ProductRepository):
@@ -17,7 +17,14 @@ class ProductService:
         price: float,
         stock: int,
         category: str,
+        unit_id: int,
+        product_type: str,
+        creator_id: int,
+        min_stock: int=0,
+        sku: str=None,
         images: List = None,
+        weight: float = 0.0,
+        localization: str = None
     ):
         # Validações
         if not name or not description or not category:
@@ -26,28 +33,73 @@ class ProductService:
             raise HTTPException(status_code=400, detail="Price must be positive")
         if stock < 0:
             raise HTTPException(status_code=400, detail="Stock must be positive")
+        if min_stock < 0:
+            raise HTTPException(status_code=400, detail="Minimum stock must be positive")
+
+        if sku and len(sku.strip()) == 0:
+            sku = None
 
         # Processar upload de imagens
         images_paths = self._process_images(images) if images else []
 
         # Criar produto
         product = self.product_repo.create_product(
-            name, description, price, stock, category, ",".join(images_paths)
+            name=name,
+            description=description,
+            price=price,
+            storck=stock,
+            category=category,
+            images=images_paths,
+            sku=sku,
+            creator_id=creator_id,
+            unit_id=unit_id,
+            product_type=product_type,
+            weight=weight,
+            localization=localization
         )
         return product
 
     def _process_images(self, images: List):
+        if not images:
+            return []
+
+        ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
+        MAX_FILE_SIZE = 5 * 1024 * 1024 # 5MB em bytes
+
         image_paths = []
         upload_dir = "uploads/products/"
         os.makedirs(upload_dir, exist_ok=True)
 
         for image in images:
-            ext = os.path.splitext(image.filename)[1]
+            ext = os.path.splitext(image.filename)[1].lower()
+
+            # validação de formatos
+            if ext not in ALLOWED_EXTENSIONS:
+                raise HTTPException(status_code=400, detail=f"Invalid image format. Allowed: {'.'.join(ALLOWED_EXTENSIONS)}")
+
+            image_content = image.file.read()
+
+            # validação de tamanho
+            file_size = len(image_content)
+            if file_size > MAX_FILE_SIZE:
+                size_mb = file_size / (1024 * 1024)
+                raise HTTPException(status_code=400, detail=f"Image too large: {size_mb:.1f}MB. Maximum allowed: 5MB")
+
+            # processamento da imagem
+            try:
+                img = Image.open(io.BytesIO(image_content))
+                img.verify() # prevenção de uploads maliciosos
+            except Exception:
+                raise HTTPException(status_code=400, detail=f"Invalid image file: {image.filename}")
+
             filename = f"product-{int(os.times()[4] * 1000)}-{os.getpid()}{ext}"
             filepath = os.path.join(upload_dir, filename)
             with open(filepath, "wb") as f:
                 f.write(image.file.read())
             image_paths.append(f"/uploads/products/{filename}")
+
+            # resert file pointer para as próximas operações
+            # image.file.seek(0)
         return image_paths
 
     def list_products(self):

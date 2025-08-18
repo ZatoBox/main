@@ -38,13 +38,31 @@ def create_product(
     price: float = Form(...),
     stock: int = Form(...),
     category: str = Form(...),
+    unit_id: int = Form(...),
+    product_type: str = Form(...),
+    weight: float = Form(...),
+    min_sock: int = Form(None, ge=0),
+    sku: str = Form(None),
+    localization: str = Form(None),
     images: List[UploadFile] = File(None),
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
     user_timezone = get_user_timezone_from_request(request)
     product = product_service.create_product(
-        name, description, price, stock, category, images
+        name=name,
+        description=description,
+        price=price,
+        stock=stock,
+        category=category,
+        sku=sku,
+        unit_id=unit_id,
+        product_type=product_type,
+        creator_id=current_user['id'],
+        images=images,
+        weight=weight,
+        min_stock=min_sock,
+        localization=localization
     )
     return {
         "success": True,
