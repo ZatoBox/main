@@ -4,8 +4,12 @@ import type { RequestInit } from 'node-fetch';
 // Configuración de la API
 const API_BASE_URL: string =
   import.meta.env.VITE_API_URL || 'http://localhost:4444/api';
-const OCR_API_BASE_URL: string =
-  import.meta.env.VITE_OCR_API_URL || 'http://127.0.0.1:8001/api/v1';
+const OCR_API_BASE_URL_RAW: string =
+  import.meta.env.VITE_OCR_API_URL || 'http://127.0.0.1:5000';
+const OCR_API_BASE_URL: string = (OCR_API_BASE_URL_RAW as string).replace(
+  /\/+$/g,
+  ''
+);
 
 export const API_CONFIG = {
   BASE_URL: API_BASE_URL,
@@ -449,6 +453,27 @@ export const ocrAPI = {
       mode: 'cors',
       credentials: 'omit',
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+    }
+    return await response.json();
+  },
+
+  validateDocument: async (file: File): Promise<OCRResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(
+      `${API_CONFIG.OCR_BASE_URL}/invoice/validate`,
+      {
+        method: 'POST',
+        body: formData,
+        mode: 'cors',
+        credentials: 'omit',
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
