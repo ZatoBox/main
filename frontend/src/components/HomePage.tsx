@@ -29,6 +29,7 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm: externalSearchTerm = ''
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  // @ts-ignore
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [paymentTotal, setPaymentTotal] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
@@ -152,7 +153,7 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm: externalSearchTerm = ''
       // Prepare sale data
       const saleData = {
         items: cartItems.map(item => ({
-          productId: item.id,
+          product_id: item.id,
           quantity: item.quantity,
           price: item.price,
         })),
@@ -259,9 +260,9 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm: externalSearchTerm = ''
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-main pt-16 flex items-center justify-center animate-fade-in">
+      <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4 animate-pulse-glow"></div>
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary animate-pulse-glow"></div>
           <p className="text-text-secondary animate-slide-in-left">Loading products...</p>
         </div>
       </div>
@@ -271,17 +272,17 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm: externalSearchTerm = ''
   // Show error state
   if (error) {
     return (
-      <div className="min-h-screen bg-bg-main pt-16 flex items-center justify-center animate-fade-in">
+      <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
         <div className="text-center">
-          <div className="text-red-500 mb-4 animate-bounce-in">
+          <div className="mb-4 text-red-500 animate-bounce-in">
             <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <p className="text-text-primary mb-4 animate-slide-in-left">{error}</p>
+          <p className="mb-4 text-text-primary animate-slide-in-left">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-primary hover:bg-primary-600 text-black font-medium px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg btn-animate"
+            className="px-4 py-2 font-medium text-black transition-all duration-300 rounded-lg bg-primary hover:bg-primary-600 hover:scale-105 hover:shadow-lg btn-animate"
           >
             Reintentar
           </button>
@@ -295,10 +296,10 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm: externalSearchTerm = ''
       <div className={`py-8 transition-all duration-300 ${
         isDrawerOpen && !isPaymentOpen && !isSuccessOpen ? 'md:mr-[40%] lg:mr-[33.333333%]' : ''
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="mb-6">
             {/* Title and Search Row */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+            <div className="flex flex-col gap-4 mb-2 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="text-2xl font-bold text-text-primary animate-slide-in-left">
                 Sales Dashboard
               </h1>
@@ -307,13 +308,13 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm: externalSearchTerm = ''
               <div className="flex items-center gap-3">
                 {/* Search Bar */}
                 <div className="relative w-full sm:w-80 animate-slide-in-left">
-                  <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary icon-bounce" />
+                  <Search size={20} className="absolute transform -translate-y-1/2 left-3 top-1/2 text-text-secondary icon-bounce" />
                   <input
                     type="text"
                     value={localSearchTerm}
                     onChange={(e) => handleLocalSearchChange(e.target.value)}
                     placeholder="Search products..."
-                    className="w-full pl-10 pr-4 py-2 border border-divider rounded-lg text-sm focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary transition-all duration-300 hover:border-complement/50"
+                    className="w-full py-2 pl-10 pr-4 text-sm transition-all duration-300 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:border-complement/50"
                   />
                 </div>
 
@@ -321,7 +322,7 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm: externalSearchTerm = ''
                 <button
                   onClick={reloadProducts}
                   disabled={loading}
-                  className="p-2 bg-primary hover:bg-primary-600 text-black rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg icon-bounce disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 text-black transition-all duration-300 rounded-lg bg-primary hover:bg-primary-600 hover:scale-110 hover:shadow-lg icon-bounce disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Update products"
                 >
                   <RefreshCw size={20} className={`${loading ? 'animate-spin' : ''}`} />
@@ -342,9 +343,9 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm: externalSearchTerm = ''
           </div>
 
           {/* Responsive Grid with white background */}
-          <div className="bg-white p-6 rounded-lg border border-divider animate-scale-in">
+          <div className="p-6 bg-white border rounded-lg border-divider animate-scale-in">
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 animate-stagger">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 animate-stagger">
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -354,13 +355,13 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm: externalSearchTerm = ''
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 animate-fade-in">
-                <div className="text-text-secondary mb-4 animate-bounce-in">
-                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="py-12 text-center animate-fade-in">
+                <div className="mb-4 text-text-secondary animate-bounce-in">
+                  <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-text-primary mb-2 animate-slide-in-left">
+                <h3 className="mb-2 text-lg font-medium text-text-primary animate-slide-in-left">
                   No products found
                 </h3>
                 <p className="text-text-secondary animate-slide-in-right">

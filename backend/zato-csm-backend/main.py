@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes import auth, products, inventory, sales
 from config.init_database import init_database  # comming create database
 
+# Import middleware registry
+from middleware.middleware import register_middlewares
+
 app = FastAPI(title="CSM API", description="Headless CSM for Zatobox", version="1.0.0")
 
 # --- Swagger Bearer Token Support ---
@@ -37,7 +40,7 @@ async def startup_event():
     init_database()
     print("🚀 API Started with Configured database!")
     # except Exception as e:
-    #     print(e)
+    # 	print(e)
 
 
 # CORS config (adjust origins as needed)
@@ -48,6 +51,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+register_middlewares(app)
 
 # Include routers
 app.include_router(auth.router)

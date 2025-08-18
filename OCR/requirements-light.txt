@@ -31,7 +31,7 @@ python-bidi==0.4.0
 six==1.16.0
 
 # --- Recommended for Production/Security ---
-flask-limiter==2.0.5
+flask-limiter==3.5.0
 sentry-sdk==1.30.0
 python-magic==0.4.27
 pyzbar==0.1.8

@@ -148,14 +148,20 @@ export const productsAPI = {
       body: JSON.stringify(productData),
     }),
 
-  update: (id: number, productData: Partial<Product>): Promise<ProductResponse> => {
+  update: (
+    id: number,
+    productData: Partial<Product>
+  ): Promise<ProductResponse> => {
     const removeUndefined = (obj: Record<string, unknown>) => {
-      return Object.entries(obj).reduce<Record<string, unknown>>((acc, [key, value]) => {
-        if (value !== undefined) {
-          acc[key] = value;
-        }
-        return acc;
-      }, {});
+      return Object.entries(obj).reduce<Record<string, unknown>>(
+        (acc, [key, value]) => {
+          if (value !== undefined) {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        {}
+      );
     };
 
     const payload = removeUndefined(productData as Record<string, unknown>);
@@ -182,6 +188,11 @@ export const productsAPI = {
     }
     return response.json();
   },
+
+  delete: (id: number): Promise<{ success: boolean; message: string }> =>
+    apiRequest(`/products/${id}`, {
+      method: 'DELETE',
+    }),
 };
 
 export interface InventoryResponse {
@@ -336,10 +347,44 @@ export const profileAPI = {
 };
 
 // OCR API Types
+export interface OCRLineItem {
+  name?: string;
+  description?: string;
+  unit_price?: string;
+  quantity?: string;
+  total_price?: string;
+  confidence?: number;
+  category?: string;
+  [key: string]: unknown;
+}
+
+export interface OCRMetadata {
+  company_name?: string;
+  ruc?: string;
+  date?: string;
+  invoice_number?: string;
+  payment_method?: string;
+  subtotal?: string;
+  iva?: string;
+  total?: string;
+  [key: string]: unknown;
+}
+
 export interface OCRResponse {
   success: boolean;
   message?: string;
-  line_items?: Record<string, unknown>[];
+  line_items?: OCRLineItem[];
+  metadata?: OCRMetadata;
+  detections?: unknown[];
+  processed_image?: string | null;
+  processing_time?: number;
+  statistics?: {
+    yolo_detections?: number;
+    table_regions?: number;
+    ocr_confidence?: number;
+    [item: string]: unknown;
+  };
+  summary?: Record<string, unknown>;
   [key: string]: unknown;
 }
 
