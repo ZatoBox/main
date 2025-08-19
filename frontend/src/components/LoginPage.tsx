@@ -35,9 +35,23 @@ const LoginPage: React.FC = () => {
   };
 
   const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`);
-    // Navigate to homepage
-    navigate('/');
+    const domain =
+      import.meta.env.VITE_AUTH0_DOMAIN;
+    const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID || '';
+    const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
+    const frontend =
+      import.meta.env.VITE_FRONTEND_URL;
+    const redirectUri = `${frontend.replace(/\/$/, '')}/callback`;
+    const responseType = 'token id_token';
+    const scope = 'openid profile email';
+    const params = new URLSearchParams({
+      client_id: clientId,
+      response_type: responseType,
+      redirect_uri: redirectUri,
+      scope,
+      audience,
+    });
+    window.location.href = `https://${domain}/authorize?${params.toString()}`;
   };
 
   return (

@@ -5,6 +5,7 @@ def create_tables_sql():
     return """
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
+        auth0_id VARCHAR(255) UNIQUE,
         email VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         full_name VARCHAR(255) NOT NULL,
