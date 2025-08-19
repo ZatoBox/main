@@ -32,6 +32,20 @@ const NewProductPage: React.FC = () => {
     'Electronics',
     'Decoration',
     'Office',
+    'Gaming',
+  ];
+
+  const unitOptions = [
+    { label: 'Per item', value: 'Per item' },
+    { label: 'Per kilogram', value: 'Per kilogram' },
+    { label: 'Per liter', value: 'Per liter' },
+    { label: 'Per metro', value: 'Per metro' },
+  ];
+
+  const productTypeOptions = [
+    { label: 'Physical Product', value: 'Physical Product' },
+    { label: 'Service', value: 'Service' },
+    { label: 'Digital', value: 'Digital' },
   ];
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -103,42 +117,37 @@ const NewProductPage: React.FC = () => {
       setLoading(false);
       return;
     }
+    if (selectedCategories.length === 0) {
+      setError('Category is required');
+      setLoading(false);
+      return;
+    }
+    const priceNum = Number(formData.price);
+    if (!Number.isFinite(priceNum) || priceNum <= 0) {
+      setError('Price must be greater than 0');
+      setLoading(false);
+      return;
+    }
+    const stockNum = parseInt(formData.inventoryQuantity, 10);
+    if (!Number.isFinite(stockNum) || Number.isNaN(stockNum) || stockNum < 0) {
+      setError('Inventory quantity must be 0 or more');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const productPayload: any = {
+      const productPayload = {
         name: formData.name,
         description: formData.description || null,
-        price: parseFloat(formData.price) || 0,
-        stock: parseInt(formData.inventoryQuantity) || 0,
-        min_stock: parseInt(formData.lowStockAlert) || 0,
-        weight: formData.weight ? parseFloat(formData.weight) : null,
-        sku: formData.sku || null,
-        unit_name: formData.unit,
+        price: priceNum,
+        stock: stockNum,
+        unit: formData.unit,
         product_type: formData.productType || 'Physical Product',
-        localization: formData.location || null,
-        status: 'active',
+        category: selectedCategories[0],
+        sku: formData.sku || null,
       };
-      if (selectedCategories.length > 0) {
-        productPayload.category = selectedCategories[0];
-      }
-      console.log('DEBUG create payload:', productPayload);
-      const createResult = await productsAPI.create(productPayload);
-      if (!createResult || !createResult.success) {
-        setError(
-          (createResult && createResult.message) || 'Error creating product'
-        );
-        setLoading(false);
-        return;
-      }
-      const createdProduct = createResult.product;
-      if (selectedFiles.length > 0 && createdProduct && createdProduct.id) {
-        const imagesForm = new FormData();
-        selectedFiles.forEach((file) => {
-          imagesForm.append('images', file);
-        });
-        if (productsAPI.uploadImages) {
-          await productsAPI.uploadImages(createdProduct.id, imagesForm);
-        }
-      }
+
+      await productsAPI.create(productPayload as any);
       navigate('/inventory');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error creating product');
@@ -335,10 +344,29 @@ const NewProductPage: React.FC = () => {
                     className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
                     required
                   >
-                    <option value='Per item'>Per item</option>
-                    <option value='Per kilogramo'>Per kilogramo</option>
-                    <option value='Per metro'>Per metro</option>
-                    <option value='Per litro'>Per litro</option>
+                    {unitOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className='block mb-2 text-sm font-medium text-text-primary'>
+                    Product Type
+                  </label>
+                  <select
+                    value={formData.productType}
+                    onChange={(e) =>
+                      handleInputChange('productType', e.target.value)
+                    }
+                    className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+                  >
+                    {productTypeOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>

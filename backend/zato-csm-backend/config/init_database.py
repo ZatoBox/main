@@ -28,7 +28,7 @@ def create_tables_sql():
         price DECIMAL(10,2) NOT NULL,
         stock INT NOT NULL,
         min_stock INT DEFAULT 0,
-        category_id INT,
+        category VARCHAR(255) NOT NULL,
         images JSONB,
         status VARCHAR(20) DEFAULT 'active',
         weight DECIMAL(10,2),
@@ -39,8 +39,7 @@ def create_tables_sql():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_updated TIMESTAMP DEFAULT NOW(),
         localization TEXT,
-        FOREIGN KEY (creator_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-        FOREIGN KEY (category_id) REFERENCES categories(id) ON UPDATE CASCADE ON DELETE RESTRICT        
+        FOREIGN KEY (creator_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT
     );
         
     CREATE TABLE IF NOT EXISTS inventory_movements(
