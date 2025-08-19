@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from typing import List
 
+from models.product import CreateProductRequest
 from repositories.product_repositories import ProductRepository
 from PIL import Image
 import os
@@ -12,50 +13,29 @@ class ProductService:
 
     def create_product(
         self,
-        name: str,
-        description: str,
-        price: float,
-        stock: int,
-        category: str,
-        unit_id: int,
-        product_type: str,
+        product_data: CreateProductRequest,
         creator_id: int,
-        min_stock: int=0,
-        sku: str=None,
-        images: List = None,
-        weight: float = 0.0,
-        localization: str = None
+        images: List = None
     ):
-        # Validações
-        if not name or not description or not category:
-            raise HTTPException(status_code=400, detail="All fields are required")
-        if price <= 0:
-            raise HTTPException(status_code=400, detail="Price must be positive")
-        if stock < 0:
-            raise HTTPException(status_code=400, detail="Stock must be positive")
-        if min_stock < 0:
-            raise HTTPException(status_code=400, detail="Minimum stock must be positive")
-
-        if sku and len(sku.strip()) == 0:
-            sku = None
-
         # Processar upload de imagens
         images_paths = self._process_images(images) if images else []
 
         # Criar produto
         product = self.product_repo.create_product(
-            name=name,
-            description=description,
-            price=price,
-            storck=stock,
-            category=category,
+            name=product_data.name,
+            description=product_data.description,
+            price=product_data.price,
+            stock=product_data.stock,
+            category_id=product_data.category_id,
             images=images_paths,
-            sku=sku,
+            sku=product_data.sku,
             creator_id=creator_id,
-            unit_id=unit_id,
-            product_type=product_type,
-            weight=weight,
-            localization=localization
+            unit=product_data.unit.value,
+            product_type=product_data.product_type.value,
+            weight=product_data.weight,
+            localization=product_data.localization,
+            min_stock=product_data.min_stock or 0,
+            status=product_data.status.value
         )
         return product
 

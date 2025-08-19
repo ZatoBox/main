@@ -33,13 +33,20 @@ export interface User {
 export interface Product {
   id: number;
   name: string;
-  description?: string;
-  sku?: string;
-  category: string;
+  description?: string | null;
+  sku?: string | null;
+  category?: string | null;
+  category_id?: number | null;
   price: number;
   stock: number;
-  status: 'active' | 'inactive';
-  image?: string;
+  min_stock?: number | null;
+  unit_id?: number | null;
+  unit_name?: string | null;
+  weight?: number | null;
+  images?: string[] | null;
+  localization?: string | null;
+  status?: 'active' | 'inactive';
+  image?: string | null;
 }
 
 export interface AuthResponse {
@@ -130,6 +137,14 @@ export const authAPI = {
     apiRequest('/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email }),
+    }),
+
+  socialRegister: (
+    access_token: string
+  ): Promise<{ user: User; token: string }> =>
+    apiRequest('/auth/social', {
+      method: 'POST',
+      body: JSON.stringify({ access_token }),
     }),
 };
 // Products API

@@ -28,3 +28,15 @@ class UserItem(BaseModel):
         if not v:
             raise ValueError("Email is mandatory")
         return v
+
+
+# This is the model for users in the database
+class UserInDB(UserItem):
+    auth0_id: str = Field(..., description="The unique ID from Auth0 for this user.")
+    random_username: str = Field(
+        ..., description="A random unique username for this user."
+    )
+    random_password: str = Field(
+        ..., description="A random unique password for this user."
+    )
+    created_at: datetime = Field(..., description="The creation date of the user.")

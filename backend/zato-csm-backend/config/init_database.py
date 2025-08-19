@@ -5,6 +5,7 @@ def create_tables_sql():
     return """
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
+        auth0_id VARCHAR(255) UNIQUE,
         email VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         full_name VARCHAR(255) NOT NULL,
@@ -15,16 +16,6 @@ def create_tables_sql():
         last_updated TIMESTAMP DEFAULT NOW()
     );
     
-    CREATE TABLE IF NOT EXISTS units (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL UNIQUE,
-        code VARCHAR(20) NOT NULL UNIQUE,
-        symbol VARCHAR(20) NOT NULL,
-        creator_id INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (creator_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT
-    );
-        
     CREATE TABLE IF NOT EXISTS categories (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL UNIQUE
@@ -43,13 +34,12 @@ def create_tables_sql():
         weight DECIMAL(10,2),
         sku VARCHAR(255) UNIQUE,
         creator_id INT,
-        unit_id INT NOT NULL,
+        unit VARCHAR(25) NOT NULL,
         product_type VARCHAR(20) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_updated TIMESTAMP DEFAULT NOW(),
         localization TEXT,
         FOREIGN KEY (creator_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-        FOREIGN KEY (unit_id) REFERENCES units(id) ON UPDATE CASCADE ON DELETE RESTRICT,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON UPDATE CASCADE ON DELETE RESTRICT        
     );
         
@@ -77,14 +67,6 @@ def create_tables_sql():
     );
     """
 
-def default_unit():
-    return """
-        INSERT INTO units (name, code, symbol) VALUES ('Unidad', 'UN', 'UN');
-        INSERT INTO units (name, code, symbol) VALUES ('Kilogram', 'KG', 'kg');
-        INSERT INTO units (name, code, symbol) VALUES ('Liters', 'L', 'l');
-        INSERT INTO units (name, code, symbol) VALUES ('Meters', 'M', 'm');
-        INSERT INTO units (name, code, symbol) VALUES ('Grams', 'G', 'g');
-    """
 
 def init_database():
     conn = None
@@ -95,12 +77,6 @@ def init_database():
 
         # Execute each statement separately
         for statement in create_tables_sql().split(";"):
-            stmt = statement.strip()
-            if stmt:
-                cursor.execute(stmt)
-
-        # Inserindo dados iniciais para as unidades
-        for statement in default_unit().split(";"):
             stmt = statement.strip()
             if stmt:
                 cursor.execute(stmt)

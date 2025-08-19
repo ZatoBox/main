@@ -4,22 +4,20 @@ import json
 from repositories.base_repository import BaseRepository
 
 from utils.timezone_utils import get_current_time_with_timezone
-from utils.dependencies import get_current_user
-
 
 class ProductRepository(BaseRepository):
 
     def create_product(
         self,
         name: str,
-        description: str,
         price: float,
         stock: int,
-        category: str,
-        images: str,
-        creator_id: int,
-        unit_id: int,
+        unit: str,
         product_type: str,
+        creator_id: int,
+        description: str = None,
+        category_id: int = None,
+        images: list = None,
         min_stock: int=0,
         sku: str=None,
         status: str="active",
@@ -34,12 +32,15 @@ class ProductRepository(BaseRepository):
 
         with self._get_cursor() as cursor:
             cursor.execute(
-                "INSERT INTO products (name, description, price, stock, category, images, status, weigth, sku, creator_id, unit_id, product_type, min_stock, created_at, last_updated, localization) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING *",
+                "INSERT INTO products ("
+                    "name, description, price, stock, category_id, images, "
+                    "min_stock, status, weight, sku, creator_id, unit,"
+                    "product_type, created_at, last_updated, localization)"
+                "VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING *",
                 (
-                    name, description, price, stock, category, images_json,
-                    status, weight, sku, creator_id, unit_id, product_type,
-                    min_stock, created_at, last_updated, localization
+                    name, description, price, stock, category_id, images_json,
+                    min_stock, status, weight, sku, creator_id, unit, product_type,
+                    created_at, last_updated, localization
                 ),
             )
             self.db.commit()
@@ -80,9 +81,9 @@ class ProductRepository(BaseRepository):
             cursor.execute("SELECT * FROM products WHERE id=%s", (product_id,))
             return cursor.fetchone()
 
-    def find_by_category(self, category: str):
+    def find_by_category(self, category_id: int):
         with self._get_cursor() as cursor:
-            cursor.execute("SELECT * FROM products WHERE category=%s", (category,))
+            cursor.execute("SELECT * FROM products WHERE category_id=%s", (category_id,))
             return cursor.fetchall()
 
     def find_by_name(self, name: str):
