@@ -11,6 +11,7 @@ from fastapi import (
 from typing import List, Optional
 import os
 
+from models.product import ProductResponse, CreateProductRequest
 from repositories.product_repositories import ProductRepository
 from utils.dependencies import get_current_user
 from config.database import get_db_connection
@@ -30,45 +31,21 @@ def _get_product_service(db=Depends(get_db_connection)) -> ProductService:
     return ProductService(product_repo)
 
 
-@router.post("/")
+@router.post("/", response_model=ProductResponse)
 def create_product(
-    request: Request,
-    name: str = Form(...),
-    description: str = Form(...),
-    price: float = Form(...),
-    stock: int = Form(...),
-    category: str = Form(...),
-    unit_id: int = Form(...),
-    product_type: str = Form(...),
-    weight: float = Form(...),
-    min_sock: int = Form(None, ge=0),
-    sku: str = Form(None),
-    localization: str = Form(None),
+    product_data: CreateProductRequest,
     images: List[UploadFile] = File(None),
+    # request: Request,
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
-    user_timezone = get_user_timezone_from_request(request)
+    # user_timezone = get_user_timezone_from_request(request)
     product = product_service.create_product(
-        name=name,
-        description=description,
-        price=price,
-        stock=stock,
-        category=category,
-        sku=sku,
-        unit_id=unit_id,
-        product_type=product_type,
+        product_data,
         creator_id=current_user['id'],
-        images=images,
-        weight=weight,
-        min_stock=min_sock,
-        localization=localization
+        images=images
     )
-    return {
-        "success": True,
-        "message": "Product created successfully",
-        "product": product,
-    }
+    return ProductResponse(**product)
 
 
 @router.get("/{product_id}")

@@ -12,23 +12,27 @@ class ProductStatus(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
 
+class ProductUnity(str, Enum):
+    PER_ITEM = "Per item"
+    PER_KILOGRAM = "Per kilogram"
+    PER_LITER = "Per liter"
+
 class CreateProductRequest(BaseModel):
+    # Default fields
     name: str = Field(..., min_length=1, description="Product name")
     price: float = Field(..., gt=0, description="Product price")
     stock: int = Field(..., gt=0, description="Product stock")
-    unit_id: str = Field(..., min_length=1, description="Product unit")
-    product_type: ProductType = Field(..., default=ProductType.PHYSICAL_PRODUCT, description="Product type")
-
-    images: List[str] = []
+    unit: ProductUnity = Field(...)
+    product_type: ProductType = Field(...)
 
     # Optional fields
     description: Optional[str] = Field(None, description="Product description")
-    category: Optional[str] = Field(None, description="Product category")
-    sku: Optional[str] = Field(None, description="Product SKU")
-    weight: float = Field(..., gt=0, description="Product weight")
+    category_id: Optional[str] = Field(None, description="Product category", gt=0)
+    sku: Optional[str] = Field(None, max_length=255, description="Product SKU")
+    weight: Optional[float] = Field(None, gt=0, description="Product weight")
     localization: Optional[str] = Field(None, description="Product localization")
-    min_stock: int = Field(..., gt=0, description="Product minimum stock")
-    status: str = Field(..., min_length=1, default=ProductStatus.ACTIVE, description="Product status")
+    min_stock: Optional[int] = Field(..., gt=0, description="Product minimum stock")
+    status: ProductStatus = Field(ProductStatus.ACTIVE)
 
     @validator("name")
     def validate_name(cls, v):
@@ -47,28 +51,30 @@ class UpdateProductRequest(BaseModel):
     description: Optional[str] = Field(None)
     price: Optional[float] = Field(None, gt=0)
     stock: Optional[int] = Field(None, ge=0)
-    category: Optional[str] = Field(None, max_length=100)
+    category_id: Optional[str] = Field(None, gt=0)
     sku: Optional[str] = Field(None, max_length=255)
     weight: Optional[float] = Field(None, ge=0)
     localization: Optional[str] = Field(None)
+    min_stock: Optional[int] = Field(None, ge=0)
     status: Optional[ProductStatus] = Field(None)
     product_type: Optional[ProductType] = Field(None)
-    unit_id: Optional[int] = Field(None, gt=0)
+    unit: Optional[ProductUnity] = Field(None)
 
 
-def ProductResponse(product):
+class ProductResponse(BaseModel):
     id: int
     name: str
     description: Optional[str]
     price: float
     stock: int
-    category: Optional[str]
+    min_stock: int
+    category_id: Optional[int]
     images: Optional[List[str]] = []
     status: str
     weight: Optional[float]
     sku: Optional[str]
     creator_id: Optional[int]
-    unit_id: int
+    unit: str
     product_type: str
     created_at: datetime
     last_updated: datetime
