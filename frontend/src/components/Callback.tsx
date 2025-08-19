@@ -16,11 +16,9 @@ const AuthCallback: React.FC = () => {
   };
 
   const fetchMe = async (token: string) => {
-    // Construir base correcta independientemente de VITE_API_URL
     const raw =
       (import.meta.env.VITE_API_URL as string) || 'http://localhost:4444';
     const base = raw.replace(/\/+$/g, '');
-    // Garantizar que use /api/auth/me exactamente
     const url = base.endsWith('/api')
       ? `${base}/auth/me`
       : `${base}/api/auth/me`;
@@ -52,32 +50,34 @@ const AuthCallback: React.FC = () => {
           'Social register failed';
         throw new Error(msg);
       }
-      // backend returns local token in access_token
+
       const localToken =
         payload.access_token || payload.token || payload.accessToken;
       if (!localToken) {
-        // fallback: try to use the auth0 access token to call /me
         try {
           const me = await fetchMe(accessToken);
           localStorage.setItem('user', JSON.stringify(me));
-          // keep auth0 token too if you need it
           localStorage.setItem('auth0_token', accessToken);
           navigate('/');
+          window.location.reload();
           return;
         } catch {
           throw new Error('No local token received');
         }
       }
-      // store local token and fetch profile
-      localStorage.setItem('access_token', localToken);
+
+      localStorage.setItem('token', localToken);
+      localStorage.setItem('user', JSON.stringify(payload.user));
+
       try {
         const me = await fetchMe(localToken);
         localStorage.setItem('user', JSON.stringify(me));
       } catch {
-        // if /me fails, still proceed but warn
         console.warn('Could not fetch /me with local token');
       }
+
       navigate('/');
+      window.location.reload();
     } catch (e: any) {
       setError(e.message || 'Error creating user');
     }
