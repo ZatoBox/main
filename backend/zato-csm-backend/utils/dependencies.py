@@ -12,7 +12,6 @@ import config.settings as settings
 
 def verify_token(token: str):
     try:
-        # If AUTH0_DOMAIN and AUTH0_AUDIENCE are configured, validate using JWKS (RS256)
         auth0_domain = getattr(settings, "AUTH0_DOMAIN", None)
         auth0_audience = getattr(settings, "AUTH0_AUDIENCE", None)
         algorithms = getattr(settings, "ALGORITHMS", None) or [
@@ -46,7 +45,6 @@ def verify_token(token: str):
             )
             return payload
 
-        # Fallback: symmetric key decode (HS256 or configured ALGORITHM)
         secret = getattr(settings, "SECRET_KEY", None)
         alg = getattr(settings, "ALGORITHM", "HS256")
         if not secret:
@@ -67,31 +65,46 @@ def verify_token(token: str):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-def get_current_user(request: Request, db=Depends(get_db_connection)):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing token")
-    token = auth_header.split(" ")[1]
-    payload = verify_token(token)
+def fetch_userinfo(token: str):
+    with requests.Session() as s:
+        headers = {"Authorization": f"Bearer {token}"}
+        domain = getattr(settings, "AUTH0_DOMAIN", None)
+        if not domain:
+            return {}
+        url = f"https://{domain}/userinfo"
+        try:
+            r = s.get(url, headers=headers, timeout=5)
+            if r.status_code == 200:
+                return r.json()
+        except requests.RequestException:
+            return {}
+    return {}
 
-    # Map first the OIDC (Auth0) ID -> "sub", fallback to "user_id"
+
+def ensure_user_from_payload(token: str, payload: dict, db):
     auth0_id = payload.get("sub") or payload.get("user_id")
-    # Use the provided PostgreSQL connection
     user_repo = UserRepository(db)
     user = user_repo.find_by_user_id(auth0_id)
+    if user:
+        return user
 
-    if not user:
-        # Auto-register
-        email = payload.get("email")
-        full_name = (
-            payload.get("fullName")
-            or payload.get("name")
-            or (email.split("@")[0] if email else None)
-        )
-        random_pw = str(uuid.uuid4())
-        hashed = hash_password(random_pw)
+    email = payload.get("email")
+    if not email:
+        info = fetch_userinfo(token)
+        email = info.get("email")
 
-        user_repo = UserRepository(db)
+    if not email:
+        safe_id = (auth0_id or str(uuid.uuid4())).replace("|", "_")
+        email = f"{safe_id}@noemail.local"
+
+    full_name = payload.get("fullName") or payload.get("name")
+    if not full_name:
+        full_name = "user_" + uuid.uuid4().hex[:8]
+
+    random_pw = str(uuid.uuid4())
+    hashed = hash_password(random_pw)
+
+    try:
         new_id = user_repo.create_user(
             full_name,
             email,
@@ -102,14 +115,28 @@ def get_current_user(request: Request, db=Depends(get_db_connection)):
             user_timezone="UTC",
             auth0_id=auth0_id,
         )
-        user = user_repo.find_by_user_id(auth0_id)
+    except Exception:
+        user = user_repo.find_by_user_id(auth0_id) or user_repo.find_by_email(email)
+        if user:
+            return user
+        raise HTTPException(status_code=500, detail="Unable to create user")
+
+    user = user_repo.find_by_user_id(auth0_id)
     return user
+
+
+def get_current_user(request: Request, db=Depends(get_db_connection)):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing token")
+    token = auth_header.split(" ")[1]
+    payload = verify_token(token)
+    return ensure_user_from_payload(token, payload, db)
 
 
 def get_current_token(request: Request) -> str:
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing token")
-
     token = auth_header.split(" ")[1]
     return token

@@ -1,11 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from pydantic import BaseModel
 from config.database import get_db_connection
-
 from repositories.user_repositories import UserRepository
 from services.auth_service import AuthService
-from utils.dependencies import get_current_token, get_current_user
-
+from utils.dependencies import (
+    get_current_token,
+    get_current_user,
+    verify_token,
+    ensure_user_from_payload,
+    fetch_userinfo,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -54,6 +58,35 @@ def logout(token: str = Depends(get_current_token)):
 @router.get("/me")
 def get_current_user(user=Depends((get_current_user))):
     return user
+
+
+class SocialAuthRequest(BaseModel):
+    access_token: str
+
+
+@router.post("/social")
+def social_register(payload: SocialAuthRequest, db=Depends(get_db_connection)):
+    try:
+        jwt_payload = verify_token(payload.access_token)
+        user = ensure_user_from_payload(payload.access_token, jwt_payload, db)
+        return {"success": True, "user": user}
+    except HTTPException as e:
+        if e.status_code == 401:
+            info = fetch_userinfo(payload.access_token)
+            if not info:
+                raise HTTPException(
+                    status_code=401, detail="Invalid token or cannot fetch userinfo"
+                )
+            jwt_payload = {
+                "sub": info.get("sub") or info.get("user_id") or info.get("id"),
+                "email": info.get("email"),
+                "name": info.get("name")
+                or info.get("nickname")
+                or info.get("given_name"),
+            }
+            user = ensure_user_from_payload(payload.access_token, jwt_payload, db)
+            return {"success": True, "user": user}
+        raise e
 
 
 @router.get("/users")
