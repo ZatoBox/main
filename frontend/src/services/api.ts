@@ -42,6 +42,7 @@ export interface Product {
   min_stock?: number | null;
   unit_id?: number | null;
   unit_name?: string | null;
+  product_type?: string | null;
   weight?: number | null;
   images?: string[] | null;
   localization?: string | null;

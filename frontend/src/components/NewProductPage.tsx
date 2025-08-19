@@ -136,16 +136,19 @@ const NewProductPage: React.FC = () => {
     }
 
     try {
-      const productPayload = {
+      const productPayload: Record<string, unknown> = {
         name: formData.name,
         description: formData.description || null,
         price: priceNum,
         stock: stockNum,
         unit: formData.unit,
-        product_type: formData.productType || 'Physical Product',
         category: selectedCategories[0],
         sku: formData.sku || null,
       };
+
+      if (formData.productType && formData.productType !== '') {
+        productPayload.product_type = formData.productType;
+      }
 
       await productsAPI.create(productPayload as any);
       navigate('/inventory');

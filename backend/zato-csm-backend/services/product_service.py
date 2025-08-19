@@ -57,17 +57,76 @@ class ProductService:
     def update_product(
         self, product_id: int, updates: dict, user_timezone: str = "UTC"
     ):
-        # Validation allowed fields
-        allowed_fields = ["name", "description", "price", "stock", "category", "images"]
+        allowed_fields = [
+            "name",
+            "description",
+            "price",
+            "stock",
+            "category",
+            "images",
+            "sku",
+            "weight",
+            "localization",
+            "min_stock",
+            "status",
+            "product_type",
+            "unit",
+        ]
 
         for field in list(updates.keys()):
             if field not in allowed_fields:
                 raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
 
-        if "price" in updates and updates["price"] <= 0:
-            raise HTTPException(status_code=400, detail="Price must be positive")
-        if "stock" in updates and updates["stock"] < 0:
-            raise HTTPException(status_code=400, detail="Stock cannot be negative")
+        for fld in (
+            "product_type",
+            "unit",
+            "category",
+            "description",
+            "localization",
+            "sku",
+            "status",
+        ):
+            val = updates.get(fld)
+            if val == "" or val is None:
+                updates.pop(fld, None)
+
+        if "price" in updates:
+            try:
+                updates["price"] = float(updates["price"])
+                if updates["price"] <= 0:
+                    raise HTTPException(
+                        status_code=400, detail="Price must be positive"
+                    )
+            except (ValueError, TypeError):
+                raise HTTPException(status_code=400, detail="Invalid price value")
+
+        if "stock" in updates:
+            try:
+                updates["stock"] = int(updates["stock"])
+                if updates["stock"] < 0:
+                    raise HTTPException(
+                        status_code=400, detail="Stock cannot be negative"
+                    )
+            except (ValueError, TypeError):
+                raise HTTPException(status_code=400, detail="Invalid stock value")
+
+        if "min_stock" in updates:
+            try:
+                updates["min_stock"] = int(updates["min_stock"])
+                if updates["min_stock"] < 0:
+                    raise HTTPException(
+                        status_code=400, detail="min_stock cannot be negative"
+                    )
+            except (ValueError, TypeError):
+                raise HTTPException(status_code=400, detail="Invalid min_stock value")
+
+        if "weight" in updates:
+            try:
+                updates["weight"] = float(updates["weight"])
+                if updates["weight"] < 0:
+                    raise HTTPException(status_code=400, detail="Invalid weight value")
+            except (ValueError, TypeError):
+                raise HTTPException(status_code=400, detail="Invalid weight value")
 
         images = updates.get("images")
         if images and isinstance(images, list):
