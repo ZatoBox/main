@@ -138,6 +138,14 @@ export const authAPI = {
       method: 'POST',
       body: JSON.stringify({ email }),
     }),
+
+  socialRegister: (
+    access_token: string
+  ): Promise<{ user: User; token: string }> =>
+    apiRequest('/auth/social', {
+      method: 'POST',
+      body: JSON.stringify({ access_token }),
+    }),
 };
 // Products API
 export const productsAPI = {

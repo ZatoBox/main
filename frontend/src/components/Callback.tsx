@@ -1,79 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../services/api';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
-  const getApiEndpoint = () => {
-    let api =
-      (import.meta.env.VITE_API_URL as string) || 'http://localhost:4444';
-    api = api.replace(/\/$/, '');
-    if (api.includes('/api')) {
-      return `${api}/auth/social`;
-    }
-    return `${api}/api/auth/social`;
-  };
-
-  const fetchMe = async (token: string) => {
-    const raw =
-      (import.meta.env.VITE_API_URL as string) || 'http://localhost:4444';
-    const base = raw.replace(/\/+$/g, '');
-    const url = base.endsWith('/api')
-      ? `${base}/auth/me`
-      : `${base}/api/auth/me`;
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      throw new Error(`Failed /me (${res.status}) ${body}`);
-    }
-    return res.json();
+  const fetchMe = async () => {
+    const res = await authAPI.getCurrentUser();
+    return res.user;
   };
 
   const sendSocialToken = async (accessToken: string) => {
     try {
-      const endpoint = getApiEndpoint();
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_token: accessToken }),
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const msg =
-          payload.detail ||
-          payload.message ||
-          JSON.stringify(payload) ||
-          'Social register failed';
-        throw new Error(msg);
-      }
-
+      const payload = await authAPI.socialRegister(accessToken);
       const localToken =
-        payload.access_token || payload.token || payload.accessToken;
+        (payload as any).token ||
+        (payload as any).access_token ||
+        (payload as any).token;
+      const user = (payload as any).user || null;
+
       if (!localToken) {
+        localStorage.setItem('auth0_token', accessToken);
         try {
-          const me = await fetchMe(accessToken);
+          const me = await fetchMe();
           localStorage.setItem('user', JSON.stringify(me));
-          localStorage.setItem('auth0_token', accessToken);
           navigate('/');
           window.location.reload();
           return;
         } catch {
-          throw new Error('No local token received');
+          throw new Error('No local token received and /me failed');
         }
       }
 
       localStorage.setItem('token', localToken);
-      localStorage.setItem('user', JSON.stringify(payload.user));
-
-      try {
-        const me = await fetchMe(localToken);
-        localStorage.setItem('user', JSON.stringify(me));
-      } catch {
-        console.warn('Could not fetch /me with local token');
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      } else {
+        try {
+          const me = await fetchMe();
+          localStorage.setItem('user', JSON.stringify(me));
+        } catch {
+          console.warn('Could not fetch /me with local token');
+        }
       }
 
       navigate('/');

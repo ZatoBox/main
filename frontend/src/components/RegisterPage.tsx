@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { authAPI } from '../services/api';
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -68,26 +69,19 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      const apiUrl =
-        import.meta.env.VITE_API_URL || 'http://localhost:4444/api';
-      const res = await fetch(`${apiUrl}/auth/social`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_token: accessToken }),
-      });
-      if (!res.ok) {
-        let data;
-        try {
-          data = await res.json();
-        } catch {
-          data = {};
-        }
-        throw new Error(
-          data.detail || data.message || 'Social register failed'
-        );
+      const payload = await authAPI.socialRegister(accessToken);
+      const localToken =
+        (payload as any).token || (payload as any).access_token;
+      const user = (payload as any).user || null;
+
+      if (!localToken) {
+        throw new Error('No local token received from backend');
       }
-      await res.json().catch(() => null);
+
+      localStorage.setItem('token', localToken);
+      if (user) localStorage.setItem('user', JSON.stringify(user));
       navigate('/');
+      window.location.reload();
     } catch (e: any) {
       setError(e.message || 'Error creating user');
     } finally {
