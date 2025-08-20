@@ -23,6 +23,19 @@ class InventoryService:
             for p in products
         ]
 
+    def get_inventory_by_user(self, user_id: int):
+        products = self.product_repo.find_by_creator(user_id)
+        return [
+            {
+                "id": p["id"],
+                "productId": p["id"],
+                "quantity": p["stock"],
+                "minStock": p.get("min_stock", 0),
+                "lastUpdated": p.get("last_updated", datetime.now().isoformat() + "Z"),
+            }
+            for p in products
+        ]
+
     def update_stock(self, product_id: int, quantity: int, user_timezone: str = "UTC"):
         if quantity < 0:
             raise HTTPException(status_code=400, detail="Quantity cannot be negative")
