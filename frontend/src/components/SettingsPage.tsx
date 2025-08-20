@@ -127,27 +127,27 @@ const SettingsPage: React.FC = () => {
   const renderGeneralSettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Configuración de la Empresa</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Configuración de la Empresa</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-secondary">
               Nombre de la Empresa
             </label>
             <input
               type="text"
               value={generalSettings.companyName}
               onChange={(e) => setGeneralSettings(prev => ({ ...prev, companyName: e.target.value }))}
-              className="w-full px-3 py-2 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-secondary">
               Moneda
             </label>
             <select
               value={generalSettings.currency}
               onChange={(e) => setGeneralSettings(prev => ({ ...prev, currency: e.target.value }))}
-              className="w-full px-3 py-2 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="MXN">Peso Mexicano (MXN)</option>
               <option value="USD">Dólar Estadounidense (USD)</option>
@@ -158,29 +158,29 @@ const SettingsPage: React.FC = () => {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Configuración Regional</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Configuración Regional</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-secondary">
               Idioma
             </label>
             <select
               value={generalSettings.language}
               onChange={(e) => setGeneralSettings(prev => ({ ...prev, language: e.target.value }))}
-              className="w-full px-3 py-2 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="es">Español</option>
               <option value="en">English</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-secondary">
               Zona Horaria
             </label>
             <select
               value={generalSettings.timezone}
               onChange={(e) => setGeneralSettings(prev => ({ ...prev, timezone: e.target.value }))}
-              className="w-full px-3 py-2 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="America/Mexico_City">Ciudad de México</option>
               <option value="America/New_York">Nueva York</option>
@@ -195,69 +195,69 @@ const SettingsPage: React.FC = () => {
   const renderProfileSettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Información Personal</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Información Personal</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-secondary">
               Nombre Completo
             </label>
             <input
               type="text"
-              defaultValue={user?.fullName || ''}
-              className="w-full px-3 py-2 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              defaultValue={user?.full_name || ''}
+              className="w-full px-3 py-2 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-secondary">
               Email
             </label>
             <input
               type="email"
               defaultValue={user?.email || ''}
-              className="w-full px-3 py-2 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Cambiar Contraseña</h3>
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Cambiar Contraseña</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-secondary">
               Contraseña Actual
             </label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
-                className="w-full px-3 py-2 pr-10 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 pr-10 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-primary"
+                className="absolute transform -translate-y-1/2 right-3 top-1/2 text-text-secondary hover:text-text-primary"
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2">
+              <label className="block mb-2 text-sm font-medium text-text-secondary">
                 Nueva Contraseña
               </label>
               <input
                 type="password"
-                className="w-full px-3 py-2 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2">
+              <label className="block mb-2 text-sm font-medium text-text-secondary">
                 Confirmar Contraseña
               </label>
               <input
                 type="password"
-                className="w-full px-3 py-2 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </div>
@@ -269,9 +269,9 @@ const SettingsPage: React.FC = () => {
   const renderSecuritySettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Autenticación</h3>
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Autenticación</h3>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border border-divider rounded-lg">
+          <div className="flex items-center justify-between p-4 border rounded-lg border-divider">
             <div>
               <h4 className="font-medium text-text-primary">Autenticación de Dos Factores</h4>
               <p className="text-sm text-text-secondary">Añade una capa extra de seguridad</p>
@@ -293,28 +293,28 @@ const SettingsPage: React.FC = () => {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Configuración de Sesión</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Configuración de Sesión</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-secondary">
               Tiempo de Sesión (minutos)
             </label>
             <input
               type="number"
               value={securitySettings.sessionTimeout}
               onChange={(e) => setSecuritySettings(prev => ({ ...prev, sessionTimeout: parseInt(e.target.value) }))}
-              className="w-full px-3 py-2 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-secondary">
               Intentos de Login
             </label>
             <input
               type="number"
               value={securitySettings.loginAttempts}
               onChange={(e) => setSecuritySettings(prev => ({ ...prev, loginAttempts: parseInt(e.target.value) }))}
-              className="w-full px-3 py-2 border border-divider rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 border rounded-lg border-divider focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
         </div>
@@ -325,10 +325,10 @@ const SettingsPage: React.FC = () => {
   const renderNotificationSettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Notificaciones por Email</h3>
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Notificaciones por Email</h3>
         <div className="space-y-4">
           {Object.entries(notificationSettings).map(([key, value]) => (
-            <div key={key} className="flex items-center justify-between p-4 border border-divider rounded-lg">
+            <div key={key} className="flex items-center justify-between p-4 border rounded-lg border-divider">
               <div>
                 <h4 className="font-medium text-text-primary">
                   {key === 'emailNotifications' && 'Notificaciones Generales'}
@@ -365,8 +365,8 @@ const SettingsPage: React.FC = () => {
   const renderAppearanceSettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Tema</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Tema</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {['light', 'dark', 'auto'].map((theme) => (
             <button
               key={theme}
@@ -377,7 +377,7 @@ const SettingsPage: React.FC = () => {
                   : 'border-divider hover:border-primary'
               }`}
             >
-              <div className="font-medium text-text-primary capitalize">{theme}</div>
+              <div className="font-medium capitalize text-text-primary">{theme}</div>
               <div className="text-sm text-text-secondary">
                 {theme === 'light' && 'Tema claro'}
                 {theme === 'dark' && 'Tema oscuro'}
@@ -389,9 +389,9 @@ const SettingsPage: React.FC = () => {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Interfaz</h3>
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Interfaz</h3>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border border-divider rounded-lg">
+          <div className="flex items-center justify-between p-4 border rounded-lg border-divider">
             <div>
               <h4 className="font-medium text-text-primary">Animaciones</h4>
               <p className="text-sm text-text-secondary">Mostrar animaciones en la interfaz</p>
@@ -409,7 +409,7 @@ const SettingsPage: React.FC = () => {
               />
             </button>
           </div>
-          <div className="flex items-center justify-between p-4 border border-divider rounded-lg">
+          <div className="flex items-center justify-between p-4 border rounded-lg border-divider">
             <div>
               <h4 className="font-medium text-text-primary">Modo Compacto</h4>
               <p className="text-sm text-text-secondary">Reducir el espaciado en la interfaz</p>
@@ -435,14 +435,14 @@ const SettingsPage: React.FC = () => {
   const renderPluginSettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Módulos Disponibles</h3>
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Módulos Disponibles</h3>
         <div className="space-y-4">
           {[
             { id: 'smart-inventory', name: 'Smart Inventory', description: 'Gestión inteligente de inventario con IA' },
             { id: 'ocr-module', name: 'OCR Documents', description: 'Procesamiento de documentos con OCR' },
             { id: 'pos-integration', name: 'POS Integration', description: 'Integración con sistemas POS' },
           ].map((plugin) => (
-            <div key={plugin.id} className="flex items-center justify-between p-4 border border-divider rounded-lg">
+            <div key={plugin.id} className="flex items-center justify-between p-4 border rounded-lg border-divider">
               <div>
                 <h4 className="font-medium text-text-primary">{plugin.name}</h4>
                 <p className="text-sm text-text-secondary">{plugin.description}</p>
@@ -469,39 +469,39 @@ const SettingsPage: React.FC = () => {
   const renderSystemSettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Información del Sistema</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 border border-divider rounded-lg">
-            <h4 className="font-medium text-text-primary mb-2">Versión</h4>
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Información del Sistema</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="p-4 border rounded-lg border-divider">
+            <h4 className="mb-2 font-medium text-text-primary">Versión</h4>
             <p className="text-sm text-text-secondary">ZatoBox v2.0.0</p>
           </div>
-          <div className="p-4 border border-divider rounded-lg">
-            <h4 className="font-medium text-text-primary mb-2">Última Actualización</h4>
+          <div className="p-4 border rounded-lg border-divider">
+            <h4 className="mb-2 font-medium text-text-primary">Última Actualización</h4>
             <p className="text-sm text-text-secondary">24 de Julio, 2025</p>
           </div>
-          <div className="p-4 border border-divider rounded-lg">
-            <h4 className="font-medium text-text-primary mb-2">Base de Datos</h4>
+          <div className="p-4 border rounded-lg border-divider">
+            <h4 className="mb-2 font-medium text-text-primary">Base de Datos</h4>
             <p className="text-sm text-text-secondary">SQLite v3.45.0</p>
           </div>
-          <div className="p-4 border border-divider rounded-lg">
-            <h4 className="font-medium text-text-primary mb-2">Estado</h4>
+          <div className="p-4 border rounded-lg border-divider">
+            <h4 className="mb-2 font-medium text-text-primary">Estado</h4>
             <p className="text-sm text-success">Operativo</p>
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Mantenimiento</h3>
+        <h3 className="mb-4 text-lg font-semibold text-text-primary">Mantenimiento</h3>
         <div className="space-y-4">
-          <button className="w-full p-4 border border-divider rounded-lg text-left hover:border-primary transition-colors">
+          <button className="w-full p-4 text-left transition-colors border rounded-lg border-divider hover:border-primary">
             <h4 className="font-medium text-text-primary">Respaldar Base de Datos</h4>
             <p className="text-sm text-text-secondary">Crear una copia de seguridad de todos los datos</p>
           </button>
-          <button className="w-full p-4 border border-divider rounded-lg text-left hover:border-primary transition-colors">
+          <button className="w-full p-4 text-left transition-colors border rounded-lg border-divider hover:border-primary">
             <h4 className="font-medium text-text-primary">Limpiar Cache</h4>
             <p className="text-sm text-text-secondary">Eliminar archivos temporales del sistema</p>
           </button>
-          <button className="w-full p-4 border border-error rounded-lg text-left hover:border-error-600 transition-colors">
+          <button className="w-full p-4 text-left transition-colors border rounded-lg border-error hover:border-error-600">
             <h4 className="font-medium text-error">Restablecer Configuración</h4>
             <p className="text-sm text-text-secondary">Volver a la configuración por defecto</p>
           </button>
@@ -534,13 +534,13 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-bg-main">
       {/* Header */}
-      <div className="bg-bg-surface border-b border-divider">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="border-b bg-bg-surface border-divider">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => window.history.back()}
-                className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+                className="p-2 transition-colors text-text-secondary hover:text-text-primary"
               >
                 <ArrowLeft size={20} />
               </button>
@@ -565,7 +565,7 @@ const SettingsPage: React.FC = () => {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center space-x-2 px-4 py-2 bg-primary text-black font-medium rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50"
+                className="flex items-center px-4 py-2 space-x-2 font-medium text-black transition-colors rounded-lg bg-primary hover:bg-primary-600 disabled:opacity-50"
               >
                 <Save size={16} />
                 <span>{isSaving ? 'Guardando...' : 'Guardar'}</span>
@@ -575,8 +575,8 @@ const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <nav className="space-y-2">
@@ -605,7 +605,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Content */}
           <div className="lg:col-span-3">
-            <div className="bg-bg-surface border border-divider rounded-lg p-6">
+            <div className="p-6 border rounded-lg bg-bg-surface border-divider">
               {renderContent()}
             </div>
           </div>

@@ -24,7 +24,7 @@ export const API_CONFIG = {
 export interface User {
   id: number;
   email: string;
-  fullName: string;
+  full_name: string;
   role: 'admin' | 'user';
   phone?: string;
   address?: string;
@@ -42,6 +42,7 @@ export interface Product {
   min_stock?: number | null;
   unit_id?: number | null;
   unit_name?: string | null;
+  product_type?: string | null;
   weight?: number | null;
   images?: string[] | null;
   localization?: string | null;

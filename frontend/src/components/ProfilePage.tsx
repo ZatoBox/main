@@ -1,23 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../services/api';
 import {
-  ArrowLeft,
-  User,
-  Shield,
-  Eye,
-  EyeOff,
-  Globe,
-  Bell,
-  CreditCard,
-  Download,
-  HelpCircle,
-  MessageSquare,
-  Activity,
-  Save,
-  Camera,
-  Smartphone,
-  Monitor,
-  X,
+    ArrowLeft,
+    User,
+    Shield,
+    Eye,
+    EyeOff,
+    Globe,
+    Bell,
+    CreditCard,
+    Download,
+    HelpCircle,
+    MessageSquare,
+    Activity,
+    Save,
+    Camera,
+    Smartphone,
+    Monitor,
+    X,
 } from 'lucide-react';
 
 interface Session {
@@ -52,14 +53,16 @@ const ProfilePage: React.FC = () => {
   const [showAddCardForm, setShowAddCardForm] = useState(false);
   const [editingCard, setEditingCard] = useState<PaymentCard | null>(null);
   const [showPassword, setShowPassword] = useState({
-    current: false,
-    new: false,
-    confirm: false,
-  });
+        current: false,
+        new: false,
+        confirm: false,
+    });
+    // @ts-ignore
+    const [loadingProfile, setLoadingProfile] = useState(false);
 
   // Profile data state
   const [profileData, setProfileData] = useState({
-    name: 'John Doe',
+    full_name: 'John Doe',
     email: 'john.doe@company.com',
     phone: '+1 (555) 123-4567',
     address: '123 Main St, City, Country',
@@ -322,23 +325,23 @@ const ProfilePage: React.FC = () => {
   };
 
   const renderProfileHeader = () => (
-    <div className="bg-bg-surface rounded-lg shadow-sm border border-divider p-6 mb-6">
-      <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
+    <div className="p-6 mb-6 border rounded-lg shadow-sm bg-bg-surface border-divider">
+      <div className="flex flex-col items-start space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-6">
         {/* Avatar */}
         <div className="relative">
-          <div className="w-20 h-20 bg-complement rounded-full flex items-center justify-center">
+          <div className="flex items-center justify-center w-20 h-20 rounded-full bg-complement">
             <User size={32} className="text-white" />
           </div>
-          <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-primary rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+          <button className="absolute flex items-center justify-center w-8 h-8 transition-colors rounded-full -bottom-1 -right-1 bg-primary hover:bg-primary-600">
             <Camera size={16} className="text-black" />
           </button>
         </div>
 
         {/* User Info */}
         <div className="flex-1">
-          <h2 className="text-xl font-bold text-text-primary">{profileData.name}</h2>
+          <h2 className="text-xl font-bold text-text-primary">{profileData.full_name}</h2>
           <p className="text-text-secondary">{profileData.email}</p>
-          <div className="flex items-center space-x-4 mt-2">
+          <div className="flex items-center mt-2 space-x-4">
             <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-complement-100 text-complement-800">
               {profileData.role}
             </span>
@@ -353,21 +356,21 @@ const ProfilePage: React.FC = () => {
 
   const renderPersonalData = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
+          <label className="block mb-2 text-sm font-medium text-text-primary">
             Full Name
           </label>
           <input
             type="text"
-            value={profileData.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            className="w-full p-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+            value={profileData.full_name}
+            onChange={(e) => handleInputChange('full_name', e.target.value)}
+            className="w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
+          <label className="block mb-2 text-sm font-medium text-text-primary">
             Email
           </label>
           <div className="flex space-x-2">
@@ -375,7 +378,7 @@ const ProfilePage: React.FC = () => {
               type="email"
               value={profileData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
-              className="flex-1 p-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+              className="flex-1 p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
             />
             <button className={`px-4 py-3 rounded-lg font-medium transition-colors ${
               profileData.emailVerified
@@ -388,7 +391,7 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
+          <label className="block mb-2 text-sm font-medium text-text-primary">
             Phone
           </label>
           <div className="flex space-x-2">
@@ -396,7 +399,7 @@ const ProfilePage: React.FC = () => {
               type="tel"
               value={profileData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
-              className="flex-1 p-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+              className="flex-1 p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
             />
             <button className={`px-4 py-3 rounded-lg font-medium transition-colors ${
               profileData.phoneVerified
@@ -409,14 +412,14 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
+          <label className="block mb-2 text-sm font-medium text-text-primary">
             Full Address
           </label>
           <input
             type="text"
             value={profileData.address}
             onChange={(e) => handleInputChange('address', e.target.value)}
-            className="w-full p-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+            className="w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
           />
         </div>
       </div>
@@ -427,10 +430,10 @@ const ProfilePage: React.FC = () => {
     <div className="space-y-6">
       {/* Password Change */}
       <div>
-        <h3 className="text-lg font-medium text-text-primary mb-4">Change Password</h3>
+        <h3 className="mb-4 text-lg font-medium text-text-primary">Change Password</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-primary">
               Current Password
             </label>
             <div className="relative">
@@ -438,12 +441,12 @@ const ProfilePage: React.FC = () => {
                 type={showPassword.current ? 'text' : 'password'}
                 value={passwordData.current}
                 onChange={(e) => handlePasswordChange('current', e.target.value)}
-                className="w-full p-3 pr-12 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+                className="w-full p-3 pr-12 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
               />
               <button
                 type="button"
                 onClick={() => togglePasswordVisibility('current')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-primary"
+                className="absolute transform -translate-y-1/2 right-3 top-1/2 text-text-secondary hover:text-text-primary"
               >
                 {showPassword.current ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -451,7 +454,7 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-primary">
               New Password
             </label>
             <div className="relative">
@@ -459,12 +462,12 @@ const ProfilePage: React.FC = () => {
                 type={showPassword.new ? 'text' : 'password'}
                 value={passwordData.new}
                 onChange={(e) => handlePasswordChange('new', e.target.value)}
-                className="w-full p-3 pr-12 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+                className="w-full p-3 pr-12 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
               />
               <button
                 type="button"
                 onClick={() => togglePasswordVisibility('new')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-primary"
+                className="absolute transform -translate-y-1/2 right-3 top-1/2 text-text-secondary hover:text-text-primary"
               >
                 {showPassword.new ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -472,7 +475,7 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">
+            <label className="block mb-2 text-sm font-medium text-text-primary">
               Confirm New Password
             </label>
             <div className="relative">
@@ -480,12 +483,12 @@ const ProfilePage: React.FC = () => {
                 type={showPassword.confirm ? 'text' : 'password'}
                 value={passwordData.confirm}
                 onChange={(e) => handlePasswordChange('confirm', e.target.value)}
-                className="w-full p-3 pr-12 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+                className="w-full p-3 pr-12 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
               />
               <button
                 type="button"
                 onClick={() => togglePasswordVisibility('confirm')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-primary"
+                className="absolute transform -translate-y-1/2 right-3 top-1/2 text-text-secondary hover:text-text-primary"
               >
                 {showPassword.confirm ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -495,7 +498,7 @@ const ProfilePage: React.FC = () => {
       </div>
 
       {/* Two Factor Authentication */}
-      <div className="border-t border-divider pt-6">
+      <div className="pt-6 border-t border-divider">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-medium text-text-primary">Two-Factor Authentication</h3>
@@ -514,13 +517,13 @@ const ProfilePage: React.FC = () => {
       </div>
 
       {/* Active Sessions */}
-      <div className="border-t border-divider pt-6">
-        <h3 className="text-lg font-medium text-text-primary mb-4">Active Sessions</h3>
+      <div className="pt-6 border-t border-divider">
+        <h3 className="mb-4 text-lg font-medium text-text-primary">Active Sessions</h3>
         <div className="space-y-3">
           {sessions.map((session) => (
-            <div key={session.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-divider">
+            <div key={session.id} className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-divider">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full">
                   {session.device.includes('iPhone') ? (
                     <Smartphone size={20} className="text-text-secondary" />
                   ) : (
@@ -531,7 +534,7 @@ const ProfilePage: React.FC = () => {
                   <div className="font-medium text-text-primary">
                     {session.device}
                     {session.current && (
-                      <span className="ml-2 inline-flex px-2 py-1 text-xs font-medium rounded-full bg-success-100 text-success-800">
+                      <span className="inline-flex px-2 py-1 ml-2 text-xs font-medium rounded-full bg-success-100 text-success-800">
                         Current
                       </span>
                     )}
@@ -544,7 +547,7 @@ const ProfilePage: React.FC = () => {
               {!session.current && (
                 <button
                   onClick={() => handleCloseSession(session.id)}
-                  className="px-3 py-1 text-sm text-error hover:bg-error-50 rounded transition-colors"
+                  className="px-3 py-1 text-sm transition-colors rounded text-error hover:bg-error-50"
                 >
                   Close Session
                 </button>
@@ -558,15 +561,15 @@ const ProfilePage: React.FC = () => {
 
   const renderPreferences = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
+          <label className="block mb-2 text-sm font-medium text-text-primary">
             Language
           </label>
           <select
             value={profileData.language}
             onChange={(e) => handleInputChange('language', e.target.value)}
-            className="w-full p-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+            className="w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
           >
             <option value="en">English</option>
             <option value="es">Spanish</option>
@@ -576,13 +579,13 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
+          <label className="block mb-2 text-sm font-medium text-text-primary">
             Timezone
           </label>
           <select
             value={profileData.timezone}
             onChange={(e) => handleInputChange('timezone', e.target.value)}
-            className="w-full p-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+            className="w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
           >
             <option value="America/Mexico_City">Mexico City (GMT-6)</option>
             <option value="America/New_York">New York (GMT-5)</option>
@@ -592,13 +595,13 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
+          <label className="block mb-2 text-sm font-medium text-text-primary">
             Date Format
           </label>
           <select
             value={profileData.dateFormat}
             onChange={(e) => handleInputChange('dateFormat', e.target.value)}
-            className="w-full p-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+            className="w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
           >
             <option value="DD/MM/YYYY">DD/MM/YYYY</option>
             <option value="MM/DD/YYYY">MM/DD/YYYY</option>
@@ -607,13 +610,13 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
+          <label className="block mb-2 text-sm font-medium text-text-primary">
             Default Currency
           </label>
           <select
             value={profileData.currency}
             onChange={(e) => handleInputChange('currency', e.target.value)}
-            className="w-full p-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+            className="w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
           >
             <option value="USD">USD - US Dollar</option>
             <option value="MXN">MXN - Mexican Peso</option>
@@ -629,10 +632,10 @@ const ProfilePage: React.FC = () => {
     <div className="space-y-6">
       {/* Notification Types */}
       <div>
-        <h3 className="text-lg font-medium text-text-primary mb-4">Notification Types</h3>
+        <h3 className="mb-4 text-lg font-medium text-text-primary">Notification Types</h3>
         <div className="space-y-4">
           {Object.keys(profileData.notifications).map((key) => (
-            <div key={key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-divider">
+            <div key={key} className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-divider">
               <div>
                 <div className="font-medium text-text-primary">
                   {key === 'lowStock' && 'Low Stock'}
@@ -653,7 +656,7 @@ const ProfilePage: React.FC = () => {
                     type="checkbox"
                     checked={profileData.notifications[key as keyof typeof profileData.notifications].email}
                     onChange={(e) => handleNestedInputChange('notifications', key, 'email', e.target.checked)}
-                    className="w-4 h-4 text-complement border-gray-300 rounded focus:ring-complement"
+                    className="w-4 h-4 border-gray-300 rounded text-complement focus:ring-complement"
                   />
                   <span className="text-sm text-text-secondary">Email</span>
                 </label>
@@ -662,7 +665,7 @@ const ProfilePage: React.FC = () => {
                     type="checkbox"
                     checked={profileData.notifications[key as keyof typeof profileData.notifications].inApp}
                     onChange={(e) => handleNestedInputChange('notifications', key, 'inApp', e.target.checked)}
-                    className="w-4 h-4 text-complement border-gray-300 rounded focus:ring-complement"
+                    className="w-4 h-4 border-gray-300 rounded text-complement focus:ring-complement"
                   />
                   <span className="text-sm text-text-secondary">In-App</span>
                 </label>
@@ -673,12 +676,12 @@ const ProfilePage: React.FC = () => {
       </div>
 
       {/* Frequency */}
-      <div className="border-t border-divider pt-6">
-        <h3 className="text-lg font-medium text-text-primary mb-4">Frequency</h3>
+      <div className="pt-6 border-t border-divider">
+        <h3 className="mb-4 text-lg font-medium text-text-primary">Frequency</h3>
         <select
           value={profileData.notificationFrequency}
           onChange={(e) => handleInputChange('notificationFrequency', e.target.value)}
-          className="w-full md:w-auto p-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+          className="w-full p-3 border rounded-lg md:w-auto border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
         >
           <option value="immediate">Immediate</option>
           <option value="daily">Daily</option>
@@ -691,14 +694,14 @@ const ProfilePage: React.FC = () => {
   const renderBilling = () => (
     <div className="space-y-6">
       {/* Current Plan */}
-      <div className="bg-bg-surface rounded-lg border border-divider p-6">
-        <h3 className="text-lg font-medium text-text-primary mb-4">Current Plan</h3>
+      <div className="p-6 border rounded-lg bg-bg-surface border-divider">
+        <h3 className="mb-4 text-lg font-medium text-text-primary">Current Plan</h3>
         <div className="flex items-center justify-between">
           <div>
             <h4 className="font-medium text-text-primary">Pro Plan</h4>
             <div className="text-text-secondary">$29.99/month • Up to 10,000 products</div>
           </div>
-          <button className="px-4 py-2 bg-complement hover:bg-complement-600 text-white rounded-lg transition-colors">
+          <button className="px-4 py-2 text-white transition-colors rounded-lg bg-complement hover:bg-complement-600">
             Upgrade
           </button>
         </div>
@@ -710,14 +713,14 @@ const ProfilePage: React.FC = () => {
           <h3 className="text-lg font-medium text-text-primary">Payment Method</h3>
           <button
             onClick={handleOpenPaymentModal}
-            className="bg-secondary hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors">
+            className="px-4 py-2 text-white transition-colors rounded-lg bg-secondary hover:bg-secondary-600">
             Update Method
           </button>
         </div>
 
         {/* Display default card */}
         {paymentCards.length > 0 && (
-          <div className="bg-gray-50 rounded-lg p-4 border border-divider">
+          <div className="p-4 border rounded-lg bg-gray-50 border-divider">
             <div className="flex items-center space-x-3">
               {getCardIcon(paymentCards.find(card => card.isDefault)?.type || 'visa')}
               <div>
@@ -739,21 +742,21 @@ const ProfilePage: React.FC = () => {
 
       {/* Invoices */}
       <div>
-        <h3 className="text-lg font-medium text-text-primary mb-4">Invoice History</h3>
-        <div className="bg-bg-surface rounded-lg border border-divider overflow-hidden">
+        <h3 className="mb-4 text-lg font-medium text-text-primary">Invoice History</h3>
+        <div className="overflow-hidden border rounded-lg bg-bg-surface border-divider">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                <th className="px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary">
                   Date
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                <th className="px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary">
                   Amount
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                <th className="px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary">
                   Status
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                <th className="px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary">
                   Actions
                 </th>
               </tr>
@@ -769,7 +772,7 @@ const ProfilePage: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-4 py-4">
-                    <button className="text-complement hover:text-complement-600 text-sm font-medium">
+                    <button className="text-sm font-medium text-complement hover:text-complement-600">
                       <Download size={16} className="inline mr-1" />
                       Download PDF
                     </button>
@@ -785,22 +788,22 @@ const ProfilePage: React.FC = () => {
 
   const renderSupport = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <button className="p-6 bg-gray-50 rounded-lg border border-divider hover:bg-gray-100 transition-colors text-left">
-          <HelpCircle size={32} className="text-complement mb-3" />
-          <h3 className="font-medium text-text-primary mb-2">Help Center</h3>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <button className="p-6 text-left transition-colors border rounded-lg bg-gray-50 border-divider hover:bg-gray-100">
+          <HelpCircle size={32} className="mb-3 text-complement" />
+          <h3 className="mb-2 font-medium text-text-primary">Help Center</h3>
           <p className="text-sm text-text-secondary">Find answers to frequently asked questions</p>
         </button>
 
-        <button className="p-6 bg-gray-50 rounded-lg border border-divider hover:bg-gray-100 transition-colors text-left">
-          <MessageSquare size={32} className="text-complement mb-3" />
-          <h3 className="font-medium text-text-primary mb-2">Send Feedback</h3>
+        <button className="p-6 text-left transition-colors border rounded-lg bg-gray-50 border-divider hover:bg-gray-100">
+          <MessageSquare size={32} className="mb-3 text-complement" />
+          <h3 className="mb-2 font-medium text-text-primary">Send Feedback</h3>
           <p className="text-sm text-text-secondary">Share your comments and suggestions</p>
         </button>
 
-        <button className="p-6 bg-gray-50 rounded-lg border border-divider hover:bg-gray-100 transition-colors text-left">
-          <Activity size={32} className="text-complement mb-3" />
-          <h3 className="font-medium text-text-primary mb-2">System Status</h3>
+        <button className="p-6 text-left transition-colors border rounded-lg bg-gray-50 border-divider hover:bg-gray-100">
+          <Activity size={32} className="mb-3 text-complement" />
+          <h3 className="mb-2 font-medium text-text-primary">System Status</h3>
           <p className="text-sm text-text-secondary">Check the status of our services</p>
         </button>
       </div>
@@ -828,16 +831,64 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+        if (activeSection !== 'profile') return;
+        let canceled = false;
+        const getCookie = (name: string) => {
+            const match = document.cookie.split('; ').find(c => c.startsWith(name + '='));
+            if (!match) return null;
+            try {
+                return decodeURIComponent(match.split('=')[1]);
+            } catch {
+                return null;
+            }
+        };
+        const getFullNameFromUserCookie = () => {
+            const raw = getCookie('user');
+            if (!raw) return null;
+            try {
+                const parsed = JSON.parse(raw);
+                return parsed?.full_name ?? parsed?.fullName ?? parsed?.name ?? null;
+            } catch {
+                return null;
+            }
+        };
+        const fetchUser = async () => {
+            setLoadingProfile(true);
+            try {
+                const res = await authAPI.getCurrentUser();
+                if (canceled) return;
+                if (res?.user) {
+                    const cookieFullName = getFullNameFromUserCookie();
+                    setProfileData(prev => ({
+                        ...prev,
+                        full_name: cookieFullName || res.user.full_name || prev.full_name,
+                        email: res.user.email || prev.email,
+                        lastAccess: 'Now',
+                    }));
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                if (!canceled) setLoadingProfile(false);
+            }
+        };
+        fetchUser();
+        return () => {
+            canceled = true;
+        };
+    }, [activeSection]);
+
   return (
-    <div className="min-h-screen bg-bg-main pt-16">
+    <div className="min-h-screen pt-16 bg-bg-main">
       {/* Header */}
-      <div className="bg-bg-surface shadow-sm border-b border-divider">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="border-b shadow-sm bg-bg-surface border-divider">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate('/')}
-                className="p-2 hover:bg-gray-50 rounded-full transition-colors md:hidden"
+                className="p-2 transition-colors rounded-full hover:bg-gray-50 md:hidden"
               >
                 <ArrowLeft size={20} className="text-text-primary" />
               </button>
@@ -848,12 +899,12 @@ const ProfilePage: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
 
           {/* Desktop Sidebar */}
           <div className="hidden lg:block">
-            <div className="bg-bg-surface rounded-lg shadow-sm border border-divider p-4 sticky top-24">
+            <div className="sticky p-4 border rounded-lg shadow-sm bg-bg-surface border-divider top-24">
               <nav className="space-y-2">
                 {sections.map((section) => {
                   const Icon = section.icon;
@@ -877,8 +928,8 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* Mobile/Tablet Accordion */}
-          <div className="lg:hidden mb-6">
-            <div className="bg-bg-surface rounded-lg shadow-sm border border-divider overflow-hidden">
+          <div className="mb-6 lg:hidden">
+            <div className="overflow-hidden border rounded-lg shadow-sm bg-bg-surface border-divider">
               {sections.map((section) => {
                 const Icon = section.icon;
                 const isActive = activeSection === section.id;
@@ -908,8 +959,8 @@ const ProfilePage: React.FC = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <div className="bg-bg-surface rounded-lg shadow-sm border border-divider p-6 mb-6">
-              <h2 className="text-xl font-semibold text-text-primary mb-6">
+            <div className="p-6 mb-6 border rounded-lg shadow-sm bg-bg-surface border-divider">
+              <h2 className="mb-6 text-xl font-semibold text-text-primary">
                 {sections.find(s => s.id === activeSection)?.name}
               </h2>
               {renderContent()}
@@ -919,11 +970,11 @@ const ProfilePage: React.FC = () => {
       </div>
 
       {/* Fixed Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-bg-surface border-t border-divider p-4 md:pl-64">
-        <div className="max-w-7xl mx-auto flex items-center justify-center">
+      <div className="fixed bottom-0 left-0 right-0 p-4 border-t bg-bg-surface border-divider md:pl-64">
+        <div className="flex items-center justify-center mx-auto max-w-7xl">
           <button
             onClick={handleSaveChanges}
-            className="bg-primary hover:bg-primary-600 text-black font-medium py-3 px-8 rounded-lg transition-colors flex items-center space-x-2"
+            className="flex items-center px-8 py-3 space-x-2 font-medium text-black transition-colors rounded-lg bg-primary hover:bg-primary-600"
           >
             <Save size={16} />
             <span>Save Changes</span>
@@ -933,7 +984,7 @@ const ProfilePage: React.FC = () => {
 
       {/* Payment Method Modal */}
       {showPaymentModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
           <div className="bg-bg-surface rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-divider">
@@ -942,7 +993,7 @@ const ProfilePage: React.FC = () => {
               </h3>
               <button
                 onClick={handleClosePaymentModal}
-                className="p-2 hover:bg-gray-50 rounded-full transition-colors"
+                className="p-2 transition-colors rounded-full hover:bg-gray-50"
               >
                 <X size={20} />
               </button>
@@ -958,67 +1009,67 @@ const ProfilePage: React.FC = () => {
                   className="space-y-4"
                 >
                   <div>
-                    <label className="block text-sm font-medium mb-1">Card Number</label>
+                    <label className="block mb-1 text-sm font-medium">Card Number</label>
                     <input
                       type="text"
                       value={newCard.number}
                       onChange={e => handleNewCardChange('number', e.target.value)}
-                      className="w-full p-2 border border-divider rounded"
+                      className="w-full p-2 border rounded border-divider"
                       maxLength={19}
                       required
                     />
                   </div>
                   <div className="flex space-x-2">
                     <div className="flex-1">
-                      <label className="block text-sm font-medium mb-1">Expiry Month</label>
+                      <label className="block mb-1 text-sm font-medium">Expiry Month</label>
                       <input
                         type="text"
                         value={newCard.expiryMonth}
                         onChange={e => handleNewCardChange('expiryMonth', e.target.value)}
-                        className="w-full p-2 border border-divider rounded"
+                        className="w-full p-2 border rounded border-divider"
                         maxLength={2}
                         required
                       />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-sm font-medium mb-1">Expiry Year</label>
+                      <label className="block mb-1 text-sm font-medium">Expiry Year</label>
                       <input
                         type="text"
                         value={newCard.expiryYear}
                         onChange={e => handleNewCardChange('expiryYear', e.target.value)}
-                        className="w-full p-2 border border-divider rounded"
+                        className="w-full p-2 border rounded border-divider"
                         maxLength={4}
                         required
                       />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-sm font-medium mb-1">CVC</label>
+                      <label className="block mb-1 text-sm font-medium">CVC</label>
                       <input
                         type="text"
                         value={newCard.cvc}
                         onChange={e => handleNewCardChange('cvc', e.target.value)}
-                        className="w-full p-2 border border-divider rounded"
+                        className="w-full p-2 border rounded border-divider"
                         maxLength={4}
                         required
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Cardholder Name</label>
+                    <label className="block mb-1 text-sm font-medium">Cardholder Name</label>
                     <input
                       type="text"
                       value={newCard.holderName}
                       onChange={e => handleNewCardChange('holderName', e.target.value)}
-                      className="w-full p-2 border border-divider rounded"
+                      className="w-full p-2 border rounded border-divider"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Type</label>
+                    <label className="block mb-1 text-sm font-medium">Type</label>
                     <select
                       value={newCard.type}
                       onChange={e => handleNewCardChange('type', e.target.value)}
-                      className="w-full p-2 border border-divider rounded"
+                      className="w-full p-2 border rounded border-divider"
                     >
                       <option value="visa">Visa</option>
                       <option value="mastercard">Mastercard</option>
@@ -1028,7 +1079,7 @@ const ProfilePage: React.FC = () => {
                   <div className="flex space-x-2">
                     <button
                       type="submit"
-                      className="bg-primary text-black px-4 py-2 rounded hover:bg-primary-600"
+                      className="px-4 py-2 text-black rounded bg-primary hover:bg-primary-600"
                     >
                       Save Card
                     </button>
@@ -1039,7 +1090,7 @@ const ProfilePage: React.FC = () => {
                         setEditingCard(null);
                         resetNewCard();
                       }}
-                      className="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300"
+                      className="px-4 py-2 text-black bg-gray-200 rounded hover:bg-gray-300"
                     >
                       Cancel
                     </button>
@@ -1047,18 +1098,18 @@ const ProfilePage: React.FC = () => {
                 </form>
               ) : (
                 <>
-                  <div className="mb-4 flex justify-between items-center">
+                  <div className="flex items-center justify-between mb-4">
                     <h4 className="font-medium">Your Cards</h4>
                     <button
                       onClick={handleAddCard}
-                      className="bg-complement text-white px-3 py-1 rounded hover:bg-complement-600"
+                      className="px-3 py-1 text-white rounded bg-complement hover:bg-complement-600"
                     >
                       Add Card
                     </button>
                   </div>
                   <div className="space-y-3">
                     {paymentCards.map(card => (
-                      <div key={card.id} className="flex items-center justify-between p-3 border border-divider rounded">
+                      <div key={card.id} className="flex items-center justify-between p-3 border rounded border-divider">
                         <div>
                           <span className="mr-2">{getCardIcon(card.type)}</span>
                           <span>•••• {card.lastFour}</span>
@@ -1066,14 +1117,14 @@ const ProfilePage: React.FC = () => {
                             {card.type.toUpperCase()} • {card.expiryMonth}/{card.expiryYear}
                           </span>
                           {card.isDefault && (
-                            <span className="ml-2 px-2 py-1 text-xs bg-success-100 text-success-800 rounded">Default</span>
+                            <span className="px-2 py-1 ml-2 text-xs rounded bg-success-100 text-success-800">Default</span>
                           )}
                         </div>
                         <div className="flex space-x-2">
                           {!card.isDefault && (
                             <button
                               onClick={() => handleSetDefaultCard(card.id)}
-                              className="text-complement hover:underline text-xs"
+                              className="text-xs text-complement hover:underline"
                             >
                               Set Default
                             </button>
@@ -1090,13 +1141,13 @@ const ProfilePage: React.FC = () => {
                                 type: card.type,
                               });
                             }}
-                            className="text-primary hover:underline text-xs"
+                            className="text-xs text-primary hover:underline"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDeleteCard(card.id)}
-                            className="text-error hover:underline text-xs"
+                            className="text-xs text-error hover:underline"
                           >
                             Delete
                           </button>

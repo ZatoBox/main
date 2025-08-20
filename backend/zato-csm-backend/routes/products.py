@@ -34,16 +34,12 @@ def _get_product_service(db=Depends(get_db_connection)) -> ProductService:
 @router.post("/", response_model=ProductResponse)
 def create_product(
     product_data: CreateProductRequest,
-    images: List[UploadFile] = File(None),
-    # request: Request,
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
-    # user_timezone = get_user_timezone_from_request(request)
     product = product_service.create_product(
         product_data,
         creator_id=current_user['id'],
-        images=images
     )
     return ProductResponse(**product)
 

@@ -5,46 +5,56 @@ from repositories.base_repository import BaseRepository
 
 from utils.timezone_utils import get_current_time_with_timezone
 
+
 class ProductRepository(BaseRepository):
 
     def create_product(
         self,
         name: str,
+        description: str | None,
         price: float,
         stock: int,
         unit: str,
         product_type: str,
+        category: str,
+        sku: str | None,
+        min_stock: int,
+        status: str,
+        weight: float | None,
+        localization: str | None,
         creator_id: int,
-        description: str = None,
-        category_id: int = None,
-        images: list = None,
-        min_stock: int=0,
-        sku: str=None,
-        status: str="active",
-        weight: float=0.0,
-        localization: str=None,
-        user_timezone: str = "UTC",
     ):
-        last_updated = get_current_time_with_timezone(user_timezone)
-        created_at = get_current_time_with_timezone(user_timezone)
-
-        images_json = json.dumps(images) if images else json.dumps([])
-
-        with self._get_cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO products ("
-                    "name, description, price, stock, category_id, images, "
-                    "min_stock, status, weight, sku, creator_id, unit,"
-                    "product_type, created_at, last_updated, localization)"
-                "VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING *",
-                (
-                    name, description, price, stock, category_id, images_json,
-                    min_stock, status, weight, sku, creator_id, unit, product_type,
-                    created_at, last_updated, localization
-                ),
-            )
-            self.db.commit()
-            return cursor.fetchone()
+        query = """
+        INSERT INTO products
+            (name, description, price, stock, min_stock, category, images, status, weight, sku, creator_id, unit, product_type, localization)
+        VALUES
+            (%s, %s, %s, %s, %s, %s, '[]'::jsonb, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id, name, description, price, stock, min_stock, category, images, status, weight, sku, creator_id, unit, product_type, created_at, last_updated, localization
+        """
+        cur = self.db.cursor()
+        cur.execute(
+            query,
+            (
+                name,
+                description,
+                price,
+                stock,
+                min_stock,
+                category,
+                status,
+                weight,
+                sku,
+                creator_id,
+                unit,
+                product_type,
+                localization,
+            ),
+        )
+        row = cur.fetchone()
+        self.db.commit()
+        colnames = [desc[0] for desc in cur.description]
+        cur.close()
+        return dict(zip(colnames, row))
 
     def update_product(self, product_id, updates: dict, user_timezone: str = "UTC"):
         # Protecting the created_at and id Update field
@@ -83,7 +93,9 @@ class ProductRepository(BaseRepository):
 
     def find_by_category(self, category_id: int):
         with self._get_cursor() as cursor:
-            cursor.execute("SELECT * FROM products WHERE category_id=%s", (category_id,))
+            cursor.execute(
+                "SELECT * FROM products WHERE category_id=%s", (category_id,)
+            )
             return cursor.fetchall()
 
     def find_by_name(self, name: str):
