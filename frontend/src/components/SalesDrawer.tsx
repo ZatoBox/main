@@ -19,7 +19,15 @@ interface SalesDrawerProps {
   clearCart: () => void;
 }
 
-const SalesDrawer: React.FC<SalesDrawerProps> = ({ isOpen, onClose, onNavigateToPayment, cartItems, updateCartItemQuantity, removeCartItem, clearCart }) => {
+const SalesDrawer: React.FC<SalesDrawerProps> = ({
+  isOpen,
+  onClose,
+  onNavigateToPayment,
+  cartItems,
+  updateCartItemQuantity,
+  removeCartItem,
+  clearCart,
+}) => {
   // @ts-ignore
   const [isAdjustableAmount, setIsAdjustableAmount] = useState(false);
   // @ts-ignore
@@ -151,10 +159,11 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({ isOpen, onClose, onNavigateTo
 
             {/* Payment Button */}
             <button
+              disabled
               onClick={handlePaymentClick}
-              className='w-full py-4 font-medium text-white transition-all duration-300 rounded-lg bg-complement hover:bg-complement-700 hover:scale-105 hover:shadow-lg btn-animate'
+              className='w-full py-4 font-medium text-white transition-all duration-300 bg-gray-400 rounded-lg cursor-not-allowed'
             >
-              Proceed to Payment
+              IN MAINTENANCE
             </button>
 
             {/* Clear Cart */}
