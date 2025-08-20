@@ -1,0 +1,303 @@
+# ==================== ARCHIVOS SENSIBLES ====================
+# NUNCA subir credenciales o información sensible
+.env
+.env.*
+*.env
+config.ini
+secrets.json
+
+# Credenciales específicas de Lightspark
+*lightspark*
+*LIGHTSPARK*
+
+# ==================== BASE DE DATOS ====================
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+zatobox_lightning.db
+test.db
+development.db
+
+# PostgreSQL dumps
+*.sql.gz
+*.dump
+backup_*.sql
+
+# Database migrations backup
+migrations/backup/
+
+# ==================== PYTHON ====================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+test-results/
+test_*.xml
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.python-env/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# ==================== FASTAPI / UVICORN ====================
+# Log files
+*.log
+logs/
+log/
+*.log.*
+
+# Temporary upload files
+uploads/
+temp/
+tmp/
+
+# ==================== ARCHIVOS DEL SISTEMA ====================
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ==================== EDITORES / IDEs ====================
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-*
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ==================== DOCUMENTACIÓN Y MEDIOS ====================
+# Archivos temporales de documentación
+docs/_build/
+docs/build/
+*.pdf
+*.docx
+*.pptx
+
+# Imágenes temporales
+*.tmp
+*.bak
+*.backup
+
+# ==================== ARCHIVOS ESPECÍFICOS DEL PROYECTO ====================
+# Archivos de testing
+test_invoices/
+sandbox/
+playground/
+
+# QR codes generados
+qr_codes/
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# Archivos de configuración local
+local_config.py
+dev_settings.py
+debug_*.py
+
+# Scripts de instalación temporales
+install_*.sh
+setup_temp.py
+
+# Archivos de migración temporal
+migrate_*.py
+migration_backup/
+
+# ==================== LIGHTSPARK ESPECÍFICOS ====================
+# Archivos relacionados con Lightning Network
+lightning_data/
+node_data/
+wallet_*.json
+channel_backup/
+
+# Certificados y claves temporales
+*.pem
+*.key
+*.cert
+*.crt
+
+# Archivos de testing de Lightning
+test_payments/
+test_invoices.json
+lightning_test_*.py
+
+# ==================== DOCKER ====================
+# Docker
+Dockerfile.local
+docker-compose.override.yml
+.dockerignore
+
+# ==================== ARCHIVOS DE PRODUCCIÓN ====================
+# No subir archivos de producción
+production.py
+prod_*.py
+server_config.py
+
+# Archivos de deployment
+deploy/
+deployment/
+ansible/
+terraform/
+
+# SSL certificates
+ssl/
+certs/
+
+# ==================== VARIOS ====================
+# Archivos comprimidos
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Archivos temporales
+*.tmp
+*.temp
+temp_*
+
+# Node modules (si usas algo de JS)
+node_modules/
+package-lock.json
+
+# Git patches
+*.patch
+*.diff
+
+# ==================== COMENTARIOS INFORMATIVOS ====================
+# Este .gitignore protege:
+# 1. Credenciales sensibles (.env, tokens Lightspark)
+# 2. Bases de datos locales (SQLite)  
+# 3. Archivos temporales y de cache
+# 4. Configuraciones específicas del entorno de desarrollo
+# 5. Logs y archivos de debugging
+# 6. Archivos generados automáticamente
+
+# RECUERDA:
+# - Nunca subas credenciales reales
+# - La base de datos SQLite es solo para desarrollo local
+# - Los logs pueden contener información sensible
+# - Siempre revisa antes de hacer commit
