@@ -147,3 +147,11 @@ def update_profile(
     if not current_user.get("admin"):
         raise HTTPException(status_code=403, detail="Acess denied")
     return auth_service.update_profile(user_id, updates)
+
+
+@router.get("/check-email")
+def check_email(email: str, db=Depends(get_db_connection)):
+    with db.cursor() as cursor:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        row = cursor.fetchone()
+    return {"exists": bool(row)}

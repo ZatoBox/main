@@ -21,6 +21,14 @@ def get_inventory(
     return {"success": True, "inventory": inventory}
 
 
+@router.get("/user")
+def get_user_inventory(
+    user=Depends(get_current_user), inventory_service=Depends(_get_inventory_service)
+):
+    inventory = inventory_service.get_inventory_by_user(user["id"])
+    return {"success": True, "inventory": inventory}
+
+
 @router.put("/{product_id}")
 def update_inventory(
     product_id: int,

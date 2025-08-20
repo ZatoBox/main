@@ -147,6 +147,9 @@ export const authAPI = {
       method: 'POST',
       body: JSON.stringify({ access_token }),
     }),
+
+  checkEmail: (email: string): Promise<{ exists: boolean }> =>
+    apiRequest(`/auth/check-email?email=${encodeURIComponent(email)}`),
 };
 // Products API
 export const productsAPI = {
@@ -234,6 +237,38 @@ export interface InventoryItem {
   reason?: string;
   date?: string;
 }
+
+// Inventory API
+export const inventoryAPI = {
+  getUserInventory: (): Promise<InventoryResponse> =>
+    apiRequest('/inventory/user'),
+
+  getAll: (
+    params: Record<string, string | number | boolean> = {}
+  ): Promise<InventoryResponse> => {
+    const queryString = new URLSearchParams(
+      params as Record<string, string>
+    ).toString();
+    return apiRequest(`/inventory?${queryString}`);
+  },
+
+  getById: (id: number): Promise<InventoryResponse> =>
+    apiRequest(`/inventory/${id}`),
+
+  update: (
+    id: number,
+    inventoryData: Partial<InventoryItem>
+  ): Promise<{ success: boolean; message: string }> =>
+    apiRequest(`/inventory/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(inventoryData),
+    }),
+
+  delete: (id: number): Promise<{ success: boolean; message: string }> =>
+    apiRequest(`/inventory/${id}`, {
+      method: 'DELETE',
+    }),
+};
 
 // Sales Types
 export interface Sale {

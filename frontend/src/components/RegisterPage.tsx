@@ -68,6 +68,31 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
+      const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+      if (domain) {
+        try {
+          const userinfoResp = await fetch(`https://${domain}/userinfo`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          if (userinfoResp.ok) {
+            const profile = await userinfoResp.json();
+            const email = profile?.email;
+            if (email) {
+              const check = await authAPI.checkEmail(email);
+              if (check.exists) {
+                setError('Email already registered. Please login or use social login.');
+                setIsLoading(false);
+                return;
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Could not fetch userinfo from Auth0', e);
+        }
+      }
+
       const payload = await authAPI.socialRegister(accessToken);
       const localToken =
         (payload as any).token || (payload as any).access_token;
@@ -136,6 +161,12 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
+      const check = await authAPI.checkEmail(formData.email);
+      if (check.exists) {
+        setError('Email already registered. Please login or use social login.');
+        setIsLoading(false);
+        return;
+      }
       await register({
         fullName: formData.fullName,
         email: formData.email,

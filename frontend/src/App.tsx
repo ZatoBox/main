@@ -66,7 +66,7 @@ function App() {
                   <div className='p-8'>
                     <h1 className='text-2xl font-bold'>POS Integration</h1>
                     <p className='mt-4'>
-                      POS system integration module is active and ready to use.
+                      POS system integration module is currently under development. This feature will allow you to connect ZatoBox with your existing POS system for seamless inventory management and sales tracking.
                     </p>
                   </div>
                 }
