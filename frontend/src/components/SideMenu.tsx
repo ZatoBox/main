@@ -205,7 +205,7 @@ const SideMenu: React.FC = () => {
                 }`}>
                   {item.name}
                 </div>
-                <div className="text-xs text-text-secondary transition-colors duration-300">
+                <div className="text-xs transition-colors duration-300 text-text-secondary">
                   {item.description}
                 </div>
               </div>
@@ -219,10 +219,10 @@ const SideMenu: React.FC = () => {
   return (
     <>
       {/* Mobile Menu Button */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
+      <div className="fixed z-50 md:hidden top-4 left-4">
         <button
           onClick={toggleMobileMenu}
-          className="p-2 bg-bg-surface border border-divider rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
+          className="p-2 transition-colors border rounded-lg shadow-lg bg-bg-surface border-divider hover:bg-gray-50"
         >
           {isMobileMenuOpen ? (
             <X size={24} className="text-text-primary" />
@@ -235,7 +235,7 @@ const SideMenu: React.FC = () => {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -249,7 +249,7 @@ const SideMenu: React.FC = () => {
           <img
             src="/images/logozato.png"
             alt="ZatoBox Logo"
-            className="h-10 w-auto"
+            className="w-auto h-10"
           />
         </div>
 
@@ -259,27 +259,27 @@ const SideMenu: React.FC = () => {
         </nav>
 
         {/* Bottom Navigation */}
-        <div className="px-4 py-4 border-t border-divider space-y-2">
+        <div className="px-4 py-4 space-y-2 border-t border-divider">
           {renderMenuItems(bottomMenuItems)}
         </div>
 
         {/* User Info */}
         <div className="px-4 py-4 border-t border-divider">
-          <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50">
-            <div className="w-8 h-8 bg-complement rounded-full flex items-center justify-center">
+          <div className="flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-complement">
               <User size={16} className="text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-text-primary truncate">
-                {user?.fullName || 'User'}
+              <div className="text-sm font-medium truncate text-text-primary">
+                {user?.full_name || 'User'}
               </div>
-              <div className="text-xs text-text-secondary truncate">
+              <div className="text-xs truncate text-text-secondary">
                 {user?.role === 'admin' ? 'Administrator' : 'User'}
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="p-2 text-error hover:bg-error-50 rounded-lg transition-colors"
+              className="p-2 transition-colors rounded-lg text-error hover:bg-error-50"
             >
               <LogOut size={16} />
             </button>
@@ -294,7 +294,7 @@ const SideMenu: React.FC = () => {
           <img
             src="/images/logozato.png"
             alt="ZatoBox Logo"
-            className="h-10 w-auto"
+            className="w-auto h-10"
           />
         </div>
 
@@ -304,7 +304,7 @@ const SideMenu: React.FC = () => {
         </nav>
 
         {/* Bottom Navigation */}
-        <div className="px-4 py-4 border-t border-divider space-y-2">
+        <div className="px-4 py-4 space-y-2 border-t border-divider">
           {renderMenuItems(bottomMenuItems)}
         </div>
 
@@ -320,14 +320,14 @@ const SideMenu: React.FC = () => {
                 ? 'bg-error-50 border border-error-200 shadow-sm'
                 : 'hover:bg-gray-50'
             }`}>
-              <div className="w-8 h-8 bg-complement rounded-full flex items-center justify-center">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-complement">
                 <User size={16} className="text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-text-primary truncate">
-                  {user?.fullName || 'User'}
+                <div className="text-sm font-medium truncate text-text-primary">
+                  {user?.full_name || 'User'}
                 </div>
-                <div className="text-xs text-text-secondary truncate">
+                <div className="text-xs truncate text-text-secondary">
                   {user?.role === 'admin' ? 'Administrator' : 'User'}
                 </div>
               </div>
@@ -350,7 +350,7 @@ const SideMenu: React.FC = () => {
             }`}>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 font-medium text-sm"
+                className="flex items-center space-x-2 text-sm font-medium"
               >
                 <LogOut size={16} />
                 <span>Logout</span>

@@ -24,7 +24,7 @@ export const API_CONFIG = {
 export interface User {
   id: number;
   email: string;
-  fullName: string;
+  full_name: string;
   role: 'admin' | 'user';
   phone?: string;
   address?: string;

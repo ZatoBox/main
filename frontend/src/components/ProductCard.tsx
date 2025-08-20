@@ -1,19 +1,6 @@
 import React from 'react';
 import { Package } from 'lucide-react';
-
-interface Product {
-  id: number;
-  name: string;
-  description?: string;
-  sku?: string;
-  category: string;
-  stock: number;
-  price: number;
-  status: 'active' | 'inactive';
-  image?: string;
-  images?: string[];
-  unit?: string;
-}
+import type { Product } from '../services/api';
 
 interface ProductCardProps {
   product: Product;
@@ -26,15 +13,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   };
 
   const getImageUrl = () => {
-    if (product.image) {
+    if (product.image && typeof product.image === 'string') {
       if (product.image.startsWith('http')) {
         return product.image;
       }
       return `http://localhost:4444${product.image}`;
     }
-    if (product.images && product.images.length > 0) {
+    if (Array.isArray(product.images) && product.images.length > 0) {
       const imageUrl = product.images[0];
-      if (imageUrl.startsWith('http')) {
+      if (typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
         return imageUrl;
       }
       return `http://localhost:4444${imageUrl}`;
@@ -43,7 +30,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   };
 
   const imageUrl = getImageUrl();
-  const unitLabel = product.unit ?? 'per unit';
+  const unitLabel = (product as any).unit_name ?? 'per unit';
 
   return (
     <div
@@ -113,7 +100,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         {/* Category */}
         <div className='flex items-center justify-between'>
           <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-text-secondary group-hover:text-complement'>
-            {product.category}
+            {product.category ?? ''}
           </span>
           {product.sku && (
             <span className='text-xs transition-colors duration-300 text-text-secondary group-hover:text-text-primary'>
@@ -128,11 +115,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         </h3>
 
         {/* Description */}
-        {product.description && (
+        {product.description ? (
           <p className='text-sm transition-colors duration-300 text-text-secondary line-clamp-2 group-hover:text-text-primary'>
             {product.description}
           </p>
-        )}
+        ) : null}
 
         {/* Price and Action */}
         <div className='flex items-center justify-between pt-2'>

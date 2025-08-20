@@ -171,7 +171,7 @@ const EditProductPage: React.FC = () => {
           payload.category = category;
         if (
           formData.unit !== '' &&
-          formData.unit !== (originalProduct.unit || '')
+          formData.unit !== ((originalProduct as any).unit || '')
         )
           payload.unit = formData.unit;
         if (
