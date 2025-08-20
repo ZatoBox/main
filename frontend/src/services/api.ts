@@ -147,6 +147,9 @@ export const authAPI = {
       method: 'POST',
       body: JSON.stringify({ access_token }),
     }),
+
+  checkEmail: (email: string): Promise<{ exists: boolean }> =>
+    apiRequest(`/auth/check-email?email=${encodeURIComponent(email)}`),
 };
 // Products API
 export const productsAPI = {
