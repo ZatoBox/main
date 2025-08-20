@@ -21,6 +21,27 @@ const OCRResultPage: React.FC = () => {
   });
   const [systemStatus, setSystemStatus] = useState<any>(null);
 
+  const maintenanceMode = true;
+
+  if (maintenanceMode) {
+    return (
+      <div className='flex items-center justify-center min-h-screen p-4'>
+        <div className='w-full max-w-2xl p-8 text-center bg-white rounded-lg shadow-lg'>
+          <h1 className='mb-4 text-2xl font-bold'>In maintenance</h1>
+          <p className='mb-6 text-text-secondary'>
+            The OCR feature is temporarily unavailable.
+          </p>
+          <button
+            disabled
+            className='px-6 py-3 font-medium text-white bg-gray-400 rounded-lg cursor-not-allowed'
+          >
+            In maintenance
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);

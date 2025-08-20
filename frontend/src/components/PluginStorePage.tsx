@@ -10,7 +10,7 @@ interface IPlugin {
   description: string;
   category: string;
   icon: string;
-  status: 'active' | 'inactive' | 'coming-soon';
+  status: 'active' | 'inactive' | 'coming-soon' | 'maintenance';
   version: string;
   author: string;
   rating: number;
@@ -34,7 +34,9 @@ const PluginStorePage: React.FC = () => {
   const categoriesRef = useRef<HTMLDivElement>(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
-  const [notificationType, setNotificationType] = useState<'success' | 'info'>('info');
+  const [notificationType, setNotificationType] = useState<'success' | 'info'>(
+    'info'
+  );
 
   const categories = [
     { id: 'all', name: 'Discover', icon: '🌟' },
@@ -52,22 +54,30 @@ const PluginStorePage: React.FC = () => {
     {
       id: 'ocr-module',
       name: 'OCR Document Scanner',
-      description: 'Scan and extract data from invoices, receipts, and documents automatically',
+      description:
+        'Scan and extract data from invoices, receipts, and documents automatically',
       category: 'productivity',
       icon: '🔍',
-      status: 'active',
+      status: 'maintenance',
       version: '1.2.0',
       author: 'ZatoBox Team',
       rating: 4.8,
       installs: 1250,
       price: 'free',
-      features: ['Document scanning', 'Data extraction', 'Invoice processing', 'Receipt management'],
-      screenshot: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop',
+      features: [
+        'Document scanning',
+        'Data extraction',
+        'Invoice processing',
+        'Receipt management',
+      ],
+      screenshot:
+        'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop',
     },
     {
       id: 'smart-inventory',
       name: 'Smart Inventory Manager',
-      description: 'Advanced inventory tracking with AI-powered stock predictions and alerts',
+      description:
+        'Advanced inventory tracking with AI-powered stock predictions and alerts',
       category: 'inventory',
       icon: '🧠',
       status: 'coming-soon',
@@ -76,13 +86,20 @@ const PluginStorePage: React.FC = () => {
       rating: 0,
       installs: 0,
       price: 'premium',
-      features: ['AI predictions', 'Low stock alerts', 'Demand forecasting', 'Automated reordering'],
-      screenshot: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop',
+      features: [
+        'AI predictions',
+        'Low stock alerts',
+        'Demand forecasting',
+        'Automated reordering',
+      ],
+      screenshot:
+        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop',
     },
     {
       id: 'advanced-analytics',
       name: 'Advanced Analytics Dashboard',
-      description: 'Comprehensive business analytics with real-time insights and reporting',
+      description:
+        'Comprehensive business analytics with real-time insights and reporting',
       category: 'analytics',
       icon: '📈',
       status: 'coming-soon',
@@ -91,12 +108,18 @@ const PluginStorePage: React.FC = () => {
       rating: 0,
       installs: 0,
       price: 'premium',
-      features: ['Real-time dashboards', 'Custom reports', 'Data visualization', 'Export capabilities'],
+      features: [
+        'Real-time dashboards',
+        'Custom reports',
+        'Data visualization',
+        'Export capabilities',
+      ],
     },
     {
       id: 'pos-integration',
       name: 'POS System Integration',
-      description: 'Connect with popular POS systems for seamless data synchronization',
+      description:
+        'Connect with popular POS systems for seamless data synchronization',
       category: 'integrations',
       icon: '💳',
       status: 'active',
@@ -105,7 +128,12 @@ const PluginStorePage: React.FC = () => {
       rating: 4.7,
       installs: 850,
       price: 'free',
-      features: ['Multi-POS support', 'Real-time sync', 'Payment processing', 'Receipt printing'],
+      features: [
+        'Multi-POS support',
+        'Real-time sync',
+        'Payment processing',
+        'Receipt printing',
+      ],
     },
     {
       id: 'email-automation',
@@ -119,7 +147,12 @@ const PluginStorePage: React.FC = () => {
       rating: 0,
       installs: 0,
       price: 'premium',
-      features: ['Email templates', 'Automated campaigns', 'Customer segmentation', 'Performance tracking'],
+      features: [
+        'Email templates',
+        'Automated campaigns',
+        'Customer segmentation',
+        'Performance tracking',
+      ],
     },
     {
       id: 'mobile-app',
@@ -133,12 +166,18 @@ const PluginStorePage: React.FC = () => {
       rating: 0,
       installs: 0,
       price: 'free',
-      features: ['Offline mode', 'Push notifications', 'Barcode scanning', 'Quick actions'],
+      features: [
+        'Offline mode',
+        'Push notifications',
+        'Barcode scanning',
+        'Quick actions',
+      ],
     },
     {
       id: 'api-gateway',
       name: 'API Gateway',
-      description: 'Developer tools for custom integrations and third-party connections',
+      description:
+        'Developer tools for custom integrations and third-party connections',
       category: 'developer',
       icon: '🔌',
       status: 'coming-soon',
@@ -161,23 +200,32 @@ const PluginStorePage: React.FC = () => {
       rating: 0,
       installs: 0,
       price: 'premium',
-      features: ['Store management', 'Inventory sync', 'Centralized reporting', 'Role-based access'],
+      features: [
+        'Store management',
+        'Inventory sync',
+        'Centralized reporting',
+        'Role-based access',
+      ],
     },
   ];
 
   useEffect(() => {
     // Simulate loading
     setTimeout(() => {
-      // Sync plugin status with context
-      const syncedPlugins = mockPlugins.map(plugin => {
-        // Keep coming-soon plugins as coming-soon
-        if (plugin.status === 'coming-soon') {
+      const syncedPlugins = mockPlugins.map((plugin) => {
+        if (
+          plugin.status === 'coming-soon' ||
+          plugin.status === 'maintenance'
+        ) {
           return plugin;
         }
-        // For other plugins, sync with context
         return {
           ...plugin,
-          status: (isPluginActive(plugin.id) ? 'active' : 'inactive') as 'active' | 'inactive' | 'coming-soon',
+          status: (isPluginActive(plugin.id) ? 'active' : 'inactive') as
+            | 'active'
+            | 'inactive'
+            | 'coming-soon'
+            | 'maintenance',
         };
       });
 
@@ -192,14 +240,17 @@ const PluginStorePage: React.FC = () => {
 
     // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(plugin => plugin.category === selectedCategory);
+      filtered = filtered.filter(
+        (plugin) => plugin.category === selectedCategory
+      );
     }
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(plugin =>
-        plugin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        plugin.description.toLowerCase().includes(searchQuery.toLowerCase()),
+      filtered = filtered.filter(
+        (plugin) =>
+          plugin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          plugin.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -248,7 +299,10 @@ const PluginStorePage: React.FC = () => {
   }, [filteredPlugins]);
 
   // Function to show notification
-  const showPluginNotification = (message: string, type: 'success' | 'info') => {
+  const showPluginNotification = (
+    message: string,
+    type: 'success' | 'info'
+  ) => {
     // Only show notifications when explicitly called, not automatically
     setNotificationMessage(message);
     setNotificationType(type);
@@ -259,106 +313,142 @@ const PluginStorePage: React.FC = () => {
     }, 3000);
   };
 
-  const handlePluginToggle = async(pluginId: string) => {
+  const handlePluginToggle = async (pluginId: string) => {
     if (!token) {
       alert('Please log in to manage plugins');
       return;
     }
 
     // Get current plugin info
-    const plugin = plugins.find(p => p.id === pluginId);
-    if (!plugin) {return;}
+    const plugin = plugins.find((p) => p.id === pluginId);
+    if (!plugin) {
+      return;
+    }
 
     // Toggle plugin status using context
     togglePlugin(pluginId);
 
     // Update local state to reflect the change
-    setPlugins(prev => prev.map(p => {
-      if (p.id === pluginId) {
-        const newStatus = isPluginActive(pluginId) ? 'active' : 'inactive';
-        return { ...p, status: newStatus as 'active' | 'inactive' | 'coming-soon' };
-      }
-      return p;
-    }));
+    setPlugins((prev) =>
+      prev.map((p) => {
+        if (p.id === pluginId) {
+          const newStatus = isPluginActive(pluginId) ? 'active' : 'inactive';
+          return {
+            ...p,
+            status: newStatus as 'active' | 'inactive' | 'coming-soon',
+          };
+        }
+        return p;
+      })
+    );
 
     // Plugin status updated successfully
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-    case 'active':
-      return <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>;
-    case 'inactive':
-      return <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Inactive</span>;
-    case 'coming-soon':
-      return <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">Coming Soon</span>;
-    default:
-      return null;
+      case 'active':
+        return (
+          <span className='px-2 py-1 text-xs text-green-800 bg-green-100 rounded-full'>
+            Active
+          </span>
+        );
+      case 'inactive':
+        return (
+          <span className='px-2 py-1 text-xs text-gray-800 bg-gray-100 rounded-full'>
+            Inactive
+          </span>
+        );
+      case 'coming-soon':
+        return (
+          <span className='px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-full'>
+            Coming Soon
+          </span>
+        );
+      case 'maintenance':
+        return (
+          <span className='px-2 py-1 text-xs text-yellow-800 bg-yellow-100 rounded-full'>
+            En mantenimiento
+          </span>
+        );
+      default:
+        return null;
     }
   };
 
   const getPriceBadge = (price: string) => {
-    return price === 'free'
-      ? <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Free</span>
-      : <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">Premium</span>;
+    return price === 'free' ? (
+      <span className='px-2 py-1 text-xs text-green-800 bg-green-100 rounded-full'>
+        Free
+      </span>
+    ) : (
+      <span className='px-2 py-1 text-xs text-purple-800 bg-purple-100 rounded-full'>
+        Premium
+      </span>
+    );
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-main flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-text-secondary">Loading Plugin Store...</p>
+      <div className='flex items-center justify-center min-h-screen bg-bg-main'>
+        <div className='text-center'>
+          <div className='w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary'></div>
+          <p className='text-text-secondary'>Loading Plugin Store...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-bg-main">
+    <div className='min-h-screen bg-bg-main'>
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-divider">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-text-primary">Plugin Store</h1>
-              <p className="text-text-secondary text-sm hidden md:block">
-                Browse the ever-growing collection of business modules on ZatoBox
+      <div className='bg-white border-b shadow-sm border-divider'>
+        <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+          <div className='flex items-center justify-between h-16'>
+            <div className='flex items-center space-x-4'>
+              <h1 className='text-2xl font-bold text-text-primary'>
+                Plugin Store
+              </h1>
+              <p className='hidden text-sm text-text-secondary md:block'>
+                Browse the ever-growing collection of business modules on
+                ZatoBox
               </p>
             </div>
-
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className='px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         {/* Search and Filters */}
-        <div className="mb-8">
-          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between space-y-6 xl:space-y-0">
+        <div className='mb-8'>
+          <div className='flex flex-col space-y-6 xl:flex-row xl:items-center xl:justify-between xl:space-y-0'>
             {/* Search Section */}
-            <div className="flex-1 xl:max-w-2xl animate-slide-in-left">
-              <div className="relative plugin-store-search">
-                <Search size={20} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-text-secondary icon-bounce" />
+            <div className='flex-1 xl:max-w-2xl animate-slide-in-left'>
+              <div className='relative plugin-store-search'>
+                <Search
+                  size={20}
+                  className='absolute transform -translate-y-1/2 left-6 top-1/2 text-text-secondary icon-bounce'
+                />
                 <input
-                  type="text"
-                  placeholder="Search plugins..."
+                  type='text'
+                  placeholder='Search plugins...'
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-16 pr-8 py-5 border border-divider rounded-lg text-sm focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary transition-all duration-300 hover:border-complement/50 shadow-sm"
+                  className='w-full py-5 pl-16 pr-8 text-sm transition-all duration-300 border rounded-lg shadow-sm border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:border-complement/50'
                 />
               </div>
             </div>
 
             {/* Category Tabs with Horizontal Scroll */}
-            <div className="relative flex-1 xl:flex-none">
-              <div className="relative">
+            <div className='relative flex-1 xl:flex-none'>
+              <div className='relative'>
                 {/* Left Arrow */}
                 {canScrollLeft && (
                   <button
                     onClick={scrollLeft}
-                    className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-8 h-8 bg-white border border-divider rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-all duration-200 hover:scale-110"
+                    className='absolute left-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110'
                   >
-                    <ChevronLeft size={16} className="text-text-primary" />
+                    <ChevronLeft size={16} className='text-text-primary' />
                   </button>
                 )}
 
@@ -366,9 +456,9 @@ const PluginStorePage: React.FC = () => {
                 {canScrollRight && (
                   <button
                     onClick={scrollRight}
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 w-8 h-8 bg-white border border-divider rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-all duration-200 hover:scale-110"
+                    className='absolute right-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110'
                   >
-                    <ChevronRight size={16} className="text-text-primary" />
+                    <ChevronRight size={16} className='text-text-primary' />
                   </button>
                 )}
 
@@ -376,7 +466,7 @@ const PluginStorePage: React.FC = () => {
                 <div
                   ref={categoriesRef}
                   onScroll={checkScrollButtons}
-                  className="flex gap-3 overflow-x-auto scrollbar-hide px-2 py-1 category-scroll-container"
+                  className='flex gap-3 px-2 py-1 overflow-x-auto scrollbar-hide category-scroll-container'
                   style={{
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
@@ -392,14 +482,14 @@ const PluginStorePage: React.FC = () => {
                           : 'bg-gray-100 text-text-secondary hover:bg-gray-200 hover:shadow-sm'
                       }`}
                     >
-                      <span className="mr-2">{category.icon}</span>
+                      <span className='mr-2'>{category.icon}</span>
                       {category.name}
                     </button>
                   ))}
                 </div>
 
                 {/* Gradient Overlay for Right Edge */}
-                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+                <div className='absolute top-0 bottom-0 right-0 w-8 pointer-events-none bg-gradient-to-l from-white to-transparent'></div>
               </div>
             </div>
           </div>
@@ -407,61 +497,81 @@ const PluginStorePage: React.FC = () => {
 
         {/* Featured Section */}
         {selectedCategory === 'all' && (
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-text-primary mb-4">🔥 MOST INSTALLS By popular demand</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className='mb-8'>
+            <h2 className='mb-4 text-xl font-bold text-text-primary'>
+              🔥 MOST INSTALLS By popular demand
+            </h2>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
               {filteredPlugins.slice(0, 3).map((plugin) => (
-                <div key={plugin.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <div
+                  key={plugin.id}
+                  className='overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'
+                >
                   {plugin.screenshot && (
-                    <div className="h-48 bg-gray-200 overflow-hidden">
+                    <div className='h-48 overflow-hidden bg-gray-200'>
                       <img
                         src={plugin.screenshot}
                         alt={plugin.name}
-                        className="w-full h-full object-cover"
+                        className='object-cover w-full h-full'
                       />
                     </div>
                   )}
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-3xl">{plugin.icon}</span>
+                  <div className='p-6'>
+                    <div className='flex items-start justify-between mb-3'>
+                      <div className='flex items-center space-x-3'>
+                        <span className='text-3xl'>{plugin.icon}</span>
                         <div>
-                          <h3 className="text-lg font-semibold text-text-primary">{plugin.name}</h3>
-                          <p className="text-sm text-text-secondary">{plugin.description}</p>
+                          <h3 className='text-lg font-semibold text-text-primary'>
+                            {plugin.name}
+                          </h3>
+                          <p className='text-sm text-text-secondary'>
+                            {plugin.description}
+                          </p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2">
+                    <div className='flex items-center justify-between mb-4'>
+                      <div className='flex items-center space-x-2'>
                         {getStatusBadge(plugin.status)}
                         {getPriceBadge(plugin.price)}
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <span className="text-yellow-400">⭐</span>
-                        <span className="text-sm text-text-secondary">{plugin.rating}</span>
-                        <span className="text-sm text-text-secondary">({plugin.installs})</span>
+                      <div className='flex items-center space-x-1'>
+                        <span className='text-yellow-400'>⭐</span>
+                        <span className='text-sm text-text-secondary'>
+                          {plugin.rating}
+                        </span>
+                        <span className='text-sm text-text-secondary'>
+                          ({plugin.installs})
+                        </span>
                       </div>
                     </div>
                     {plugin.status === 'active' ? (
                       <button
                         onClick={() => handlePluginToggle(plugin.id)}
-                        className="w-full bg-red-100 text-red-800 py-2 px-4 rounded-lg font-medium hover:bg-red-200 transition-colors"
+                        className='w-full px-4 py-2 font-medium text-red-800 transition-colors bg-red-100 rounded-lg hover:bg-red-200'
                       >
                         Deactivate
                       </button>
                     ) : plugin.status === 'inactive' ? (
                       <button
                         onClick={() => handlePluginToggle(plugin.id)}
-                        className="w-full bg-green-100 text-green-800 py-2 px-4 rounded-lg font-medium hover:bg-green-200 transition-colors"
+                        className='w-full px-4 py-2 font-medium text-green-800 transition-colors bg-green-100 rounded-lg hover:bg-green-200'
                       >
                         Activate
+                      </button>
+                    ) : plugin.status === 'coming-soon' ? (
+                      <button
+                        disabled
+                        className='w-full px-4 py-2 font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed'
+                      >
+                        Coming Soon
                       </button>
                     ) : (
                       <button
                         disabled
-                        className="w-full bg-gray-100 text-gray-400 py-2 px-4 rounded-lg font-medium cursor-not-allowed"
+                        className='w-full px-4 py-2 font-medium text-yellow-800 bg-yellow-100 rounded-lg cursor-not-allowed'
                       >
-                        Coming Soon
+                        En mantenimiento
                       </button>
                     )}
                   </div>
@@ -472,42 +582,56 @@ const PluginStorePage: React.FC = () => {
         )}
 
         {/* All Plugins Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
           {filteredPlugins.map((plugin) => (
-            <div key={plugin.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{plugin.icon}</span>
+            <div
+              key={plugin.id}
+              className='overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'
+            >
+              <div className='p-6'>
+                <div className='flex items-start justify-between mb-3'>
+                  <div className='flex items-center space-x-3'>
+                    <span className='text-2xl'>{plugin.icon}</span>
                     <div>
-                      <h3 className="text-lg font-semibold text-text-primary">{plugin.name}</h3>
-                      <p className="text-sm text-text-secondary">{plugin.description}</p>
+                      <h3 className='text-lg font-semibold text-text-primary'>
+                        {plugin.name}
+                      </h3>
+                      <p className='text-sm text-text-secondary'>
+                        {plugin.description}
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
+                <div className='flex items-center justify-between mb-4'>
+                  <div className='flex items-center space-x-2'>
                     {getStatusBadge(plugin.status)}
                     {getPriceBadge(plugin.price)}
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <span className="text-yellow-400">⭐</span>
-                    <span className="text-sm text-text-secondary">{plugin.rating}</span>
-                    <span className="text-sm text-text-secondary">({plugin.installs})</span>
+                  <div className='flex items-center space-x-1'>
+                    <span className='text-yellow-400'>⭐</span>
+                    <span className='text-sm text-text-secondary'>
+                      {plugin.rating}
+                    </span>
+                    <span className='text-sm text-text-secondary'>
+                      ({plugin.installs})
+                    </span>
                   </div>
                 </div>
 
                 {/* Features */}
-                <div className="mb-4">
-                  <div className="flex flex-wrap gap-1">
+                <div className='mb-4'>
+                  <div className='flex flex-wrap gap-1'>
                     {plugin.features.slice(0, 2).map((feature, index) => (
-                      <span key={index} className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
+                      <span
+                        key={index}
+                        className='px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded'
+                      >
                         {feature}
                       </span>
                     ))}
                     {plugin.features.length > 2 && (
-                      <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
+                      <span className='px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded'>
                         +{plugin.features.length - 2} more
                       </span>
                     )}
@@ -515,26 +639,19 @@ const PluginStorePage: React.FC = () => {
                 </div>
 
                 {/* Action Button */}
-                {plugin.status === 'active' ? (
+                {plugin.status === 'coming-soon' ? (
                   <button
-                    onClick={() => handlePluginToggle(plugin.id)}
-                    className="w-full bg-red-100 text-red-800 py-2 px-4 rounded-lg font-medium hover:bg-red-200 transition-colors"
+                    disabled
+                    className='w-full px-4 py-2 font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed'
                   >
-                    Deactivate
-                  </button>
-                ) : plugin.status === 'inactive' ? (
-                  <button
-                    onClick={() => handlePluginToggle(plugin.id)}
-                    className="w-full bg-green-100 text-green-800 py-2 px-4 rounded-lg font-medium hover:bg-green-200 transition-colors"
-                  >
-                    Activate
+                    Coming Soon
                   </button>
                 ) : (
                   <button
                     disabled
-                    className="w-full bg-gray-100 text-gray-400 py-2 px-4 rounded-lg font-medium cursor-not-allowed"
+                    className='w-full px-4 py-2 font-medium text-yellow-800 bg-yellow-100 rounded-lg cursor-not-allowed'
                   >
-                    Coming Soon
+                    En mantenimiento
                   </button>
                 )}
               </div>
@@ -544,39 +661,47 @@ const PluginStorePage: React.FC = () => {
 
         {/* Empty State */}
         {filteredPlugins.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-text-primary mb-2">No plugins found</h3>
-            <p className="text-text-secondary">Try adjusting your search or filter criteria</p>
+          <div className='py-12 text-center'>
+            <div className='mb-4 text-6xl'>🔍</div>
+            <h3 className='mb-2 text-xl font-semibold text-text-primary'>
+              No plugins found
+            </h3>
+            <p className='text-text-secondary'>
+              Try adjusting your search or filter criteria
+            </p>
           </div>
         )}
 
         {/* Plugin Change Notification */}
         {showNotification && (
-          <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out ${
-            notificationType === 'success'
-              ? 'bg-green-500 text-white'
-              : 'bg-blue-500 text-white'
-          } animate-menu-item-bounce`}>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              <span className="font-medium">{notificationMessage}</span>
+          <div
+            className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out ${
+              notificationType === 'success'
+                ? 'bg-green-500 text-white'
+                : 'bg-blue-500 text-white'
+            } animate-menu-item-bounce`}
+          >
+            <div className='flex items-center space-x-2'>
+              <div className='w-2 h-2 bg-white rounded-full animate-pulse'></div>
+              <span className='font-medium'>{notificationMessage}</span>
             </div>
           </div>
         )}
         {/* Example usage buttons for navigate and showPluginNotification */}
-        <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
+        <div className='fixed z-50 flex flex-col gap-2 bottom-4 right-4'>
           <button
             onClick={() => navigate('/')}
-            className="bg-blue-100 text-blue-800 py-2 px-4 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+            className='px-4 py-2 font-medium text-blue-800 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200'
           >
-          Go Home (navigate)
+            Go Home (navigate)
           </button>
           <button
-            onClick={() => showPluginNotification('This is a test notification!', 'info')}
-            className="bg-green-100 text-green-800 py-2 px-4 rounded-lg font-medium hover:bg-green-200 transition-colors"
+            onClick={() =>
+              showPluginNotification('This is a test notification!', 'info')
+            }
+            className='px-4 py-2 font-medium text-green-800 transition-colors bg-green-100 rounded-lg hover:bg-green-200'
           >
-          Show Notification
+            Show Notification
           </button>
         </div>
       </div>
