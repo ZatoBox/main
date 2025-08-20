@@ -5,7 +5,7 @@ import {
   Navigate,
   Outlet,
 } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { PluginProvider } from './contexts/PluginContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import SideMenu from './components/SideMenu';
@@ -34,6 +34,18 @@ function AppLayout() {
   );
 }
 
+function RootElement() {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) {
+    return (
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    );
+  }
+  return <LandingPage />;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -48,11 +60,7 @@ function App() {
 
             <Route
               path='/'
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
+              element={<RootElement />}
             >
               <Route index element={<HomePage />} />
               <Route path='inventory' element={<InventoryPage />} />
