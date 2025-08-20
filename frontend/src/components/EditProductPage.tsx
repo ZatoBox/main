@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Upload, Plus } from 'lucide-react';
+import { ArrowLeft, Upload, Plus, Check } from 'lucide-react';
 import { productsAPI, Product } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -26,6 +26,8 @@ const EditProductPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [originalProduct, setOriginalProduct] = useState<Product | null>(null);
+  const [status, setStatus] = useState<'active' | 'inactive' | ''>('');
+  const [togglingStatus, setTogglingStatus] = useState(false);
 
   const existingCategories = [
     'Furniture',
@@ -64,6 +66,7 @@ const EditProductPage: React.FC = () => {
         if (response.success) {
           const product = response.product as Product;
           setOriginalProduct(product);
+          setStatus(product.status ?? 'inactive');
           setFormData((prev) => ({
             ...prev,
             productType: '',
@@ -208,6 +211,7 @@ const EditProductPage: React.FC = () => {
 
       if (response.success) {
         setOriginalProduct(response.product);
+        setStatus(response.product.status ?? 'inactive');
         navigate('/inventory');
       } else {
         setError('Error updating product');
@@ -239,6 +243,35 @@ const EditProductPage: React.FC = () => {
       setError('Error deleting product');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleToggleStatus = async () => {
+    if (!isAuthenticated) {
+      setError('Debes iniciar sesión para cambiar el estado');
+      return;
+    }
+    if (!id) {
+      setError('ID de producto inválido');
+      return;
+    }
+    const newStatus = status === 'active' ? 'inactive' : 'active';
+    try {
+      setTogglingStatus(true);
+      setError(null);
+      const response = await productsAPI.update(parseInt(id, 10), {
+        status: newStatus,
+      });
+      if (response.success) {
+        setStatus(newStatus);
+        setOriginalProduct(response.product);
+      } else {
+        setError('Error al cambiar estado');
+      }
+    } catch (err) {
+      setError('Error al cambiar estado');
+    } finally {
+      setTogglingStatus(false);
     }
   };
 
@@ -303,11 +336,33 @@ const EditProductPage: React.FC = () => {
             <div className='flex items-center space-x-3'>
               {error && <div className='text-sm text-red-500'>{error}</div>}
               <button
+                onClick={() => navigate('/inventory')}
+                className='px-4 py-2 font-medium text-black transition-colors bg-gray-100 rounded-lg hover:bg-gray-200'
+              >
+                Go back
+              </button>
+              <button
                 onClick={handleDelete}
                 disabled={saving}
                 className='px-4 py-2 font-medium text-white transition-colors bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 Delete
+              </button>
+              <button
+                onClick={handleToggleStatus}
+                disabled={saving || togglingStatus}
+                className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                  status === 'active'
+                    ? 'bg-green-500 text-white hover:bg-green-600'
+                    : 'bg-gray-100 text-text-primary hover:bg-gray-200'
+                } ${
+                  saving || togglingStatus
+                    ? 'opacity-50 cursor-not-allowed'
+                    : ''
+                }`}
+              >
+                <Check size={16} />
+                <span>{status === 'active' ? 'Active' : 'Inactive'}</span>
               </button>
               <button
                 onClick={handleSave}
@@ -364,7 +419,7 @@ const EditProductPage: React.FC = () => {
             </div>
 
             <div className='p-6 border rounded-lg shadow-sm bg-bg-surface border-divider'>
-              <label className='block mb-4 text-sm font-medium text-text-primary'>
+              <label className='block mb-2 text-sm font-medium text-text-primary'>
                 Product Images
               </label>
               <div className='p-8 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-divider hover:border-gray-400'>

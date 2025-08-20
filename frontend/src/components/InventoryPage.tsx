@@ -8,7 +8,7 @@ import {
   Package,
   ChevronDown,
 } from 'lucide-react';
-import { productsAPI, inventoryAPI } from '../services/api';
+import { productsAPI } from '../services/api';
 import type { Product } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -36,50 +36,13 @@ const InventoryPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const response = await inventoryAPI.getUserInventory();
-
-        if (!response.success) {
+        const response = await productsAPI.getAll();
+        if (!response || !response.products) {
           setError('Error loading inventory');
           return;
         }
 
-        const mappedProducts: Product[] = response.inventory.map((item) => {
-          const anyItem = item as unknown as Record<string, unknown>;
-
-          // If backend returns an embedded product object
-          if (anyItem.product && typeof anyItem.product === 'object') {
-            return anyItem.product as Product;
-          }
-
-          // If inventory item already contains product-like fields
-          if (anyItem.name || anyItem.price !== undefined) {
-            return {
-              id: (anyItem.product_id as number) ?? (anyItem.id as number) ?? 0,
-              name:
-                (anyItem.name as string) ??
-                `Product ${
-                  (anyItem.product_id as number) ?? (anyItem.id as number) ?? ''
-                }`,
-              description: (anyItem.description as string) ?? null,
-              price: Number(anyItem.price ?? 0),
-              stock: Number(anyItem.quantity ?? 0),
-              category: (anyItem.category as string) ?? null,
-              status: (anyItem.status as 'active' | 'inactive') ?? 'inactive',
-            } as Product;
-          }
-
-          // Fallback minimal product constructed from inventory item
-          return {
-            id: (anyItem.product_id as number) ?? (anyItem.id as number) ?? 0,
-            name: `Product ${
-              (anyItem.product_id as number) ?? (anyItem.id as number) ?? ''
-            }`,
-            price: 0,
-            stock: Number(anyItem.quantity ?? 0),
-          } as Product;
-        });
-
-        setInventoryItems(mappedProducts);
+        setInventoryItems(response.products);
         setError(null);
       } catch (err) {
         console.error('Error fetching inventory:', err);

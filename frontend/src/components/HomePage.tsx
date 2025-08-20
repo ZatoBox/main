@@ -4,7 +4,7 @@ import ProductCard from './ProductCard';
 import SalesDrawer from './SalesDrawer';
 import PaymentScreen from './PaymentScreen';
 import PaymentSuccessScreen from './PaymentSuccessScreen';
-import { productsAPI, salesAPI } from '../services/api';
+import { inventoryAPI, salesAPI } from '../services/api';
 import type { Product } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -52,21 +52,25 @@ const HomePage: React.FC<HomePageProps> = ({
 
       try {
         setLoading(true);
-        const response = await productsAPI.getAll();
-        if (response.success) {
-          // Show active products (allow stock 0 to see all products)
-          const availableProducts = response.products.filter(
-            (product: Product) => product.status === 'active'
-          );
-          console.log('Products loaded:', response.products);
-          console.log('Available products:', availableProducts);
+        const response = await inventoryAPI.getActive();
+        if (response && response.success && Array.isArray(response.inventory)) {
+          const availableProducts = response.inventory
+            .filter((item: any) => item.product)
+            .map((item: any) => {
+              const product = item.product as Product;
+              return {
+                ...product,
+                id: product.id ?? item.product_id ?? 0,
+                stock: Number(item.quantity ?? product.stock ?? 0),
+              } as Product;
+            });
           setProducts(availableProducts);
         } else {
-          setError('Error loading products');
+          setProducts([]);
         }
       } catch (err) {
         console.error('Error fetching products:', err);
-        setError('Error loading products');
+        setProducts([]);
       } finally {
         setLoading(false);
       }
@@ -230,21 +234,27 @@ const HomePage: React.FC<HomePageProps> = ({
     try {
       setLoading(true);
       setError(null);
-      const response = await productsAPI.getAll();
+      const response = await inventoryAPI.getActive();
 
-      if (response.success) {
-        // Show active products (allow stock 0 to see all products)
-        const availableProducts = response.products.filter(
-          (product) => product.status === 'active'
-        );
+      if (response && response.success && Array.isArray(response.inventory)) {
+        const availableProducts = response.inventory
+          .filter((item: any) => item.product)
+          .map((item: any) => {
+            const product = item.product as Product;
+            return {
+              ...product,
+              id: product.id ?? item.product_id ?? 0,
+              stock: Number(item.quantity ?? product.stock ?? 0),
+            } as Product;
+          });
         setProducts(availableProducts);
-        console.log('Products reloaded:', response.products);
-        console.log('Available products:', availableProducts);
       } else {
+        setProducts([]);
         setError('Error reloading products');
       }
     } catch (err) {
       console.error('Error reloading products:', err);
+      setProducts([]);
       setError('Error reloading products');
     } finally {
       setLoading(false);

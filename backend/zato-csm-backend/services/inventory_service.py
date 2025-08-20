@@ -10,15 +10,14 @@ class InventoryService:
 
     def get_inventory(self):
         products = self.product_repo.find_all()
-        inventory = []
-
         return [
             {
                 "id": p["id"],
-                "productId": p["id"],
-                "quantity": p["stock"],
-                "minStock": p.get("min_stock", 0),
-                "lastUpdated": p.get("last_updated", datetime.now().isoformat() + "Z"),
+                "product_id": p["id"],
+                "quantity": p.get("stock", 0),
+                "location": p.get("location"),
+                "updated_at": p.get("last_updated", datetime.now().isoformat() + "Z"),
+                "product": p,
             }
             for p in products
         ]
@@ -28,10 +27,11 @@ class InventoryService:
         return [
             {
                 "id": p["id"],
-                "productId": p["id"],
-                "quantity": p["stock"],
-                "minStock": p.get("min_stock", 0),
-                "lastUpdated": p.get("last_updated", datetime.now().isoformat() + "Z"),
+                "product_id": p["id"],
+                "quantity": p.get("stock", 0),
+                "location": p.get("location"),
+                "updated_at": p.get("last_updated", datetime.now().isoformat() + "Z"),
+                "product": p,
             }
             for p in products
         ]
@@ -49,36 +49,32 @@ class InventoryService:
 
         return {
             "id": updated_product["id"],
-            "productId": updated_product["id"],
-            "quantity": updated_product["stock"],
-            "lastUpdated": updated_product.get(
-                "last_updated", datetime.now().isoformat() + "Z"
-            ),
+            "product_id": updated_product["id"],
+            "quantity": updated_product.get("stock", 0),
+            "updated_at": updated_product.get("last_updated", datetime.now().isoformat() + "Z"),
+            "product": updated_product,
         }
 
     def check_low_stock(self, min_threshold: int = 0):
-        """Function to check low stock products"""
         products = self.product_repo.find_all()
-
         return [
             {
                 "id": p["id"],
-                "currentStock": p["stock"],
-                "minStock": min_threshold,
-                "needRestock": True,
+                "product_id": p["id"],
+                "quantity": p.get("stock", 0),
+                "min_threshold": min_threshold,
+                "need_restock": True,
+                "product": p,
             }
             for p in products
-            if p["stock"] <= min_threshold
+            if p.get("stock", 0) <= min_threshold
         ]
 
     def get_inventory_summary(self):
-        """Inventory summary functionality"""
         products = self.product_repo.find_all()
-
         total_products = len(products)
-        total_stock = sum(p["stock"] for p in products)
-        low_stock_count = len([p for p in products if p["stock"] <= 0])
-
+        total_stock = sum(p.get("stock", 0) for p in products)
+        low_stock_count = len([p for p in products if p.get("stock", 0) <= 0])
         return {
             "totalProducts": total_products,
             "totalStock": total_stock,

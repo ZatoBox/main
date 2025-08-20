@@ -1,6 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Package, Home, Plus, Archive, Brain, Settings, LogOut, User, Menu, X, Scan, Store } from 'lucide-react';
+import {
+  Package,
+  Home,
+  Plus,
+  Archive,
+  Brain,
+  Settings,
+  LogOut,
+  User,
+  Menu,
+  X,
+  Scan,
+  Store,
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePlugins } from '../contexts/PluginContext';
 
@@ -13,13 +26,41 @@ const SideMenu: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
   const [animatingItems, setAnimatingItems] = useState<Set<string>>(new Set());
+  const userInfoRef = useRef<HTMLDivElement | null>(null);
+  const [hoverSupported, setHoverSupported] = useState<boolean>(true);
 
+  useEffect(() => {
+    try {
+      setHoverSupported(
+        window.matchMedia && window.matchMedia('(hover: hover)').matches
+      );
+    } catch {
+      setHoverSupported(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hoverSupported) return;
+    const handleDocClick = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      if (
+        userInfoRef.current &&
+        target &&
+        !userInfoRef.current.contains(target)
+      ) {
+        setShowLogout(false);
+      }
+    };
+    document.addEventListener('click', handleDocClick);
+    return () => document.removeEventListener('click', handleDocClick);
+  }, [hoverSupported]);
 
   // Initialize visible items on component mount
   useEffect(() => {
     const initialVisibleItems = new Set<string>();
     menuItems.forEach((item) => {
-      const shouldBeVisible = item.alwaysVisible || (item.pluginId && isPluginActive(item.pluginId));
+      const shouldBeVisible =
+        item.alwaysVisible || (item.pluginId && isPluginActive(item.pluginId));
       if (shouldBeVisible) {
         initialVisibleItems.add(item.path);
       }
@@ -27,32 +68,36 @@ const SideMenu: React.FC = () => {
     setVisibleItems(initialVisibleItems);
   }, []);
 
-
   // Effect to handle menu item animations when plugins change
   useEffect(() => {
     const newVisibleItems = new Set<string>();
 
     menuItems.forEach((item) => {
-      const shouldBeVisible = item.alwaysVisible || (item.pluginId && isPluginActive(item.pluginId));
+      const shouldBeVisible =
+        item.alwaysVisible || (item.pluginId && isPluginActive(item.pluginId));
       if (shouldBeVisible) {
         newVisibleItems.add(item.path);
       }
     });
 
     // Find items that are being added
-    const addedItems = Array.from(newVisibleItems).filter(path => !visibleItems.has(path));
+    const addedItems = Array.from(newVisibleItems).filter(
+      (path) => !visibleItems.has(path)
+    );
     // Find items that are being removed
-    const removedItems = Array.from(visibleItems).filter(path => !newVisibleItems.has(path));
+    const removedItems = Array.from(visibleItems).filter(
+      (path) => !newVisibleItems.has(path)
+    );
 
     // Animate out items that are being removed
     if (removedItems.length > 0) {
-      setAnimatingItems(prev => new Set([...prev, ...removedItems]));
+      setAnimatingItems((prev) => new Set([...prev, ...removedItems]));
 
       setTimeout(() => {
         setVisibleItems(newVisibleItems);
-        setAnimatingItems(prev => {
+        setAnimatingItems((prev) => {
           const newSet = new Set(prev);
-          removedItems.forEach(item => newSet.delete(item));
+          removedItems.forEach((item) => newSet.delete(item));
           return newSet;
         });
       }, 300); // Match the CSS transition duration
@@ -64,9 +109,9 @@ const SideMenu: React.FC = () => {
     // Animate in new items
     if (addedItems.length > 0) {
       setTimeout(() => {
-        setAnimatingItems(prev => {
+        setAnimatingItems((prev) => {
           const newSet = new Set(prev);
-          addedItems.forEach(item => newSet.delete(item));
+          addedItems.forEach((item) => newSet.delete(item));
           return newSet;
         });
       }, 50); // Small delay for smooth animation
@@ -101,6 +146,7 @@ const SideMenu: React.FC = () => {
       path: '/smart-inventory',
       description: 'AI for inventory',
       pluginId: 'smart-inventory',
+      alwaysVisible: false,
     },
     {
       name: 'OCR Documents',
@@ -108,6 +154,7 @@ const SideMenu: React.FC = () => {
       path: '/ocr-result',
       description: 'Process documents',
       pluginId: 'ocr-module',
+      alwaysVisible: false,
     },
     {
       name: 'POS Integration',
@@ -115,6 +162,7 @@ const SideMenu: React.FC = () => {
       path: '/pos-integration',
       description: 'POS system integration',
       pluginId: 'pos-integration',
+      alwaysVisible: false,
     },
     {
       name: 'Plugin Store',
@@ -129,8 +177,9 @@ const SideMenu: React.FC = () => {
     {
       name: 'Settings',
       icon: Settings,
-      path: '/settings',
+      path: '/profile',
       description: 'Settings',
+      alwaysVisible: true,
     },
   ];
 
@@ -155,9 +204,13 @@ const SideMenu: React.FC = () => {
     return items
       .filter((item) => {
         // Always show items that are always visible
-        if (item.alwaysVisible) {return true;}
+        if (item.alwaysVisible) {
+          return true;
+        }
         // Show items that have a pluginId only if the plugin is active
-        if (item.pluginId) {return isPluginActive(item.pluginId);}
+        if (item.pluginId) {
+          return isPluginActive(item.pluginId);
+        }
         return true;
       })
       .map((item, index) => {
@@ -165,10 +218,15 @@ const SideMenu: React.FC = () => {
         const isActive = location.pathname === item.path;
         const isVisible = visibleItems.has(item.path);
         const isAnimating = animatingItems.has(item.path);
-        const isNewItem = !visibleItems.has(item.path) && (item.alwaysVisible || (item.pluginId && isPluginActive(item.pluginId)));
+        const isNewItem =
+          !visibleItems.has(item.path) &&
+          (item.alwaysVisible ||
+            (item.pluginId && isPluginActive(item.pluginId)));
 
         // Don't render if not visible and not animating
-        if (!isVisible && !isAnimating && !isNewItem) {return null;}
+        if (!isVisible && !isAnimating && !isNewItem) {
+          return null;
+        }
 
         return (
           <div
@@ -177,9 +235,11 @@ const SideMenu: React.FC = () => {
               isVisible && !isAnimating
                 ? 'opacity-100 translate-y-0 scale-100 animate-menu-item-bounce'
                 : isAnimating
-                  ? 'opacity-0 translate-y-2 scale-95 animate-menu-item-out'
-                  : 'opacity-0 translate-y-2 scale-95'
-            } ${isNewItem ? 'animate-menu-item-in' : ''} ${isActive ? 'active' : ''}`}
+                ? 'opacity-0 translate-y-2 scale-95 animate-menu-item-out'
+                : 'opacity-0 translate-y-2 scale-95'
+            } ${isNewItem ? 'animate-menu-item-in' : ''} ${
+              isActive ? 'active' : ''
+            }`}
             style={{
               animationDelay: `${index * 50}ms`,
               transitionDelay: isNewItem ? `${index * 50}ms` : '0ms',
@@ -191,21 +251,29 @@ const SideMenu: React.FC = () => {
                 isActive
                   ? 'bg-complement-50 text-complement-700 border border-complement-200 shadow-sm'
                   : 'text-text-secondary hover:bg-gray-50 hover:text-text-primary hover:shadow-sm'
-              } ${item.pluginId && isPluginActive(item.pluginId) ? 'plugin-indicator' : ''}`}
+              } ${
+                item.pluginId && isPluginActive(item.pluginId)
+                  ? 'plugin-indicator'
+                  : ''
+              }`}
             >
               <Icon
                 size={20}
                 className={`mr-3 transition-all duration-300 ${
-                  isActive ? 'text-complement-600 scale-110' : 'text-text-secondary group-hover:text-text-primary group-hover:scale-105'
+                  isActive
+                    ? 'text-complement-600 scale-110'
+                    : 'text-text-secondary group-hover:text-text-primary group-hover:scale-105'
                 }`}
               />
-              <div className="flex-1">
-                <div className={`font-medium transition-colors duration-300 ${
-                  isActive ? 'text-complement-700' : 'text-text-primary'
-                }`}>
+              <div className='flex-1'>
+                <div
+                  className={`font-medium transition-colors duration-300 ${
+                    isActive ? 'text-complement-700' : 'text-text-primary'
+                  }`}
+                >
                   {item.name}
                 </div>
-                <div className="text-xs transition-colors duration-300 text-text-secondary">
+                <div className='text-xs transition-colors duration-300 text-text-secondary'>
                   {item.description}
                 </div>
               </div>
@@ -219,15 +287,15 @@ const SideMenu: React.FC = () => {
   return (
     <>
       {/* Mobile Menu Button */}
-      <div className="fixed z-50 md:hidden top-4 left-4">
+      <div className='fixed z-50 md:hidden top-4 left-4'>
         <button
           onClick={toggleMobileMenu}
-          className="p-2 transition-colors border rounded-lg shadow-lg bg-bg-surface border-divider hover:bg-gray-50"
+          className='p-2 transition-colors border rounded-lg shadow-lg bg-bg-surface border-divider hover:bg-gray-50'
         >
           {isMobileMenuOpen ? (
-            <X size={24} className="text-text-primary" />
+            <X size={24} className='text-text-primary' />
           ) : (
-            <Menu size={24} className="text-text-primary" />
+            <Menu size={24} className='text-text-primary' />
           )}
         </button>
       </div>
@@ -235,51 +303,53 @@ const SideMenu: React.FC = () => {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
+          className='fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden'
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Mobile Menu Sidebar */}
-      <div className={`md:hidden fixed inset-y-0 left-0 w-64 bg-bg-surface border-r border-divider z-50 transform transition-transform duration-300 ease-in-out ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <div
+        className={`md:hidden fixed inset-y-0 left-0 w-64 bg-bg-surface border-r border-divider z-50 transform transition-transform duration-300 ease-in-out ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         {/* Logo/Brand */}
-        <div className="flex items-center justify-center h-16 px-6 border-b border-divider">
+        <div className='flex items-center justify-center h-16 px-6 border-b border-divider'>
           <img
-            src="/images/logozato.png"
-            alt="ZatoBox Logo"
-            className="w-auto h-10"
+            src='/images/logozato.png'
+            alt='ZatoBox Logo'
+            className='w-auto h-10'
           />
         </div>
 
         {/* Main Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto sidebar-menu-container">
+        <nav className='flex-1 px-4 py-6 space-y-2 overflow-y-auto sidebar-menu-container'>
           {renderMenuItems(menuItems)}
         </nav>
 
         {/* Bottom Navigation */}
-        <div className="px-4 py-4 space-y-2 border-t border-divider">
+        <div className='px-4 py-4 space-y-2 border-t border-divider'>
           {renderMenuItems(bottomMenuItems)}
         </div>
 
         {/* User Info */}
-        <div className="px-4 py-4 border-t border-divider">
-          <div className="flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-complement">
-              <User size={16} className="text-white" />
+        <div className='px-4 py-4 border-t border-divider'>
+          <div className='flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50'>
+            <div className='flex items-center justify-center w-8 h-8 rounded-full bg-complement'>
+              <User size={16} className='text-white' />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium truncate text-text-primary">
+            <div className='flex-1 min-w-0'>
+              <div className='text-sm font-medium truncate text-text-primary'>
                 {user?.full_name || 'User'}
               </div>
-              <div className="text-xs truncate text-text-secondary">
+              <div className='text-xs truncate text-text-secondary'>
                 {user?.role === 'admin' ? 'Administrator' : 'User'}
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="p-2 transition-colors rounded-lg text-error hover:bg-error-50"
+              className='p-2 transition-colors rounded-lg text-error hover:bg-error-50'
             >
               <LogOut size={16} />
             </button>
@@ -288,69 +358,81 @@ const SideMenu: React.FC = () => {
       </div>
 
       {/* Desktop Side Menu */}
-      <div className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-bg-surface md:border-r md:border-divider md:z-40">
+      <div className='hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-bg-surface md:border-r md:border-divider md:z-40'>
         {/* Logo/Brand */}
-        <div className="flex items-center justify-center h-16 px-6 border-b border-divider">
+        <div className='flex items-center justify-center h-16 px-6 border-b border-divider'>
           <img
-            src="/images/logozato.png"
-            alt="ZatoBox Logo"
-            className="w-auto h-10"
+            src='/images/logozato.png'
+            alt='ZatoBox Logo'
+            className='w-auto h-10'
           />
         </div>
 
         {/* Main Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2 sidebar-menu-container">
+        <nav className='flex-1 px-4 py-6 space-y-2 sidebar-menu-container'>
           {renderMenuItems(menuItems)}
         </nav>
 
         {/* Bottom Navigation */}
-        <div className="px-4 py-4 space-y-2 border-t border-divider">
+        <div className='px-4 py-4 space-y-2 border-t border-divider'>
           {renderMenuItems(bottomMenuItems)}
         </div>
 
         {/* User Info with Hover Animation */}
-        <div className="px-4 py-4 border-t border-divider">
+        <div className='px-4 py-4 border-t border-divider'>
           <div
-            className="relative cursor-pointer"
-            onMouseEnter={() => setShowLogout(true)}
-            onMouseLeave={() => setShowLogout(false)}
+            ref={userInfoRef}
+            className='relative cursor-pointer'
+            onMouseEnter={
+              hoverSupported ? () => setShowLogout(true) : undefined
+            }
+            onMouseLeave={
+              hoverSupported ? () => setShowLogout(false) : undefined
+            }
+            onClick={
+              !hoverSupported ? () => setShowLogout((prev) => !prev) : undefined
+            }
           >
-            <div className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 ease-in-out ${
-              showLogout
-                ? 'bg-error-50 border border-error-200 shadow-sm'
-                : 'hover:bg-gray-50'
-            }`}>
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-complement">
-                <User size={16} className="text-white" />
+            <div
+              className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 ease-in-out ${
+                showLogout
+                  ? 'bg-error-50 border border-error-200 shadow-sm'
+                  : 'hover:bg-gray-50'
+              }`}
+            >
+              <div className='flex items-center justify-center w-8 h-8 rounded-full bg-complement'>
+                <User size={16} className='text-white' />
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium truncate text-text-primary">
+              <div className='flex-1 min-w-0'>
+                <div className='text-sm font-medium truncate text-text-primary'>
                   {user?.full_name || 'User'}
                 </div>
-                <div className="text-xs truncate text-text-secondary">
+                <div className='text-xs truncate text-text-secondary'>
                   {user?.role === 'admin' ? 'Administrator' : 'User'}
                 </div>
               </div>
 
-              {/* Logout Icon with Animation */}
-              <div className={`transition-all duration-300 ease-in-out ${
-                showLogout
-                  ? 'opacity-100 translate-x-0'
-                  : 'opacity-0 translate-x-2'
-              }`}>
-                <LogOut size={16} className="text-error" />
+              <div
+                className={`transition-all duration-300 ease-in-out ${
+                  showLogout
+                    ? 'opacity-100 translate-x-0'
+                    : 'opacity-0 translate-x-2'
+                }`}
+              >
+                <LogOut size={16} className='text-error' />
               </div>
             </div>
 
-            {/* Logout Overlay with Animation */}
-            <div className={`absolute inset-0 flex items-center justify-center rounded-lg transition-all duration-300 ease-in-out ${
-              showLogout
-                ? 'opacity-100 bg-error-500 text-white shadow-lg transform scale-100'
-                : 'opacity-0 bg-transparent transform scale-95 pointer-events-none'
-            }`}>
+            <div
+              className={`absolute inset-0 flex items-center justify-center rounded-lg transition-all duration-300 ease-in-out ${
+                showLogout
+                  ? 'opacity-100 bg-error-500 text-white shadow-lg transform scale-100'
+                  : 'opacity-0 bg-transparent transform scale-95 pointer-events-none'
+              }`}
+            >
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 text-sm font-medium"
+                className='flex items-center space-x-2 text-sm font-medium'
               >
                 <LogOut size={16} />
                 <span>Logout</span>
@@ -359,8 +441,6 @@ const SideMenu: React.FC = () => {
           </div>
         </div>
       </div>
-
-
     </>
   );
 };

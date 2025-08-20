@@ -236,6 +236,7 @@ export interface InventoryItem {
   change?: number;
   reason?: string;
   date?: string;
+  product?: Product;
 }
 
 // Inventory API
@@ -250,6 +251,36 @@ export const inventoryAPI = {
       params as Record<string, string>
     ).toString();
     return apiRequest(`/inventory?${queryString}`);
+  },
+
+  getActive: async (
+    params: Record<string, string | number | boolean> = {}
+  ): Promise<InventoryResponse> => {
+    const merged = { ...params, include: (params as any).include ?? 'product' };
+    const queryString = new URLSearchParams(
+      merged as Record<string, string>
+    ).toString();
+    const response = await apiRequest<InventoryResponse>(`/inventory?${queryString}`);
+    if (!response || !Array.isArray(response.inventory)) return response;
+    const inventoryList = response.inventory;
+    const needFetch = inventoryList.some((it) => !it.product && it.product_id);
+    if (needFetch) {
+      const uniqueIds = Array.from(new Set(inventoryList.map((it) => it.product_id).filter(Boolean)));
+      const productsMap: Record<number, Product> = {};
+      await Promise.all(
+        uniqueIds.map(async (pid) => {
+          try {
+            const prodRes = await productsAPI.getById(pid);
+            if (prodRes && (prodRes as any).product) productsMap[pid] = (prodRes as any).product as Product;
+          } catch {}
+        })
+      );
+      inventoryList.forEach((it) => {
+        if (!it.product) it.product = productsMap[it.product_id] ?? null;
+      });
+    }
+    const filtered = inventoryList.filter((it) => it.product && (it.product as Product).status === 'active');
+    return { ...response, inventory: filtered };
   },
 
   getById: (id: number): Promise<InventoryResponse> =>
