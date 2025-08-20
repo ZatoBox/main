@@ -3,7 +3,7 @@ import type { RequestInit } from 'node-fetch';
 
 // Configuración de la API
 const API_BASE_URL: string =
-  import.meta.env.VITE_API_URL || 'http://localhost:4444/api';
+  import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 const OCR_API_BASE_URL_RAW: string =
   import.meta.env.VITE_OCR_API_URL || 'http://127.0.0.1:5000';
 const OCR_API_BASE_URL: string = (OCR_API_BASE_URL_RAW as string).replace(

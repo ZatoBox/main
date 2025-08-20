@@ -22,6 +22,7 @@ import RegisterPage from './components/RegisterPage';
 import PluginStorePage from './components/PluginStorePage';
 import LandingPage from './components/LandingPage';
 import AuthCallback from './components/Callback';
+import POSPage from './pages/POSPage';
 
 function AppLayout() {
   return (
@@ -60,6 +61,7 @@ function App() {
               <Route path='new-product' element={<NewProductPage />} />
               <Route path='edit-product/:id' element={<EditProductPage />} />
               <Route path='ocr-result' element={<OCRResultPage />} />
+              <Route path='pos' element={<POSPage />} />
               <Route
                 path='pos-integration'
                 element={

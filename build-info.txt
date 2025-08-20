@@ -1,0 +1,8 @@
+ZatoBox Build Information
+=========================
+Fecha: Wed Aug 13 17:37:48 -04 2025
+Versión Node.js: v20.19.4
+Versión npm: 10.8.2
+Tamaño frontend: 3.5M
+Archivos generados: 6
+Directorio dist: frontend/dist/

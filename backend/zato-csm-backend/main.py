@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, products, inventory, sales
+from routes import auth, products, inventory, sales, payments
 from config.init_database import init_database  # comming create database
 
 # Import middleware registry
@@ -59,6 +59,7 @@ app.include_router(auth.router)
 app.include_router(products.router)
 app.include_router(inventory.router)
 app.include_router(sales.router)
+app.include_router(payments.router)
 
 
 @app.get("/")

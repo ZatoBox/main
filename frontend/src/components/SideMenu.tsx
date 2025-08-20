@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Package, Home, Plus, Archive, Brain, Settings, LogOut, User, Menu, X, Scan, Store } from 'lucide-react';
+import { Package, Home, Plus, Archive, Brain, Settings, LogOut, User, Menu, X, Scan, Store, CreditCard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePlugins } from '../contexts/PluginContext';
 
@@ -108,6 +108,13 @@ const SideMenu: React.FC = () => {
       path: '/ocr-result',
       description: 'Process documents',
       pluginId: 'ocr-module',
+    },
+    {
+      name: 'VexorPay POS',
+      icon: CreditCard,
+      path: '/pos',
+      description: 'Point of sale with payments',
+      alwaysVisible: true,
     },
     {
       name: 'POS Integration',
