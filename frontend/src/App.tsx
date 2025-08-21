@@ -5,7 +5,7 @@ import {
   Navigate,
   Outlet,
 } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { PluginProvider } from './contexts/PluginContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import SideMenu from './components/SideMenu';
@@ -35,6 +35,18 @@ function AppLayout() {
   );
 }
 
+function RootElement() {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) {
+    return (
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    );
+  }
+  return <LandingPage />;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -49,11 +61,7 @@ function App() {
 
             <Route
               path='/'
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
+              element={<RootElement />}
             >
               <Route index element={<HomePage />} />
               <Route path='inventory' element={<InventoryPage />} />
@@ -68,7 +76,7 @@ function App() {
                   <div className='p-8'>
                     <h1 className='text-2xl font-bold'>POS Integration</h1>
                     <p className='mt-4'>
-                      POS system integration module is active and ready to use.
+                      POS system integration module is currently under development. This feature will allow you to connect ZatoBox with your existing POS system for seamless inventory management and sales tracking.
                     </p>
                   </div>
                 }

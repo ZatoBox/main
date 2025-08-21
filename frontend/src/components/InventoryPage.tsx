@@ -27,7 +27,7 @@ const InventoryPage: React.FC = () => {
 
   // Fetch products from backend
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchInventory = async () => {
       if (!isAuthenticated) {
         setError('You must log in to view inventory');
         setLoading(false);
@@ -37,20 +37,22 @@ const InventoryPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await productsAPI.getAll();
-        if (response.success) {
-          setInventoryItems(response.products);
-        } else {
-          setError('Error loading products');
+        if (!response || !response.products) {
+          setError('Error loading inventory');
+          return;
         }
+
+        setInventoryItems(response.products);
+        setError(null);
       } catch (err) {
-        console.error('Error fetching products:', err);
-        setError('Error loading products');
+        console.error('Error fetching inventory:', err);
+        setError('Error loading inventory');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchInventory();
   }, [isAuthenticated]);
 
   const categories = [

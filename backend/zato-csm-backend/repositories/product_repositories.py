@@ -113,3 +113,8 @@ class ProductRepository(BaseRepository):
             if not product:
                 raise HTTPException(status_code=404, detail="Product not found")
             return product
+
+    def find_by_creator(self, creator_id: int):
+        with self._get_cursor() as cursor:
+            cursor.execute("SELECT * FROM products WHERE creator_id=%s", (creator_id,))
+            return cursor.fetchall()
