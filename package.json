@@ -1,0 +1,10 @@
+{
+	"dependencies": {
+		"@supabase/ssr": "^0.7.0",
+		"@supabase/supabase-js": "^2.56.0",
+		"js-cookie": "^3.0.5"
+	},
+	"devDependencies": {
+		"@types/js-cookie": "^3.0.6"
+	}
+}
