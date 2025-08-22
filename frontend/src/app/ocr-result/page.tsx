@@ -1,10 +1,23 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { productsAPI, ocrAPI, OCRResponse, OCRLineItem } from '../services/api';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import {
+  productsAPI,
+  ocrAPI,
+  OCRResponse,
+  OCRLineItem,
+} from '@/services/api.service';
+import Header from '@/components/ocr-result/Header';
+import FileUploader from '@/components/ocr-result/FileUploader';
+import ProcessingOptions from '@/components/ocr-result/ProcessingOptions';
+import ResultOverview from '@/components/ocr-result/ResultOverview';
+import ItemsTable from '@/components/ocr-result/ItemsTable';
+import ActionsBar from '@/components/ocr-result/ActionsBar';
 
 const OCRResultPage: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { token } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<OCRResponse | null>(null);
@@ -136,7 +149,7 @@ const OCRResultPage: React.FC = () => {
           });
         }
         alert(message);
-        navigate('/inventory');
+        router.push('/inventory');
       } else {
         setError('Failed to add any products to inventory');
       }
@@ -238,134 +251,22 @@ const OCRResultPage: React.FC = () => {
     <div className='flex items-center justify-center min-h-screen p-4'>
       <div className='w-full max-w-4xl'>
         {!result ? (
-          // File selection form
           <div className='p-6 bg-white rounded-lg shadow-lg md:p-8 animate-fadeIn'>
-            <div className='mb-6 text-center md:mb-8'>
-              <div className='mb-4 text-3xl md:text-4xl'>🔍</div>
-              <h2 className='mb-2 text-2xl font-bold md:text-3xl text-text-primary'>
-                Process Document with OCR
-              </h2>
-              <p className='text-sm text-text-secondary md:text-base'>
-                Upload a document to extract information automatically
-              </p>
-            </div>
-
-            <div className='mb-6'>
-              <label className='block mb-3 text-sm font-medium text-text-primary'>
-                📁 Select invoice document
-              </label>
-              <div className='p-6 text-center transition-colors duration-300 border-2 border-dashed rounded-lg border-divider md:p-8 hover:border-complement'>
-                <input
-                  type='file'
-                  accept='.pdf,.png,.jpg,.jpeg,.tiff,.bmp'
-                  onChange={handleFileChange}
-                  className='hidden'
-                  id='file-upload'
-                />
-                <label htmlFor='file-upload' className='cursor-pointer'>
-                  <div className='text-text-secondary'>
-                    <div className='mb-4 text-4xl md:text-5xl animate-bounce'>
-                      🧾
-                    </div>
-                    <p className='text-base font-medium md:text-lg'>
-                      {file
-                        ? `Selected: ${file.name}`
-                        : 'Click to select an invoice'}
-                    </p>
-                    <p className='mt-2 text-xs md:text-sm text-text-secondary'>
-                      PDF, PNG, JPG, JPEG, TIFF, BMP (max 50MB)
-                    </p>
-                    <div className='mt-3 text-xs'>
-                      {systemStatus ? (
-                        <div
-                          className={`inline-flex items-center px-2 py-1 rounded ${
-                            systemStatus.model_status?.yolo_loaded
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
-                        >
-                          {systemStatus.model_status?.yolo_loaded ? '✅' : '⚠️'}
-                          AI Model{' '}
-                          {systemStatus.model_status?.yolo_loaded
-                            ? 'Ready'
-                            : 'Loading...'}
-                          {systemStatus.model_status?.classes_count && (
-                            <span className='ml-2 text-xs'>
-                              ({systemStatus.model_status.classes_count}{' '}
-                              classes)
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <div className='inline-flex items-center px-2 py-1 text-gray-600 bg-gray-100 rounded'>
-                          🔄 Checking OCR Backend...
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </label>
-              </div>
-
-              {/* Processing Options */}
-              <div className='p-4 mt-4 rounded-lg bg-gray-50'>
-                <h4 className='mb-3 text-sm font-medium text-text-primary'>
-                  ⚙️ Processing Options
-                </h4>
-                <div className='grid grid-cols-1 gap-3 text-sm md:grid-cols-3'>
-                  <label className='flex items-center'>
-                    <input
-                      type='checkbox'
-                      checked={processingOptions.enhance_ocr}
-                      onChange={(e) =>
-                        setProcessingOptions((prev) => ({
-                          ...prev,
-                          enhance_ocr: e.target.checked,
-                        }))
-                      }
-                      className='mr-2'
-                    />
-                    <span>Enhance OCR</span>
-                  </label>
-                  <label className='flex items-center'>
-                    <input
-                      type='checkbox'
-                      checked={processingOptions.rotation_correction}
-                      onChange={(e) =>
-                        setProcessingOptions((prev) => ({
-                          ...prev,
-                          rotation_correction: e.target.checked,
-                        }))
-                      }
-                      className='mr-2'
-                    />
-                    <span>Auto-rotation</span>
-                  </label>
-                  <label className='flex items-center'>
-                    <span className='mr-2'>Confidence:</span>
-                    <input
-                      type='range'
-                      min='0.1'
-                      max='0.9'
-                      step='0.1'
-                      value={processingOptions.confidence_threshold}
-                      onChange={(e) =>
-                        setProcessingOptions((prev) => ({
-                          ...prev,
-                          confidence_threshold: parseFloat(e.target.value),
-                        }))
-                      }
-                      className='flex-1'
-                    />
-                    <span className='ml-2 text-xs'>
-                      {(processingOptions.confidence_threshold * 100).toFixed(
-                        0
-                      )}
-                      %
-                    </span>
-                  </label>
-                </div>
-              </div>
-            </div>
+            <Header />
+            <FileUploader
+              fileName={file?.name ?? null}
+              onChange={(f) => {
+                setFile(f);
+                setResult(null);
+                setError('');
+              }}
+            />
+            <ProcessingOptions
+              options={processingOptions}
+              onChange={(opts) =>
+                setProcessingOptions((prev) => ({ ...prev, ...opts }))
+              }
+            />
 
             <div className='text-center'>
               <button
@@ -394,280 +295,50 @@ const OCRResultPage: React.FC = () => {
             )}
           </div>
         ) : (
-          // Processing result
           <div className='p-6 bg-white rounded-lg shadow-lg md:p-8 animate-fadeIn'>
-            <div className='mb-6 text-center md:mb-8'>
-              <div className='mb-4 text-3xl md:text-4xl'>🧾</div>
-              <h2 className='mb-2 text-xl font-bold md:text-2xl text-text-primary'>
-                Invoice Processing Result
-              </h2>
-              <p className='text-sm text-text-secondary md:text-base'>
-                Document processed successfully with AI + OCR
-              </p>
-              <div className='flex flex-wrap justify-center gap-4 mt-4'>
-                <div className='px-4 py-2 border border-green-200 rounded-lg bg-green-50'>
-                  <div className='text-sm text-text-secondary'>
-                    OCR Confidence
-                  </div>
-                  <div className='text-lg font-bold text-green-600'>
-                    {result?.statistics?.ocr_confidence
-                      ? (result.statistics.ocr_confidence * 100).toFixed(1)
-                      : '85.0'}
-                    %
-                  </div>
-                </div>
-                <div className='px-4 py-2 border border-blue-200 rounded-lg bg-blue-50'>
-                  <div className='text-sm text-text-secondary'>
-                    YOLO Detections
-                  </div>
-                  <div className='text-lg font-bold text-blue-600'>
-                    {result?.statistics?.yolo_detections || 0}
-                  </div>
-                </div>
-                <div className='px-4 py-2 border border-purple-200 rounded-lg bg-purple-50'>
-                  <div className='text-sm text-text-secondary'>
-                    Processing Time
-                  </div>
-                  <div className='text-lg font-bold text-purple-600'>
-                    {result?.processing_time || 0}s
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ResultOverview result={result} fileName={file?.name ?? null} />
 
-            {/* Document information */}
-            <div className='grid gap-6 mb-6 md:grid-cols-2 md:gap-8 md:mb-8'>
-              <div className='p-4 rounded-lg bg-bg-surface md:p-6'>
-                <h3 className='mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4'>
-                  📋 Invoice Information
-                </h3>
-                <div className='space-y-2 md:space-y-3'>
-                  <div className='flex justify-between'>
-                    <span className='text-sm font-medium text-text-secondary md:text-base'>
-                      Company:
-                    </span>
-                    <span className='text-sm text-text-primary md:text-base'>
-                      {result?.metadata?.company_name || 'No detectado'}
-                    </span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span className='text-sm font-medium text-text-secondary md:text-base'>
-                      RUC:
-                    </span>
-                    <span className='text-sm text-text-primary md:text-base'>
-                      {result?.metadata?.ruc || 'No detectado'}
-                    </span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span className='text-sm font-medium text-text-secondary md:text-base'>
-                      Date:
-                    </span>
-                    <span className='text-sm text-text-primary md:text-base'>
-                      {result?.metadata?.date || 'No detectado'}
-                    </span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span className='text-sm font-medium text-text-secondary md:text-base'>
-                      Invoice #:
-                    </span>
-                    <span className='text-sm text-text-primary md:text-base'>
-                      {result?.metadata?.invoice_number || 'No detectado'}
-                    </span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span className='text-sm font-medium text-text-secondary md:text-base'>
-                      Payment Method:
-                    </span>
-                    <span className='text-sm text-text-primary md:text-base'>
-                      {result?.metadata?.payment_method || 'No detectado'}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <ItemsTable
+              items={
+                (isEditing
+                  ? editedResult?.line_items ?? []
+                  : result?.line_items ?? []) as OCRLineItem[]
+              }
+              isEditing={isEditing}
+              onChange={handleItemChange}
+            />
 
-              <div className='p-4 rounded-lg bg-bg-surface md:p-6'>
-                <h3 className='mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4'>
-                  💰 Financial Summary
-                </h3>
-                <div className='space-y-2 md:space-y-3'>
-                  <div className='flex justify-between'>
-                    <span className='text-sm font-medium text-text-secondary md:text-base'>
-                      Subtotal:
-                    </span>
-                    <span className='text-sm text-text-primary md:text-base'>
-                      {result?.metadata?.subtotal || 'No detectado'}
-                    </span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span className='text-sm font-medium text-text-secondary md:text-base'>
-                      IVA:
-                    </span>
-                    <span className='text-sm text-text-primary md:text-base'>
-                      {result?.metadata?.iva || 'No detectado'}
-                    </span>
-                  </div>
-                  <div className='flex justify-between pt-2 border-t border-divider'>
-                    <span className='text-sm font-bold text-text-primary md:text-base'>
-                      Total:
-                    </span>
-                    <span className='text-lg font-bold text-green-600 md:text-xl'>
-                      {result?.metadata?.total || 'No detectado'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Items table */}
-            <div className='mb-6 md:mb-8'>
-              <h3 className='mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4'>
-                📦 Detected Items
-              </h3>
-              <div className='overflow-hidden rounded-lg bg-bg-surface'>
-                <div className='overflow-x-auto'>
-                  <table className='min-w-full'>
-                    <thead>
-                      <tr className='bg-divider'>
-                        <th className='px-3 py-3 text-xs font-medium text-left md:px-6 md:py-4 md:text-sm text-text-primary'>
-                          Description
-                        </th>
-                        <th className='px-3 py-3 text-xs font-medium text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
-                          Quantity
-                        </th>
-                        <th className='px-3 py-3 text-xs font-medium text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
-                          Unit Price
-                        </th>
-                        <th className='px-3 py-3 text-xs font-medium text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
-                          Total
-                        </th>
-                        <th className='px-3 py-3 text-xs font-medium text-center md:px-6 md:py-4 md:text-sm text-text-primary'>
-                          Confidence
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(isEditing
-                        ? editedResult?.line_items || []
-                        : result?.line_items || []
-                      ).map((item: OCRLineItem, index: number) => (
-                        <tr
-                          key={index}
-                          className='transition-colors border-b border-divider hover:bg-gray-50'
-                        >
-                          <td className='px-3 py-3 text-xs md:px-6 md:py-4 md:text-sm text-text-primary'>
-                            {isEditing ? (
-                              <input
-                                type='text'
-                                value={item.description}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    index,
-                                    'description',
-                                    e.target.value
-                                  )
-                                }
-                                className='w-full px-2 py-1 text-xs border rounded-lg md:px-3 md:py-2 border-divider focus:ring-2 focus:ring-complement focus:border-transparent md:text-sm'
-                              />
-                            ) : (
-                              <div className='max-w-xs'>
-                                <div className='font-medium text-text-primary'>
-                                  {item.description}
-                                </div>
-                              </div>
-                            )}
-                          </td>
-                          <td className='px-3 py-3 text-xs text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
-                            {isEditing ? (
-                              <input
-                                type='number'
-                                value={item.quantity}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    index,
-                                    'quantity',
-                                    parseInt(e.target.value) || 0
-                                  )
-                                }
-                                className='w-16 px-2 py-1 text-xs text-right border rounded-lg md:w-20 md:px-3 md:py-2 border-divider focus:ring-2 focus:ring-complement focus:border-transparent md:text-sm'
-                              />
-                            ) : (
-                              item.quantity
-                            )}
-                          </td>
-                          <td className='px-3 py-3 text-xs text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
-                            {isEditing ? (
-                              <input
-                                type='text'
-                                value={item.unit_price}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    index,
-                                    'unit_price',
-                                    e.target.value
-                                  )
-                                }
-                                className='w-20 px-2 py-1 text-xs text-right border rounded-lg md:w-24 md:px-3 md:py-2 border-divider focus:ring-2 focus:ring-complement focus:border-transparent md:text-sm'
-                              />
-                            ) : (
-                              item.unit_price
-                            )}
-                          </td>
-                          <td className='px-3 py-3 text-xs font-medium text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
-                            {item.total_price}
-                          </td>
-                          <td className='px-3 py-3 text-xs text-center md:px-6 md:py-4 md:text-sm'>
-                            <span className='px-2 py-1 text-xs text-blue-700 bg-blue-100 rounded'>
-                              {item?.confidence
-                                ? (item.confidence * 100).toFixed(0)
-                                : '85'}
-                              %
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Totales Summary */}
-              {result?.summary && (
-                <div className='p-4 mt-4 border border-green-200 rounded-lg bg-green-50'>
-                  <div className='grid grid-cols-2 gap-4 text-center md:grid-cols-4'>
-                    <div>
-                      <div className='text-xs text-gray-600'>
-                        Total Products
-                      </div>
-                      <div className='text-lg font-bold text-green-700'>
-                        {String(result.summary.total_productos ?? '')}
-                      </div>
+            {result?.summary && (
+              <div className='p-4 mt-4 border border-green-200 rounded-lg bg-green-50'>
+                <div className='grid grid-cols-2 gap-4 text-center md:grid-cols-4'>
+                  <div>
+                    <div className='text-xs text-gray-600'>Total Products</div>
+                    <div className='text-lg font-bold text-green-700'>
+                      {String(result.summary.total_productos ?? '')}
                     </div>
-                    <div>
-                      <div className='text-xs text-gray-600'>
-                        Total Quantity
-                      </div>
-                      <div className='text-lg font-bold text-blue-700'>
-                        {String(result.summary.total_cantidad ?? '')}
-                      </div>
+                  </div>
+                  <div>
+                    <div className='text-xs text-gray-600'>Total Quantity</div>
+                    <div className='text-lg font-bold text-blue-700'>
+                      {String(result.summary.total_cantidad ?? '')}
                     </div>
-                    <div>
-                      <div className='text-xs text-gray-600'>Average Price</div>
-                      <div className='text-lg font-bold text-purple-700'>
-                        {String(result.summary.promedio_precio ?? '')}
-                      </div>
+                  </div>
+                  <div>
+                    <div className='text-xs text-gray-600'>Average Price</div>
+                    <div className='text-lg font-bold text-purple-700'>
+                      {String(result.summary.promedio_precio ?? '')}
                     </div>
-                    <div>
-                      <div className='text-xs text-gray-600'>GRAND TOTAL</div>
-                      <div className='text-xl font-bold text-green-800'>
-                        {String(result.summary.gran_total ?? '')}
-                      </div>
+                  </div>
+                  <div>
+                    <div className='text-xs text-gray-600'>GRAND TOTAL</div>
+                    <div className='text-xl font-bold text-green-800'>
+                      {String(result.summary.gran_total ?? '')}
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Processing Details */}
             <div className='p-3 mb-6 border border-blue-200 rounded-lg bg-blue-50 md:p-4 md:mb-8'>
               <div className='flex flex-wrap items-center justify-between gap-2'>
                 <div className='flex items-center'>
@@ -688,7 +359,6 @@ const OCRResultPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Processed Image */}
             {result.processed_image && (
               <div className='mb-6 md:mb-8'>
                 <h3 className='mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4'>
@@ -709,7 +379,6 @@ const OCRResultPage: React.FC = () => {
               </div>
             )}
 
-            {/* Category selection */}
             <div className='mb-6 md:mb-8'>
               <h3 className='mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4'>
                 📂 Product Category
@@ -735,7 +404,6 @@ const OCRResultPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Error message */}
             {error && (
               <div className='p-4 mb-6 border rounded-lg md:mb-8 bg-error-50 border-error-200 text-error-700 animate-shake'>
                 <div className='flex items-center'>
@@ -745,54 +413,15 @@ const OCRResultPage: React.FC = () => {
               </div>
             )}
 
-            {/* Action buttons */}
-            <div className='flex flex-col justify-center gap-3 sm:flex-row md:gap-4'>
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={handleSaveEdit}
-                    className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-green-600 rounded-lg md:px-6 md:py-3 hover:bg-green-700 hover:scale-105 md:text-base'
-                  >
-                    💾 Save Changes
-                  </button>
-                  <button
-                    onClick={handleCancelEdit}
-                    className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-gray-600 rounded-lg md:px-6 md:py-3 hover:bg-gray-700 hover:scale-105 md:text-base'
-                  >
-                    ❌ Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={handleConfirmData}
-                    disabled={isAddingToInventory}
-                    className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-green-600 rounded-lg md:px-6 md:py-3 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 md:text-base'
-                  >
-                    {isAddingToInventory ? (
-                      <>
-                        <div className='inline-block w-4 h-4 mr-2 border-b-2 border-white rounded-full animate-spin'></div>
-                        Adding to Inventory...
-                      </>
-                    ) : (
-                      '✅ Confirm Data'
-                    )}
-                  </button>
-                  <button
-                    onClick={handleEditResult}
-                    className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-blue-600 rounded-lg md:px-6 md:py-3 hover:bg-blue-700 hover:scale-105 md:text-base'
-                  >
-                    📝 Edit Result
-                  </button>
-                  <button
-                    onClick={handleProcessAnother}
-                    className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-gray-600 rounded-lg md:px-6 md:py-3 hover:bg-gray-700 hover:scale-105 md:text-base'
-                  >
-                    🔄 Process Another
-                  </button>
-                </>
-              )}
-            </div>
+            <ActionsBar
+              isEditing={isEditing}
+              isAdding={isAddingToInventory}
+              onConfirm={handleConfirmData}
+              onEdit={handleEditResult}
+              onSaveEdit={handleSaveEdit}
+              onCancelEdit={handleCancelEdit}
+              onProcessAnother={handleProcessAnother}
+            />
           </div>
         )}
       </div>
