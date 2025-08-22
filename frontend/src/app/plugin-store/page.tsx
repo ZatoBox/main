@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { usePlugins } from '../contexts/PluginContext';
+import { useAuth } from '@/context/AuthContext';
+import { usePlugins } from '@/context/PluginContext';
+import PluginGrid from '@/components/plugin-store/PluginGrid';
+import FeaturedSection from '@/components/plugin-store/FeaturedSection';
+import PluginNotification from '@/components/plugin-store/PluginNotification';
 
 interface IPlugin {
   id: string;
@@ -368,7 +371,7 @@ const PluginStorePage: React.FC = () => {
       case 'maintenance':
         return (
           <span className='px-2 py-1 text-xs text-yellow-800 bg-yellow-100 rounded-full'>
-            En mantenimiento
+            Maintenance
           </span>
         );
       default:
@@ -495,169 +498,21 @@ const PluginStorePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Featured Section */}
         {selectedCategory === 'all' && (
-          <div className='mb-8'>
-            <h2 className='mb-4 text-xl font-bold text-text-primary'>
-              🔥 MOST INSTALLS By popular demand
-            </h2>
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
-              {filteredPlugins.slice(0, 3).map((plugin) => (
-                <div
-                  key={plugin.id}
-                  className='overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'
-                >
-                  {plugin.screenshot && (
-                    <div className='h-48 overflow-hidden bg-gray-200'>
-                      <img
-                        src={plugin.screenshot}
-                        alt={plugin.name}
-                        className='object-cover w-full h-full'
-                      />
-                    </div>
-                  )}
-                  <div className='p-6'>
-                    <div className='flex items-start justify-between mb-3'>
-                      <div className='flex items-center space-x-3'>
-                        <span className='text-3xl'>{plugin.icon}</span>
-                        <div>
-                          <h3 className='text-lg font-semibold text-text-primary'>
-                            {plugin.name}
-                          </h3>
-                          <p className='text-sm text-text-secondary'>
-                            {plugin.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className='flex items-center justify-between mb-4'>
-                      <div className='flex items-center space-x-2'>
-                        {getStatusBadge(plugin.status)}
-                        {getPriceBadge(plugin.price)}
-                      </div>
-                      <div className='flex items-center space-x-1'>
-                        <span className='text-yellow-400'>⭐</span>
-                        <span className='text-sm text-text-secondary'>
-                          {plugin.rating}
-                        </span>
-                        <span className='text-sm text-text-secondary'>
-                          ({plugin.installs})
-                        </span>
-                      </div>
-                    </div>
-                    {plugin.status === 'active' ? (
-                      <button
-                        onClick={() => handlePluginToggle(plugin.id)}
-                        className='w-full px-4 py-2 font-medium text-red-800 transition-colors bg-red-100 rounded-lg hover:bg-red-200'
-                      >
-                        Deactivate
-                      </button>
-                    ) : plugin.status === 'inactive' ? (
-                      <button
-                        onClick={() => handlePluginToggle(plugin.id)}
-                        className='w-full px-4 py-2 font-medium text-green-800 transition-colors bg-green-100 rounded-lg hover:bg-green-200'
-                      >
-                        Activate
-                      </button>
-                    ) : plugin.status === 'coming-soon' ? (
-                      <button
-                        disabled
-                        className='w-full px-4 py-2 font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed'
-                      >
-                        Coming Soon
-                      </button>
-                    ) : (
-                      <button
-                        disabled
-                        className='w-full px-4 py-2 font-medium text-yellow-800 bg-yellow-100 rounded-lg cursor-not-allowed'
-                      >
-                        En mantenimiento
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <FeaturedSection
+            plugins={filteredPlugins}
+            getStatusBadge={getStatusBadge}
+            getPriceBadge={getPriceBadge}
+            onToggle={handlePluginToggle}
+          />
         )}
 
-        {/* All Plugins Grid */}
-        <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-          {filteredPlugins.map((plugin) => (
-            <div
-              key={plugin.id}
-              className='overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'
-            >
-              <div className='p-6'>
-                <div className='flex items-start justify-between mb-3'>
-                  <div className='flex items-center space-x-3'>
-                    <span className='text-2xl'>{plugin.icon}</span>
-                    <div>
-                      <h3 className='text-lg font-semibold text-text-primary'>
-                        {plugin.name}
-                      </h3>
-                      <p className='text-sm text-text-secondary'>
-                        {plugin.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='flex items-center justify-between mb-4'>
-                  <div className='flex items-center space-x-2'>
-                    {getStatusBadge(plugin.status)}
-                    {getPriceBadge(plugin.price)}
-                  </div>
-                  <div className='flex items-center space-x-1'>
-                    <span className='text-yellow-400'>⭐</span>
-                    <span className='text-sm text-text-secondary'>
-                      {plugin.rating}
-                    </span>
-                    <span className='text-sm text-text-secondary'>
-                      ({plugin.installs})
-                    </span>
-                  </div>
-                </div>
-
-                {/* Features */}
-                <div className='mb-4'>
-                  <div className='flex flex-wrap gap-1'>
-                    {plugin.features.slice(0, 2).map((feature, index) => (
-                      <span
-                        key={index}
-                        className='px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded'
-                      >
-                        {feature}
-                      </span>
-                    ))}
-                    {plugin.features.length > 2 && (
-                      <span className='px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded'>
-                        +{plugin.features.length - 2} more
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Button */}
-                {plugin.status === 'coming-soon' ? (
-                  <button
-                    disabled
-                    className='w-full px-4 py-2 font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed'
-                  >
-                    Coming Soon
-                  </button>
-                ) : (
-                  <button
-                    disabled
-                    className='w-full px-4 py-2 font-medium text-yellow-800 bg-yellow-100 rounded-lg cursor-not-allowed'
-                  >
-                    En mantenimiento
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+        <PluginGrid
+          plugins={filteredPlugins}
+          onToggle={handlePluginToggle}
+          getStatusBadge={getStatusBadge}
+          getPriceBadge={getPriceBadge}
+        />
 
         {/* Empty State */}
         {filteredPlugins.length === 0 && (
@@ -674,18 +529,10 @@ const PluginStorePage: React.FC = () => {
 
         {/* Plugin Change Notification */}
         {showNotification && (
-          <div
-            className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out ${
-              notificationType === 'success'
-                ? 'bg-green-500 text-white'
-                : 'bg-blue-500 text-white'
-            } animate-menu-item-bounce`}
-          >
-            <div className='flex items-center space-x-2'>
-              <div className='w-2 h-2 bg-white rounded-full animate-pulse'></div>
-              <span className='font-medium'>{notificationMessage}</span>
-            </div>
-          </div>
+          <PluginNotification
+            message={notificationMessage}
+            type={notificationType}
+          />
         )}
         {/* Example usage buttons for navigate and showPluginNotification */}
         <div className='fixed z-50 flex flex-col gap-2 bottom-4 right-4'>
