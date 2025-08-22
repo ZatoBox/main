@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, RefreshCw } from 'lucide-react';
-import ProductCard from './ProductCard';
-import SalesDrawer from './SalesDrawer';
-import PaymentScreen from './PaymentScreen';
-import PaymentSuccessScreen from './PaymentSuccessScreen';
-import { inventoryAPI, salesAPI } from '../services/api';
-import type { Product } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
+import HomeHeader from '../../components/home/HomeHeader';
+import ProductGrid from '../../components/home/ProductGrid';
+import HomeStats from '../../components/home/HomeStats';
+import SalesDrawer from '@/components/SalesDrawer';
+import PaymentScreen from '@/components/PaymentScreen';
+import PaymentSuccessScreen from '@/components/PaymentSuccessScreen';
+import { inventoryAPI, salesAPI } from '@/services/api.service';
+import type { Product } from '@/services/api.service';
+import { useAuth } from '@/context/AuthContext';
 
 interface HomePageProps {
   tab?: string;
@@ -320,97 +321,24 @@ const HomePage: React.FC<HomePageProps> = ({
       >
         <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
           <div className='mb-6'>
-            {/* Title and Search Row */}
-            <div className='flex flex-col gap-4 mb-2 sm:flex-row sm:items-center sm:justify-between'>
-              <h1 className='text-2xl font-bold text-text-primary animate-slide-in-left'>
-                Sales Dashboard
-              </h1>
-
-              {/* Search and Refresh Row */}
-              <div className='flex items-center gap-3'>
-                {/* Search Bar */}
-                <div className='relative w-full sm:w-80 animate-slide-in-left'>
-                  <Search
-                    size={20}
-                    className='absolute transform -translate-y-1/2 left-3 top-1/2 text-text-secondary icon-bounce'
-                  />
-                  <input
-                    type='text'
-                    value={localSearchTerm}
-                    onChange={(e) => handleLocalSearchChange(e.target.value)}
-                    placeholder='Search products...'
-                    className='w-full py-2 pl-10 pr-4 text-sm transition-all duration-300 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:border-complement/50'
-                  />
-                </div>
-
-                {/* Refresh Button */}
-                <button
-                  onClick={reloadProducts}
-                  disabled={loading}
-                  className='p-2 text-black transition-all duration-300 rounded-lg bg-primary hover:bg-primary-600 hover:scale-110 hover:shadow-lg icon-bounce disabled:opacity-50 disabled:cursor-not-allowed'
-                  title='Update products'
-                >
-                  <RefreshCw
-                    size={20}
-                    className={`${loading ? 'animate-spin' : ''}`}
-                  />
-                </button>
-              </div>
-            </div>
-
-            {/* Description */}
-            <p className='text-text-secondary animate-slide-in-right'>
-              {activeSearchTerm ? (
-                <>
-                  Showing {filteredProducts.length} result
-                  {filteredProducts.length !== 1 ? 's' : ''} for "
-                  {activeSearchTerm}"
-                </>
-              ) : (
-                'Select products to create sales orders quickly'
-              )}
-            </p>
+            <HomeHeader
+              searchValue={localSearchTerm}
+              onSearchChange={handleLocalSearchChange}
+              onReload={reloadProducts}
+              loading={loading}
+            />
+            <HomeStats
+              count={filteredProducts.length}
+              searchTerm={activeSearchTerm}
+            />
           </div>
 
           {/* Responsive Grid with white background */}
           <div className='p-6 bg-white border rounded-lg border-divider animate-scale-in'>
-            {filteredProducts.length > 0 ? (
-              <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 animate-stagger'>
-                {filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onClick={handleProductClick}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className='py-12 text-center animate-fade-in'>
-                <div className='mb-4 text-text-secondary animate-bounce-in'>
-                  <svg
-                    className='w-12 h-12 mx-auto'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
-                    />
-                  </svg>
-                </div>
-                <h3 className='mb-2 text-lg font-medium text-text-primary animate-slide-in-left'>
-                  No products found
-                </h3>
-                <p className='text-text-secondary animate-slide-in-right'>
-                  {activeSearchTerm
-                    ? `No products match "${activeSearchTerm}". Try different search terms.`
-                    : 'No products available for sale.'}
-                </p>
-              </div>
-            )}
+            <ProductGrid
+              products={filteredProducts}
+              onProductClick={handleProductClick}
+            />
           </div>
         </div>
       </div>
