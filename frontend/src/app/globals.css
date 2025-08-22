@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
 @layer utilities {
   .text-balance {
@@ -248,16 +246,19 @@
 }
 
 @keyframes text-glow {
-  0%, 100% {
+  0%,
+  100% {
     text-shadow: 0 0 5px rgba(249, 115, 22, 0.5);
   }
   50% {
-    text-shadow: 0 0 20px rgba(249, 115, 22, 0.8), 0 0 30px rgba(249, 115, 22, 0.6);
+    text-shadow: 0 0 20px rgba(249, 115, 22, 0.8),
+      0 0 30px rgba(249, 115, 22, 0.6);
   }
 }
 
 @keyframes soft-blink {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     visibility: visible;
   }
@@ -268,7 +269,8 @@
 }
 
 @keyframes highlight {
-  0%, 100% {
+  0%,
+  100% {
     background-color: rgb(249, 115, 22);
     color: black;
   }
@@ -279,7 +281,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -288,25 +291,34 @@
 }
 
 @keyframes gradient-shift {
-  0%, 100% {
+  0%,
+  100% {
     background: linear-gradient(to bottom right, black, rgb(55, 65, 81), black);
   }
   50% {
-    background: linear-gradient(to bottom right, rgb(55, 65, 81), black, rgb(55, 65, 81));
+    background: linear-gradient(
+      to bottom right,
+      rgb(55, 65, 81),
+      black,
+      rgb(55, 65, 81)
+    );
   }
 }
 
 @keyframes bitcoin-glow {
-  0%, 100% {
+  0%,
+  100% {
     text-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
   }
   50% {
-    text-shadow: 0 0 30px rgba(249, 115, 22, 1), 0 0 40px rgba(249, 115, 22, 0.8);
+    text-shadow: 0 0 30px rgba(249, 115, 22, 1),
+      0 0 40px rgba(249, 115, 22, 0.8);
   }
 }
 
 @keyframes pulse-slow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -315,7 +327,8 @@
 }
 
 @keyframes pulse-subtle {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }

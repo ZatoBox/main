@@ -94,12 +94,12 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
   if (!isOpen) {return null;}
 
   return (
-    <div className="fixed inset-0 bg-bg-main z-50 flex flex-col animate-scale-in">
+    <div className="fixed inset-0 z-50 flex flex-col bg-bg-main animate-scale-in">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-divider bg-bg-surface">
         <button
           onClick={onBack}
-          className="p-2 hover:bg-gray-50 rounded-full transition-all duration-300 hover:scale-110 icon-bounce"
+          className="p-2 transition-all duration-300 rounded-full hover:bg-gray-50 hover:scale-110 icon-bounce"
         >
           <ArrowLeft size={20} className="text-text-primary" />
         </button>
@@ -108,9 +108,9 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 pb-24">
+      <div className="flex-1 p-4 pb-24 overflow-y-auto">
         {/* Total Amount */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-divider animate-bounce-in">
+        <div className="p-4 mb-6 border rounded-lg bg-gray-50 border-divider animate-bounce-in">
           <div className="text-center">
             <span className="text-sm text-text-secondary">Total to pay</span>
             <div className="text-2xl font-bold text-text-primary">{formatCurrency(total)}</div>
@@ -118,7 +118,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
         </div>
 
         {/* Payment Methods */}
-        <div className="space-y-4 mb-6 animate-stagger">
+        <div className="mb-6 space-y-4 animate-stagger">
           {/* Credit/Debit Card */}
           <div
             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
@@ -206,56 +206,56 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
 
         {/* Payment Method Forms */}
         {selectedMethod && (
-          <div className="bg-bg-surface border border-divider rounded-lg p-6 mb-6 animate-fade-in">
+          <div className="p-6 mb-6 border rounded-lg bg-bg-surface border-divider animate-fade-in">
             {selectedMethod === 'card' && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-text-primary mb-4">Card Information</h3>
+                <h3 className="mb-4 text-lg font-semibold text-text-primary">Card Information</h3>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">Card Number</label>
+                  <label className="block mb-2 text-sm font-medium text-text-primary">Card Number</label>
                   <input
                     type="text"
                     value={formData.cardNumber}
                     onChange={(e) => handleInputChange('cardNumber', e.target.value)}
                     placeholder="1234 5678 9012 3456"
-                    className="w-full px-4 py-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent"
+                    className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
                     maxLength={19}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">Expiry Date</label>
+                    <label className="block mb-2 text-sm font-medium text-text-primary">Expiry Date</label>
                     <input
                       type="text"
                       value={formData.expiryDate}
                       onChange={(e) => handleInputChange('expiryDate', e.target.value)}
                       placeholder="MM/YY"
-                      className="w-full px-4 py-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent"
+                      className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
                       maxLength={5}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">CVC</label>
+                    <label className="block mb-2 text-sm font-medium text-text-primary">CVC</label>
                     <input
                       type="text"
                       value={formData.cvc}
                       onChange={(e) => handleInputChange('cvc', e.target.value)}
                       placeholder="123"
-                      className="w-full px-4 py-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent"
+                      className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
                       maxLength={4}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">Cardholder Name</label>
+                  <label className="block mb-2 text-sm font-medium text-text-primary">Cardholder Name</label>
                   <input
                     type="text"
                     value={formData.cardName}
                     onChange={(e) => handleInputChange('cardName', e.target.value)}
                     placeholder="John Doe"
-                    className="w-full px-4 py-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent"
+                    className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
                   />
                 </div>
               </div>
@@ -263,14 +263,14 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
 
             {selectedMethod === 'crypto' && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-text-primary mb-4">Crypto Payment</h3>
+                <h3 className="mb-4 text-lg font-semibold text-text-primary">Crypto Payment</h3>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">Cryptocurrency</label>
+                  <label className="block mb-2 text-sm font-medium text-text-primary">Cryptocurrency</label>
                   <select
                     value={formData.cryptoCurrency}
                     onChange={(e) => handleInputChange('cryptoCurrency', e.target.value)}
-                    className="w-full px-4 py-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent"
+                    className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
                   >
                     <option value="bitcoin">Bitcoin (BTC)</option>
                     <option value="ethereum">Ethereum (ETH)</option>
@@ -280,13 +280,13 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">Wallet Address</label>
+                  <label className="block mb-2 text-sm font-medium text-text-primary">Wallet Address</label>
                   <input
                     type="text"
                     value={formData.walletAddress}
                     onChange={(e) => handleInputChange('walletAddress', e.target.value)}
                     placeholder="Enter your wallet address"
-                    className="w-full px-4 py-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent"
+                    className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
                   />
                 </div>
               </div>
@@ -294,10 +294,10 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
 
             {selectedMethod === 'cash' && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-text-primary mb-4">Cash Payment</h3>
+                <h3 className="mb-4 text-lg font-semibold text-text-primary">Cash Payment</h3>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">Amount Received</label>
+                  <label className="block mb-2 text-sm font-medium text-text-primary">Amount Received</label>
                   <input
                     type="number"
                     value={cashReceived}
@@ -310,20 +310,20 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
                     step="0.01"
                   />
                   {!isSufficientAmount && cashReceived > 0 && (
-                    <p className="text-red-500 text-sm mt-1">Insufficient amount. Please enter at least {formatCurrency(total)}</p>
+                    <p className="mt-1 text-sm text-red-500">Insufficient amount. Please enter at least {formatCurrency(total)}</p>
                   )}
                 </div>
 
                 {/* Quick Amount Buttons */}
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">Quick Amount</label>
+                  <label className="block mb-2 text-sm font-medium text-text-primary">Quick Amount</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[10, 20, 50, 100, 200, 500].map((amount) => (
                       <button
                         key={amount}
                         type="button"
                         onClick={() => handleCashReceivedChange(amount.toString())}
-                        className="px-3 py-2 border border-divider rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                        className="px-3 py-2 text-sm transition-colors border rounded-lg border-divider hover:bg-gray-50"
                       >
                         ${amount}
                       </button>
@@ -333,7 +333,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
 
                 {/* Change Calculator */}
                 {cashReceived > 0 && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="p-4 rounded-lg bg-gray-50">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-text-secondary">Change to return:</span>
                       <span className={`text-lg font-bold ${changeAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -341,7 +341,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
                       </span>
                     </div>
                     {changeAmount < 0 && (
-                      <p className="text-red-500 text-sm">Additional amount needed: {formatCurrency(Math.abs(changeAmount))}</p>
+                      <p className="text-sm text-red-500">Additional amount needed: {formatCurrency(Math.abs(changeAmount))}</p>
                     )}
                   </div>
                 )}
@@ -349,9 +349,9 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
             )}
 
             {selectedMethod === 'wallet' && (
-              <div className="text-center py-8">
-                <div className="text-4xl mb-4">📱</div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">Mobile Payment</h3>
+              <div className="py-8 text-center">
+                <div className="mb-4 text-4xl">📱</div>
+                <h3 className="mb-2 text-lg font-semibold text-text-primary">Mobile Payment</h3>
                 <p className="text-text-secondary">Use your mobile wallet to complete the payment</p>
               </div>
             )}

@@ -5,8 +5,8 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { authAPI } from '../services/api';
-import type { User as APIUser } from '../services/api';
+import { authAPI } from '../../../../frontend/src/services/api';
+import type { User as APIUser } from '../../../../frontend/src/services/api';
 
 interface AuthContextType {
   user: APIUser | null;

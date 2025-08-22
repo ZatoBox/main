@@ -260,18 +260,23 @@ export const inventoryAPI = {
     const queryString = new URLSearchParams(
       merged as Record<string, string>
     ).toString();
-    const response = await apiRequest<InventoryResponse>(`/inventory?${queryString}`);
+    const response = await apiRequest<InventoryResponse>(
+      `/inventory?${queryString}`
+    );
     if (!response || !Array.isArray(response.inventory)) return response;
     const inventoryList = response.inventory;
     const needFetch = inventoryList.some((it) => !it.product && it.product_id);
     if (needFetch) {
-      const uniqueIds = Array.from(new Set(inventoryList.map((it) => it.product_id).filter(Boolean)));
+      const uniqueIds = Array.from(
+        new Set(inventoryList.map((it) => it.product_id).filter(Boolean))
+      );
       const productsMap: Record<number, Product> = {};
       await Promise.all(
         uniqueIds.map(async (pid) => {
           try {
             const prodRes = await productsAPI.getById(pid);
-            if (prodRes && (prodRes as any).product) productsMap[pid] = (prodRes as any).product as Product;
+            if (prodRes && (prodRes as any).product)
+              productsMap[pid] = (prodRes as any).product as Product;
           } catch {}
         })
       );
@@ -279,7 +284,9 @@ export const inventoryAPI = {
         if (!it.product) it.product = productsMap[it.product_id] ?? null;
       });
     }
-    const filtered = inventoryList.filter((it) => it.product && (it.product as Product).status === 'active');
+    const filtered = inventoryList.filter(
+      (it) => it.product && (it.product as Product).status === 'active'
+    );
     return { ...response, inventory: filtered };
   },
 

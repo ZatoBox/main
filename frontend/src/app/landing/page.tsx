@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import GlitchLogo from './landing/GlitchLogo';
-import BetaModal from './landing/BetaModal';
-import BetaCounter from './landing/BetaCounter';
+import GlitchLogo from '../../../nextjs/front/src/components/landing/GlitchLogo';
+import BetaModal from '../../../nextjs/front/src/components/landing/BetaModal';
+import BetaCounter from '../../../nextjs/front/src/components/landing/BetaCounter';
 
 export default function ZatoBoxBitcoiners() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -449,9 +449,9 @@ export default function ZatoBoxBitcoiners() {
               </p>
               <div className='flex flex-col justify-center gap-2 sm:flex-row sm:gap-4'>
                 <a href='/login'>
-                    <Button className='px-4 py-3 text-sm font-bold tracking-wider text-black transition-all duration-200 bg-orange-500 border-4 border-orange-500 rounded-none hover:bg-orange-400 sm:text-base sm:px-6 sm:py-4 hover:scale-105'>
-                        REQUEST DEMO
-                    </Button>
+                  <Button className='px-4 py-3 text-sm font-bold tracking-wider text-black transition-all duration-200 bg-orange-500 border-4 border-orange-500 rounded-none hover:bg-orange-400 sm:text-base sm:px-6 sm:py-4 hover:scale-105'>
+                    REQUEST DEMO
+                  </Button>
                 </a>
                 <Button className='px-4 py-3 text-sm font-bold tracking-wider text-orange-500 transition-all duration-200 bg-black border-4 border-black rounded-none hover:bg-gray-800 sm:text-base sm:px-6 sm:py-4 hover:scale-105'>
                   CONTACT SUPPORT
