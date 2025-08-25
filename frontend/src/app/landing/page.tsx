@@ -1,9 +1,11 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import GlitchLogo from '../../../nextjs/front/src/components/landing/GlitchLogo';
-import BetaModal from '../../../nextjs/front/src/components/landing/BetaModal';
-import BetaCounter from '../../../nextjs/front/src/components/landing/BetaCounter';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import GlitchLogo from '@/components/landing/GlitchLogo';
+import BetaModal from '@/components/landing/BetaModal';
+import BetaCounter from '@/components/landing/BetaCounter';
 
 export default function ZatoBoxBitcoiners() {
   const [isModalOpen, setIsModalOpen] = useState(false);

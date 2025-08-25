@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package } from 'lucide-react';
 import { productsAPI } from '@/services/api.service';
 import type { Product } from '@/services/api.service';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-store';
 import InventoryHeader from '@/components/inventory/InventoryHeader';
 import InventoryFilters from '@/components/inventory/InventoryFilters';
 import InventoryGrid from '@/components/inventory/InventoryGrid';

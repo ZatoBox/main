@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { productsAPI, Product } from '@/services/api.service';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-store';
 import EditHeader from '@/components/edit-product/EditHeader';
 import ProductForm from '@/components/edit-product/ProductForm';
 import ImagesUploader from '@/components/edit-product/ImagesUploader';

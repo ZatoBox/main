@@ -1,10 +1,12 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { authAPI } from '@/services/api.service';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthStore } from '@/context/auth-store';
 import SocialButtons from '../../auth/login/SocialButtons';
 
 const validationSchema = Yup.object().shape({
@@ -24,8 +26,8 @@ const validationSchema = Yup.object().shape({
 });
 
 const RegisterForm: React.FC = () => {
-  const navigate = useNavigate();
-  const { register } = useAuth();
+  const router = useRouter();
+  const { register, setUser } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,15 +47,11 @@ const RegisterForm: React.FC = () => {
         setIsLoading(true);
         try {
           const payload = await authAPI.socialRegister(accessToken);
-          const localToken =
-            (payload as any).token || (payload as any).access_token;
           const user = (payload as any).user || null;
-          if (!localToken)
-            throw new Error('No local token received from backend');
-          localStorage.setItem('token', localToken);
-          if (user) localStorage.setItem('user', JSON.stringify(user));
-          navigate('/');
-          window.location.reload();
+          const token = (payload as any).token || (payload as any).access_token;
+          if (!token) throw new Error('No local token received from backend');
+          if (user) setUser(user);
+          router.push('/');
         } catch (e: any) {
           setError(e.message || 'Error creating user');
         } finally {
@@ -66,7 +64,7 @@ const RegisterForm: React.FC = () => {
         window.location.pathname + window.location.search
       );
     }
-  }, [navigate]);
+  }, [router]);
 
   const handleSubmit = async (values: any) => {
     setIsLoading(true);
@@ -84,7 +82,7 @@ const RegisterForm: React.FC = () => {
         password: values.password,
         phone: values.phone,
       });
-      navigate('/');
+      router.push('/');
     } catch (e: any) {
       setError(e.message || 'Error registering user');
     } finally {

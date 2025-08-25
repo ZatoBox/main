@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-store';
 import { usePlugins } from '@/context/PluginContext';
 import PluginGrid from '@/components/plugin-store/PluginGrid';
 import FeaturedSection from '@/components/plugin-store/FeaturedSection';

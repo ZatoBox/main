@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useMemo, useEffect } from 'react';
 import HomeHeader from '../../components/home/HomeHeader';
 import ProductGrid from '../../components/home/ProductGrid';
@@ -7,7 +9,7 @@ import PaymentScreen from '@/components/PaymentScreen';
 import PaymentSuccessScreen from '@/components/PaymentSuccessScreen';
 import { inventoryAPI, salesAPI } from '@/services/api.service';
 import type { Product } from '@/services/api.service';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-store';
 
 interface HomePageProps {
   tab?: string;
