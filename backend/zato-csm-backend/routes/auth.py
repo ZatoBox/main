@@ -46,9 +46,6 @@ def login(payload: LoginRequest):
         raise HTTPException(status_code=401, detail=e.message)
 
 
-# En tu archivo routes/auth.py
-
-
 @router.post("/register")
 def register(payload: RegisterRequest):
     try:
@@ -70,20 +67,15 @@ def register(payload: RegisterRequest):
             "token": response.session.access_token,
         }
     except SupabaseAuthError as e:
-        # Intenta obtener el mensaje de error del JSON de respuesta de Supabase
         error_detail = "Error de autenticación desconocido"
         try:
-            # Algunas veces el mensaje está en e.json().msg
             if hasattr(e, "json") and e.json().get("msg"):
                 error_detail = e.json()["msg"]
-            # Otras veces el error está en e.message (como antes)
             elif hasattr(e, "message"):
                 error_detail = e.message
         except:
-            # Si nada funciona, dejamos el mensaje por defecto
             pass
 
-        # Intenta convertir a int, si falla usa 400 por defecto
         try:
             status_code = int(e.code)
         except (ValueError, TypeError):
