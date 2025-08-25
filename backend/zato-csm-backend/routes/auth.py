@@ -101,7 +101,6 @@ def register(payload: RegisterRequest):
                     "data": {
                         "full_name": payload.full_name,
                         "phone": payload.phone,
-                        "address": payload.address,
                     }
                 },
             }
