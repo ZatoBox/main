@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional
 from config.supabase import supabase_client
@@ -6,6 +7,44 @@ from supabase import AuthError as SupabaseAuthError
 from datetime import datetime
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+
+
+def get_current_user_from_token(token: str = Depends(oauth2_scheme)):
+    """Verify the JWT token and return the current user."""
+    try:
+        user_response = supabase_client.auth.get_user(token)
+        return user_response.user
+    except SupabaseAuthError as e:
+        raise HTTPException(
+            status_code=401,
+            detail="Credenciales de autenticación inválidas",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def get_current_admin_user(current_user: dict = Depends(get_current_user_from_token)):
+    """Verify if the authenticated user has the 'admin' role."""
+    try:
+        user_profile = (
+            supabase_client.from_("users")
+            .select("role")
+            .eq("id", current_user.id)
+            .single()
+            .execute()
+            .data
+        )
+        if user_profile and user_profile.get("role") == "admin":
+            return current_user
+
+        raise HTTPException(
+            status_code=403, detail="No tienes permisos de administrador"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=403, detail="No tienes permisos de administrador"
+        )
 
 
 class LoginRequest(BaseModel):
@@ -32,8 +71,12 @@ class UserInfo(BaseModel):
     last_updated: datetime
 
 
+# --- Auth Routes ---
+
+
 @router.post("/login")
 def login(payload: LoginRequest):
+    """Allows an existing user to log in."""
     try:
         response = supabase_client.auth.sign_in_with_password(
             {"email": payload.email, "password": payload.password}
@@ -48,6 +91,7 @@ def login(payload: LoginRequest):
 
 @router.post("/register")
 def register(payload: RegisterRequest):
+    """Creates a new user with email and password."""
     try:
         response = supabase_client.auth.sign_up(
             {
@@ -86,23 +130,54 @@ def register(payload: RegisterRequest):
         raise HTTPException(status_code=500, detail="Registration failed")
 
 
-@router.get("/users")
-def list_users():
+# --- Protected Routes ---
+
+
+@router.get("/me")
+def get_current_user_profile(current_user: dict = Depends(get_current_user_from_token)):
+    """Gets the profile of the currently authenticated user. RLS policies protect it."""
     try:
-        response = supabase_client.from_("users").select("*").execute()
+        response = (
+            supabase_client.from_("users")
+            .select("*")
+            .eq("id", current_user.id)
+            .single()
+            .execute()
+        )
+
+        if not response.data:
+            raise HTTPException(
+                status_code=404, detail="Perfil de usuario no encontrado"
+            )
+
         return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/profile/{user_id}")
-def get_profile(user_id: str):
+@router.get("/users/{user_id}")
+def get_user_by_id(
+    user_id: str, current_user: dict = Depends(get_current_user_from_token)
+):
+    """Gets the profile of a specific user. RLS policies protect it."""
     try:
         response = (
-            supabase_client.from_("users").select("*").eq("auth_id", user_id).execute()
+            supabase_client.from_("users").select("*").eq("id", user_id).execute()
         )
+
         if not response.data:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
         return response.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/users")
+def list_all_users(current_user: dict = Depends(get_current_admin_user)):
+    """Gets a list of all users. Requires admin permissions."""
+    try:
+        response = supabase_client.from_("users").select("*").execute()
+        return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
