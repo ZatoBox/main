@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import auth, products, inventory, sales
-from config.init_database import init_database  # comming create database
 
 # Import middleware registry
 from middleware.middleware import register_middlewares
@@ -32,16 +31,6 @@ def custom_openapi():
 
 
 app.openapi = custom_openapi
-
-
-@app.on_event("startup")
-async def startup_event():
-    # try:
-    init_database()
-    print("🚀 API Started with Configured database!")
-    # except Exception as e:
-    # 	print(e)
-
 
 # CORS config (adjust origins as needed)
 app.add_middleware(

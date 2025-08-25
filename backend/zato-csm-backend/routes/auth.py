@@ -1,25 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from config.database import get_db_connection
-from repositories.user_repositories import UserRepository
-from services.auth_service import AuthService
-from utils.dependencies import (
-    get_current_token,
-    get_current_user,
-    verify_token,
-    ensure_user_from_payload,
-    fetch_userinfo,
-)
-from datetime import datetime, timedelta
-import jwt as pyjwt
-import config.settings as settings
+from typing import Optional
+from config.supabase import supabase_client
+from supabase import AuthError as SupabaseAuthError
+from datetime import datetime
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
-
-
-def _get_auth_service(db=Depends(get_db_connection)) -> AuthService:
-    auth_repo = UserRepository(db)
-    return AuthService(auth_repo)
 
 
 class LoginRequest(BaseModel):
@@ -27,131 +13,104 @@ class LoginRequest(BaseModel):
     password: str
 
 
-@router.post("/login")
-def login(payload: LoginRequest, auth_service=Depends(_get_auth_service)):
-    result = auth_service.login(payload.email, payload.password)
-    return result
-
-
 class RegisterRequest(BaseModel):
-    fullName: str
+    full_name: str
     email: str
     password: str
-    phone: str | None = None
-    address: str | None = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+
+
+class UserInfo(BaseModel):
+    id: str
+    email: str
+    full_name: str
+    phone: Optional[str]
+    address: Optional[str]
+    role: str
+    created_at: datetime
+    last_updated: datetime
+
+
+@router.post("/login")
+def login(payload: LoginRequest):
+    try:
+        response = supabase_client.auth.sign_in_with_password(
+            {"email": payload.email, "password": payload.password}
+        )
+        return {
+            "user": response.user.model_dump(),
+            "token": response.session.access_token,
+        }
+    except SupabaseAuthError as e:
+        raise HTTPException(status_code=401, detail=e.message)
+
+
+# En tu archivo routes/auth.py
 
 
 @router.post("/register")
-def register(payload: RegisterRequest, auth_service=Depends(_get_auth_service)):
-    result = auth_service.register(
-        payload.fullName,
-        payload.email,
-        payload.password,
-        payload.phone,
-        payload.address,
-    )
-    return result
-
-
-@router.post("/logout")
-def logout(token: str = Depends(get_current_token)):
-    return token
-
-
-@router.get("/me")
-def get_current_user(user=Depends((get_current_user))):
-    return user
-
-
-def _build_local_token_for_user(user: dict) -> str:
-    secret = getattr(settings, "SECRET_KEY", "zatobox")
-    alg = getattr(settings, "ALGORITHM", "HS256")
-    exp_minutes = int(getattr(settings, "ACCESS_TOKEN_EXPIRE_MINUTES", 60))
-    payload = {
-        "sub": str(user.get("auth0_id") or user.get("id")),
-        "user_id": user.get("id"),
-        "email": user.get("email"),
-        "exp": datetime.utcnow() + timedelta(minutes=exp_minutes),
-    }
-    token = pyjwt.encode(payload, secret, algorithm=alg)
-    if isinstance(token, bytes):
-        token = token.decode("utf-8")
-    return token
-
-
-class SocialAuthRequest(BaseModel):
-    access_token: str
-
-
-@router.post("/social")
-def social_register(
-    payload: SocialAuthRequest,
-    db=Depends(get_db_connection),
-    auth_service=Depends(_get_auth_service),
-):
+def register(payload: RegisterRequest):
     try:
-        jwt_payload = verify_token(payload.access_token)
-    except HTTPException as e:
-        if e.status_code == 401:
-            info = fetch_userinfo(payload.access_token)
-            if not info:
-                raise HTTPException(
-                    status_code=401, detail="Invalid token or cannot fetch userinfo"
-                )
-            jwt_payload = {
-                "sub": info.get("sub") or info.get("user_id") or info.get("id"),
-                "email": info.get("email"),
-                "name": info.get("name")
-                or info.get("nickname")
-                or info.get("given_name"),
+        response = supabase_client.auth.sign_up(
+            {
+                "email": payload.email,
+                "password": payload.password,
+                "options": {
+                    "data": {
+                        "full_name": payload.full_name,
+                        "phone": payload.phone,
+                        "address": payload.address,
+                    }
+                },
             }
-        else:
-            raise e
+        )
+        return {
+            "user": response.user.model_dump(),
+            "token": response.session.access_token,
+        }
+    except SupabaseAuthError as e:
+        # Intenta obtener el mensaje de error del JSON de respuesta de Supabase
+        error_detail = "Error de autenticación desconocido"
+        try:
+            # Algunas veces el mensaje está en e.json().msg
+            if hasattr(e, "json") and e.json().get("msg"):
+                error_detail = e.json()["msg"]
+            # Otras veces el error está en e.message (como antes)
+            elif hasattr(e, "message"):
+                error_detail = e.message
+        except:
+            # Si nada funciona, dejamos el mensaje por defecto
+            pass
 
-    # crea/obtiene usuario y devuelve el mismo formato que login()
-    user = ensure_user_from_payload(payload.access_token, jwt_payload, db)
-    user_data = dict(user)
-    user_data.pop("password", None)
-    try:
-        token = auth_service.create_access_token({"user_id": user_data["id"]})
-    except Exception as ex:
-        raise HTTPException(status_code=500, detail="Token generation failed")
+        # Intenta convertir a int, si falla usa 400 por defecto
+        try:
+            status_code = int(e.code)
+        except (ValueError, TypeError):
+            status_code = 400
 
-    return {"user": user_data, "token": token}
+        raise HTTPException(status_code=status_code, detail=error_detail)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Registration failed")
 
 
 @router.get("/users")
-def list_users(
-    current_user=Depends(get_current_user), auth_service=Depends(_get_auth_service)
-):
-    if not current_user.get("admin"):
-        raise HTTPException(status_code=403, detail="Acess denied")
-    return auth_service.get_list_users()
+def list_users():
+    try:
+        response = supabase_client.from_("users").select("*").execute()
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/profile/{user_id}")
-def get_profile(
-    user_id: int,
-    auth_service=Depends(_get_auth_service),
-):
-    return auth_service.get_profile_user(user_id)
-
-
-@router.put("/profile/{user_id}")
-def update_profile(
-    user_id: int,
-    updates: dict = Body(...),
-    current_user=Depends(get_current_user),
-    auth_service=Depends(_get_auth_service),
-):
-    if not current_user.get("admin"):
-        raise HTTPException(status_code=403, detail="Acess denied")
-    return auth_service.update_profile(user_id, updates)
-
-
-@router.get("/check-email")
-def check_email(email: str, db=Depends(get_db_connection)):
-    with db.cursor() as cursor:
-        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
-        row = cursor.fetchone()
-    return {"exists": bool(row)}
+def get_profile(user_id: str):
+    try:
+        response = (
+            supabase_client.from_("users").select("*").eq("auth_id", user_id).execute()
+        )
+        if not response.data:
+            raise HTTPException(status_code=404, detail="User not found")
+        return response.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
