@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import HomeHeader from '../../components/home/HomeHeader';
-import ProductGrid from '../../components/home/ProductGrid';
-import HomeStats from '../../components/home/HomeStats';
+import HomeHeader from '@/components/home/HomeHeader';
+import ProductGrid from '@/components/home/ProductGrid';
+import HomeStats from '@/components/home/HomeStats';
 import SalesDrawer from '@/components/SalesDrawer';
 import PaymentScreen from '@/components/PaymentScreen';
 import PaymentSuccessScreen from '@/components/PaymentSuccessScreen';
 import { inventoryAPI, salesAPI } from '@/services/api.service';
-import type { Product } from '@/services/api.service';
+import type { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 
 interface HomePageProps {
@@ -23,7 +23,6 @@ const HomePage: React.FC<HomePageProps> = ({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
-  // @ts-ignore
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [paymentTotal, setPaymentTotal] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>('');

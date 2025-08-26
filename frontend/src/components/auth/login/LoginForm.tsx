@@ -21,11 +21,15 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (values: { email: string; password: string }) => {
+  const handleSubmit = async (values: {
+    email: string;
+    password: string;
+    remember: boolean;
+  }) => {
     setError('');
     try {
-      await login(values.email, values.password);
-      router.push('/products');
+      await login(values.email, values.password, values.remember);
+      router.push('/home');
     } catch (err: any) {
       setError(err?.message || 'Error logging in');
     }
@@ -34,7 +38,7 @@ const LoginForm: React.FC = () => {
   return (
     <>
       <Formik
-        initialValues={{ email: '', password: '' }}
+        initialValues={{ email: '', password: '', remember: true }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
@@ -70,7 +74,15 @@ const LoginForm: React.FC = () => {
             </div>
           </div>
 
-          <div className='text-right'>
+          <div className='flex items-center justify-between'>
+            <label className='flex items-center space-x-2 text-sm cursor-pointer select-none text-text-secondary'>
+              <Field
+                type='checkbox'
+                name='remember'
+                className='w-4 h-4 border-gray-300 rounded text-complement focus:ring-complement'
+              />
+              <span>Remember me</span>
+            </label>
             <button
               type='button'
               className='text-sm transition-colors text-complement hover:text-complement-600'

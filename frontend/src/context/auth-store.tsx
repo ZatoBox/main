@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import axios from 'axios';
+import { authAPI } from '@/services/api.service';
 import {
   setAuthToken,
   getAuthToken,
@@ -10,7 +10,7 @@ import {
   getCookie,
   removeCookie,
 } from '@/services/cookies.service';
-import { User } from '@/types/index';
+import { User } from '@/types';
 
 const USER_COOKIE = 'zatobox_user';
 
@@ -30,22 +30,16 @@ interface AuthState {
     },
     remember?: boolean
   ) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loadFromCookies: () => Promise<void>;
   setUser: (user: User | null) => void;
   updateProfile: (patch: Partial<User>) => Promise<void>;
   refreshToken: () => Promise<void>;
 }
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4444/api',
-});
-
 export const useAuthStore = create<AuthState>((set, get) => {
   const initialToken =
     typeof window !== 'undefined' ? getAuthToken() : undefined;
-  if (initialToken)
-    api.defaults.headers.common.Authorization = `Bearer ${initialToken}`;
   return {
     user: null,
     token: initialToken,
@@ -71,16 +65,13 @@ export const useAuthStore = create<AuthState>((set, get) => {
           }
         }
       }
-      if (token) api.defaults.headers.common.Authorization = `Bearer ${token}`;
       set({ token, user, initialized: true });
       if (token && !user) {
         try {
-          const me = await api.get(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/me`
-          );
-          if (me.data) {
-            set({ user: me.data });
-            setCookie(USER_COOKIE, JSON.stringify(me.data));
+          const res = await authAPI.getCurrentUser();
+          if (res.user) {
+            set({ user: res.user });
+            setCookie(USER_COOKIE, JSON.stringify(res.user));
           }
         } catch {
           set({ user: null });
@@ -90,26 +81,18 @@ export const useAuthStore = create<AuthState>((set, get) => {
     login: async (email, password, remember = false) => {
       set({ loading: true, error: null });
       try {
-        const res = await api.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
-          { email, password }
-        );
-        const token = res.data?.token || res.data?.access_token;
-        const user = res.data?.user || null;
-        if (!token) throw new Error('Token no recibido');
-        setAuthToken(token, remember);
-        api.defaults.headers.common.Authorization = `Bearer ${token}`;
-        if (user)
-          setCookie(USER_COOKIE, JSON.stringify(user), {
+        const res = await authAPI.login({ email, password });
+        if (!res.token) throw new Error('Token no recibido');
+        setAuthToken(res.token, remember);
+        if (res.user) {
+          setCookie(USER_COOKIE, JSON.stringify(res.user), {
             expires: remember ? 30 : 7,
           });
-        set({ token, user, loading: false });
+        }
+        set({ token: res.token, user: res.user || null, loading: false });
       } catch (e: any) {
         set({
-          error:
-            e?.response?.data?.message ||
-            e.message ||
-            'Error al iniciar sesión',
+          error: e?.message || 'Error al iniciar sesión',
           loading: false,
         });
         throw e;
@@ -118,24 +101,18 @@ export const useAuthStore = create<AuthState>((set, get) => {
     register: async (data, remember = false) => {
       set({ loading: true, error: null });
       try {
-        const res = await api.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
-          data
-        );
-        const token = res.data?.token || res.data?.access_token;
-        const user = res.data?.user || null;
-        if (!token) throw new Error('Token no recibido');
-        setAuthToken(token, remember);
-        api.defaults.headers.common.Authorization = `Bearer ${token}`;
-        if (user)
-          setCookie(USER_COOKIE, JSON.stringify(user), {
+        const res = await authAPI.register(data);
+        if (!res.token) throw new Error('Token no recibido');
+        setAuthToken(res.token, remember);
+        if (res.user) {
+          setCookie(USER_COOKIE, JSON.stringify(res.user), {
             expires: remember ? 30 : 7,
           });
-        set({ token, user, loading: false });
+        }
+        set({ token: res.token, user: res.user || null, loading: false });
       } catch (e: any) {
         set({
-          error:
-            e?.response?.data?.message || e.message || 'Error al registrar',
+          error: e?.message || 'Error al registrar',
           loading: false,
         });
         throw e;
@@ -144,19 +121,13 @@ export const useAuthStore = create<AuthState>((set, get) => {
     updateProfile: async (patch) => {
       set({ loading: true, error: null });
       try {
-        const res = await api.patch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
-          patch
-        );
-        const updated = res.data;
-        set({ user: updated, loading: false });
-        setCookie(USER_COOKIE, JSON.stringify(updated));
+        const res = await authAPI.getCurrentUser();
+        const merged = { ...res.user, ...patch };
+        set({ user: merged, loading: false });
+        setCookie(USER_COOKIE, JSON.stringify(merged));
       } catch (e: any) {
         set({
-          error:
-            e?.response?.data?.message ||
-            e.message ||
-            'Error al actualizar perfil',
+          error: e?.message || 'Error al actualizar perfil',
           loading: false,
         });
         throw e;
@@ -164,43 +135,53 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
     refreshToken: async () => {
       try {
-        const res = await api.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`
-        );
-        const token = res.data?.token || res.data?.access_token;
-        if (token) {
-          setAuthToken(token, true);
-          api.defaults.headers.common.Authorization = `Bearer ${token}`;
-          set({ token });
+        const res = await authAPI.refresh();
+        if (res.token) {
+          setAuthToken(res.token, true);
+          set({ token: res.token });
         }
       } catch {
         get().logout();
       }
     },
-    logout: () => {
+    logout: async () => {
+      try {
+        await authAPI.logout();
+      } catch {}
       removeAuthToken();
       removeCookie(USER_COOKIE);
-      delete api.defaults.headers.common.Authorization;
       set({ user: null, token: undefined });
     },
   };
 });
 
-api.interceptors.response.use(
-  (r) => r,
-  async (error) => {
-    if (error?.response?.status === 401) {
-      try {
-        await useAuthStore.getState().refreshToken();
-        const cfg = error.config;
-        if (cfg && !cfg.__isRetry) {
-          cfg.__isRetry = true;
-          return api(cfg);
-        }
-      } catch {
-        useAuthStore.getState().logout();
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+export const useAuth = () => {
+  const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
+  const initialized = useAuthStore((s) => s.initialized);
+  const loading = useAuthStore((s) => s.loading);
+  const error = useAuthStore((s) => s.error);
+  const login = useAuthStore((s) => s.login);
+  const register = useAuthStore((s) => s.register);
+  const logout = useAuthStore((s) => s.logout);
+  const loadFromCookies = useAuthStore((s) => s.loadFromCookies);
+  const refreshToken = useAuthStore((s) => s.refreshToken);
+  const setUser = useAuthStore((s) => s.setUser);
+  const updateProfile = useAuthStore((s) => s.updateProfile);
+  const isAuthenticated = !!user && !!token;
+  return {
+    user,
+    token,
+    initialized,
+    loading,
+    error,
+    login,
+    register,
+    logout,
+    loadFromCookies,
+    refreshToken,
+    setUser,
+    updateProfile,
+    isAuthenticated,
+  };
+};
