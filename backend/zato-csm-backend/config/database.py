@@ -1,4 +1,3 @@
-import contextlib
 import psycopg2
 import psycopg2.extras
 import os
@@ -15,9 +14,7 @@ def connect_postgres():
     return psycopg2.connect(database_url)
 
 
-@contextlib.contextmanager
 def get_db_connection():
-    """FastAPI dependency that yields a live PostgreSQL connection for the request lifecycle"""
     conn = connect_postgres()
     try:
         yield conn

@@ -24,19 +24,13 @@ class UserRepository(BaseRepository):
             return cursor.fetchone()
 
     def find_by_user_id(self, user_id):
-        """
-        Search by user ID or auth0_id.
-        """
         with self._get_cursor() as cursor:
             if not user_id:
                 return None
-            # Trying to convert it to int
             try:
                 uid = int(user_id)
             except Exception:
-                cursor.execute("SELECT * FROM users WHERE auth0_id=%s", (user_id,))
-                return cursor.fetchone()
-
+                return None
             cursor.execute("SELECT * FROM users WHERE id=%s", (uid,))
             return cursor.fetchone()
 
@@ -49,17 +43,14 @@ class UserRepository(BaseRepository):
         address: str = None,
         role: str = "user",
         user_timezone: str = "UTC",
-        auth0_id: str = None,
     ):
         created_at = get_current_time_with_timezone(user_timezone)
         last_updated = get_current_time_with_timezone(user_timezone)
 
         with self._get_cursor() as cursor:
-            # Inserting auth0 if provided
             cursor.execute(
-                "INSERT INTO users (auth0_id, full_name, email, password, phone, address, role, created_at, last_updated) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
+                "INSERT INTO users (full_name, email, password, phone, address, role, created_at, last_updated) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
                 (
-                    auth0_id,
                     full_name,
                     email,
                     password,

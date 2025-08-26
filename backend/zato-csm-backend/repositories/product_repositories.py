@@ -41,11 +41,10 @@ class ProductRepository:
             "localization": localization,
         }
         resp = self.supabase.table(self.table).insert(payload).execute()
-        if resp.error:
-            raise HTTPException(
-                status_code=400, detail=f"Error creating product: {resp.error.message}"
-            )
-        return resp.data[0]
+        data = getattr(resp, "data", None)
+        if not data:
+            raise HTTPException(status_code=400, detail="Error creating product")
+        return data[0]
 
     def update_product(
         self, product_id: int, updates: dict, user_timezone: str = "UTC"
@@ -59,21 +58,15 @@ class ProductRepository:
             .eq("id", product_id)
             .execute()
         )
-        if resp.error:
-            raise HTTPException(
-                status_code=400, detail=f"Error updating product: {resp.error.message}"
-            )
-        if not resp.data:
+        data = getattr(resp, "data", None)
+        if not data:
             raise HTTPException(status_code=404, detail="Product not found")
-        return resp.data[0]
+        return data[0]
 
     def find_all(self):
         resp = self.supabase.table(self.table).select("*").execute()
-        if resp.error:
-            raise HTTPException(
-                status_code=400, detail=f"Error fetching products: {resp.error.message}"
-            )
-        return resp.data or []
+        data = getattr(resp, "data", None) or []
+        return data
 
     def find_by_id(self, product_id: int):
         resp = (
@@ -83,13 +76,10 @@ class ProductRepository:
             .single()
             .execute()
         )
-        if resp.error:
-            if getattr(resp.error, "message", "").lower().startswith("row not found"):
-                return None
-            raise HTTPException(
-                status_code=400, detail=f"Error fetching product: {resp.error.message}"
-            )
-        return resp.data
+        data = getattr(resp, "data", None)
+        if not data:
+            return None
+        return data
 
     def find_by_category(self, category_id: str):
         resp = (
@@ -98,30 +88,20 @@ class ProductRepository:
             .eq("category_id", category_id)
             .execute()
         )
-        if resp.error:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Error fetching by category: {resp.error.message}",
-            )
-        return resp.data or []
+        data = getattr(resp, "data", None) or []
+        return data
 
     def find_by_name(self, name: str):
         resp = self.supabase.table(self.table).select("*").ilike("name", name).execute()
-        if resp.error:
-            raise HTTPException(
-                status_code=400, detail=f"Error searching by name: {resp.error.message}"
-            )
-        return resp.data or []
+        data = getattr(resp, "data", None) or []
+        return data
 
     def delete_product(self, product_id: int):
         resp = self.supabase.table(self.table).delete().eq("id", product_id).execute()
-        if resp.error:
-            raise HTTPException(
-                status_code=400, detail=f"Error deleting product: {resp.error.message}"
-            )
-        if not resp.data:
+        data = getattr(resp, "data", None)
+        if not data:
             raise HTTPException(status_code=404, detail="Product not found")
-        return resp.data[0]
+        return data[0]
 
     def find_by_creator(self, creator_id: str):
         resp = (
@@ -130,9 +110,5 @@ class ProductRepository:
             .eq("creator_id", creator_id)
             .execute()
         )
-        if resp.error:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Error fetching by creator: {resp.error.message}",
-            )
-        return resp.data or []
+        data = getattr(resp, "data", None) or []
+        return data
