@@ -3,11 +3,11 @@
 import type React from "react"
 
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/landing/ui/sheet"
 import { Menu } from "lucide-react"
 import Link from "next/link" // Import Link for client-side navigation
-import { useLanguageContext } from "@/contexts/language-context"
-import { getTranslation } from "@/lib/translations"
+import { useLanguageContext } from "@/context/language-context"
+import { getTranslation } from "@/utils/translations"
 import { LanguageSwitcher } from "./language-switcher"
 
 export function Header() {

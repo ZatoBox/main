@@ -3,8 +3,8 @@
 import type React from "react"
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
-import { useLanguageContext } from "@/contexts/language-context"
-import { getTranslation } from "@/lib/translations"
+import { useLanguageContext } from '@/context/language-context';
+import { getTranslation } from '@/utils/translations';
 
 
 

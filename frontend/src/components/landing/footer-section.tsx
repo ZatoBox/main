@@ -1,8 +1,8 @@
 "use client"
 
 import { Twitter, Github, Linkedin } from "lucide-react"
-import { useLanguageContext } from "@/contexts/language-context"
-import { getTranslation } from "@/lib/translations"
+import { useLanguageContext } from '@/context/language-context';
+import { getTranslation } from '@/utils/translations';
 
 export function FooterSection() {
   const { language } = useLanguageContext()

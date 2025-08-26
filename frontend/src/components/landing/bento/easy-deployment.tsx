@@ -1,8 +1,8 @@
 "use client"
 
 import Image from "next/image"
-import { useLanguageContext } from "@/contexts/language-context"
-import { getTranslation } from "@/lib/translations"
+import { useLanguageContext } from "@/context/language-context"
+import { getTranslation } from "@/utils/translations"
 
 interface DeploymentEasyProps {
   /** Width of component – number (px) or any CSS size value */

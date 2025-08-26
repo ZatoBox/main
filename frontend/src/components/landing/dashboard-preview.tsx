@@ -1,8 +1,8 @@
 "use client"
 
 import Image from "next/image" // Import the Image component
-import { useLanguageContext } from "@/contexts/language-context"
-import { getTranslation } from "@/lib/translations"
+import { useLanguageContext } from "@/context/language-context"
+import { getTranslation } from "@/utils/translations"
 
 export function DashboardPreview() {
   const { language } = useLanguageContext()

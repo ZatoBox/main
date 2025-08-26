@@ -3,8 +3,8 @@
 import { useState } from "react"
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useLanguageContext } from "@/contexts/language-context"
-import { getTranslation } from "@/lib/translations"
+import { useLanguageContext } from '@/context/language-context';
+import { getTranslation } from '@/utils/translations';
 
 export function PricingSection() {
   const { language } = useLanguageContext()

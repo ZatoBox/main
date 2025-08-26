@@ -6,8 +6,8 @@ import OneClickIntegrationsIllustration from "./bento/one-click-integrations-ill
 import MCPConnectivityIllustration from "./bento/mcp-connectivity-illustration" // Updated import
 import EasyDeployment from "./bento/easy-deployment"
 import WhatsAppAutomation from "./bento/parallel-agents" // Updated import
-import { useLanguageContext } from "@/contexts/language-context"
-import { getTranslation } from "@/lib/translations"
+import { useLanguageContext } from "@/context/language-context"
+import { getTranslation } from "@/utils/translations"
 
 interface BentoCardProps {
   title: string;

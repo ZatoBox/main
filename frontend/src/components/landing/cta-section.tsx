@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { useLanguageContext } from "@/contexts/language-context"
-import { getTranslation } from "@/lib/translations"
+import { useLanguageContext } from "@/context/language-context"
+import { getTranslation } from "@/utils/translations"
 
 export function CTASection() {
   const { language } = useLanguageContext()
