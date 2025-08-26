@@ -57,7 +57,6 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     phone: Optional[str] = None
-    address: Optional[str] = None
 
 
 class UserInfo(BaseModel):

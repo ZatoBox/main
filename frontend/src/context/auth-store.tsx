@@ -12,12 +12,7 @@ import {
 } from '@/services/cookies.service';
 import { User } from '@/types/index';
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  process.env.VITE_API_URL ||
-  'http://localhost:4444/api';
 const USER_COOKIE = 'zatobox_user';
-
 
 interface AuthState {
   user: User | null;
@@ -27,7 +22,12 @@ interface AuthState {
   initialized: boolean;
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
   register: (
-    data: { fullName: string; email: string; password: string; phone?: string },
+    data: {
+      full_name: string;
+      email: string;
+      password: string;
+      phone?: string;
+    },
     remember?: boolean
   ) => Promise<void>;
   logout: () => void;
@@ -37,7 +37,9 @@ interface AuthState {
   refreshToken: () => Promise<void>;
 }
 
-const api = axios.create({ baseURL: API_URL });
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4444/api',
+});
 
 export const useAuthStore = create<AuthState>((set, get) => {
   const initialToken =
@@ -73,7 +75,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
       set({ token, user, initialized: true });
       if (token && !user) {
         try {
-          const me = await api.get('/auth/me');
+          const me = await api.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/me`
+          );
           if (me.data) {
             set({ user: me.data });
             setCookie(USER_COOKIE, JSON.stringify(me.data));
@@ -86,7 +90,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
     login: async (email, password, remember = false) => {
       set({ loading: true, error: null });
       try {
-        const res = await api.post('/auth/login', { email, password });
+        const res = await api.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+          { email, password }
+        );
         const token = res.data?.token || res.data?.access_token;
         const user = res.data?.user || null;
         if (!token) throw new Error('Token no recibido');
@@ -111,7 +118,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
     register: async (data, remember = false) => {
       set({ loading: true, error: null });
       try {
-        const res = await api.post('/auth/register', data);
+        const res = await api.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+          data
+        );
         const token = res.data?.token || res.data?.access_token;
         const user = res.data?.user || null;
         if (!token) throw new Error('Token no recibido');
@@ -134,7 +144,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
     updateProfile: async (patch) => {
       set({ loading: true, error: null });
       try {
-        const res = await api.patch('/auth/me', patch);
+        const res = await api.patch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+          patch
+        );
         const updated = res.data;
         set({ user: updated, loading: false });
         setCookie(USER_COOKIE, JSON.stringify(updated));
@@ -151,7 +164,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
     refreshToken: async () => {
       try {
-        const res = await api.post('/auth/refresh');
+        const res = await api.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`
+        );
         const token = res.data?.token || res.data?.access_token;
         if (token) {
           setAuthToken(token, true);

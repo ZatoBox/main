@@ -1,16 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { authAPI } from '@/services/api.service';
 import { useAuthStore } from '@/context/auth-store';
-import SocialButtons from '../../auth/login/SocialButtons';
 
 const validationSchema = Yup.object().shape({
-  fullName: Yup.string().required('Full name is required'),
+  full_name: Yup.string().required('Full name is required'),
   email: Yup.string().email('Invalid email').required('Email is required'),
   password: Yup.string()
     .min(8, 'Password must be at least 8 characters')
@@ -27,57 +25,18 @@ const validationSchema = Yup.object().shape({
 
 const RegisterForm: React.FC = () => {
   const router = useRouter();
-  const { register, setUser } = useAuthStore();
+  const { register } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (!hash) return;
-    const params = new URLSearchParams(hash.replace('#', ''));
-    const accessToken = params.get('access_token');
-    const state = params.get('state');
-    const storedState = sessionStorage.getItem('auth0_state');
-    if (accessToken && state && storedState && state === storedState) {
-      sessionStorage.removeItem('auth0_state');
-      sessionStorage.removeItem('auth0_nonce');
-      (async () => {
-        setIsLoading(true);
-        try {
-          const payload = await authAPI.socialRegister(accessToken);
-          const user = (payload as any).user || null;
-          const token = (payload as any).token || (payload as any).access_token;
-          if (!token) throw new Error('No local token received from backend');
-          if (user) setUser(user);
-          router.push('/');
-        } catch (e: any) {
-          setError(e.message || 'Error creating user');
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-      history.replaceState(
-        null,
-        '',
-        window.location.pathname + window.location.search
-      );
-    }
-  }, [router]);
-
   const handleSubmit = async (values: any) => {
     setIsLoading(true);
     setError('');
     try {
-      const check = await authAPI.checkEmail(values.email);
-      if (check.exists) {
-        setError('Email already registered. Please login or use social login.');
-        setIsLoading(false);
-        return;
-      }
       await register({
-        fullName: values.fullName,
+        full_name: values.full_name,
         email: values.email,
         password: values.password,
         phone: values.phone,
@@ -94,7 +53,7 @@ const RegisterForm: React.FC = () => {
     <>
       <Formik
         initialValues={{
-          fullName: '',
+          full_name: '',
           email: '',
           password: '',
           confirmPassword: '',
@@ -107,12 +66,12 @@ const RegisterForm: React.FC = () => {
         <Form className='space-y-4'>
           <div>
             <Field
-              name='fullName'
+              name='full_name'
               placeholder='Your full name'
               className='w-full px-4 transition-all duration-150 ease-in-out border rounded h-11 border-divider focus:ring-2 focus:ring-primary focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:shadow-sm'
             />
             <div className='mt-1 text-sm text-error-700'>
-              <ErrorMessage name='fullName' />
+              <ErrorMessage name='full_name' />
             </div>
           </div>
 
@@ -219,10 +178,6 @@ const RegisterForm: React.FC = () => {
           </button>
         </Form>
       </Formik>
-
-      <div className='grid grid-cols-2 gap-3 mt-3'>
-        <SocialButtons />
-      </div>
     </>
   );
 };
