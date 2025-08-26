@@ -1,7 +1,9 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/context/auth-store';
 import SocialButtons from './SocialButtons';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -14,22 +16,18 @@ const validationSchema = Yup.object().shape({
 });
 
 const LoginForm: React.FC = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
+  const router = useRouter();
+  const { login, loading, error: authError } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (values: { email: string; password: string }) => {
-    setIsLoading(true);
     setError('');
     try {
       await login(values.email, values.password);
-      navigate('/products');
+      router.push('/products');
     } catch (err: any) {
       setError(err?.message || 'Error logging in');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -81,18 +79,18 @@ const LoginForm: React.FC = () => {
             </button>
           </div>
 
-          {error && (
+          {(error || authError) && (
             <div className='p-3 text-sm border rounded-lg bg-error-50 border-error-200 text-error-700'>
-              {error}
+              {error || authError}
             </div>
           )}
 
           <button
             type='submit'
-            disabled={isLoading}
+            disabled={loading}
             className='w-full h-12 font-medium text-black transition-all duration-150 ease-in-out rounded-lg bg-primary hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-sm'
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </Form>
       </Formik>
@@ -114,7 +112,7 @@ const LoginForm: React.FC = () => {
         <p className='text-text-secondary'>
           Don't have an account?{' '}
           <button
-            onClick={() => navigate('/register')}
+            onClick={() => router.push('/register')}
             className='font-medium transition-colors text-complement hover:text-complement-600'
           >
             Sign up

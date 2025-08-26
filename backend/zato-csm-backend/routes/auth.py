@@ -57,7 +57,6 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     phone: Optional[str] = None
-    address: Optional[str] = None
 
 
 class UserInfo(BaseModel):
@@ -101,7 +100,6 @@ def register(payload: RegisterRequest):
                     "data": {
                         "full_name": payload.full_name,
                         "phone": payload.phone,
-                        "address": payload.address,
                     }
                 },
             }

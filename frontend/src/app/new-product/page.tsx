@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/new-product/Header';
 import ImagesUploader from '@/components/new-product/ImagesUploader';
 import NewProductForm from '@/components/new-product/NewProductForm';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-store';
 import { productsAPI } from '@/services/api.service';
 
 const NewProductPage: React.FC = () => {
