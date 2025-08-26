@@ -18,6 +18,7 @@ import type {
   OCRDebugResponse,
   OCRSupportedFormatsResponse,
 } from '@/types';
+import { getAuthToken as getCookieAuthToken } from '@/services/cookies.service';
 
 const apiEnv = process.env.NEXT_PUBLIC_API_URL;
 const ocrEnv = process.env.NEXT_PUBLIC_OCR_API_URL;
@@ -49,7 +50,13 @@ export const API_CONFIG = {
   HEADERS: { 'Content-Type': 'application/json' },
 };
 
-const getAuthToken = (): string | null => localStorage.getItem('token');
+const getAuthToken = (): string | undefined => {
+  try {
+    return getCookieAuthToken();
+  } catch {
+    return undefined;
+  }
+};
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -84,7 +91,6 @@ const apiRequest = async <T>(
   }
 };
 
-// Auth API
 export const authAPI = {
   register: (userData: Partial<User>): Promise<AuthResponse> =>
     apiRequest('/auth/register', { method: 'POST', data: userData }),
@@ -111,8 +117,10 @@ export const authAPI = {
     apiRequest('/auth/social', { method: 'POST', data: { access_token } }),
   checkEmail: (email: string): Promise<{ exists: boolean }> =>
     apiRequest(`/auth/check-email?email=${encodeURIComponent(email)}`),
+  refresh: (): Promise<{ success: boolean; token: string }> =>
+    apiRequest('/auth/refresh', { method: 'POST' }),
 };
-// Products API
+
 export const productsAPI = {
   getAll: (
     params: Record<string, string | number | boolean> = {}
@@ -146,7 +154,9 @@ export const productsAPI = {
     const res = await axios.post(
       `${API_BASE_URL}/products/${id}/images`,
       formData,
-      { headers: { Authorization: token ? `Bearer ${token}` : undefined } }
+      {
+        headers: { Authorization: token ? `Bearer ${token}` : undefined },
+      }
     );
     return res.data;
   },
@@ -154,7 +164,6 @@ export const productsAPI = {
     apiRequest(`/products/${id}`, { method: 'DELETE' }),
 };
 
-// Inventory API
 export const inventoryAPI = {
   getUserInventory: (): Promise<InventoryResponse> =>
     apiRequest('/inventory/user'),
@@ -213,7 +222,6 @@ export const inventoryAPI = {
     apiRequest(`/inventory/${id}`, { method: 'DELETE' }),
 };
 
-// Sales API
 export const salesAPI = {
   getAll: (
     params: Record<string, string | number | boolean> = {}
@@ -233,7 +241,6 @@ export const salesAPI = {
   getStats: (): Promise<SalesStatsResponse> => apiRequest('/sales/stats'),
 };
 
-// Profile API
 export const profileAPI = {
   get: (): Promise<{ success: boolean; user: User }> => apiRequest('/profile'),
   update: (
@@ -268,7 +275,6 @@ export const profileAPI = {
     apiRequest('/profile', { method: 'DELETE', data: { password } }),
 };
 
-// OCR API
 export const ocrAPI = {
   processDocument: async (
     file: File,
