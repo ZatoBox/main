@@ -154,3 +154,34 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
   };
 });
+
+export const useAuth = () => {
+  const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
+  const initialized = useAuthStore((s) => s.initialized);
+  const loading = useAuthStore((s) => s.loading);
+  const error = useAuthStore((s) => s.error);
+  const login = useAuthStore((s) => s.login);
+  const register = useAuthStore((s) => s.register);
+  const logout = useAuthStore((s) => s.logout);
+  const loadFromCookies = useAuthStore((s) => s.loadFromCookies);
+  const refreshToken = useAuthStore((s) => s.refreshToken);
+  const setUser = useAuthStore((s) => s.setUser);
+  const updateProfile = useAuthStore((s) => s.updateProfile);
+  const isAuthenticated = !!user && !!token;
+  return {
+    user,
+    token,
+    initialized,
+    loading,
+    error,
+    login,
+    register,
+    logout,
+    loadFromCookies,
+    refreshToken,
+    setUser,
+    updateProfile,
+    isAuthenticated,
+  };
+};
