@@ -9,12 +9,13 @@ class ProductService:
     def __init__(self, repo: ProductRepository):
         self.repo = repo
 
-    def create_product(self, product_data: CreateProductRequest, creator_id: int):
+    def create_product(self, product_data: CreateProductRequest, creator_id: str):
         unit_val = getattr(product_data.unit, "value", product_data.unit)
         type_val = getattr(
             product_data.product_type, "value", product_data.product_type
         )
-        category_val = getattr(product_data.category, "value", product_data.category)
+        # category ahora es category_id uuid string
+        category_id_val = getattr(product_data, "category_id")
 
         return self.repo.create_product(
             name=product_data.name,
@@ -23,7 +24,7 @@ class ProductService:
             stock=int(product_data.stock),
             unit=unit_val,
             product_type=type_val,
-            category=category_val,
+            category_id=category_id_val,
             sku=product_data.sku,
             min_stock=int(getattr(product_data, "min_stock", 0)),
             status=getattr(
@@ -31,9 +32,9 @@ class ProductService:
                 "value",
                 getattr(product_data, "status", "active"),
             ),
-            weight=getattr(product_data, "weight", None),
+            weigth=getattr(product_data, "weigth", None),
             localization=getattr(product_data, "localization", None),
-            creator_id=creator_id,
+            creator_id=str(creator_id),
         )
 
     def list_products(self):
@@ -62,10 +63,10 @@ class ProductService:
             "description",
             "price",
             "stock",
-            "category",
+            "category_id",
             "images",
             "sku",
-            "weight",
+            "weigth",
             "localization",
             "min_stock",
             "status",
@@ -80,7 +81,7 @@ class ProductService:
         for fld in (
             "product_type",
             "unit",
-            "category",
+            "category_id",
             "description",
             "localization",
             "sku",
@@ -120,13 +121,13 @@ class ProductService:
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid min_stock value")
 
-        if "weight" in updates:
+        if "weigth" in updates:
             try:
-                updates["weight"] = float(updates["weight"])
-                if updates["weight"] < 0:
-                    raise HTTPException(status_code=400, detail="Invalid weight value")
+                updates["weigth"] = float(updates["weigth"])
+                if updates["weigth"] < 0:
+                    raise HTTPException(status_code=400, detail="Invalid weigth value")
             except (ValueError, TypeError):
-                raise HTTPException(status_code=400, detail="Invalid weight value")
+                raise HTTPException(status_code=400, detail="Invalid weigth value")
 
         images = updates.get("images")
         if images and isinstance(images, list):
@@ -136,3 +137,12 @@ class ProductService:
 
     def delete_product(self, product_id):
         return self.repo.delete_product(product_id)
+
+    def _process_images(self, images):
+        processed = []
+        for img in images:
+            if hasattr(img, "filename"):
+                processed.append(img.filename)
+            else:
+                processed.append(str(img))
+        return processed

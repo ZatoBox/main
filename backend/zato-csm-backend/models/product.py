@@ -22,27 +22,19 @@ class ProductUnity(str, Enum):
     PER_METRO = "Per metro"
 
 
-class ProductCategory(str, Enum):
-    FURNITURE = "Furniture"
-    TEXTILES = "Textiles"
-    LIGHTING = "Lighting"
-    ELECTRONICS = "Electronics"
-    DECORATION = "Decoration"
-    OFFICE = "Office"
-    GAMING = "Gaming"
-
-
 class CreateProductRequest(BaseModel):
     name: str = Field(..., min_length=1)
     price: float = Field(..., gt=0)
     stock: int = Field(..., ge=0)
     unit: ProductUnity = Field(...)
     product_type: ProductType = Field(...)
-    category: str = Field(...)
+    category_id: str = Field(..., min_length=1, description="UUID de la categoría")
 
     description: Optional[str] = None
     sku: Optional[str] = Field(None, max_length=255)
-    weight: Optional[float] = Field(None, gt=0)
+    weigth: Optional[float] = Field(
+        None, gt=0, description="Peso (columna se llama 'weigth')"
+    )
     localization: Optional[str] = None
     min_stock: int = Field(0, ge=0)
     status: ProductStatus = Field(ProductStatus.ACTIVE)
@@ -53,36 +45,20 @@ class CreateProductRequest(BaseModel):
             return None
         return v
 
-    @validator("category")
-    def _validate_category(cls, v):
-        valid = {c.value for c in ProductCategory}
-        if v not in valid:
-            raise ValueError(f"Invalid category. Allowed: {', '.join(sorted(valid))}")
-        return v
-
 
 class UpdateProductRequest(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
     price: Optional[float] = Field(None, gt=0)
     stock: Optional[int] = Field(None, ge=0)
-    category: Optional[str] = None
+    category_id: Optional[str] = None
     sku: Optional[str] = Field(None, max_length=255)
-    weight: Optional[float] = Field(None, ge=0)
+    weigth: Optional[float] = Field(None, ge=0)
     localization: Optional[str] = None
     min_stock: Optional[int] = Field(None, ge=0)
     status: Optional[ProductStatus] = None
     product_type: Optional[ProductType] = None
     unit: Optional[ProductUnity] = None
-
-    @validator("category")
-    def _validate_category_update(cls, v):
-        if v is None:
-            return v
-        valid = {c.value for c in ProductCategory}
-        if v not in valid:
-            raise ValueError(f"Invalid category. Allowed: {', '.join(sorted(valid))}")
-        return v
 
 
 class ProductResponse(BaseModel):
@@ -92,12 +68,12 @@ class ProductResponse(BaseModel):
     price: float
     stock: int
     min_stock: int
-    category: str
+    category_id: str
     images: Optional[List[str]] = []
     status: str
-    weight: Optional[float]
+    weigth: Optional[float]
     sku: Optional[str]
-    creator_id: Optional[int]
+    creator_id: Optional[str]
     unit: str
     product_type: str
     created_at: datetime
@@ -106,3 +82,4 @@ class ProductResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        fields = {"weigth": "weigth"}
