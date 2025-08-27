@@ -32,7 +32,7 @@ class ProductService:
                 "value",
                 getattr(product_data, "status", "active"),
             ),
-            weigth=getattr(product_data, "weigth", None),
+            weight=getattr(product_data, "weight", None),
             localization=getattr(product_data, "localization", None),
             creator_id=str(creator_id),
         )
@@ -46,8 +46,8 @@ class ProductService:
     def search_by_name(self, name: str):
         return self.repo.find_by_name(name)
 
-    def get_product(self, product_id):
-        if not product_id or product_id <= 0:
+    def get_product(self, product_id: str):
+        if not product_id or not isinstance(product_id, str):
             raise HTTPException(status_code=400, detail="Invalid product ID")
 
         product = self.repo.find_by_id(product_id)
@@ -66,7 +66,7 @@ class ProductService:
             "category_id",
             "images",
             "sku",
-            "weigth",
+            "weight",
             "localization",
             "min_stock",
             "status",
@@ -121,13 +121,13 @@ class ProductService:
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid min_stock value")
 
-        if "weigth" in updates:
+        if "weight" in updates:
             try:
-                updates["weigth"] = float(updates["weigth"])
-                if updates["weigth"] < 0:
-                    raise HTTPException(status_code=400, detail="Invalid weigth value")
+                updates["weight"] = float(updates["weight"])
+                if updates["weight"] < 0:
+                    raise HTTPException(status_code=400, detail="Invalid weight value")
             except (ValueError, TypeError):
-                raise HTTPException(status_code=400, detail="Invalid weigth value")
+                raise HTTPException(status_code=400, detail="Invalid weight value")
 
         images = updates.get("images")
         if images and isinstance(images, list):

@@ -30,14 +30,13 @@ class CreateProductRequest(BaseModel):
     product_type: ProductType = Field(...)
     category_id: str = Field(..., min_length=1, description="UUID de la categoría")
 
-    description: Optional[str] = None
-    sku: Optional[str] = Field(None, max_length=255)
-    weigth: Optional[float] = Field(
-        None, gt=0, description="Peso (columna se llama 'weigth')"
+    description: str = Field(..., description="Descripción del producto")
+    sku: str = Field(..., max_length=255, description="SKU del producto")
+    weight: Optional[float] = Field(
+        None, gt=0, description="Peso (columna se llama 'weight')"
     )
     localization: Optional[str] = None
-    min_stock: int = Field(0, ge=0)
-    status: ProductStatus = Field(ProductStatus.ACTIVE)
+    status: ProductStatus = Field(..., description="Estado del producto")
 
     @validator("sku")
     def _normalize_sku(cls, v):
@@ -53,7 +52,7 @@ class UpdateProductRequest(BaseModel):
     stock: Optional[int] = Field(None, ge=0)
     category_id: Optional[str] = None
     sku: Optional[str] = Field(None, max_length=255)
-    weigth: Optional[float] = Field(None, ge=0)
+    weight: Optional[float] = Field(None, ge=0)
     localization: Optional[str] = None
     min_stock: Optional[int] = Field(None, ge=0)
     status: Optional[ProductStatus] = None
@@ -62,7 +61,7 @@ class UpdateProductRequest(BaseModel):
 
 
 class ProductResponse(BaseModel):
-    id: int
+    id: str
     name: str
     description: Optional[str]
     price: float
@@ -71,7 +70,7 @@ class ProductResponse(BaseModel):
     category_id: str
     images: Optional[List[str]] = []
     status: str
-    weigth: Optional[float]
+    weight: Optional[float]
     sku: Optional[str]
     creator_id: Optional[str]
     unit: str
@@ -82,4 +81,4 @@ class ProductResponse(BaseModel):
 
     class Config:
         from_attributes = True
-        fields = {"weigth": "weigth"}
+        fields = {"weight": "weight"}
