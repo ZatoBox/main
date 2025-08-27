@@ -1,34 +1,72 @@
-from repositories.base_repository import BaseRepository
+from fastapi import HTTPException
+from supabase import Client
 from utils.timezone_utils import get_current_time_with_timezone
 
 
-class SalesRepository(BaseRepository):
+class SalesRepository:
+    def __init__(self, supabase: Client):
+        self.supabase = supabase
+        self.table = "sales"
+
     def create_sale(
         self,
-        items: str,
-        total: float,
+        items: list,
         payment_method: str,
-        user_id: int,
+        creator_id: str,
         status: str = "completed",
         user_timezone: str = "UTC",
     ):
-        created_at = get_current_time_with_timezone(user_timezone)
+        for item in items:
+            if "price" not in item or item["price"] is None:
+                product_price = self._get_product_price(item["product_id"])
+                item["price"] = product_price
+        total = sum(it["quantity"] * it["price"] for it in items)
+        payload = {
+            "items": items,
+            "total": total,
+            "payment_method": payment_method,
+            "creator_id": creator_id,
+            "status": status,
+            "created_at": get_current_time_with_timezone(user_timezone),
+        }
+        resp = self.supabase.table(self.table).insert(payload).execute()
+        data = getattr(resp, "data", None)
+        if not data:
+            raise HTTPException(status_code=400, detail="Error creating sale")
+        return data[0]
 
-        with self._get_cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO sales (items, total, payment_method, user_id, status, created_at) "
-                "VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
-                (items, total, payment_method, user_id, status, created_at),
+    def _get_product_price(self, product_id: int) -> float:
+        resp = (
+            self.supabase.table("products")
+            .select("price")
+            .eq("id", product_id)
+            .single()
+            .execute()
+        )
+        data = getattr(resp, "data", None)
+        if not data:
+            raise HTTPException(
+                status_code=404, detail=f"Product with id {product_id} not found"
             )
-            self.db.commit()
-            return cursor.fetchone()["id"]
+        return data["price"]
 
-    def find_by_id(self, sale_id: int):
-        with self._get_cursor() as cursor:
-            cursor.execute("SELECT * FROM sales WHERE id=%s", (sale_id,))
-            return cursor.fetchone()
+    def find_by_id(self, sale_id: str):
+        resp = (
+            self.supabase.table(self.table)
+            .select("*")
+            .eq("id", sale_id)
+            .single()
+            .execute()
+        )
+        data = getattr(resp, "data", None)
+        return data
 
     def list_sales(self):
-        with self._get_cursor() as cursor:
-            cursor.execute("SELECT * FROM sales")
-            return cursor.fetchall()
+        resp = (
+            self.supabase.table(self.table)
+            .select("*")
+            .order("created_at", desc=True)
+            .execute()
+        )
+        data = getattr(resp, "data", None) or []
+        return data

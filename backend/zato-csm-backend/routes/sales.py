@@ -1,16 +1,16 @@
-from config.database import get_db_connection
-
-from fastapi import APIRouter, Depends, HTTPException
+from typing import List
+from fastapi import APIRouter, Depends
 from models.sales import SaleResponse, CreateSaleRequest
 from services.sales_service import SalesService
-from utils.dependencies import get_current_token, get_current_user
+from utils.dependencies import get_current_user
 from repositories.sales_repositories import SalesRepository
+from config.supabase import get_supabase_client
 
 router = APIRouter(prefix="/api/sales", tags=["sales"])
 
 
-def _get_sale_service(db=Depends(get_db_connection)) -> SalesService:
-    sales_repo = SalesRepository(db)
+def _get_sale_service(supabase=Depends(get_supabase_client)) -> SalesService:
+    sales_repo = SalesRepository(supabase)
     return SalesService(sales_repo)
 
 
@@ -24,10 +24,10 @@ def create_sale(
 
 
 @router.get("/{sale_id}", response_model=SaleResponse)
-def get_sale(sale_id: int, sales_service: SalesService = Depends(_get_sale_service)):
+def get_sale(sale_id: str, sales_service: SalesService = Depends(_get_sale_service)):
     return sales_service.get_sale(sale_id)
 
 
-@router.get("/", response_model=SaleResponse)
+@router.get("/", response_model=List[SaleResponse])
 def get_sales_history(sales_service: SalesService = Depends(_get_sale_service)):
     return sales_service.history_sales()
