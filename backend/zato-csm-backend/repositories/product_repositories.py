@@ -20,7 +20,7 @@ class ProductRepository:
         sku: str | None,
         min_stock: int,
         status: str,
-        weigth: float | None,
+        weight: float | None,
         localization: str | None,
         creator_id: str,
     ):
@@ -33,7 +33,7 @@ class ProductRepository:
             "category_id": category_id,
             "images": [],
             "status": status,
-            "weigth": weigth,
+            "weight": weight,
             "sku": sku,
             "creator_id": creator_id,
             "unit": unit,

@@ -63,7 +63,7 @@ async def update_product(
     price: Optional[float] = Form(None),
     stock: Optional[int] = Form(None),
     category_id: Optional[str] = Form(None),
-    weigth: Optional[float] = Form(None),
+    weight: Optional[float] = Form(None),
     images: List[UploadFile] = File(None),
     body: Optional[dict] = Body(None),
     current_user=Depends(get_current_user),
@@ -86,8 +86,8 @@ async def update_product(
         updates["stock"] = stock
     if category_id is not None:
         updates["category_id"] = category_id
-    if weigth is not None:
-        updates["weigth"] = weigth
+    if weight is not None:
+        updates["weight"] = weight
 
     if images:
         updates["images"] = images
