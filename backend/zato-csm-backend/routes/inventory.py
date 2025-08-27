@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, Request
-from config.database import get_db_connection
-from repositories.product_repositories import ProductRepository
+from config.supabase import get_supabase_client
 from services.inventory_service import InventoryService
 from utils.dependencies import get_current_user
 from utils.timezone_utils import get_user_timezone_from_request
@@ -8,9 +7,8 @@ from utils.timezone_utils import get_user_timezone_from_request
 router = APIRouter(prefix="/api/inventory", tags=["inventory"])
 
 
-def _get_inventory_service(db=Depends(get_db_connection)) -> InventoryService:
-    product_repo = ProductRepository(db)
-    return InventoryService(product_repo)
+def _get_inventory_service(supabase=Depends(get_supabase_client)) -> InventoryService:
+    return InventoryService(supabase)
 
 
 @router.get("")
@@ -31,7 +29,7 @@ def get_user_inventory(
 
 @router.put("/{product_id}")
 def update_inventory(
-    product_id: int,
+    product_id: str,
     quantity: int,
     request: Request,
     user=Depends(get_current_user),
