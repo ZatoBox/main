@@ -46,8 +46,8 @@ class ProductService:
     def search_by_name(self, name: str):
         return self.repo.find_by_name(name)
 
-    def get_product(self, product_id):
-        if not product_id or product_id <= 0:
+    def get_product(self, product_id: str):
+        if not product_id or not isinstance(product_id, str):
             raise HTTPException(status_code=400, detail="Invalid product ID")
 
         product = self.repo.find_by_id(product_id)

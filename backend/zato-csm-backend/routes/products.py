@@ -46,7 +46,7 @@ def create_product(
 
 @router.get("/{product_id}")
 def get_product(
-    product_id: int,
+    product_id: str,
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
@@ -57,7 +57,7 @@ def get_product(
 @router.put("/{product_id}")
 async def update_product(
     request: Request,
-    product_id: int,
+    product_id: str,
     name: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     price: Optional[float] = Form(None),
