@@ -22,7 +22,7 @@ const WebFooter: React.FC = () => {
   }
 
   return (
-    <footer className='bg-gray-50 text-gray-700 py-8'>
+    <footer className='bg-zatobox-50 text-zatobox-700 py-8'>
       <div className='container mx-auto px-4'>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
           <div>
@@ -40,7 +40,7 @@ const WebFooter: React.FC = () => {
                       href={value as string}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='hover:text-gray-900'
+                      className='hover:text-zatobox-900'
                     >
                       <Github size={24} />
                     </a>
@@ -53,7 +53,7 @@ const WebFooter: React.FC = () => {
                       href={value as string}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='hover:text-gray-900'
+                      className='hover:text-zatobox-900'
                     >
                       <Linkedin size={24} />
                     </a>
@@ -66,7 +66,7 @@ const WebFooter: React.FC = () => {
                       href={value as string}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='hover:text-gray-900'
+                      className='hover:text-zatobox-900'
                     >
                       <Instagram size={24} />
                     </a>
@@ -83,7 +83,7 @@ const WebFooter: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className='border-t border-gray-200 mt-8 pt-4 text-center'>
+        <div className='border-t border-zatobox-200 mt-8 pt-4 text-center'>
           <p className='text-sm'>&copy; 2025 ZatoBox. All rights reserved.</p>
         </div>
       </div>
