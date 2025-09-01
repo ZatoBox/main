@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, products, inventory, sales
+from routes import auth, products, inventory, sales, layouts
 
 # Import middleware registry
 from middleware.middleware import register_middlewares
@@ -48,6 +48,7 @@ app.include_router(auth.router)
 app.include_router(products.router)
 app.include_router(inventory.router)
 app.include_router(sales.router)
+app.include_router(layouts.router)
 
 
 @app.get("/")
