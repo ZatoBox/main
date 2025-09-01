@@ -196,3 +196,40 @@ export interface OCRSupportedFormatsResponse {
     orientation: string;
   };
 }
+
+// Layout
+export interface Layout {
+  slug: string;
+  owner_id: string;
+  inventory_id: string;
+  hero_title?: string;
+  web_description?: string;
+  social_links?: Record<string, any>;
+  created_at: string;
+  last_updated: string;
+}
+
+export interface CreateLayoutRequest {
+  slug: string;
+  inventory_id: string;
+  hero_title?: string;
+  web_description?: string;
+  social_links?: Record<string, any>;
+}
+
+export interface UpdateLayoutRequest {
+  hero_title?: string;
+  web_description?: string;
+  social_links?: Record<string, any>;
+}
+
+export interface LayoutResponse {
+  success: boolean;
+  message: string;
+  layout: Layout;
+}
+
+export interface LayoutsResponse {
+  success: boolean;
+  layouts: Layout[];
+}
