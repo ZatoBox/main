@@ -30,7 +30,7 @@ const WebFooter: React.FC = () => {
             <p className='text-sm'>{layout.web_description}</p>
           </div>
           <div>
-            <h4 className='text-md font-medium mb-4'>Enlaces</h4>
+            <h4 className='text-md font-medium mb-4'>Links</h4>
             <div className='flex space-x-4'>
               {Object.entries(layout.social_links || {}).map(([key, value]) => {
                 if (key === 'github') {
@@ -77,17 +77,14 @@ const WebFooter: React.FC = () => {
             </div>
           </div>
           <div>
-            <h4 className='text-md font-medium mb-4'>Contacto</h4>
+            <h4 className='text-md font-medium mb-4'>Contact</h4>
             <p className='text-sm'>
-              Última actualización:{' '}
-              {new Date(layout.last_updated).toLocaleDateString()}
+              Last updated: {new Date(layout.last_updated).toLocaleDateString()}
             </p>
           </div>
         </div>
         <div className='border-t border-gray-200 mt-8 pt-4 text-center'>
-          <p className='text-sm'>
-            &copy; 2025 ZatoBox. Todos los derechos reservados.
-          </p>
+          <p className='text-sm'>&copy; 2025 ZatoBox. All rights reserved.</p>
         </div>
       </div>
     </footer>
