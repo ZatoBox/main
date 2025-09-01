@@ -5,7 +5,7 @@ from fastapi import (
     Body,
     Request,
 )
-from typing import Optional
+from typing import Optional, List
 from models.product import ProductResponse, CreateProductRequest, UpdateProductRequest
 from repositories.product_repositories import ProductRepository
 from utils.dependencies import get_current_user
@@ -32,6 +32,22 @@ def create_product(
         creator_id=current_user["id"],
     )
     return ProductResponse(**product)
+
+
+@router.post("/bulk", response_model=List[ProductResponse])
+def create_products_bulk(
+    products_data: List[CreateProductRequest] = Body(...),
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    products = []
+    for product_data in products_data:
+        product = product_service.create_product(
+            product_data,
+            creator_id=current_user["id"],
+        )
+        products.append(ProductResponse(**product))
+    return products
 
 
 @router.get("/{product_id}")

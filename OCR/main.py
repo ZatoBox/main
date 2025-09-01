@@ -4,7 +4,7 @@ from google import genai
 from google.genai import types
 from pydantic import BaseModel
 import os
-from typing import Optional
+from typing import Optional, List
 import httpx
 from dotenv import load_dotenv
 import json
@@ -29,6 +29,7 @@ class OCRResponse(BaseModel):
     text: str
     confidence: Optional[float] = None
     language: Optional[str] = None
+    products: Optional[List[dict]] = None
 
 
 @app.post("/ocr")
@@ -54,10 +55,7 @@ async def process_image(file: UploadFile = File(...)):
         image_data = await file.read()
 
         # Procesar con Gemini
-        prompt = os.environ.get(
-            "OCR_PROMPT",
-            "Extrae todo el texto de esta imagen. Devuelve solo el texto sin formato adicional.",
-        )
+        prompt = os.environ.get("OCR_PROMPT")
         contents = [
             types.Content(
                 role="user",
@@ -74,7 +72,18 @@ async def process_image(file: UploadFile = File(...)):
         # Intentar parsear como JSON
         try:
             result = json.loads(extracted_text)
-            return JSONResponse(content=result)
+            if isinstance(result, list):
+                products = result
+            elif isinstance(result, dict):
+                if "productos" in result:
+                    products = result["productos"]
+                else:
+                    products = [result]
+            else:
+                products = None
+            return OCRResponse(
+                text=extracted_text, confidence=0.95, language="es", products=products
+            )
         except json.JSONDecodeError:
             # Si no es JSON válido, devolver como texto
             return OCRResponse(
@@ -94,18 +103,20 @@ async def root():
     return {"message": "ZatoBox OCR API con Gemini"}
 
 
-# Futura conexión a otro endpoint
-@app.post("/connect-to-endpoint")
+# Conexión a products endpoint
+@app.post("/bulk-products")
 async def connect_to_other_endpoint(data: OCRResponse):
     """
-    Endpoint para enviar los datos procesados a otro endpoint existente
+    Endpoint para enviar los datos procesados al endpoint de products
     """
     try:
-        # Lógica para conectar con otro endpoint existente (productos)
+        # Lógica para conectar con endpoint de products
+        products_to_create = data.products if data.products else []
 
         async with httpx.AsyncClient() as http_client:
+            backend_url = os.environ.get("BACKEND_URL")
             response = await http_client.post(
-                "https://tu-endpoint-existente.com/api/process", json=data.dict()
+                f"{backend_url}/api/products/bulk", json=products_to_create
             )
 
         return {
