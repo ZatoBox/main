@@ -7,6 +7,7 @@ import type {
   Product,
   InventoryResponse,
   InventoryItem,
+  InventorySummary,
   SalesResponse,
   SaleResponse,
   Sale,
@@ -167,59 +168,26 @@ export const productsAPI = {
 export const inventoryAPI = {
   getUserInventory: (): Promise<InventoryResponse> =>
     apiRequest('/inventory/user'),
-  getAll: (
-    params: Record<string, string | number | boolean> = {}
-  ): Promise<InventoryResponse> => {
-    const queryString = new URLSearchParams(
-      params as Record<string, string>
-    ).toString();
-    return apiRequest(`/inventory?${queryString}`);
-  },
-  getActive: async (
-    params: Record<string, string | number | boolean> = {}
-  ): Promise<InventoryResponse> => {
-    const merged = { ...params, include: (params as any).include ?? 'product' };
-    const queryString = new URLSearchParams(
-      merged as Record<string, string>
-    ).toString();
-    const response = await apiRequest<InventoryResponse>(
-      `/inventory?${queryString}`
-    );
-    if (!response || !Array.isArray(response.inventory)) return response;
-    const inventoryList = response.inventory;
-    const needFetch = inventoryList.some((it) => !it.product && it.product_id);
-    if (needFetch) {
-      const uniqueIds = Array.from(
-        new Set(inventoryList.map((it) => it.product_id).filter(Boolean))
-      );
-      const productsMap: Record<number, Product> = {};
-      await Promise.all(
-        uniqueIds.map(async (pid) => {
-          try {
-            const prodRes = await productsAPI.getById(pid);
-            if ((prodRes as any).product)
-              productsMap[pid] = (prodRes as any).product as Product;
-          } catch {}
-        })
-      );
-      inventoryList.forEach((it) => {
-        if (!it.product) it.product = productsMap[it.product_id] ?? null;
-      });
-    }
-    const filtered = inventoryList.filter(
-      (it) => it.product && (it.product as Product).status === 'active'
-    );
-    return { ...response, inventory: filtered };
-  },
-  getById: (id: number): Promise<InventoryResponse> =>
-    apiRequest(`/inventory/${id}`),
-  update: (
-    id: number,
-    inventoryData: Partial<InventoryItem>
-  ): Promise<{ success: boolean; message: string }> =>
-    apiRequest(`/inventory/${id}`, { method: 'PUT', data: inventoryData }),
-  delete: (id: number): Promise<{ success: boolean; message: string }> =>
-    apiRequest(`/inventory/${id}`, { method: 'DELETE' }),
+  getAll: (): Promise<InventoryResponse> => apiRequest('/inventory'),
+  getSummary: (): Promise<{ success: boolean; summary: InventorySummary }> =>
+    apiRequest('/inventory/summary'),
+  getLowStock: (
+    threshold: number = 0
+  ): Promise<{ success: boolean; low_stock_products: InventoryItem[] }> =>
+    apiRequest(`/inventory/low-stock?threshold=${threshold}`),
+  getById: (
+    productId: string
+  ): Promise<{ success: boolean; product?: InventoryItem; message?: string }> =>
+    apiRequest(`/inventory/${productId}`),
+  updateStock: (
+    productId: string,
+    quantity: number,
+    reason?: string
+  ): Promise<{ success: boolean; message: string; product: InventoryItem }> =>
+    apiRequest(`/inventory/${productId}`, {
+      method: 'PUT',
+      data: { quantity, reason },
+    }),
 };
 
 export const salesAPI = {

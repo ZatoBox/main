@@ -56,7 +56,7 @@ class LayoutService:
             if val == "" or val is None:
                 updates.pop(fld, None)
 
-        return self.repo.update_layout(layout_slug, updates, user_timezone)
+        return self.repo.update_layout(layout_slug, updates)
 
     def delete_layout(self, layout_slug: str):
         return self.repo.delete_layout(layout_slug)

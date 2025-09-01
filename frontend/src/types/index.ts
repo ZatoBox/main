@@ -69,22 +69,46 @@ export interface Category {
 export interface InventoryResponse {
   success: boolean;
   inventory: InventoryItem[];
+  total_products: number;
+  total_stock: number;
+  low_stock_count: number;
 }
+
+export interface InventoryItem {
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  stock: number;
+  min_stock: number;
+  category_id: string;
+  images: string[];
+  status: string;
+  weight?: number;
+  sku?: string;
+  creator_id: string;
+  unit: string;
+  product_type: string;
+  localization?: string;
+  created_at: string;
+  last_updated: string;
+  last_stock_update_reason?: string;
+}
+
+export interface InventorySummary {
+  total_products: number;
+  total_stock: number;
+  low_stock_count: number;
+}
+
 export interface InventoryStatsResponse {
   success: boolean;
   stats: Record<string, number>;
 }
 
-export interface InventoryItem {
-  id: number;
-  product_id: number;
+export interface UpdateInventoryRequest {
   quantity: number;
-  location?: string;
-  updated_at?: string;
-  change?: number;
   reason?: string;
-  date?: string;
-  product?: Product;
 }
 
 // Sales

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
@@ -23,6 +23,8 @@ class ProductUnity(str, Enum):
 
 
 class CreateProductRequest(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     name: str = Field(..., min_length=1)
     price: float = Field(..., gt=0)
     stock: int = Field(..., ge=0)
@@ -39,7 +41,8 @@ class CreateProductRequest(BaseModel):
     status: ProductStatus = Field(..., description="Estado del producto")
     min_stock: int = Field(0, ge=0, description="Stock mínimo")
 
-    @validator("sku")
+    @field_validator("sku")
+    @classmethod
     def _normalize_sku(cls, v):
         if v is not None and v.strip() == "":
             return None
@@ -47,6 +50,8 @@ class CreateProductRequest(BaseModel):
 
 
 class UpdateProductRequest(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
     price: Optional[float] = Field(None, gt=0)
@@ -62,6 +67,8 @@ class UpdateProductRequest(BaseModel):
 
 
 class ProductResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     name: str
     description: Optional[str]
@@ -79,7 +86,3 @@ class ProductResponse(BaseModel):
     created_at: datetime
     last_updated: datetime
     localization: Optional[str]
-
-    class Config:
-        from_attributes = True
-        fields = {"weight": "weight"}

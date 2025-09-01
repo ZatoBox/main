@@ -3,7 +3,6 @@ from fastapi import (
     Depends,
     HTTPException,
     Body,
-    Request,
 )
 from typing import Optional, List
 from models.layout import LayoutResponse, CreateLayoutRequest, UpdateLayoutRequest
@@ -11,7 +10,6 @@ from repositories.layout_repositories import LayoutRepository
 from utils.dependencies import get_current_user
 from config.supabase import get_supabase_client
 from services.layout_service import LayoutService
-from utils.timezone_utils import get_user_timezone_from_request
 
 router = APIRouter(prefix="/api/layouts", tags=["layouts"])
 
@@ -21,7 +19,7 @@ def _get_layout_service(supabase=Depends(get_supabase_client)) -> LayoutService:
     return LayoutService(layout_repo)
 
 
-@router.post("/", response_model=LayoutResponse)
+@router.post("/")
 def create_layout(
     layout_data: CreateLayoutRequest = Body(...),
     current_user=Depends(get_current_user),
@@ -31,7 +29,7 @@ def create_layout(
         layout_data,
         owner_id=current_user["id"],
     )
-    return LayoutResponse(**layout)
+    return {"success": True, "message": "Layout created successfully", "layout": layout}
 
 
 @router.get("/{layout_slug}")
@@ -47,15 +45,12 @@ def get_layout(
 @router.put("/{layout_slug}")
 def update_layout(
     layout_slug: str,
-    request: Request,
     updates: UpdateLayoutRequest = Body(...),
     current_user=Depends(get_current_user),
     layout_service=Depends(_get_layout_service),
 ):
-    user_timezone = get_user_timezone_from_request(request)
-
     layout_updated = layout_service.update_layout(
-        layout_slug, updates.dict(exclude_unset=True), user_timezone
+        layout_slug, updates.dict(exclude_unset=True)
     )
     return {
         "success": True,
