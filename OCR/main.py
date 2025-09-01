@@ -69,6 +69,13 @@ async def process_image(file: UploadFile = File(...)):
 
         extracted_text = response.text.strip()
 
+        # Limpiar si viene en bloque de código Markdown
+        if extracted_text.startswith("```json"):
+            extracted_text = extracted_text[7:]
+        if extracted_text.endswith("```"):
+            extracted_text = extracted_text[:-3]
+        extracted_text = extracted_text.strip()
+
         # Intentar parsear como JSON
         try:
             result = json.loads(extracted_text)
