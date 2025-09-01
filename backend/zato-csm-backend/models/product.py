@@ -37,6 +37,7 @@ class CreateProductRequest(BaseModel):
     )
     localization: Optional[str] = None
     status: ProductStatus = Field(..., description="Estado del producto")
+    min_stock: int = Field(0, ge=0, description="Stock mínimo")
 
     @validator("sku")
     def _normalize_sku(cls, v):

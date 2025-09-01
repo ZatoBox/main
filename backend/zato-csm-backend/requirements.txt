@@ -51,3 +51,4 @@ supabase_auth==2.12.3
 supabase_functions==0.10.1
 urllib3==2.5.0
 websockets==15.0.1
+cloudinary==1.44.0

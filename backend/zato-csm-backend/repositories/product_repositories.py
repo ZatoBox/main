@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from supabase import Client
 from utils.timezone_utils import get_current_time_with_timezone
+from typing import List
 
 
 class ProductRepository:
@@ -23,6 +24,7 @@ class ProductRepository:
         weight: float | None,
         localization: str | None,
         creator_id: str,
+        images: List[str] = None,
     ):
         payload = {
             "name": name,
@@ -31,7 +33,7 @@ class ProductRepository:
             "stock": stock,
             "min_stock": min_stock,
             "category_id": category_id,
-            "images": [],
+            "images": images or [],
             "status": status,
             "weight": weight,
             "sku": sku,

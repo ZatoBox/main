@@ -9,12 +9,16 @@ class ProductService:
     def __init__(self, repo: ProductRepository):
         self.repo = repo
 
-    def create_product(self, product_data: CreateProductRequest, creator_id: str):
+    def create_product(
+        self,
+        product_data: CreateProductRequest,
+        creator_id: str,
+        images: List[str] = None,
+    ):
         unit_val = getattr(product_data.unit, "value", product_data.unit)
         type_val = getattr(
             product_data.product_type, "value", product_data.product_type
         )
-        # category ahora es category_id uuid string
         category_id_val = getattr(product_data, "category_id")
 
         return self.repo.create_product(
@@ -35,6 +39,7 @@ class ProductService:
             weight=getattr(product_data, "weight", None),
             localization=getattr(product_data, "localization", None),
             creator_id=str(creator_id),
+            images=images or [],
         )
 
     def list_products(self):
@@ -131,12 +136,9 @@ class ProductService:
 
         images = updates.get("images")
         if images and isinstance(images, list):
-            updates["images"] = self._process_images(images)
+            updates["images"] = images
 
         return self.repo.update_product(product_id, updates, user_timezone)
-
-    def delete_product(self, product_id):
-        return self.repo.delete_product(product_id)
 
     def _process_images(self, images):
         processed = []
