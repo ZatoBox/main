@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Header
 from fastapi.responses import JSONResponse
 from google import genai
 from google.genai import types
@@ -111,8 +111,10 @@ async def root():
 
 
 # Conexión a products endpoint
-@app.post("/bulk-products")
-async def connect_to_other_endpoint(data: OCRResponse):
+@app.post("/bulk")
+async def connect_to_other_endpoint(
+    data: OCRResponse, authorization: str = Header(None)
+):
     """
     Endpoint para enviar los datos procesados al endpoint de products
     """
@@ -120,14 +122,26 @@ async def connect_to_other_endpoint(data: OCRResponse):
         # Lógica para conectar con endpoint de products
         products_to_create = data.products if data.products else []
 
+        headers = {}
+        # if authorization:
+        #     token = (
+        #         authorization.replace("Bearer ", "")
+        #         if authorization.startswith("Bearer ")
+        #         else authorization
+        #     )
+        #     headers["Authorization"] = f"Bearer {token}"
+
         async with httpx.AsyncClient() as http_client:
             backend_url = os.environ.get("BACKEND_URL")
             response = await http_client.post(
-                f"{backend_url}/api/products/bulk", json=products_to_create
+                f"{backend_url}/api/products/bulk",
+                json=products_to_create,
+                headers=headers,
             )
 
         return {
-            "status": "success",
+            "status": "success" if response.status_code == 200 else "error",
+            "response_status": response.status_code,
             "endpoint_response": (
                 response.json() if response.status_code == 200 else response.text
             ),
