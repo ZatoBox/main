@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { Github, Linkedin, Instagram } from 'lucide-react';
 import { layoutAPI } from '@/services/web-api';
