@@ -8,6 +8,8 @@ from typing import Optional, List
 import httpx
 from dotenv import load_dotenv
 import json
+import time
+from collections import defaultdict
 
 # Cargar variables de entorno desde .env
 load_dotenv()
@@ -17,6 +19,10 @@ client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 # Modelo de Gemini para OCR
 model = "gemini-1.5-flash"
+
+# Rate limiting: 5 minutos entre peticiones por usuario
+RATE_LIMIT_SECONDS = 300  # 5 minutos
+user_last_request = defaultdict(float)
 
 app = FastAPI(
     title="ZatoBox OCR API",
@@ -33,10 +39,35 @@ class OCRResponse(BaseModel):
 
 
 @app.post("/ocr")
-async def process_image(file: UploadFile = File(...)):
+async def process_image(
+    file: UploadFile = File(...), authorization: str = Header(None)
+):
     """
     Endpoint para procesar imagen y extraer texto usando Gemini
     """
+    # Rate limiting: verificar si el usuario puede hacer la petición
+    user_id = "anonymous"
+    if authorization:
+        # Usar el token como identificador único del usuario
+        user_id = (
+            authorization.replace("Bearer ", "")
+            if authorization.startswith("Bearer ")
+            else authorization
+        )
+
+    current_time = time.time()
+    last_request_time = user_last_request[user_id]
+
+    if current_time - last_request_time < RATE_LIMIT_SECONDS:
+        remaining_time = int(RATE_LIMIT_SECONDS - (current_time - last_request_time))
+        raise HTTPException(
+            status_code=429,
+            detail=f"Demasiadas peticiones. Debes esperar {remaining_time} segundos antes de hacer otra petición OCR.",
+        )
+
+    # Actualizar el timestamp de la última petición
+    user_last_request[user_id] = current_time
+
     try:
         # Validar tipo de archivo
         allowed_types = [
