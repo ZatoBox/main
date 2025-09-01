@@ -4,6 +4,9 @@ from fastapi import (
     HTTPException,
     Body,
     Request,
+    Form,
+    File,
+    UploadFile,
 )
 from typing import Optional, List
 from models.product import ProductResponse, CreateProductRequest, UpdateProductRequest
@@ -90,6 +93,7 @@ def update_product(
     product_service=Depends(_get_product_service),
 ):
     user_timezone = get_user_timezone_from_request(request)
+
     product_updated = product_service.update_product(
         product_id, updates.dict(exclude_unset=True), user_timezone
     )
@@ -126,3 +130,65 @@ def list_products(
         raise HTTPException(
             status_code=500, detail=f"Error fetching products: {str(e)}"
         )
+
+
+# CRUD for product images
+@router.post("/{product_id}/images")
+def add_product_images(
+    product_id: str,
+    images: List[UploadFile] = File(...),
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    from utils.cloudinary_utils import upload_multiple_images_from_files
+
+    image_urls = upload_multiple_images_from_files(images)
+    product_updated = product_service.add_images(product_id, image_urls)
+    return {
+        "success": True,
+        "message": "Images added successfully",
+        "product": product_updated,
+    }
+
+
+@router.get("/{product_id}/images")
+def get_product_images(
+    product_id: str,
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    images = product_service.get_images(product_id)
+    return {"success": True, "images": images}
+
+
+@router.put("/{product_id}/images")
+def update_product_images(
+    product_id: str,
+    images: List[UploadFile] = File(...),
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    from utils.cloudinary_utils import upload_multiple_images_from_files
+
+    image_urls = upload_multiple_images_from_files(images)
+    product_updated = product_service.update_images(product_id, image_urls)
+    return {
+        "success": True,
+        "message": "Images updated successfully",
+        "product": product_updated,
+    }
+
+
+@router.delete("/{product_id}/images/{image_index}")
+def delete_product_image(
+    product_id: str,
+    image_index: int,
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    product_updated = product_service.delete_image(product_id, image_index)
+    return {
+        "success": True,
+        "message": "Image deleted successfully",
+        "product": product_updated,
+    }

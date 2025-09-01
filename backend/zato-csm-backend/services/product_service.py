@@ -9,12 +9,15 @@ class ProductService:
     def __init__(self, repo: ProductRepository):
         self.repo = repo
 
-    def create_product(self, product_data: CreateProductRequest, creator_id: str):
+    def create_product(
+        self,
+        product_data: CreateProductRequest,
+        creator_id: str,
+    ):
         unit_val = getattr(product_data.unit, "value", product_data.unit)
         type_val = getattr(
             product_data.product_type, "value", product_data.product_type
         )
-        # category ahora es category_id uuid string
         category_id_val = getattr(product_data, "category_id")
 
         return self.repo.create_product(
@@ -35,6 +38,7 @@ class ProductService:
             weight=getattr(product_data, "weight", None),
             localization=getattr(product_data, "localization", None),
             creator_id=str(creator_id),
+            images=[],
         )
 
     def list_products(self):
@@ -56,7 +60,10 @@ class ProductService:
         return product
 
     def update_product(
-        self, product_id: int, updates: dict, user_timezone: str = "UTC"
+        self,
+        product_id: int,
+        updates: dict,
+        user_timezone: str = "UTC",
     ):
         allowed_fields = [
             "name",
@@ -129,14 +136,11 @@ class ProductService:
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid weight value")
 
-        images = updates.get("images")
-        if images and isinstance(images, list):
-            updates["images"] = self._process_images(images)
+        images_list = updates.get("images")
+        if images_list and isinstance(images_list, list):
+            pass
 
         return self.repo.update_product(product_id, updates, user_timezone)
-
-    def delete_product(self, product_id):
-        return self.repo.delete_product(product_id)
 
     def _process_images(self, images):
         processed = []
@@ -146,3 +150,15 @@ class ProductService:
             else:
                 processed.append(str(img))
         return processed
+
+    def add_images(self, product_id: str, new_images: List[str]):
+        return self.repo.add_images(int(product_id), new_images)
+
+    def get_images(self, product_id: str):
+        return self.repo.get_images(int(product_id))
+
+    def delete_image(self, product_id: str, image_index: int):
+        return self.repo.delete_image(int(product_id), image_index)
+
+    def update_images(self, product_id: str, new_images: List[str]):
+        return self.repo.update_images(int(product_id), new_images)
