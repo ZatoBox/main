@@ -37,7 +37,7 @@ def create_product(
 @router.post("/bulk", response_model=List[ProductResponse])
 def create_products_bulk(
     products_data: List[CreateProductRequest] = Body(...),
-    # current_user=Depends(get_current_user),  # Comentado para testing
+    current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
     products = []
@@ -45,7 +45,7 @@ def create_products_bulk(
         try:
             product = product_service.create_product(
                 product_data,
-                creator_id="749262c7-e7fa-4905-b4d0-5737f2c8c860",
+                creator_id=current_user["id"],
             )
             products.append(ProductResponse(**product))
         except Exception as e:
@@ -57,7 +57,7 @@ def create_products_bulk(
                     modified_data.sku = f"{product_data.sku}_{i+1}"
                     product = product_service.create_product(
                         modified_data,
-                        creator_id="749262c7-e7fa-4905-b4d0-5737f2c8c860",
+                        creator_id=current_user["id"],
                     )
                     products.append(ProductResponse(**product))
                 except Exception as e2:

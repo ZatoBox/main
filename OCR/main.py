@@ -123,13 +123,13 @@ async def connect_to_other_endpoint(
         products_to_create = data.products if data.products else []
 
         headers = {}
-        # if authorization:
-        #     token = (
-        #         authorization.replace("Bearer ", "")
-        #         if authorization.startswith("Bearer ")
-        #         else authorization
-        #     )
-        #     headers["Authorization"] = f"Bearer {token}"
+        if authorization:
+            token = (
+                authorization.replace("Bearer ", "")
+                if authorization.startswith("Bearer ")
+                else authorization
+            )
+            headers["Authorization"] = f"Bearer {token}"
 
         async with httpx.AsyncClient() as http_client:
             backend_url = os.environ.get("BACKEND_URL")
