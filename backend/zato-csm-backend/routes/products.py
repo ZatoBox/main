@@ -5,7 +5,7 @@ from fastapi import (
     Body,
     Request,
 )
-from typing import Optional
+from typing import Optional, List
 from models.product import ProductResponse, CreateProductRequest, UpdateProductRequest
 from repositories.product_repositories import ProductRepository
 from utils.dependencies import get_current_user
@@ -32,6 +32,43 @@ def create_product(
         creator_id=current_user["id"],
     )
     return ProductResponse(**product)
+
+
+@router.post("/bulk", response_model=List[ProductResponse])
+def create_products_bulk(
+    products_data: List[CreateProductRequest] = Body(...),
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    products = []
+    for i, product_data in enumerate(products_data):
+        try:
+            product = product_service.create_product(
+                product_data,
+                creator_id=current_user["id"],
+            )
+            products.append(ProductResponse(**product))
+        except Exception as e:
+            # Si hay error (ej. SKU duplicado), intentar con SKU modificado
+            if "duplicate key value violates unique constraint" in str(e):
+                try:
+                    # Modificar el SKU agregando un sufijo
+                    modified_data = product_data.copy()
+                    modified_data.sku = f"{product_data.sku}_{i+1}"
+                    product = product_service.create_product(
+                        modified_data,
+                        creator_id=current_user["id"],
+                    )
+                    products.append(ProductResponse(**product))
+                except Exception as e2:
+                    # Si aún falla, saltar este producto
+                    print(f"Error creando producto {i+1}: {str(e2)}")
+                    continue
+            else:
+                # Otro error, saltar
+                print(f"Error creando producto {i+1}: {str(e)}")
+                continue
+    return products
 
 
 @router.get("/{product_id}")

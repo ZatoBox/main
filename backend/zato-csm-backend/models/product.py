@@ -28,7 +28,7 @@ class CreateProductRequest(BaseModel):
     stock: int = Field(..., ge=0)
     unit: ProductUnity = Field(...)
     product_type: ProductType = Field(...)
-    category_id: str = Field(..., min_length=1, description="UUID de la categoría")
+    category_id: Optional[str] = Field(None, description="UUID de la categoría")
 
     description: str = Field(..., description="Descripción del producto")
     sku: str = Field(..., max_length=255, description="SKU del producto")
@@ -67,7 +67,7 @@ class ProductResponse(BaseModel):
     price: float
     stock: int
     min_stock: int
-    category_id: str
+    category_id: Optional[str]
     images: Optional[List[str]] = []
     status: str
     weight: Optional[float]
