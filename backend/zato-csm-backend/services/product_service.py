@@ -13,7 +13,6 @@ class ProductService:
         self,
         product_data: CreateProductRequest,
         creator_id: str,
-        images: List[str] = None,
     ):
         unit_val = getattr(product_data.unit, "value", product_data.unit)
         type_val = getattr(
@@ -39,7 +38,7 @@ class ProductService:
             weight=getattr(product_data, "weight", None),
             localization=getattr(product_data, "localization", None),
             creator_id=str(creator_id),
-            images=images or [],
+            images=[],
         )
 
     def list_products(self):
@@ -65,7 +64,6 @@ class ProductService:
         product_id: int,
         updates: dict,
         user_timezone: str = "UTC",
-        images: List[str] = None,
     ):
         allowed_fields = [
             "name",
@@ -140,7 +138,7 @@ class ProductService:
 
         images_list = updates.get("images")
         if images_list and isinstance(images_list, list):
-            updates["images"] = images or images_list
+            pass
 
         return self.repo.update_product(product_id, updates, user_timezone)
 
@@ -152,3 +150,15 @@ class ProductService:
             else:
                 processed.append(str(img))
         return processed
+
+    def add_images(self, product_id: str, new_images: List[str]):
+        return self.repo.add_images(int(product_id), new_images)
+
+    def get_images(self, product_id: str):
+        return self.repo.get_images(int(product_id))
+
+    def delete_image(self, product_id: str, image_index: int):
+        return self.repo.delete_image(int(product_id), image_index)
+
+    def update_images(self, product_id: str, new_images: List[str]):
+        return self.repo.update_images(int(product_id), new_images)

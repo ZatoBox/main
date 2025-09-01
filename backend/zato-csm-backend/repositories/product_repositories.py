@@ -114,3 +114,32 @@ class ProductRepository:
         )
         data = getattr(resp, "data", None) or []
         return data
+
+    def add_images(self, product_id: int, new_images: List[str]):
+        product = self.find_by_id(product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        current_images = product.get("images", [])
+        updated_images = current_images + new_images
+        return self.update_product(product_id, {"images": updated_images})
+
+    def get_images(self, product_id: int):
+        product = self.find_by_id(product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        return product.get("images", [])
+
+    def delete_image(self, product_id: int, image_index: int):
+        product = self.find_by_id(product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        current_images = product.get("images", [])
+        if image_index < 0 or image_index >= len(current_images):
+            raise HTTPException(status_code=400, detail="Invalid image index")
+        updated_images = (
+            current_images[:image_index] + current_images[image_index + 1 :]
+        )
+        return self.update_product(product_id, {"images": updated_images})
+
+    def update_images(self, product_id: int, new_images: List[str]):
+        return self.update_product(product_id, {"images": new_images})

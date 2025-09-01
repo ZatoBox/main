@@ -4,6 +4,9 @@ from fastapi import (
     HTTPException,
     Body,
     Request,
+    Form,
+    File,
+    UploadFile,
 )
 from typing import Optional, List
 from models.product import ProductResponse, CreateProductRequest, UpdateProductRequest
@@ -27,16 +30,9 @@ def create_product(
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
-    image_urls = []
-    if product_data.images:
-        from utils.cloudinary_utils import upload_multiple_images_from_base64
-
-        image_urls = upload_multiple_images_from_base64(product_data.images)
-
     product = product_service.create_product(
         product_data,
         creator_id=current_user["id"],
-        images=image_urls,
     )
     return ProductResponse(**product)
 
@@ -50,16 +46,9 @@ def create_products_bulk(
     products = []
     for i, product_data in enumerate(products_data):
         try:
-            image_urls = []
-            if product_data.images:
-                from utils.cloudinary_utils import upload_multiple_images_from_base64
-
-                image_urls = upload_multiple_images_from_base64(product_data.images)
-
             product = product_service.create_product(
                 product_data,
                 creator_id=current_user["id"],
-                images=image_urls,
             )
             products.append(ProductResponse(**product))
         except Exception as e:
@@ -69,20 +58,9 @@ def create_products_bulk(
                     # Modificar el SKU agregando un sufijo
                     modified_data = product_data.copy()
                     modified_data.sku = f"{product_data.sku}_{i+1}"
-                    image_urls = []
-                    if modified_data.images:
-                        from utils.cloudinary_utils import (
-                            upload_multiple_images_from_base64,
-                        )
-
-                        image_urls = upload_multiple_images_from_base64(
-                            modified_data.images
-                        )
-
                     product = product_service.create_product(
                         modified_data,
                         creator_id=current_user["id"],
-                        images=image_urls,
                     )
                     products.append(ProductResponse(**product))
                 except Exception as e2:
@@ -116,14 +94,8 @@ def update_product(
 ):
     user_timezone = get_user_timezone_from_request(request)
 
-    image_urls = []
-    if updates.images:
-        from utils.cloudinary_utils import upload_multiple_images_from_base64
-
-        image_urls = upload_multiple_images_from_base64(updates.images)
-
     product_updated = product_service.update_product(
-        product_id, updates.dict(exclude_unset=True), user_timezone, images=image_urls
+        product_id, updates.dict(exclude_unset=True), user_timezone
     )
     return {
         "success": True,
@@ -158,3 +130,65 @@ def list_products(
         raise HTTPException(
             status_code=500, detail=f"Error fetching products: {str(e)}"
         )
+
+
+# CRUD for product images
+@router.post("/{product_id}/images")
+def add_product_images(
+    product_id: str,
+    images: List[UploadFile] = File(...),
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    from utils.cloudinary_utils import upload_multiple_images_from_files
+
+    image_urls = upload_multiple_images_from_files(images)
+    product_updated = product_service.add_images(product_id, image_urls)
+    return {
+        "success": True,
+        "message": "Images added successfully",
+        "product": product_updated,
+    }
+
+
+@router.get("/{product_id}/images")
+def get_product_images(
+    product_id: str,
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    images = product_service.get_images(product_id)
+    return {"success": True, "images": images}
+
+
+@router.put("/{product_id}/images")
+def update_product_images(
+    product_id: str,
+    images: List[UploadFile] = File(...),
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    from utils.cloudinary_utils import upload_multiple_images_from_files
+
+    image_urls = upload_multiple_images_from_files(images)
+    product_updated = product_service.update_images(product_id, image_urls)
+    return {
+        "success": True,
+        "message": "Images updated successfully",
+        "product": product_updated,
+    }
+
+
+@router.delete("/{product_id}/images/{image_index}")
+def delete_product_image(
+    product_id: str,
+    image_index: int,
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    product_updated = product_service.delete_image(product_id, image_index)
+    return {
+        "success": True,
+        "message": "Image deleted successfully",
+        "product": product_updated,
+    }
