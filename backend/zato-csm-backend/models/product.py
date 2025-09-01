@@ -38,6 +38,7 @@ class CreateProductRequest(BaseModel):
     localization: Optional[str] = None
     status: ProductStatus = Field(..., description="Estado del producto")
     min_stock: int = Field(0, ge=0, description="Stock mínimo")
+    images: Optional[List[str]] = Field([], description="Imágenes en base64")
 
     @validator("sku")
     def _normalize_sku(cls, v):
@@ -59,6 +60,7 @@ class UpdateProductRequest(BaseModel):
     status: Optional[ProductStatus] = None
     product_type: Optional[ProductType] = None
     unit: Optional[ProductUnity] = None
+    images: Optional[List[str]] = Field(None, description="Imágenes en base64")
 
 
 class ProductResponse(BaseModel):

@@ -61,7 +61,11 @@ class ProductService:
         return product
 
     def update_product(
-        self, product_id: int, updates: dict, user_timezone: str = "UTC"
+        self,
+        product_id: int,
+        updates: dict,
+        user_timezone: str = "UTC",
+        images: List[str] = None,
     ):
         allowed_fields = [
             "name",
@@ -134,9 +138,9 @@ class ProductService:
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid weight value")
 
-        images = updates.get("images")
-        if images and isinstance(images, list):
-            updates["images"] = images
+        images_list = updates.get("images")
+        if images_list and isinstance(images_list, list):
+            updates["images"] = images or images_list
 
         return self.repo.update_product(product_id, updates, user_timezone)
 
