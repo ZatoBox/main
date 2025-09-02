@@ -28,10 +28,10 @@ const LoginContainer: React.FC<Props> = ({
           </div>
         )}
         {title && (
-          <h1 className='mb-4 text-3xl font-bold text-text-primary'>{title}</h1>
+          <h1 className='mb-4 text-3xl font-bold text-zatobox-900'>{title}</h1>
         )}
         {description && (
-          <p className='leading-relaxed text-text-secondary'>{description}</p>
+          <p className='leading-relaxed text-zatobox-600'>{description}</p>
         )}
       </div>
       {children}

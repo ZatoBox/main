@@ -77,7 +77,7 @@ const RegisterForm: React.FC = () => {
           <Field
             name='full_name'
             placeholder='Your full name'
-            className='w-full px-4 transition-all duration-150 ease-in-out border rounded h-11 border-divider focus:ring-2 focus:ring-primary focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:shadow-sm'
+            className='w-full px-4 transition-all duration-150 ease-in-out border rounded h-11 border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900 placeholder-zatobox-600 hover:shadow-sm'
           />
           <div className='mt-1 text-sm text-error-700'>
             <ErrorMessage name='full_name' />
@@ -89,7 +89,7 @@ const RegisterForm: React.FC = () => {
             name='email'
             type='email'
             placeholder='example@email.com'
-            className='w-full px-4 transition-all duration-150 ease-in-out border rounded h-11 border-divider focus:ring-2 focus:ring-primary focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:shadow-sm'
+            className='w-full px-4 transition-all duration-150 ease-in-out border rounded h-11 border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900 placeholder-zatobox-600 hover:shadow-sm'
           />
           <div className='mt-1 text-sm text-error-700'>
             <ErrorMessage name='email' />
@@ -101,12 +101,12 @@ const RegisterForm: React.FC = () => {
             name='password'
             type={showPassword ? 'text' : 'password'}
             placeholder='at least 8 characters'
-            className='w-full px-4 pr-12 transition-all duration-150 ease-in-out border rounded h-11 border-divider focus:ring-2 focus:ring-primary focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:shadow-sm'
+            className='w-full px-4 pr-12 transition-all duration-150 ease-in-out border rounded h-11 border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900 placeholder-zatobox-600 hover:shadow-sm'
           />
           <button
             type='button'
             onClick={() => setShowPassword(!showPassword)}
-            className='absolute transition-colors transform -translate-y-1/2 right-3 top-1/2 text-text-secondary hover:text-text-primary'
+            className='absolute transition-colors transform -translate-y-1/2 right-3 top-1/2 text-zatobox-600 hover:text-zatobox-900'
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
@@ -120,12 +120,12 @@ const RegisterForm: React.FC = () => {
             name='confirmPassword'
             type={showConfirmPassword ? 'text' : 'password'}
             placeholder='confirm your password'
-            className='w-full px-4 pr-12 transition-all duration-150 ease-in-out border rounded h-11 border-divider focus:ring-2 focus:ring-primary focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:shadow-sm'
+            className='w-full px-4 pr-12 transition-all duration-150 ease-in-out border rounded h-11 border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900 placeholder-zatobox-600 hover:shadow-sm'
           />
           <button
             type='button'
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className='absolute transition-colors transform -translate-y-1/2 right-3 top-1/2 text-text-secondary hover:text-text-primary'
+            className='absolute transition-colors transform -translate-y-1/2 right-3 top-1/2 text-zatobox-600 hover:text-zatobox-900'
           >
             {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
@@ -138,7 +138,7 @@ const RegisterForm: React.FC = () => {
           <Field
             name='phone'
             placeholder='phone number (optional)'
-            className='w-full px-4 transition-all duration-150 ease-in-out border rounded h-11 border-divider focus:ring-2 focus:ring-primary focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:shadow-sm'
+            className='w-full px-4 transition-all duration-150 ease-in-out border rounded h-11 border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900 placeholder-zatobox-600 hover:shadow-sm'
           />
           <div className='mt-1 text-sm text-error-700'>
             <ErrorMessage name='phone' />
@@ -149,20 +149,20 @@ const RegisterForm: React.FC = () => {
           <Field
             name='acceptTerms'
             type='checkbox'
-            className='w-4 h-4 mt-1 border-gray-300 rounded text-complement focus:ring-complement'
+            className='w-4 h-4 mt-1 border-gray-300 rounded text-zatobox-500 focus:ring-zatobox-500'
           />
-          <label htmlFor='acceptTerms' className='text-sm text-text-secondary'>
+          <label htmlFor='acceptTerms' className='text-sm text-zatobox-600'>
             I agree to the{' '}
             <button
               type='button'
-              className='font-medium transition-colors text-complement hover:text-complement-600'
+              className='font-medium transition-colors text-zatobox-500 hover:text-zatobox-600'
             >
               Terms and Conditions
             </button>{' '}
             and{' '}
             <button
               type='button'
-              className='font-medium transition-colors text-complement hover:text-complement-600'
+              className='font-medium transition-colors text-zatobox-500 hover:text-zatobox-600'
             >
               Privacy Policy
             </button>
@@ -170,7 +170,7 @@ const RegisterForm: React.FC = () => {
         </div>
 
         {error && (
-          <div className='p-3 text-sm border rounded-lg bg-error-50 border-error-200 text-error-700'>
+          <div className='p-3 text-sm border rounded-lg bg-red-50 border-red-200 text-red-700'>
             {error}
           </div>
         )}
@@ -178,7 +178,7 @@ const RegisterForm: React.FC = () => {
         <button
           type='submit'
           disabled={isLoading}
-          className='w-full font-medium text-black transition-all duration-150 ease-in-out rounded-lg h-11 bg-primary hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed'
+          className='w-full font-medium text-white transition-all duration-150 ease-in-out rounded-lg h-11 bg-zatobox-500 hover:bg-zatobox-600 disabled:opacity-50 disabled:cursor-not-allowed'
         >
           {isLoading ? 'Creating account...' : 'Create Account'}
         </button>
