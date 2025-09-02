@@ -11,8 +11,8 @@ type Props = {
 
 const ProcessingOptions: React.FC<Props> = ({ options, onChange }) => {
   return (
-    <div className='p-4 mt-4 rounded-lg bg-gray-50'>
-      <h4 className='mb-3 text-sm font-medium text-text-primary'>
+    <div className='p-4 mt-4 rounded-lg bg-zatobox-50'>
+      <h4 className='mb-3 text-sm font-medium text-zatobox-900'>
         699 Processing Options
       </h4>
       <div className='grid grid-cols-1 gap-3 text-sm md:grid-cols-3'>

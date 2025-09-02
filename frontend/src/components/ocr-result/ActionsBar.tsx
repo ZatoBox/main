@@ -31,7 +31,7 @@ const ActionsBar: React.FC<Props> = ({
           </button>
           <button
             onClick={onCancelEdit}
-            className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-gray-600 rounded-lg md:px-6 md:py-3 hover:bg-gray-700 md:text-base'
+            className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-zatobox-500 rounded-lg md:px-6 md:py-3 hover:bg-zatobox-600 md:text-base'
           >
             74C Cancel
           </button>
@@ -54,13 +54,13 @@ const ActionsBar: React.FC<Props> = ({
           </button>
           <button
             onClick={onEdit}
-            className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-blue-600 rounded-lg md:px-6 md:py-3 hover:bg-blue-700 md:text-base'
+            className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-zatobox-500 rounded-lg md:px-6 md:py-3 hover:bg-zatobox-600 md:text-base'
           >
             4DD Edit Result
           </button>
           <button
             onClick={onProcessAnother}
-            className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-gray-600 rounded-lg md:px-6 md:py-3 hover:bg-gray-700 md:text-base'
+            className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 transform bg-zatobox-500 rounded-lg md:px-6 md:py-3 hover:bg-zatobox-600 md:text-base'
           >
             504 Process Another
           </button>
