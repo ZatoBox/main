@@ -17,3 +17,4 @@ class UserItem(BaseModel):
     email: EmailStr = Field(..., description="User email")
     role: RoleUser = Field(RoleUser.USER, description="User role")
     phone: Optional[str] = Field(None, min_length=1, description="User phone")
+    profile_image: Optional[str] = Field(None, description="User profile image URL")
