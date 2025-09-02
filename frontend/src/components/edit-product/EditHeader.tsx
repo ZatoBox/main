@@ -21,17 +21,17 @@ const EditHeader: React.FC<Props> = ({
   togglingStatus,
 }) => {
   return (
-    <div className='border-b shadow-sm bg-bg-surface border-divider'>
+    <div className='border-b shadow-sm bg-zatobox-50 border-zatobox-200'>
       <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between h-16'>
           <div className='flex items-center space-x-4'>
             <button
               onClick={onBack}
-              className='p-2 transition-colors rounded-full hover:bg-gray-50 md:hidden'
+              className='p-2 transition-colors rounded-full hover:bg-zatobox-100 md:hidden'
             >
-              <ArrowLeft size={20} className='text-text-primary' />
+              <ArrowLeft size={20} className='text-zatobox-900' />
             </button>
-            <h1 className='text-xl font-semibold text-text-primary md:hidden'>
+            <h1 className='text-xl font-semibold text-zatobox-900 md:hidden'>
               Edit Product
             </h1>
           </div>
@@ -39,7 +39,7 @@ const EditHeader: React.FC<Props> = ({
           <div className='flex items-center space-x-3'>
             <button
               onClick={onBack}
-              className='px-4 py-2 font-medium text-black transition-colors bg-gray-100 rounded-lg hover:bg-gray-200'
+              className='px-4 py-2 font-medium text-zatobox-900 transition-colors bg-zatobox-100 rounded-lg hover:bg-zatobox-200'
             >
               Go back
             </button>
@@ -55,7 +55,7 @@ const EditHeader: React.FC<Props> = ({
               className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
                 status === 'active'
                   ? 'bg-green-500 text-white hover:bg-green-600'
-                  : 'bg-gray-100 text-text-primary hover:bg-gray-200'
+                  : 'bg-zatobox-100 text-zatobox-900 hover:bg-zatobox-200'
               }`}
             >
               <Check size={16} />
@@ -64,7 +64,7 @@ const EditHeader: React.FC<Props> = ({
             <button
               onClick={onSave}
               disabled={saving}
-              className={`bg-primary hover:bg-primary-600 text-black font-medium px-6 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+              className={`bg-zatobox-500 hover:bg-zatobox-600 text-white font-medium px-6 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
                 saving ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >

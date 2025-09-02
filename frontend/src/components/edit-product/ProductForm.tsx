@@ -21,9 +21,9 @@ interface Props {
 const ProductForm: React.FC<Props> = ({ formData, onChange }) => {
   return (
     <div className='space-y-6'>
-      <div className='p-6 space-y-4 border rounded-lg shadow-sm bg-bg-surface border-divider'>
+      <div className='p-6 space-y-4 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
         <div>
-          <label className='block mb-2 text-sm font-medium text-text-primary'>
+          <label className='block mb-2 text-sm font-medium text-zatobox-900'>
             Product Name *
           </label>
           <input
@@ -31,12 +31,12 @@ const ProductForm: React.FC<Props> = ({ formData, onChange }) => {
             value={formData.name}
             onChange={(e) => onChange('name', e.target.value)}
             placeholder='Product name'
-            className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+            className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
             required
           />
         </div>
         <div>
-          <label className='block mb-2 text-sm font-medium text-text-primary'>
+          <label className='block mb-2 text-sm font-medium text-zatobox-900'>
             Description
           </label>
           <textarea
@@ -44,20 +44,20 @@ const ProductForm: React.FC<Props> = ({ formData, onChange }) => {
             onChange={(e) => onChange('description', e.target.value)}
             placeholder='Product description'
             rows={3}
-            className='w-full p-3 border rounded-lg resize-none border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+            className='w-full p-3 border rounded-lg resize-none border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
           />
         </div>
       </div>
 
-      <div className='p-6 border rounded-lg shadow-sm bg-bg-surface border-divider'>
-        <label className='block mb-2 text-sm font-medium text-text-primary'>
+      <div className='p-6 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
+        <label className='block mb-2 text-sm font-medium text-zatobox-900'>
           Locations
         </label>
         <input
           type='text'
           value={formData.location}
           onChange={(e) => onChange('location', e.target.value)}
-          className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+          className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
           placeholder='Optional physical location'
         />
       </div>
