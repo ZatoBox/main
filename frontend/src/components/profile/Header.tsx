@@ -14,13 +14,13 @@ const Header: React.FC<Props> = ({
   title = 'My Profile',
 }) => {
   return (
-    <div className='border-b shadow-sm bg-bg-surface border-divider'>
+    <div className='border-b shadow-sm bg-zatobox-50 border-zatobox-200'>
       <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between h-16'>
           <div className='flex items-center space-x-4'>
             <button
               onClick={onBack}
-              className='p-2 transition-colors rounded-full hover:bg-gray-50 md:hidden'
+              className='p-2 transition-colors rounded-full hover:bg-zatobox-100 md:hidden'
             >
               <svg
                 width='20'
@@ -31,19 +31,19 @@ const Header: React.FC<Props> = ({
                 strokeWidth='2'
                 strokeLinecap='round'
                 strokeLinejoin='round'
-                className='text-text-primary'
+                className='text-zatobox-900'
               >
                 <path d='M15 18l-6-6 6-6' />
               </svg>
             </button>
-            <h1 className='text-xl font-semibold text-text-primary'>{title}</h1>
+            <h1 className='text-xl font-semibold text-zatobox-900'>{title}</h1>
           </div>
 
           <div className='flex items-center space-x-3'>
             <button
               onClick={onSave}
               disabled={saving}
-              className={`flex items-center px-4 py-2 text-black transition-colors rounded-lg bg-primary hover:bg-primary-600 ${
+              className={`flex items-center px-4 py-2 text-white transition-colors rounded-lg bg-zatobox-500 hover:bg-zatobox-600 ${
                 saving ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
