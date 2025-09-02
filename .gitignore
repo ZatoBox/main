@@ -220,6 +220,3 @@ installed.txt
 filter-repo/
 .git/
 .next/
-
-# Test for tailwindcss
-tailwind.config.js
