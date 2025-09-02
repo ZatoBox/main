@@ -17,7 +17,7 @@ const DeleteConfirmModal: React.FC<Props> = ({
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
-      <div className='w-full max-w-md p-6 mx-4 rounded-lg shadow-lg bg-bg-surface'>
+      <div className='w-full max-w-md p-6 mx-4 rounded-lg shadow-lg bg-zatobox-50'>
         <div className='flex items-center mb-4'>
           <div className='flex items-center justify-center w-10 h-10 mr-3 bg-red-100 rounded-full'>
             <svg
@@ -34,12 +34,12 @@ const DeleteConfirmModal: React.FC<Props> = ({
               />
             </svg>
           </div>
-          <h3 className='text-lg font-medium text-text-primary'>
+          <h3 className='text-lg font-medium text-zatobox-900'>
             Confirm Delete
           </h3>
         </div>
 
-        <p className='mb-6 text-text-secondary'>
+        <p className='mb-6 text-zatobox-600'>
           Are you sure you want to delete this product? This action cannot be
           undone.
         </p>
@@ -48,7 +48,7 @@ const DeleteConfirmModal: React.FC<Props> = ({
           <button
             onClick={onCancel}
             disabled={loading}
-            className='flex-1 px-4 py-2 transition-colors border rounded-lg border-divider text-text-primary hover:bg-gray-50 disabled:opacity-50'
+            className='flex-1 px-4 py-2 transition-colors border rounded-lg border-zatobox-200 text-zatobox-900 hover:bg-zatobox-100 disabled:opacity-50'
           >
             Cancel
           </button>

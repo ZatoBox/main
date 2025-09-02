@@ -8,24 +8,24 @@ interface Props {
 
 const InventoryHeader: React.FC<Props> = ({ onBack, onCreate }) => {
   return (
-    <div className='border-b shadow-sm bg-bg-surface border-divider'>
+    <div className='border-b shadow-sm bg-zatobox-50 border-zatobox-200'>
       <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between h-16'>
           <div className='flex items-center space-x-4'>
             <button
               onClick={onBack}
-              className='p-2 transition-colors rounded-full hover:bg-gray-50 md:hidden'
+              className='p-2 transition-colors rounded-full hover:bg-zatobox-100 md:hidden'
             >
-              <ArrowLeft size={20} className='text-text-primary' />
+              <ArrowLeft size={20} className='text-zatobox-900' />
             </button>
-            <h1 className='text-xl font-semibold text-text-primary md:hidden'>
+            <h1 className='text-xl font-semibold text-zatobox-900 md:hidden'>
               Inventory
             </h1>
           </div>
 
           <button
             onClick={onCreate}
-            className='flex items-center px-4 py-2 space-x-2 font-medium text-black transition-colors rounded-lg bg-primary hover:bg-primary-600'
+            className='flex items-center px-4 py-2 space-x-2 font-medium text-white transition-colors rounded-lg bg-zatobox-500 hover:bg-zatobox-600'
           >
             <Plus size={20} />
             <span className='hidden sm:inline'>Create Item</span>

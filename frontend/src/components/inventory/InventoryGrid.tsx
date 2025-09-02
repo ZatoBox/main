@@ -28,63 +28,65 @@ const InventoryGrid: React.FC<Props> = ({
 }) => {
   return (
     <>
-      <div className='hidden overflow-hidden border rounded-lg shadow-sm md:block bg-bg-surface border-divider'>
+      <div className='hidden overflow-hidden border rounded-lg shadow-sm md:block bg-zatobox-50 border-zatobox-200'>
         <table className='w-full'>
-          <thead className='border-b bg-gray-50 border-divider'>
+          <thead className='border-b bg-zatobox-100 border-zatobox-200'>
             <tr>
               <th className='w-12 px-4 py-3'></th>
-              <th className='w-16 px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary'>
+              <th className='w-16 px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600'>
                 Image
               </th>
-              <th className='px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary'>
+              <th className='px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600'>
                 Item
               </th>
-              <th className='px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary'>
+              <th className='px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600'>
                 Category
               </th>
-              <th className='hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary lg:table-cell'>
+              <th className='hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600 lg:table-cell'>
                 Stock
               </th>
-              <th className='hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary xl:table-cell'>
+              <th className='hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600 xl:table-cell'>
                 Price
               </th>
               <th className='w-12 px-4 py-3'></th>
             </tr>
           </thead>
-          <tbody className='divide-y bg-bg-surface divide-divider'>
+          <tbody className='divide-y bg-zatobox-50 divide-zatobox-200'>
             {items.map((item) => (
               <tr
                 key={item.id}
-                className='transition-colors cursor-pointer hover:bg-gray-50'
+                className='transition-colors cursor-pointer hover:bg-zatobox-100'
               >
                 <td className='px-4 py-4'>
                   <input
                     type='checkbox'
                     checked={selectedItems.includes(item.id)}
                     onChange={(e) => onSelectItem(item.id, e.target.checked)}
-                    className='w-4 h-4 border-gray-300 rounded text-complement focus:ring-complement'
+                    className='w-4 h-4 border-gray-300 rounded text-zatobox-500 focus:ring-zatobox-500'
                   />
                 </td>
                 <td className='px-4 py-4'>
-                  <div className='flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg'>
-                    <Package size={20} className='text-text-secondary' />
+                  <div className='flex items-center justify-center w-10 h-10 bg-zatobox-100 rounded-lg'>
+                    <Package size={20} className='text-zatobox-600' />
                   </div>
                 </td>
                 <td className='px-4 py-4'>
                   <div className='flex flex-col'>
-                    <span className='text-sm font-medium text-text-primary'>
+                    <span className='text-sm font-medium text-zatobox-900'>
                       {item.name}
                     </span>
                     <span
                       className={`text-xs ${
-                        item.status === 'active' ? 'text-success' : 'text-error'
+                        item.status === 'active'
+                          ? 'text-zatobox-600'
+                          : 'text-red-600'
                       }`}
                     >
                       {item.status === 'active' ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                 </td>
-                <td className='px-4 py-4 text-sm text-text-primary'>
+                <td className='px-4 py-4 text-sm text-zatobox-900'>
                   {item.category}
                 </td>
                 <td className='hidden px-4 py-4 text-sm text-text-primary lg:table-cell'>
@@ -100,18 +102,18 @@ const InventoryGrid: React.FC<Props> = ({
                     {item.stock} units
                   </span>
                 </td>
-                <td className='hidden px-4 py-4 text-sm font-medium text-text-primary xl:table-cell'>
+                <td className='hidden px-4 py-4 text-sm font-medium text-zatobox-900 xl:table-cell'>
                   ${item.price.toFixed(2)}
                 </td>
                 <td className='px-4 py-4'>
                   <div className='flex items-center space-x-1'>
                     <button
                       onClick={() => onEditProduct(item.id)}
-                      className='p-1 transition-colors rounded hover:bg-gray-50'
+                      className='p-1 transition-colors rounded hover:bg-zatobox-100'
                       title='Edit'
                     >
                       <svg
-                        className='w-4 h-4 text-text-secondary'
+                        className='w-4 h-4 text-zatobox-600'
                         fill='none'
                         stroke='currentColor'
                         viewBox='0 0 24 24'
@@ -126,11 +128,11 @@ const InventoryGrid: React.FC<Props> = ({
                     </button>
                     <button
                       onClick={(e) => onDeleteClick(item.id, e)}
-                      className='p-1 transition-colors rounded hover:bg-red-50'
+                      className='p-1 transition-colors rounded hover:bg-red-100'
                       title='Delete'
                     >
                       <svg
-                        className='w-4 h-4 text-red-500'
+                        className='w-4 h-4 text-red-600'
                         fill='none'
                         stroke='currentColor'
                         viewBox='0 0 24 24'
