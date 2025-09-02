@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
 :root {
+  /* Colors */
   --color-zatobox-50: #fbf7ef;
   --color-zatobox-100: #f2e8d3;
   --color-zatobox-200: #e4cfa3;
@@ -12,4 +13,39 @@
   --color-zatobox-800: #763e2a;
   --color-zatobox-900: #613426;
   --color-zatobox-950: #371911;
+
+  /* Semantic Component Colors */
+  --background: #fbf7ef;
+  --foreground: #371911;
+  --card: #fbf7ef;
+  --card-foreground: #371911;
+  --popover: #fbf7ef;
+  --popover-foreground: #371911;
+  --primary: #613426;
+  --primary-foreground: #fbf7ef;
+  --secondary: #f2e8d3;
+  --secondary-foreground: #613426;
+  --muted: #f2e8d3;
+  --muted-foreground: #8f4c2e;
+  --accent: #e4cfa3;
+  --accent-foreground: #613426;
+  --destructive: #b16835;
+  --destructive-foreground: #fbf7ef;
+  --border: #e4cfa3;
+  --input: #f2e8d3;
+  --ring: #c3803d;
+  --chart-1: #cd9c52;
+  --chart-2: #b16835;
+  --chart-3: #763e2a;
+  --chart-4: #e4cfa3;
+  --chart-5: #f2e8d3;
+  --radius: 0.5rem;
+  --sidebar-background: #f2e8d3;
+  --sidebar-foreground: #371911;
+  --sidebar-primary: #613426;
+  --sidebar-primary-foreground: #fbf7ef;
+  --sidebar-accent: #e4cfa3;
+  --sidebar-accent-foreground: #613426;
+  --sidebar-border: #d6b373;
+  --sidebar-ring: #c3803d;
 }
