@@ -290,12 +290,12 @@ const SideMenu: React.FC = () => {
       <div className='fixed z-50 md:hidden top-4 left-4'>
         <button
           onClick={toggleMobileMenu}
-          className='p-2 transition-colors border rounded-lg shadow-lg bg-bg-surface border-divider hover:bg-gray-50'
+          className='p-2 transition-colors border rounded-lg shadow-lg bg-zatobox-50 border-zatobox-200 hover:bg-gray-50'
         >
           {isMobileMenuOpen ? (
-            <X size={24} className='text-text-primary' />
+            <X size={24} className='text-zatobox-900' />
           ) : (
-            <Menu size={24} className='text-text-primary' />
+            <Menu size={24} className='text-zatobox-900' />
           )}
         </button>
       </div>
@@ -310,12 +310,12 @@ const SideMenu: React.FC = () => {
 
       {/* Mobile Menu Sidebar */}
       <div
-        className={`md:hidden fixed inset-y-0 left-0 w-64 bg-bg-surface border-r border-divider z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`md:hidden fixed inset-y-0 left-0 w-64 bg-zatobox-50 border-r border-zatobox-200 z-50 transform transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Logo/Brand */}
-        <div className='flex items-center justify-center h-16 px-6 border-b border-divider'>
+        <div className='flex items-center justify-center h-16 px-6 border-b border-zatobox-200'>
           <img
             src='/images/logozato.png'
             alt='ZatoBox Logo'
@@ -329,21 +329,21 @@ const SideMenu: React.FC = () => {
         </nav>
 
         {/* Bottom Navigation */}
-        <div className='px-4 py-4 space-y-2 border-t border-divider'>
+        <div className='px-4 py-4 space-y-2 border-t border-zatobox-200'>
           {renderMenuItems(bottomMenuItems)}
         </div>
 
         {/* User Info */}
-        <div className='px-4 py-4 border-t border-divider'>
+        <div className='px-4 py-4 border-t border-zatobox-200'>
           <div className='flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50'>
             <div className='flex items-center justify-center w-8 h-8 rounded-full bg-complement'>
               <User size={16} className='text-white' />
             </div>
             <div className='flex-1 min-w-0'>
-              <div className='text-sm font-medium truncate text-text-primary'>
+              <div className='text-sm font-medium truncate text-zatobox-900'>
                 {user?.full_name || 'User'}
               </div>
-              <div className='text-xs truncate text-text-secondary'>
+              <div className='text-xs truncate text-zatobox-700'>
                 {user?.role === 'admin' ? 'Administrator' : 'User'}
               </div>
             </div>
@@ -358,9 +358,9 @@ const SideMenu: React.FC = () => {
       </div>
 
       {/* Desktop Side Menu */}
-      <div className='hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-bg-surface md:border-r md:border-divider md:z-40'>
+      <div className='hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-zatobox-50 md:border-r md:border-zatobox-200 md:z-40'>
         {/* Logo/Brand */}
-        <div className='flex items-center justify-center h-16 px-6 border-b border-divider'>
+        <div className='flex items-center justify-center h-16 px-6 border-b border-zatobox-200'>
           <img
             src='/images/logozato.png'
             alt='ZatoBox Logo'
@@ -374,12 +374,12 @@ const SideMenu: React.FC = () => {
         </nav>
 
         {/* Bottom Navigation */}
-        <div className='px-4 py-4 space-y-2 border-t border-divider'>
+        <div className='px-4 py-4 space-y-2 border-t border-zatobox-200'>
           {renderMenuItems(bottomMenuItems)}
         </div>
 
         {/* User Info with Hover Animation */}
-        <div className='px-4 py-4 border-t border-divider'>
+        <div className='px-4 py-4 border-t border-zatobox-200'>
           <div
             ref={userInfoRef}
             className='relative cursor-pointer'
@@ -404,10 +404,10 @@ const SideMenu: React.FC = () => {
                 <User size={16} className='text-white' />
               </div>
               <div className='flex-1 min-w-0'>
-                <div className='text-sm font-medium truncate text-text-primary'>
+                <div className='text-sm font-medium truncate text-zatobox-900'>
                   {user?.full_name || 'User'}
                 </div>
-                <div className='text-xs truncate text-text-secondary'>
+                <div className='text-xs truncate text-zatobox-700'>
                   {user?.role === 'admin' ? 'Administrator' : 'User'}
                 </div>
               </div>

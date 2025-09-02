@@ -86,14 +86,14 @@ const NewProductForm: React.FC<Props> = ({
         formikSubmitRef.current = formik.submitForm;
         return (
           <Form>
-            <div className='p-6 space-y-4 border rounded-lg shadow-sm bg-bg-surface border-divider'>
+            <div className='p-6 space-y-4 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
               <div>
-                <label className='block mb-2 text-sm font-medium text-text-primary'>
+                <label className='block mb-2 text-sm font-medium text-zatobox-900'>
                   Product Name *
                 </label>
                 <Field
                   name='name'
-                  className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+                  className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
                 />
                 <div className='mt-1 text-xs text-red-500'>
                   <ErrorMessage name='name' />
@@ -101,30 +101,30 @@ const NewProductForm: React.FC<Props> = ({
               </div>
 
               <div>
-                <label className='block mb-2 text-sm font-medium text-text-primary'>
+                <label className='block mb-2 text-sm font-medium text-zatobox-900'>
                   Description
                 </label>
                 <Field
                   as='textarea'
                   name='description'
                   rows={3}
-                  className='w-full p-3 border rounded-lg resize-none border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+                  className='w-full p-3 border rounded-lg resize-none border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
                 />
               </div>
             </div>
 
-            <div className='p-6 border rounded-lg shadow-sm bg-bg-surface border-divider'>
-              <label className='block mb-2 text-sm font-medium text-text-primary'>
+            <div className='p-6 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
+              <label className='block mb-2 text-sm font-medium text-zatobox-900'>
                 Locations
               </label>
               <Field
                 name='location'
-                className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+                className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
               />
             </div>
 
-            <div className='p-6 border rounded-lg shadow-sm bg-bg-surface border-divider'>
-              <h3 className='mb-4 text-lg font-medium text-text-primary'>
+            <div className='p-6 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
+              <h3 className='mb-4 text-lg font-medium text-zatobox-900'>
                 Categorization
               </h3>
               <div className='space-y-2'>
@@ -140,7 +140,7 @@ const NewProductForm: React.FC<Props> = ({
                       }
                       className='w-4 h-4 border-gray-300 rounded text-complement focus:ring-complement'
                     />
-                    <label className='text-sm text-text-primary'>
+                    <label className='text-sm text-zatobox-900'>
                       {category}
                     </label>
                   </div>
@@ -151,19 +151,19 @@ const NewProductForm: React.FC<Props> = ({
               </div>
             </div>
 
-            <div className='p-6 border rounded-lg shadow-sm bg-bg-surface border-divider'>
-              <h3 className='mb-4 text-lg font-medium text-text-primary'>
+            <div className='p-6 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
+              <h3 className='mb-4 text-lg font-medium text-zatobox-900'>
                 Units
               </h3>
               <div className='space-y-4'>
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-text-primary'>
+                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
                     Unit *
                   </label>
                   <Field
                     as='select'
                     name='unit'
-                    className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
                   >
                     {unitOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -201,7 +201,7 @@ const NewProductForm: React.FC<Props> = ({
                     name='weight'
                     type='number'
                     step='0.01'
-                    className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
                   />
                 </div>
 
@@ -227,8 +227,8 @@ const NewProductForm: React.FC<Props> = ({
               </div>
             </div>
 
-            <div className='p-6 border rounded-lg shadow-sm bg-bg-surface border-divider'>
-              <h3 className='mb-4 text-lg font-medium text-text-primary'>
+            <div className='p-6 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
+              <h3 className='mb-4 text-lg font-medium text-zatobox-900'>
                 Inventory
               </h3>
               <div className='space-y-4'>
@@ -239,7 +239,7 @@ const NewProductForm: React.FC<Props> = ({
                   <Field
                     name='inventoryQuantity'
                     type='number'
-                    className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
                   />
                   <div className='mt-1 text-xs text-red-500'>
                     <ErrorMessage name='inventoryQuantity' />
@@ -253,7 +253,7 @@ const NewProductForm: React.FC<Props> = ({
                   <Field
                     name='lowStockAlert'
                     type='number'
-                    className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
                   />
                 </div>
 
@@ -263,7 +263,7 @@ const NewProductForm: React.FC<Props> = ({
                   </label>
                   <Field
                     name='sku'
-                    className='w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary'
+                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
                   />
                 </div>
               </div>

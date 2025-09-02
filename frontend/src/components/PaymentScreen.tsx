@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CreditCard, Smartphone, Bitcoin, Banknote } from 'lucide-react';
+import {
+  ArrowLeft,
+  CreditCard,
+  Smartphone,
+  Bitcoin,
+  Banknote,
+} from 'lucide-react';
 
 interface PaymentScreenProps {
   isOpen: boolean;
@@ -10,8 +16,15 @@ interface PaymentScreenProps {
 
 type PaymentMethod = 'card' | 'wallet' | 'crypto' | 'cash';
 
-const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPaymentSuccess, total }) => {
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+const PaymentScreen: React.FC<PaymentScreenProps> = ({
+  isOpen,
+  onBack,
+  onPaymentSuccess,
+  total,
+}) => {
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(
+    null
+  );
   const [formData, setFormData] = useState({
     cardNumber: '',
     expiryDate: '',
@@ -38,7 +51,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
   }, [cashReceived, total]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleCashReceivedChange = (value: string) => {
@@ -48,31 +61,36 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
 
   const isFormValid = () => {
     switch (selectedMethod) {
-    case 'card':
-      return formData.cardNumber && formData.expiryDate && formData.cvc && formData.cardName;
-    case 'wallet':
-      return true; // Wallet payments are handled externally
-    case 'crypto':
-      return formData.walletAddress;
-    case 'cash':
-      return cashReceived >= total; // Must receive at least the total
-    default:
-      return false;
+      case 'card':
+        return (
+          formData.cardNumber &&
+          formData.expiryDate &&
+          formData.cvc &&
+          formData.cardName
+        );
+      case 'wallet':
+        return true; // Wallet payments are handled externally
+      case 'crypto':
+        return formData.walletAddress;
+      case 'cash':
+        return cashReceived >= total; // Must receive at least the total
+      default:
+        return false;
     }
   };
 
   const getPaymentMethodName = (method: PaymentMethod | null) => {
     switch (method) {
-    case 'card':
-      return 'Credit/Debit Card';
-    case 'wallet':
-      return 'Apple Pay / Google Pay';
-    case 'crypto':
-      return 'Coinbase Pay / Crypto';
-    case 'cash':
-      return 'Cash on Delivery';
-    default:
-      return 'Payment method';
+      case 'card':
+        return 'Credit/Debit Card';
+      case 'wallet':
+        return 'Apple Pay / Google Pay';
+      case 'crypto':
+        return 'Coinbase Pay / Crypto';
+      case 'cash':
+        return 'Cash on Delivery';
+      default:
+        return 'Payment method';
     }
   };
 
@@ -91,51 +109,69 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
     }).format(amount);
   };
 
-  if (!isOpen) {return null;}
+  if (!isOpen) {
+    return null;
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-bg-main animate-scale-in">
+    <div className='fixed inset-0 z-50 flex flex-col bg-zatobox-50 animate-scale-in'>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-divider bg-bg-surface">
+      <div className='flex items-center justify-between p-4 border-b border-zatobox-200 bg-zatobox-50'>
         <button
           onClick={onBack}
-          className="p-2 transition-all duration-300 rounded-full hover:bg-gray-50 hover:scale-110 icon-bounce"
+          className='p-2 transition-all duration-300 rounded-full hover:bg-gray-50 hover:scale-110 icon-bounce'
         >
-          <ArrowLeft size={20} className="text-text-primary" />
+          <ArrowLeft size={20} className='text-zatobox-900' />
         </button>
-        <h1 className="text-lg font-semibold text-text-primary animate-slide-in-left">Payment Options</h1>
-        <div className="w-10"></div> {/* Spacer */}
+        <h1 className='text-lg font-semibold text-zatobox-900 animate-slide-in-left'>
+          Payment Options
+        </h1>
+        <div className='w-10'></div> {/* Spacer */}
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-4 pb-24 overflow-y-auto">
+      <div className='flex-1 p-4 pb-24 overflow-y-auto'>
         {/* Total Amount */}
-        <div className="p-4 mb-6 border rounded-lg bg-gray-50 border-divider animate-bounce-in">
-          <div className="text-center">
-            <span className="text-sm text-text-secondary">Total to pay</span>
-            <div className="text-2xl font-bold text-text-primary">{formatCurrency(total)}</div>
+        <div className='p-4 mb-6 border rounded-lg bg-gray-50 border-zatobox-200 animate-bounce-in'>
+          <div className='text-center'>
+            <span className='text-sm text-zatobox-700'>Total to pay</span>
+            <div className='text-2xl font-bold text-zatobox-900'>
+              {formatCurrency(total)}
+            </div>
           </div>
         </div>
 
         {/* Payment Methods */}
-        <div className="mb-6 space-y-4 animate-stagger">
+        <div className='mb-6 space-y-4 animate-stagger'>
           {/* Credit/Debit Card */}
           <div
             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
-              selectedMethod === 'card' ? 'border-complement bg-complement-50 shadow-lg' : 'border-divider hover:border-gray-300 bg-bg-surface'
+              selectedMethod === 'card'
+                ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
+                : 'border-zatobox-200 hover:border-gray-300 bg-zatobox-50'
             }`}
             onClick={() => setSelectedMethod('card')}
           >
-            <div className="flex items-center space-x-3">
-              <div className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
-                selectedMethod === 'card' ? 'border-complement bg-complement' : 'border-gray-300'
-              }`}>
-                {selectedMethod === 'card' && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in"></div>}
+            <div className='flex items-center space-x-3'>
+              <div
+                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                  selectedMethod === 'card'
+                    ? 'border-zatobox-500 bg-zatobox-500'
+                    : 'border-gray-300'
+                }`}
+              >
+                {selectedMethod === 'card' && (
+                  <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
+                )}
               </div>
-              <CreditCard size={20} className="text-text-secondary icon-bounce" />
+              <CreditCard size={20} className='text-zatobox-700 icon-bounce' />
               <div>
-                <div className="font-medium text-text-primary text-glow">Credit/Debit Card</div>
-                <div className="text-sm text-text-secondary">Visa, Mastercard, American Express</div>
+                <div className='font-medium text-zatobox-900 text-glow'>
+                  Credit/Debit Card
+                </div>
+                <div className='text-sm text-zatobox-700'>
+                  Visa, Mastercard, American Express
+                </div>
               </div>
             </div>
           </div>
@@ -143,20 +179,32 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
           {/* Apple Pay / Google Pay */}
           <div
             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
-              selectedMethod === 'wallet' ? 'border-complement bg-complement-50 shadow-lg' : 'border-divider hover:border-gray-300 bg-bg-surface'
+              selectedMethod === 'wallet'
+                ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
+                : 'border-zatobox-200 hover:border-gray-300 bg-zatobox-50'
             }`}
             onClick={() => setSelectedMethod('wallet')}
           >
-            <div className="flex items-center space-x-3">
-              <div className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
-                selectedMethod === 'wallet' ? 'border-complement bg-complement' : 'border-gray-300'
-              }`}>
-                {selectedMethod === 'wallet' && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in"></div>}
+            <div className='flex items-center space-x-3'>
+              <div
+                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                  selectedMethod === 'wallet'
+                    ? 'border-zatobox-500 bg-zatobox-500'
+                    : 'border-gray-300'
+                }`}
+              >
+                {selectedMethod === 'wallet' && (
+                  <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
+                )}
               </div>
-              <Smartphone size={20} className="text-text-secondary icon-bounce" />
+              <Smartphone size={20} className='text-zatobox-700 icon-bounce' />
               <div>
-                <div className="font-medium text-text-primary text-glow">Apple Pay / Google Pay</div>
-                <div className="text-sm text-text-secondary">Quick payment with your wallet</div>
+                <div className='font-medium text-zatobox-900 text-glow'>
+                  Apple Pay / Google Pay
+                </div>
+                <div className='text-sm text-zatobox-700'>
+                  Quick payment with your wallet
+                </div>
               </div>
             </div>
           </div>
@@ -164,20 +212,32 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
           {/* Crypto */}
           <div
             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
-              selectedMethod === 'crypto' ? 'border-complement bg-complement-50 shadow-lg' : 'border-divider hover:border-gray-300 bg-bg-surface'
+              selectedMethod === 'crypto'
+                ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
+                : 'border-zatobox-200 hover:border-gray-300 bg-zatobox-50'
             }`}
             onClick={() => setSelectedMethod('crypto')}
           >
-            <div className="flex items-center space-x-3">
-              <div className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
-                selectedMethod === 'crypto' ? 'border-complement bg-complement' : 'border-gray-300'
-              }`}>
-                {selectedMethod === 'crypto' && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in"></div>}
+            <div className='flex items-center space-x-3'>
+              <div
+                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                  selectedMethod === 'crypto'
+                    ? 'border-zatobox-500 bg-zatobox-500'
+                    : 'border-gray-300'
+                }`}
+              >
+                {selectedMethod === 'crypto' && (
+                  <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
+                )}
               </div>
-              <Bitcoin size={20} className="text-text-secondary icon-bounce" />
+              <Bitcoin size={20} className='text-zatobox-700 icon-bounce' />
               <div>
-                <div className="font-medium text-text-primary text-glow">Coinbase Pay / Crypto</div>
-                <div className="text-sm text-text-secondary">Bitcoin, Ethereum, and more</div>
+                <div className='font-medium text-zatobox-900 text-glow'>
+                  Coinbase Pay / Crypto
+                </div>
+                <div className='text-sm text-zatobox-700'>
+                  Bitcoin, Ethereum, and more
+                </div>
               </div>
             </div>
           </div>
@@ -185,20 +245,32 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
           {/* Cash on Delivery */}
           <div
             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
-              selectedMethod === 'cash' ? 'border-complement bg-complement-50 shadow-lg' : 'border-divider hover:border-gray-300 bg-bg-surface'
+              selectedMethod === 'cash'
+                ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
+                : 'border-zatobox-200 hover:border-gray-300 bg-zatobox-50'
             }`}
             onClick={() => setSelectedMethod('cash')}
           >
-            <div className="flex items-center space-x-3">
-              <div className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
-                selectedMethod === 'cash' ? 'border-complement bg-complement' : 'border-gray-300'
-              }`}>
-                {selectedMethod === 'cash' && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in"></div>}
+            <div className='flex items-center space-x-3'>
+              <div
+                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                  selectedMethod === 'cash'
+                    ? 'border-zatobox-500 bg-zatobox-500'
+                    : 'border-gray-300'
+                }`}
+              >
+                {selectedMethod === 'cash' && (
+                  <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
+                )}
               </div>
-              <Banknote size={20} className="text-text-secondary icon-bounce" />
+              <Banknote size={20} className='text-zatobox-700 icon-bounce' />
               <div>
-                <div className="font-medium text-text-primary text-glow">Cash on Delivery</div>
-                <div className="text-sm text-text-secondary">Pay with cash upon delivery</div>
+                <div className='font-medium text-zatobox-900 text-glow'>
+                  Cash on Delivery
+                </div>
+                <div className='text-sm text-zatobox-700'>
+                  Pay with cash upon delivery
+                </div>
               </div>
             </div>
           </div>
@@ -206,124 +278,163 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
 
         {/* Payment Method Forms */}
         {selectedMethod && (
-          <div className="p-6 mb-6 border rounded-lg bg-bg-surface border-divider animate-fade-in">
+          <div className='p-6 mb-6 border rounded-lg bg-zatobox-50 border-zatobox-200 animate-fade-in'>
             {selectedMethod === 'card' && (
-              <div className="space-y-4">
-                <h3 className="mb-4 text-lg font-semibold text-text-primary">Card Information</h3>
+              <div className='space-y-4'>
+                <h3 className='mb-4 text-lg font-semibold text-zatobox-900'>
+                  Card Information
+                </h3>
 
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-text-primary">Card Number</label>
+                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                    Card Number
+                  </label>
                   <input
-                    type="text"
+                    type='text'
                     value={formData.cardNumber}
-                    onChange={(e) => handleInputChange('cardNumber', e.target.value)}
-                    placeholder="1234 5678 9012 3456"
-                    className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
+                    onChange={(e) =>
+                      handleInputChange('cardNumber', e.target.value)
+                    }
+                    placeholder='1234 5678 9012 3456'
+                    className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                     maxLength={19}
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className='grid grid-cols-2 gap-4'>
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-text-primary">Expiry Date</label>
+                    <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                      Expiry Date
+                    </label>
                     <input
-                      type="text"
+                      type='text'
                       value={formData.expiryDate}
-                      onChange={(e) => handleInputChange('expiryDate', e.target.value)}
-                      placeholder="MM/YY"
-                      className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
+                      onChange={(e) =>
+                        handleInputChange('expiryDate', e.target.value)
+                      }
+                      placeholder='MM/YY'
+                      className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                       maxLength={5}
                     />
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-text-primary">CVC</label>
+                    <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                      CVC
+                    </label>
                     <input
-                      type="text"
+                      type='text'
                       value={formData.cvc}
                       onChange={(e) => handleInputChange('cvc', e.target.value)}
-                      placeholder="123"
-                      className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
+                      placeholder='123'
+                      className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                       maxLength={4}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-text-primary">Cardholder Name</label>
+                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                    Cardholder Name
+                  </label>
                   <input
-                    type="text"
+                    type='text'
                     value={formData.cardName}
-                    onChange={(e) => handleInputChange('cardName', e.target.value)}
-                    placeholder="John Doe"
-                    className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
+                    onChange={(e) =>
+                      handleInputChange('cardName', e.target.value)
+                    }
+                    placeholder='John Doe'
+                    className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                   />
                 </div>
               </div>
             )}
 
             {selectedMethod === 'crypto' && (
-              <div className="space-y-4">
-                <h3 className="mb-4 text-lg font-semibold text-text-primary">Crypto Payment</h3>
+              <div className='space-y-4'>
+                <h3 className='mb-4 text-lg font-semibold text-zatobox-900'>
+                  Crypto Payment
+                </h3>
 
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-text-primary">Cryptocurrency</label>
+                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                    Cryptocurrency
+                  </label>
                   <select
                     value={formData.cryptoCurrency}
-                    onChange={(e) => handleInputChange('cryptoCurrency', e.target.value)}
-                    className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
+                    onChange={(e) =>
+                      handleInputChange('cryptoCurrency', e.target.value)
+                    }
+                    className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                   >
-                    <option value="bitcoin">Bitcoin (BTC)</option>
-                    <option value="ethereum">Ethereum (ETH)</option>
-                    <option value="litecoin">Litecoin (LTC)</option>
-                    <option value="cardano">Cardano (ADA)</option>
+                    <option value='bitcoin'>Bitcoin (BTC)</option>
+                    <option value='ethereum'>Ethereum (ETH)</option>
+                    <option value='litecoin'>Litecoin (LTC)</option>
+                    <option value='cardano'>Cardano (ADA)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-text-primary">Wallet Address</label>
+                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                    Wallet Address
+                  </label>
                   <input
-                    type="text"
+                    type='text'
                     value={formData.walletAddress}
-                    onChange={(e) => handleInputChange('walletAddress', e.target.value)}
-                    placeholder="Enter your wallet address"
-                    className="w-full px-4 py-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent"
+                    onChange={(e) =>
+                      handleInputChange('walletAddress', e.target.value)
+                    }
+                    placeholder='Enter your wallet address'
+                    className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                   />
                 </div>
               </div>
             )}
 
             {selectedMethod === 'cash' && (
-              <div className="space-y-4">
-                <h3 className="mb-4 text-lg font-semibold text-text-primary">Cash Payment</h3>
+              <div className='space-y-4'>
+                <h3 className='mb-4 text-lg font-semibold text-zatobox-900'>
+                  Cash Payment
+                </h3>
 
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-text-primary">Amount Received</label>
+                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                    Amount Received
+                  </label>
                   <input
-                    type="number"
+                    type='number'
                     value={cashReceived}
                     onChange={(e) => handleCashReceivedChange(e.target.value)}
-                    placeholder="0.00"
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent ${
-                      isSufficientAmount ? 'border-green-500' : 'border-divider'
+                    placeholder='0.00'
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-zatobox-500 focus:border-transparent ${
+                      isSufficientAmount
+                        ? 'border-green-500'
+                        : 'border-zatobox-200'
                     }`}
                     min={total}
-                    step="0.01"
+                    step='0.01'
                   />
                   {!isSufficientAmount && cashReceived > 0 && (
-                    <p className="mt-1 text-sm text-red-500">Insufficient amount. Please enter at least {formatCurrency(total)}</p>
+                    <p className='mt-1 text-sm text-red-500'>
+                      Insufficient amount. Please enter at least{' '}
+                      {formatCurrency(total)}
+                    </p>
                   )}
                 </div>
 
                 {/* Quick Amount Buttons */}
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-text-primary">Quick Amount</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                    Quick Amount
+                  </label>
+                  <div className='grid grid-cols-3 gap-2'>
                     {[10, 20, 50, 100, 200, 500].map((amount) => (
                       <button
                         key={amount}
-                        type="button"
-                        onClick={() => handleCashReceivedChange(amount.toString())}
-                        className="px-3 py-2 text-sm transition-colors border rounded-lg border-divider hover:bg-gray-50"
+                        type='button'
+                        onClick={() =>
+                          handleCashReceivedChange(amount.toString())
+                        }
+                        className='px-3 py-2 text-sm transition-colors border rounded-lg border-zatobox-200 hover:bg-gray-50'
                       >
                         ${amount}
                       </button>
@@ -333,15 +444,24 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
 
                 {/* Change Calculator */}
                 {cashReceived > 0 && (
-                  <div className="p-4 rounded-lg bg-gray-50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-text-secondary">Change to return:</span>
-                      <span className={`text-lg font-bold ${changeAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className='p-4 rounded-lg bg-gray-50'>
+                    <div className='flex items-center justify-between mb-2'>
+                      <span className='text-sm text-zatobox-700'>
+                        Change to return:
+                      </span>
+                      <span
+                        className={`text-lg font-bold ${
+                          changeAmount >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}
+                      >
                         {formatCurrency(Math.abs(changeAmount))}
                       </span>
                     </div>
                     {changeAmount < 0 && (
-                      <p className="text-sm text-red-500">Additional amount needed: {formatCurrency(Math.abs(changeAmount))}</p>
+                      <p className='text-sm text-red-500'>
+                        Additional amount needed:{' '}
+                        {formatCurrency(Math.abs(changeAmount))}
+                      </p>
                     )}
                   </div>
                 )}
@@ -349,10 +469,14 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
             )}
 
             {selectedMethod === 'wallet' && (
-              <div className="py-8 text-center">
-                <div className="mb-4 text-4xl">📱</div>
-                <h3 className="mb-2 text-lg font-semibold text-text-primary">Mobile Payment</h3>
-                <p className="text-text-secondary">Use your mobile wallet to complete the payment</p>
+              <div className='py-8 text-center'>
+                <div className='mb-4 text-4xl'>📱</div>
+                <h3 className='mb-2 text-lg font-semibold text-zatobox-900'>
+                  Mobile Payment
+                </h3>
+                <p className='text-zatobox-700'>
+                  Use your mobile wallet to complete the payment
+                </p>
               </div>
             )}
           </div>
@@ -364,14 +488,13 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ isOpen, onBack, onPayment
           disabled={!isFormValid()}
           className={`w-full py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 ${
             isFormValid()
-              ? 'bg-complement hover:bg-complement-700 text-white shadow-lg'
+              ? 'bg-zatobox-500 hover:bg-zatobox-600 text-white shadow-lg'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
           {selectedMethod === 'cash'
             ? `Confirm Payment - ${formatCurrency(total)}`
-            : 'Confirm Payment'
-          }
+            : 'Confirm Payment'}
         </button>
       </div>
     </div>

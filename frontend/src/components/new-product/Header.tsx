@@ -9,7 +9,7 @@ type Props = {
 
 const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
   return (
-    <div className='border-b shadow-sm bg-bg-surface border-divider'>
+    <div className='border-b shadow-sm bg-zatobox-50 border-zatobox-200'>
       <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between h-16'>
           <div className='flex items-center space-x-4'>
@@ -26,12 +26,12 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
                 strokeWidth='2'
                 strokeLinecap='round'
                 strokeLinejoin='round'
-                className='text-text-primary'
+                className='text-zatobox-900'
               >
                 <path d='M15 18l-6-6 6-6' />
               </svg>
             </button>
-            <h1 className='text-xl font-semibold text-text-primary md:hidden'>
+            <h1 className='text-xl font-semibold text-zatobox-900 md:hidden'>
               New Product
             </h1>
           </div>
@@ -41,7 +41,7 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
             <button
               onClick={onSave}
               disabled={saving}
-              className={`bg-primary hover:bg-primary-600 text-black font-medium px-6 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+              className={`bg-zatobox-500 hover:bg-zatobox-600 text-black font-medium px-6 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
                 saving ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
