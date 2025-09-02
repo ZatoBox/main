@@ -26,7 +26,7 @@ const ProductGrid: React.FC<Props> = ({ products, onProductClick }) => {
             />
           </svg>
         </div>
-        <p className='text-text-secondary'>No products found</p>
+        <p className='text-zatobox-600'>No products found</p>
       </div>
     );
   }
