@@ -14,18 +14,16 @@ const PluginCard: React.FC<PluginCardProps> = ({
   getPriceBadge,
 }) => {
   return (
-    <div className='overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'>
+    <div className='overflow-hidden transition-shadow bg-zatobox-50 rounded-lg shadow-lg hover:shadow-xl'>
       <div className='p-6'>
         <div className='flex items-start justify-between mb-3'>
           <div className='flex items-center space-x-3'>
             <span className='text-2xl'>{plugin.icon}</span>
             <div>
-              <h3 className='text-lg font-semibold text-text-primary'>
+              <h3 className='text-lg font-semibold text-zatobox-900'>
                 {plugin.name}
               </h3>
-              <p className='text-sm text-text-secondary'>
-                {plugin.description}
-              </p>
+              <p className='text-sm text-zatobox-600'>{plugin.description}</p>
             </div>
           </div>
         </div>
@@ -37,8 +35,8 @@ const PluginCard: React.FC<PluginCardProps> = ({
           </div>
           <div className='flex items-center space-x-1'>
             <span className='text-yellow-400'>⭐</span>
-            <span className='text-sm text-text-secondary'>{plugin.rating}</span>
-            <span className='text-sm text-text-secondary'>
+            <span className='text-sm text-zatobox-600'>{plugin.rating}</span>
+            <span className='text-sm text-zatobox-600'>
               ({plugin.installs})
             </span>
           </div>
@@ -49,13 +47,13 @@ const PluginCard: React.FC<PluginCardProps> = ({
             {plugin.features.slice(0, 2).map((f: string, i: number) => (
               <span
                 key={i}
-                className='px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded'
+                className='px-2 py-1 text-xs text-zatobox-700 bg-zatobox-100 rounded'
               >
                 {f}
               </span>
             ))}
             {plugin.features.length > 2 && (
-              <span className='px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded'>
+              <span className='px-2 py-1 text-xs text-zatobox-700 bg-zatobox-100 rounded'>
                 +{plugin.features.length - 2} more
               </span>
             )}

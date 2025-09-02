@@ -15,7 +15,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({
 }) => {
   return (
     <div className='mb-8'>
-      <h2 className='mb-4 text-xl font-bold text-text-primary'>
+      <h2 className='mb-4 text-xl font-bold text-zatobox-900'>
         🔥 MOST INSTALLS By popular demand
       </h2>
       <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
@@ -23,10 +23,10 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({
           return (
             <div
               key={plugin.id}
-              className='overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'
+              className='overflow-hidden transition-shadow bg-zatobox-50 rounded-lg shadow-lg hover:shadow-xl'
             >
               {plugin.screenshot && (
-                <div className='h-48 overflow-hidden bg-gray-200'>
+                <div className='h-48 overflow-hidden bg-zatobox-100'>
                   <img
                     src={plugin.screenshot}
                     alt={plugin.name}
@@ -39,10 +39,10 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({
                   <div className='flex items-center space-x-3'>
                     <span className='text-3xl'>{plugin.icon}</span>
                     <div>
-                      <h3 className='text-lg font-semibold text-text-primary'>
+                      <h3 className='text-lg font-semibold text-zatobox-900'>
                         {plugin.name}
                       </h3>
-                      <p className='text-sm text-text-secondary'>
+                      <p className='text-sm text-zatobox-600'>
                         {plugin.description}
                       </p>
                     </div>
@@ -55,10 +55,10 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({
                   </div>
                   <div className='flex items-center space-x-1'>
                     <span className='text-yellow-400'>⭐</span>
-                    <span className='text-sm text-text-secondary'>
+                    <span className='text-sm text-zatobox-600'>
                       {plugin.rating}
                     </span>
-                    <span className='text-sm text-text-secondary'>
+                    <span className='text-sm text-zatobox-600'>
                       ({plugin.installs})
                     </span>
                   </div>
