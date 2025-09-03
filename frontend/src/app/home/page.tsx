@@ -54,7 +54,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
       try {
         setLoading(true);
-        const response = await inventoryAPI.getActive();
+        const response = await inventoryAPI.getAll();
         if (response && response.success && Array.isArray(response.inventory)) {
           const availableProducts = response.inventory
             .filter((item: any) => item.product)
@@ -236,7 +236,7 @@ const HomePage: React.FC<HomePageProps> = ({
     try {
       setLoading(true);
       setError(null);
-      const response = await inventoryAPI.getActive();
+      const response = await inventoryAPI.getAll();
 
       if (response && response.success && Array.isArray(response.inventory)) {
         const availableProducts = response.inventory

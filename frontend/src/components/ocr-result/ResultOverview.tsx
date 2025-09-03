@@ -1,5 +1,5 @@
 import React from 'react';
-import type { OCRResponse } from '@/services/api.service';
+import { OCRResponse } from '@/types/index';
 
 type Props = {
   result?: OCRResponse | null;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Package } from 'lucide-react';
-import type { Product } from '../services/api';
+import { Product } from '@/types/index';
 
 interface ProductCardProps {
   product: Product;
@@ -13,11 +13,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   };
 
   const getImageUrl = () => {
-    if (product.image && typeof product.image === 'string') {
-      if (product.image.startsWith('http')) {
-        return product.image;
+    if (
+      product.images &&
+      Array.isArray(product.images) &&
+      product.images.length > 0
+    ) {
+      const imageUrl = product.images[0];
+      if (typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
+        return imageUrl;
       }
-      return `http://localhost:4444${product.image}`;
+      return `http://localhost:4444${imageUrl}`;
     }
     if (Array.isArray(product.images) && product.images.length > 0) {
       const imageUrl = product.images[0];
@@ -100,7 +105,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         {/* Category */}
         <div className='flex items-center justify-between'>
           <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-700 group-hover:text-zatobox-500'>
-            {product.category ?? ''}
+            {product.category_id ?? ''}
           </span>
           {product.sku && (
             <span className='text-xs transition-colors duration-300 text-zatobox-700 group-hover:text-zatobox-900'>

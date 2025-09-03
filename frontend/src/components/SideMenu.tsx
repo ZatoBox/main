@@ -14,8 +14,8 @@ import {
   Scan,
   Store,
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { usePlugins } from '../contexts/PluginContext';
+import { useAuth } from '../context/auth-store';
+import { usePlugins } from '@/context/plugin-context';
 
 const SideMenu: React.FC = () => {
   const navigate = useNavigate();

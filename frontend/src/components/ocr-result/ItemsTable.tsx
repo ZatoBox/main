@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { OCRLineItem } from '@/services/api.service';
+import { OCRLineItem } from '@/types/index';
 
 type Props = {
   items: OCRLineItem[];

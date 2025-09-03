@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Product } from '../../services/api.service';
+import { Product } from '@/types/index';
 import ProductCard from '../ProductCard';
 
 interface Props {

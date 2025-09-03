@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package } from 'lucide-react';
 import { productsAPI } from '@/services/api.service';
-import type { Product } from '@/services/api.service';
+import { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import InventoryHeader from '@/components/inventory/InventoryHeader';
 import InventoryFilters from '@/components/inventory/InventoryFilters';
@@ -128,7 +128,7 @@ const InventoryPage: React.FC = () => {
 
   const filteredItems = inventoryItems.filter((item) => {
     const matchesCategory =
-      categoryFilter === 'all' || item.category === categoryFilter;
+      categoryFilter === 'all' || item.category_id === categoryFilter;
     const matchesStatus =
       statusFilter === 'all' || item.status === statusFilter;
     const matchesSearch = item.name
@@ -140,7 +140,7 @@ const InventoryPage: React.FC = () => {
   const uiItems = filteredItems.map((p) => ({
     id: p.id,
     name: p.name,
-    category: p.category ?? 'Uncategorized',
+    category: p.category_id ?? 'Uncategorized',
     status: p.status ?? 'inactive',
     stock: p.stock,
     price: p.price,

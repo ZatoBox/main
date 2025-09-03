@@ -3,12 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-store';
-import {
-  productsAPI,
-  ocrAPI,
-  OCRResponse,
-  OCRLineItem,
-} from '@/services/api.service';
+import { productsAPI, ocrAPI } from '@/services/api.service';
+import { OCRResponse, OCRLineItem } from '@/types/index';
 import Header from '@/components/ocr-result/Header';
 import FileUploader from '@/components/ocr-result/FileUploader';
 import ProcessingOptions from '@/components/ocr-result/ProcessingOptions';
