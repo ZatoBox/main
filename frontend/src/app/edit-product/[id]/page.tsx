@@ -9,7 +9,6 @@ import EditHeader from '@/components/edit-product/EditHeader';
 import ProductForm from '@/components/edit-product/ProductForm';
 import ImagesUploader from '@/components/edit-product/ImagesUploader';
 import Categorization from '@/components/edit-product/Categorization';
-import UnitsPanel from '@/components/edit-product/UnitsPanel';
 import InventoryPanel from '@/components/edit-product/InventoryPanel';
 
 const EditProductPage: React.FC = () => {
@@ -27,7 +26,6 @@ const EditProductPage: React.FC = () => {
     name: '',
     description: '',
     location: '',
-    unit: '',
     weight: '',
     price: '',
     inventoryQuantity: '',
@@ -49,19 +47,6 @@ const EditProductPage: React.FC = () => {
     'Decoration',
     'Office',
     'Gaming',
-  ];
-
-  const unitOptions = [
-    { label: 'Per item', value: 'Per item' },
-    { label: 'Per kilogram', value: 'Per kilogram' },
-    { label: 'Per liter', value: 'Per liter' },
-    { label: 'Per meter', value: 'Per meter' },
-  ];
-
-  const productTypeOptions = [
-    { label: 'Physical Product', value: 'Physical Product' },
-    { label: 'Service', value: 'Service' },
-    { label: 'Digital', value: 'Digital' },
   ];
 
   useEffect(() => {
@@ -91,14 +76,13 @@ const EditProductPage: React.FC = () => {
         name: prod.name ?? '',
         description: prod.description ?? '',
         location: prod.localization ?? '',
-        unit: prod.unit_name ?? '',
         weight: prod.weight != null ? String(prod.weight) : '',
         price: prod.price != null ? String(prod.price) : '',
         inventoryQuantity: prod.stock != null ? String(prod.stock) : '',
         lowStockAlert: prod.min_stock != null ? String(prod.min_stock) : '',
         sku: prod.sku ?? '',
       });
-      setSelectedCategories(prod.category ? [prod.category] : []);
+      setSelectedCategories(prod.category_id ? [prod.category_id] : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error loading product');
     } finally {
@@ -127,8 +111,8 @@ const EditProductPage: React.FC = () => {
       return;
     }
 
-    if (!formData.name || !formData.price || !formData.unit) {
-      setError('Name, price and unit are required');
+    if (!formData.name || !formData.price) {
+      setError('Name and price are required');
       setSaving(false);
       return;
     }
@@ -153,14 +137,13 @@ const EditProductPage: React.FC = () => {
         description: formData.description || null,
         price: priceNum,
         stock: stockNum,
-        unit_name: formData.unit || undefined,
         product_type: formData.productType || undefined,
         weight: formData.weight ? Number(formData.weight) : undefined,
         sku: formData.sku || undefined,
         min_stock: formData.lowStockAlert
           ? Number(formData.lowStockAlert)
           : undefined,
-        category: selectedCategories[0] ?? undefined,
+        category_id: selectedCategories[0] ?? undefined,
       };
 
       await productsAPI.update(id, payload as any);
@@ -232,12 +215,6 @@ const EditProductPage: React.FC = () => {
           </div>
 
           <div className='space-y-6'>
-            <UnitsPanel
-              unitOptions={unitOptions}
-              productTypeOptions={productTypeOptions}
-              formData={formData as any}
-              onChange={handleInputChange}
-            />
             <InventoryPanel
               formData={formData as any}
               onChange={handleInputChange}
