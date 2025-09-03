@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useLanguageContext } from '@/context/language-context';
 import { getTranslation } from '@/utils/translations';
+import { Language } from '@/hooks/use-language';
 
 const avatarMapping = [
   '/images/avatars/annette-black.png',
@@ -30,7 +31,7 @@ interface TestimonialCardProps {
   company: string;
   avatar: string;
   type: string;
-  language: string;
+  language: Language;
 }
 
 const TestimonialCard = ({
@@ -76,7 +77,7 @@ const TestimonialCard = ({
     cardHeight = 'h-[502px]';
     backgroundElements = (
       <div
-        className='absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat'
+        className='absolute inset-0 w-full h-full bg-center bg-no-repeat bg-cover'
         style={{
           backgroundImage: "url('/images/large-card-background.svg')",
           zIndex: 0,
@@ -91,7 +92,7 @@ const TestimonialCard = ({
     cardHeight = 'h-[502px]';
     backgroundElements = (
       <div
-        className='absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat opacity-10'
+        className='absolute inset-0 w-full h-full bg-center bg-no-repeat bg-cover opacity-10'
         style={{
           backgroundImage: "url('/images/large-card-background.svg')",
           zIndex: 0,
@@ -113,7 +114,7 @@ const TestimonialCard = ({
       <div className={`relative z-10 font-normal break-words ${quoteClasses}`}>
         {quote}
       </div>
-      <div className='relative z-10 flex justify-start items-center gap-3'>
+      <div className='relative z-10 flex items-center justify-start gap-3'>
         <Image
           src={avatar || '/placeholder.svg'}
           alt={`${name} ${getTranslation(
@@ -137,7 +138,7 @@ const TestimonialCard = ({
 };
 
 export function TestimonialGridSection() {
-  const { language } = useLanguageContext();
+  const { language }: { language: Language } = useLanguageContext();
 
   // Obtener testimonios traducidos
   const testimonials = getTranslation(language, 'testimonials.items').map(
@@ -151,9 +152,9 @@ export function TestimonialGridSection() {
   );
 
   return (
-    <section className='w-full px-5 overflow-hidden flex flex-col justify-start py-6 md:py-8 lg:py-14'>
-      <div className='self-stretch py-6 md:py-8 lg:py-14 flex flex-col justify-center items-center gap-2'>
-        <div className='flex flex-col justify-start items-center gap-4'>
+    <section className='flex flex-col justify-start w-full px-5 py-6 overflow-hidden md:py-8 lg:py-14'>
+      <div className='flex flex-col items-center self-stretch justify-center gap-2 py-6 md:py-8 lg:py-14'>
+        <div className='flex flex-col items-center justify-start gap-4'>
           <h2 className='text-center text-zatobox-900 text-3xl md:text-4xl lg:text-[40px] font-semibold leading-tight md:leading-tight lg:leading-[40px]'>
             {getTranslation(language, 'testimonials.title')}
           </h2>
@@ -163,16 +164,16 @@ export function TestimonialGridSection() {
         </div>
       </div>
       <div className='w-full pt-0.5 pb-4 md:pb-6 lg:pb-10 flex flex-col md:flex-row justify-center items-start gap-4 md:gap-4 lg:gap-6 max-w-[1100px] mx-auto'>
-        <div className='flex-1 flex flex-col justify-start items-start gap-4 md:gap-4 lg:gap-6'>
+        <div className='flex flex-col items-start justify-start flex-1 gap-4 md:gap-4 lg:gap-6'>
           <TestimonialCard {...testimonials[0]} language={language} />
           <TestimonialCard {...testimonials[1]} language={language} />
         </div>
-        <div className='flex-1 flex flex-col justify-start items-start gap-4 md:gap-4 lg:gap-6'>
+        <div className='flex flex-col items-start justify-start flex-1 gap-4 md:gap-4 lg:gap-6'>
           <TestimonialCard {...testimonials[2]} language={language} />
           <TestimonialCard {...testimonials[3]} language={language} />
           <TestimonialCard {...testimonials[4]} language={language} />
         </div>
-        <div className='flex-1 flex flex-col justify-start items-start gap-4 md:gap-4 lg:gap-6'>
+        <div className='flex flex-col items-start justify-start flex-1 gap-4 md:gap-4 lg:gap-6'>
           <TestimonialCard {...testimonials[5]} language={language} />
           <TestimonialCard {...testimonials[6]} language={language} />
         </div>
