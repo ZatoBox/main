@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-:root {
+@theme {
   /* Principal Colors */
   --color-zatobox-50: #fef9ec;
   --color-zatobox-100: #fbefca;
