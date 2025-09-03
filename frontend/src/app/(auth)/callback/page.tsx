@@ -1,6 +1,8 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { authAPI } from '@/services/api.service';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();

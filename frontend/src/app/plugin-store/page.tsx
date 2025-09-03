@@ -1,8 +1,10 @@
+'use client';
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/auth-store';
-import { usePlugins } from '@/context/PluginContext';
+import { usePlugins } from '@/context/plugin-context';
 import PluginGrid from '@/components/plugin-store/PluginGrid';
 import FeaturedSection from '@/components/plugin-store/FeaturedSection';
 import PluginNotification from '@/components/plugin-store/PluginNotification';

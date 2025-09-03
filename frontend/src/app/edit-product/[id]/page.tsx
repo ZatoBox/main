@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { productsAPI, Product } from '@/services/api.service';
+import { productsAPI } from '@/services/api.service';
+import { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import EditHeader from '@/components/edit-product/EditHeader';
 import ProductForm from '@/components/edit-product/ProductForm';
