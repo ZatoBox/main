@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getCookie, setCookie } from '@/services/cookies.service';
 

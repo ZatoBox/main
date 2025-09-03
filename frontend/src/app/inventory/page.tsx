@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Package } from 'lucide-react';
 import { productsAPI } from '@/services/api.service';
 import { Product } from '@/types/index';
@@ -12,7 +12,7 @@ import InventoryGrid from '@/components/inventory/InventoryGrid';
 import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
 
 const InventoryPage: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -77,7 +77,7 @@ const InventoryPage: React.FC = () => {
   };
 
   const handleEditProduct = (id: number) => {
-    navigate(`/edit-product/${id}`);
+    router.push(`/edit-product/${id}`);
   };
 
   const handleDeleteClick = (id: number, event?: React.MouseEvent) => {
@@ -191,8 +191,8 @@ const InventoryPage: React.FC = () => {
   return (
     <div className='min-h-screen pt-16 bg-bg-main'>
       <InventoryHeader
-        onBack={() => navigate('/')}
-        onCreate={() => navigate('/new-product')}
+        onBack={() => router.push('/')}
+        onCreate={() => router.push('/new-product')}
       />
 
       <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>

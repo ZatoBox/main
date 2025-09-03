@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/auth-store';
 import { usePlugins } from '@/context/plugin-context';
@@ -26,7 +26,7 @@ interface IPlugin {
 }
 
 const PluginStorePage: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { token } = useAuth();
   const { isPluginActive, togglePlugin } = usePlugins();
   const [plugins, setPlugins] = useState<IPlugin[]>([]);
@@ -539,7 +539,7 @@ const PluginStorePage: React.FC = () => {
         {/* Example usage buttons for navigate and showPluginNotification */}
         <div className='fixed z-50 flex flex-col gap-2 bottom-4 right-4'>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => router.push('/')}
             className='px-4 py-2 font-medium text-blue-800 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200'
           >
             Go Home (navigate)

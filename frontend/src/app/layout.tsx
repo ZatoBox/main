@@ -3,6 +3,7 @@ import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import { LanguageProvider } from '@/context/language-context';
+import { PluginProvider } from '@/context/plugin-context';
 
 export const metadata: Metadata = {
   title: 'ZatoBox',
@@ -27,7 +28,9 @@ html {
         `}</style>
       </head>
       <body>
-        <LanguageProvider>{children}</LanguageProvider>
+        <PluginProvider>
+          <LanguageProvider>{children}</LanguageProvider>
+        </PluginProvider>
       </body>
     </html>
   );

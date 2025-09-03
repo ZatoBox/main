@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   Package,
   Home,
@@ -18,8 +20,8 @@ import { useAuth } from '../context/auth-store';
 import { usePlugins } from '@/context/plugin-context';
 
 const SideMenu: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   const { user, logout } = useAuth();
   const { isPluginActive } = usePlugins();
   const [showLogout, setShowLogout] = useState(false);
@@ -184,14 +186,14 @@ const SideMenu: React.FC = () => {
   ];
 
   const handleNavigation = (path: string) => {
-    navigate(path);
+    router.push(path);
     // Close mobile menu after navigation
     setIsMobileMenuOpen(false);
   };
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    router.push('/login');
     setIsMobileMenuOpen(false);
   };
 
@@ -215,7 +217,7 @@ const SideMenu: React.FC = () => {
       })
       .map((item, index) => {
         const Icon = item.icon;
-        const isActive = location.pathname === item.path;
+        const isActive = pathname === item.path;
         const isVisible = visibleItems.has(item.path);
         const isAnimating = animatingItems.has(item.path);
         const isNewItem =

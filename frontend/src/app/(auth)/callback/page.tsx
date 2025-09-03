@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { authAPI } from '@/services/api.service';
 
 const AuthCallback: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   const fetchMe = async () => {
@@ -27,7 +27,7 @@ const AuthCallback: React.FC = () => {
         try {
           const me = await fetchMe();
           localStorage.setItem('user', JSON.stringify(me));
-          navigate('/');
+          router.push('/');
           window.location.reload();
           return;
         } catch {
@@ -47,7 +47,7 @@ const AuthCallback: React.FC = () => {
         }
       }
 
-      navigate('/');
+      router.push('/');
       window.location.reload();
     } catch (e: any) {
       setError(e.message || 'Error creating user');
