@@ -7,6 +7,7 @@ import Sidebar from '@/components/profile/Sidebar';
 import AvatarUploader from '@/components/profile/AvatarUploader';
 import ProfileForm from '@/components/profile/ProfileForm';
 import { profileAPI, authAPI } from '@/services/api.service';
+import { useAuth } from '@/context/auth-store';
 
 const ProfilePage: React.FC = () => {
   const router = useRouter();
@@ -17,6 +18,7 @@ const ProfilePage: React.FC = () => {
   const [profileData, setProfileData] = useState<Record<string, any>>({});
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [submitSignal, setSubmitSignal] = useState(0);
+  const { user, initialized, setUser } = useAuth();
 
   const sections = [
     { id: 'profile', name: 'Profile' },
@@ -30,25 +32,41 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     let canceled = false;
-    setLoading(true);
-    (async () => {
+    const load = async () => {
+      setLoading(true);
       try {
-        const res = await profileAPI.get().catch(() => null);
-        if (canceled) return;
-        if (res && (res as any).user) setProfileData((res as any).user);
-        else {
-          const me = await authAPI.getCurrentUser().catch(() => null);
-          if (me && (me as any).user) setProfileData((me as any).user);
+        if (user) {
+          if (!canceled) setProfileData(user as any);
+        } else {
+          // Try to fetch profile from API and update the store
+          const res = await profileAPI.get().catch(() => null);
+          if (canceled) return;
+          if (res && (res as any).user) {
+            setUser((res as any).user as any);
+            if (!canceled) setProfileData((res as any).user);
+          } else {
+            const me = await authAPI.getCurrentUser().catch(() => null);
+            if (me && (me as any).user) {
+              setUser((me as any).user as any);
+              if (!canceled) setProfileData((me as any).user);
+            }
+          }
         }
       } catch (err) {
-        // keep silent - non-critical
+        // non-critical
+      } finally {
+        if (!canceled) setLoading(false);
       }
-      if (!canceled) setLoading(false);
-    })();
+    };
+
+    if (initialized) {
+      load();
+    }
+
     return () => {
       canceled = true;
     };
-  }, []);
+  }, [initialized, user, setUser]);
 
   const handleSave = async (values: Record<string, any>) => {
     setSaving(true);
@@ -67,7 +85,15 @@ const ProfilePage: React.FC = () => {
       };
 
       const res = await profileAPI.update(payload as any);
-      if (res && (res as any).user) setProfileData((res as any).user);
+      if (res && (res as any).user) {
+        const updated = (res as any).user;
+        setProfileData(updated);
+        try {
+          setUser(updated as any);
+        } catch {
+          // ignore if store setUser fails
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {

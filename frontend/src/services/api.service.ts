@@ -228,6 +228,20 @@ export const salesAPI = {
   getHistory: (): Promise<Sale[]> => apiRequest('/api/sales/'),
 };
 
+export const profileAPI = {
+  get: (): Promise<{ success: boolean; user: User }> =>
+    apiRequest('/api/profile'),
+  update: (
+    profileData: Partial<User>
+  ): Promise<{ success: boolean; message: string; user: User }> =>
+    apiRequest('/api/profile', { method: 'PUT', data: profileData }),
+  changePassword: (passwordData: {
+    oldPassword: string;
+    newPassword: string;
+  }): Promise<{ success: boolean; message: string }> =>
+    apiRequest('/api/profile/password', { method: 'PUT', data: passwordData }),
+};
+
 /// Layouts
 export const layoutsAPI = {
   create: (layoutData: CreateLayoutRequest): Promise<LayoutResponse> =>
