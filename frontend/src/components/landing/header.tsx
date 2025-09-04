@@ -44,7 +44,7 @@ export function Header() {
   };
 
   return (
-    <header className='bg-zatobox-50 w-full py-4 px-6'>
+    <header className='bg-white w-full py-4 px-6'>
       <div className='max-w-7xl mx-auto flex items-center justify-between'>
         <div className='flex items-center gap-6'>
           <div className='flex items-center gap-3'>
@@ -93,7 +93,7 @@ export function Header() {
             </SheetTrigger>
             <SheetContent
               side='bottom'
-              className='bg-zatobox-50 border-t border-border text-zatobox-900'
+              className='bg-white border-t border-border text-zatobox-900'
             >
               <SheetHeader>
                 <SheetTitle className='text-left text-xl font-semibold text-zatobox-900'>

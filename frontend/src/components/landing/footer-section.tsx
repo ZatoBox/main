@@ -8,7 +8,7 @@ export function FooterSection() {
   const { language } = useLanguageContext();
 
   return (
-    <footer className='bg-zatobox-50 w-full max-w-[1320px] mx-auto px-5 flex flex-col md:flex-row justify-between items-start gap-8 md:gap-0 py-10 md:py-[70px]'>
+    <footer className='bg-white w-full max-w-[1320px] mx-auto px-5 flex flex-col md:flex-row justify-between items-start gap-8 md:gap-0 py-10 md:py-[70px]'>
       {/* Left Section: Logo, Description, Social Links */}
       <div className='flex flex-col justify-start items-start gap-8 p-4 md:p-8'>
         <div className='flex gap-3 items-stretch justify-center'>
