@@ -91,10 +91,10 @@ export function BentoSection() {
         <div className='w-[547px] h-[938px] absolute top-[614px] left-[80px] origin-top-left rotate-[-33.39deg] bg-zatobox-500/10 blur-[130px] z-0' />
         <div className='self-stretch py-8 md:py-14 flex flex-col justify-center items-center gap-2 z-10'>
           <div className='flex flex-col justify-start items-center gap-4'>
-            <h2 className='w-full max-w-[655px] text-center text-zatobox-900 text-4xl md:text-6xl font-semibold leading-tight md:leading-[66px]'>
+            <h2 className='w-full max-w-[655px] text-center bg-gradient-to-r from-zatobox-500 to-zatobox-300 text-transparent bg-clip-text text-4xl md:text-6xl font-semibold leading-tight md:leading-[66px]'>
               {getTranslation(language, 'bento.title')}
             </h2>
-            <p className='w-full max-w-[600px] text-center text-zatobox-600 text-lg md:text-xl font-medium leading-relaxed'>
+            <p className='w-full max-w-[600px] text-center text-black text-lg md:text-xl font-medium leading-relaxed'>
               {getTranslation(language, 'bento.subtitle')}
             </p>
           </div>

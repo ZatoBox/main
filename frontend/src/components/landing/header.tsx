@@ -60,7 +60,7 @@ export function Header() {
                 key={item.name}
                 href={item.href}
                 onClick={(e) => handleScroll(e, item.href)} // Add onClick handler
-                className='text-zatobox-600 hover:text-zatobox-900 px-4 py-2 rounded-full font-medium transition-colors'
+                className='text-black px-4 py-2 rounded-full font-medium'
               >
                 {item.name}
               </Link>
@@ -106,7 +106,7 @@ export function Header() {
                     key={item.name}
                     href={item.href}
                     onClick={(e) => handleScroll(e, item.href)} // Add onClick handler
-                    className='text-zatobox-600 hover:text-zatobox-900 justify-start text-lg py-2'
+                    className='text-black justify-start text-lg py-2'
                   >
                     {item.name}
                   </Link>
