@@ -13,19 +13,23 @@ import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
 
 const InventoryPage: React.FC = () => {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const { isAuthenticated, initialized } = useAuth();
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [inventoryItems, setInventoryItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchInventory = async () => {
+      if (!initialized) {
+        return;
+      }
+
       if (!isAuthenticated) {
         setError('You must log in to view inventory');
         setLoading(false);
@@ -34,7 +38,7 @@ const InventoryPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const response = await productsAPI.getAll();
+        const response = await productsAPI.list();
         if (!response || !response.products) {
           setError('Error loading inventory');
           return;
@@ -50,7 +54,7 @@ const InventoryPage: React.FC = () => {
     };
 
     fetchInventory();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, initialized]);
 
   const categories = [
     'all',
@@ -62,17 +66,18 @@ const InventoryPage: React.FC = () => {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(inventoryItems.map((item) => item.id));
+      setSelectedItems(inventoryItems.map((item) => item.id.toString()));
     } else {
       setSelectedItems([]);
     }
   };
 
   const handleSelectItem = (id: number, checked: boolean) => {
+    const idStr = id.toString();
     if (checked) {
-      setSelectedItems([...selectedItems, id]);
+      setSelectedItems([...selectedItems, idStr]);
     } else {
-      setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
+      setSelectedItems(selectedItems.filter((itemId) => itemId !== idStr));
     }
   };
 
@@ -85,7 +90,7 @@ const InventoryPage: React.FC = () => {
       event.preventDefault();
       event.stopPropagation();
     }
-    setDeleteConfirmId(id);
+    setDeleteConfirmId(id.toString());
   };
 
   const handleDeleteConfirm = async () => {
@@ -101,7 +106,7 @@ const InventoryPage: React.FC = () => {
 
       if (response.success) {
         setInventoryItems((prevItems) =>
-          prevItems.filter((item) => item.id !== deleteConfirmId)
+          prevItems.filter((item) => item.id.toString() !== deleteConfirmId)
         );
         setSelectedItems((prevSelected) =>
           prevSelected.filter((itemId) => itemId !== deleteConfirmId)
@@ -138,7 +143,7 @@ const InventoryPage: React.FC = () => {
   });
 
   const uiItems = filteredItems.map((p) => ({
-    id: p.id,
+    id: parseInt(p.id.toString()),
     name: p.name,
     category: p.category_id ?? 'Uncategorized',
     status: p.status ?? 'inactive',
@@ -242,7 +247,7 @@ const InventoryPage: React.FC = () => {
 
           <InventoryGrid
             items={uiItems}
-            selectedItems={selectedItems}
+            selectedItems={selectedItems.map((id) => parseInt(id))}
             onSelectItem={handleSelectItem}
             onEditProduct={handleEditProduct}
             onDeleteClick={handleDeleteClick}

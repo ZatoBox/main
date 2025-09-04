@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { LanguageProvider } from '@/context/language-context';
 import { PluginProvider } from '@/context/plugin-context';
+import { AuthProvider } from '@/components/auth/AuthProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -19,7 +20,9 @@ export default function RootLayout({
     <html lang='es' className={`${GeistSans.variable}`}>
       <body className='antialiased'>
         <PluginProvider>
-          <LanguageProvider>{children}</LanguageProvider>
+          <LanguageProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </LanguageProvider>
         </PluginProvider>
       </body>
     </html>

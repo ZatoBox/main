@@ -2,57 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { authAPI } from '@/services/api.service';
+import { useAuth } from '@/context/auth-store';
 
 const AuthCallback: React.FC = () => {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
-
-  const fetchMe = async () => {
-    const res = await authAPI.getCurrentUser();
-    return res.user;
-  };
-
-  const sendSocialToken = async (accessToken: string) => {
-    try {
-      const payload = await authAPI.socialRegister(accessToken);
-      const localToken =
-        (payload as any).token ||
-        (payload as any).access_token ||
-        (payload as any).token;
-      const user = (payload as any).user || null;
-
-      if (!localToken) {
-        localStorage.setItem('auth0_token', accessToken);
-        try {
-          const me = await fetchMe();
-          localStorage.setItem('user', JSON.stringify(me));
-          router.push('/');
-          window.location.reload();
-          return;
-        } catch {
-          throw new Error('No local token received and /me failed');
-        }
-      }
-
-      localStorage.setItem('token', localToken);
-      if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
-      } else {
-        try {
-          const me = await fetchMe();
-          localStorage.setItem('user', JSON.stringify(me));
-        } catch {
-          console.warn('Could not fetch /me with local token');
-        }
-      }
-
-      router.push('/');
-      window.location.reload();
-    } catch (e: any) {
-      setError(e.message || 'Error creating user');
-    }
-  };
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -64,6 +19,7 @@ const AuthCallback: React.FC = () => {
     const accessToken = params.get('access_token');
     const state = params.get('state');
     const storedState = sessionStorage.getItem('auth0_state');
+
     if (!accessToken) {
       setError('Missing access token');
       return;
@@ -72,9 +28,14 @@ const AuthCallback: React.FC = () => {
       setError('Invalid state');
       return;
     }
+
     sessionStorage.removeItem('auth0_state');
     sessionStorage.removeItem('auth0_nonce');
-    void sendSocialToken(accessToken);
+
+    setError(
+      'Social login not implemented yet. Please use email/password login.'
+    );
+
     history.replaceState(
       null,
       '',
@@ -87,6 +48,12 @@ const AuthCallback: React.FC = () => {
       <div className='flex items-center justify-center min-h-screen'>
         <div className='p-6 border rounded bg-bg-surface border-divider'>
           <p className='text-error-700'>{error}</p>
+          <button
+            onClick={() => router.push('/login')}
+            className='px-4 py-2 mt-4 font-medium text-white transition-colors rounded-lg bg-primary hover:bg-primary-600'
+          >
+            Go to Login
+          </button>
         </div>
       </div>
     );
