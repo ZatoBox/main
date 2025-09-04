@@ -2,7 +2,7 @@ import React from 'react';
 import { Package } from 'lucide-react';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   category: string;
   status: string;
@@ -13,9 +13,9 @@ interface Product {
 interface Props {
   item: Product;
   selected: boolean;
-  onSelect: (id: number, checked: boolean) => void;
-  onEdit: (id: number) => void;
-  onDelete: (id: number, e?: React.MouseEvent) => void;
+  onSelect: (id: string, checked: boolean) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string, e?: React.MouseEvent) => void;
 }
 
 const InventoryCard: React.FC<Props> = ({

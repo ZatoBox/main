@@ -3,7 +3,7 @@ import InventoryCard from './InventoryCard';
 import { Package } from 'lucide-react';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   category: string;
   status: string;
@@ -13,10 +13,10 @@ interface Product {
 
 interface Props {
   items: Product[];
-  selectedItems: number[];
-  onSelectItem: (id: number, checked: boolean) => void;
-  onEditProduct: (id: number) => void;
-  onDeleteClick: (id: number, e?: React.MouseEvent) => void;
+  selectedItems: string[];
+  onSelectItem: (id: string, checked: boolean) => void;
+  onEditProduct: (id: string) => void;
+  onDeleteClick: (id: string, e?: React.MouseEvent) => void;
 }
 
 const InventoryGrid: React.FC<Props> = ({

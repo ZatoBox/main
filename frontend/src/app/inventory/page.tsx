@@ -72,25 +72,24 @@ const InventoryPage: React.FC = () => {
     }
   };
 
-  const handleSelectItem = (id: number, checked: boolean) => {
-    const idStr = id.toString();
+  const handleSelectItem = (id: string, checked: boolean) => {
     if (checked) {
-      setSelectedItems([...selectedItems, idStr]);
+      setSelectedItems([...selectedItems, id]);
     } else {
-      setSelectedItems(selectedItems.filter((itemId) => itemId !== idStr));
+      setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
     }
   };
 
-  const handleEditProduct = (id: number) => {
+  const handleEditProduct = (id: string) => {
     router.push(`/edit-product/${id}`);
   };
 
-  const handleDeleteClick = (id: number, event?: React.MouseEvent) => {
+  const handleDeleteClick = (id: string, event?: React.MouseEvent) => {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
-    setDeleteConfirmId(id.toString());
+    setDeleteConfirmId(id);
   };
 
   const handleDeleteConfirm = async () => {
@@ -106,7 +105,7 @@ const InventoryPage: React.FC = () => {
 
       if (response.success) {
         setInventoryItems((prevItems) =>
-          prevItems.filter((item) => item.id.toString() !== deleteConfirmId)
+          prevItems.filter((item) => item.id !== deleteConfirmId)
         );
         setSelectedItems((prevSelected) =>
           prevSelected.filter((itemId) => itemId !== deleteConfirmId)
@@ -143,7 +142,7 @@ const InventoryPage: React.FC = () => {
   });
 
   const uiItems = filteredItems.map((p) => ({
-    id: parseInt(p.id.toString()),
+    id: p.id,
     name: p.name,
     category: p.category_id ?? 'Uncategorized',
     status: p.status ?? 'inactive',
@@ -247,7 +246,7 @@ const InventoryPage: React.FC = () => {
 
           <InventoryGrid
             items={uiItems}
-            selectedItems={selectedItems.map((id) => parseInt(id))}
+            selectedItems={selectedItems}
             onSelectItem={handleSelectItem}
             onEditProduct={handleEditProduct}
             onDeleteClick={handleDeleteClick}
