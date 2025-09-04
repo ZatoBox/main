@@ -3,6 +3,7 @@ import { GeistSans } from 'geist/font/sans';
 import { LanguageProvider } from '@/context/language-context';
 import { PluginProvider } from '@/context/plugin-context';
 import { AuthProvider } from '@/components/auth/AuthProvider';
+import SideMenu from '@/components/SideMenu';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -21,7 +22,12 @@ export default function RootLayout({
       <body className='antialiased'>
         <PluginProvider>
           <LanguageProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <div className='flex min-h-screen'>
+                <SideMenu />
+                <div className='flex-1 ml-0 md:ml-64'>{children}</div>
+              </div>
+            </AuthProvider>
           </LanguageProvider>
         </PluginProvider>
       </body>
