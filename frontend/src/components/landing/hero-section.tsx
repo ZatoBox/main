@@ -13,11 +13,12 @@ export function HeroSection() {
   return (
     <section
       className='flex flex-col items-center text-center relative mx-auto rounded-2xl overflow-hidden my-6 py-0 px-4
-         w-full h-[400px] md:w-[1220px] md:h-[600px] lg:h-[810px] md:px-0'
+        w-full h-[400px] md:w-[1220px] md:h-[600px] lg:h-[810px] md:px-0'
     >
-      {/* SVG Background */}
+      <div className='absolute inset-0 bg-[#FF6A00] -z-10' />
       <div className='absolute inset-0 z-0'>
         <svg
+          className='absolute inset-0 w-full h-full opacity-18 mix-blend-overlay'
           width='100%'
           height='100%'
           viewBox='0 0 1220 810'
@@ -44,7 +45,6 @@ export function HeroSection() {
               />
             </mask>
             <g mask='url(#mask0_186_1134)'>
-              {/* Grid Rectangles */}
               {[...Array(35)].map((_, i) => (
                 <React.Fragment key={`row1-${i}`}>
                   <rect
@@ -269,7 +269,7 @@ export function HeroSection() {
                   />
                 </React.Fragment>
               ))}
-              {/* Specific Rectangles with fill */}
+
               <rect
                 x='699.711'
                 y='81'
@@ -571,16 +571,46 @@ export function HeroSection() {
         </svg>
       </div>
 
-      {/* Header positioned at top of hero container */}
-      <div className='absolute top-0 left-0 right-0 z-20'>
+      <div className='absolute inset-0 z-20 pointer-events-none'>
+        <div className='absolute inset-0 bg-gradient-to-br from-[#FF6A00] via-[#FF7A18] to-[#FFAA33] opacity-100' />
+        <div className='absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_left,_#fff0,_#0000)]' />
+        <div className='absolute -top-36 -left-56 w-[820px] h-[820px] rounded-full blur-[220px] bg-[#FF7A18] opacity-100 mix-blend-screen' />
+        <div className='absolute -bottom-56 -right-36 w-[980px] h-[980px] rounded-full blur-[320px] bg-[#FF8C42] opacity-96 mix-blend-screen' />
+        <svg
+          className='absolute inset-0 w-full h-full opacity-9'
+          viewBox='0 0 200 200'
+          preserveAspectRatio='none'
+          xmlns='http://www.w3.org/2000/svg'
+        >
+          <defs>
+            <pattern
+              id='noise'
+              patternUnits='userSpaceOnUse'
+              width='6'
+              height='6'
+            >
+              <circle cx='1.5' cy='1.5' r='0.9' fill='#FFDAB5' />
+            </pattern>
+            <linearGradient id='glint' x1='0' y1='0' x2='1' y2='1'>
+              <stop offset='0' stopColor='rgba(255,255,255,0.06)' />
+              <stop offset='1' stopColor='rgba(255,255,255,0)' />
+            </linearGradient>
+          </defs>
+          <rect width='100%' height='100%' fill='url(#noise)' />
+          <rect width='100%' height='100%' fill='url(#glint)' />
+        </svg>
+        <div className='absolute top-8 right-12 w-24 h-24 rounded-full blur-[36px] bg-[#FFDAB5] opacity-40 mix-blend-screen' />
+      </div>
+
+      <div className='absolute top-0 left-0 right-0 z-30'>
         <Header />
       </div>
 
-      <div className='relative z-10 space-y-4 md:space-y-5 lg:space-y-6 mb-6 md:mb-7 lg:mb-9 max-w-md md:max-w-[500px] lg:max-w-[588px] mt-16 md:mt-[120px] lg:mt-[160px] px-4'>
-        <h1 className='text-zatobox-900 text-3xl md:text-4xl lg:text-6xl font-semibold leading-tight'>
+      <div className='relative z-40 space-y-4 md:space-y-5 lg:space-y-6 mb-6 md:mb-7 lg:mb-9 max-w-md md:max-w-[500px] lg:max-w-[588px] mt-16 md:mt-[120px] lg:mt-[160px] px-4'>
+        <h1 className='text-white text-3xl md:text-4xl lg:text-6xl font-semibold leading-tight'>
           {getTranslation(language, 'hero.title')}
         </h1>
-        <p className='text-zatobox-600 text-base md:text-base lg:text-lg font-medium leading-relaxed max-w-lg mx-auto'>
+        <p className='text-white text-base md:text-base lg:text-lg font-medium leading-relaxed max-w-lg mx-auto'>
           {getTranslation(language, 'hero.subtitle')}
         </p>
       </div>
