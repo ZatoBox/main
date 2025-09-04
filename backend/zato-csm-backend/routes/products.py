@@ -74,6 +74,23 @@ def create_products_bulk(
     return products
 
 
+@router.get("/active")
+def list_active_products(
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    try:
+        products = product_service.list_products()
+        active_products = [
+            p for p in products if str(p.get("status", "")).lower() == "active"
+        ]
+        return {"success": True, "products": active_products}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching active products: {str(e)}"
+        )
+
+
 @router.get("/{product_id}")
 def get_product(
     product_id: str,

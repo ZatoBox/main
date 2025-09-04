@@ -4,7 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-store';
 import { productsAPI, ocrAPI } from '@/services/api.service';
-import { OCRResponse, OCRLineItem } from '@/types/index';
+import {
+  OCRResponse,
+  OCRLineItem,
+  CreateProductRequest,
+  ProductUnity,
+  ProductType,
+} from '@/types/index';
 import Header from '@/components/ocr-result/Header';
 import FileUploader from '@/components/ocr-result/FileUploader';
 import ProcessingOptions from '@/components/ocr-result/ProcessingOptions';
@@ -30,27 +36,6 @@ const OCRResultPage: React.FC = () => {
   });
   const [systemStatus, setSystemStatus] = useState<any>(null);
 
-  const maintenanceMode = true;
-
-  if (maintenanceMode) {
-    return (
-      <div className='flex items-center justify-center min-h-screen p-4'>
-        <div className='w-full max-w-2xl p-8 text-center bg-white rounded-lg shadow-lg'>
-          <h1 className='mb-4 text-2xl font-bold'>In maintenance</h1>
-          <p className='mb-6 text-text-secondary'>
-            The OCR feature is temporarily unavailable.
-          </p>
-          <button
-            disabled
-            className='px-6 py-3 font-medium text-white bg-gray-400 rounded-lg cursor-not-allowed'
-          >
-            In maintenance
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
@@ -58,43 +43,6 @@ const OCRResultPage: React.FC = () => {
       setError('');
     }
   };
-
-  const handleProcessAnother = () => {
-    setFile(null);
-    setResult(null);
-    setError('');
-    setIsEditing(false);
-    setEditedResult(null);
-    // Clear file input
-    const fileInput = document.getElementById(
-      'file-upload'
-    ) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
-  };
-
-  // Load system status on mount
-  useEffect(() => {
-    const loadSystemStatus = async () => {
-      try {
-        const status = await ocrAPI.getDebugInfo();
-        setSystemStatus(status);
-      } catch (err: any) {
-        console.warn('Could not load system status:', err);
-        // Don't show CORS errors to user, just log them
-        if (
-          err.message?.includes('CORS') ||
-          err.message?.includes('NetworkError')
-        ) {
-          console.warn(
-            'CORS issue detected - OCR backend may not be running or CORS not configured'
-          );
-        }
-      }
-    };
-    loadSystemStatus();
-  }, []);
 
   const handleConfirmData = async () => {
     if (!result || !token) {
@@ -106,134 +54,78 @@ const OCRResultPage: React.FC = () => {
     setError('');
 
     try {
-      // Add each detected item to inventory
-      const productsToAdd = (result.line_items ?? []).map(
-        (item: OCRLineItem) => ({
-          name: (item.description ?? '').substring(0, 50), // Truncate long descriptions
-          description: item.description ?? '',
-          price:
-            parseFloat((item.unit_price ?? '0').replace(/[^\d.-]/g, '')) || 0,
-          stock: parseInt((item.quantity ?? '1').replace(/[^\d]/g, '')) || 1,
-          category: selectedCategory,
-          status: 'active' as 'active',
-        })
-      );
+      const productsToAdd: CreateProductRequest[] = (
+        result.line_items ?? []
+      ).map((item: OCRLineItem) => ({
+        name: (item.name || item.description || '').substring(0, 50),
+        description: item.description || '',
+        price:
+          parseFloat(String(item.unit_price ?? '0').replace(/[^\d.-]/g, '')) ||
+          0,
+        stock:
+          parseInt(String(item.quantity ?? '1').replace(/[^\d]/g, '')) || 1,
+        unit: ProductUnity.PER_ITEM as unknown as ProductUnity,
+        product_type: ProductType.PHYSICAL_PRODUCT as unknown as ProductType,
+        category_id: undefined,
+        sku: '',
+        weight: undefined,
+        localization: undefined,
+        status: 'active' as any,
+      }));
 
-      const addedProducts = [];
-      const failedProducts = [];
+      const addedProducts: any[] = [];
+      const failedProducts: any[] = [];
+
       for (const productData of productsToAdd) {
         try {
-          const response = await productsAPI.create(productData);
-          addedProducts.push(response.product);
-        } catch (error: any) {
-          console.error('Error adding product:', productData.name, error);
+          const response = await productsAPI.create(productData as any);
+          if (response && (response as any).product)
+            addedProducts.push((response as any).product);
+        } catch (err: any) {
+          console.error('Error adding product:', productData.name, err);
           failedProducts.push({
             name: productData.name,
-            error: error.message || 'Unknown error',
+            error: err.message || 'Unknown error',
           });
-          // Continue with other products even if one fails
         }
       }
 
       if (addedProducts.length > 0) {
-        // Show success message and navigate to inventory
-        let message = `Successfully added ${addedProducts.length} products to inventory!`;
-        if (failedProducts.length > 0) {
-          message += `\n\nFailed to add ${failedProducts.length} products:`;
-          failedProducts.forEach((product) => {
-            message += `\n- ${product.name}: ${product.error}`;
-          });
-        }
-        alert(message);
         router.push('/inventory');
-      } else {
-        setError('Failed to add any products to inventory');
       }
-    } catch (error) {
-      console.error('Error adding products to inventory:', error);
-      setError('Failed to add products to inventory. Please try again.');
+      if (failedProducts.length > 0) {
+        setError(`Failed to add ${failedProducts.length} products`);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error adding products');
     } finally {
       setIsAddingToInventory(false);
     }
   };
 
-  const handleEditResult = () => {
-    setIsEditing(true);
-    setEditedResult(JSON.parse(JSON.stringify(result))); // Deep copy
-  };
-
-  const handleSaveEdit = () => {
-    setResult(editedResult);
-    setIsEditing(false);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditedResult(null);
-  };
-
-  const handleItemChange = (index: number, field: string, value: any) => {
-    if (!editedResult) {
-      return;
-    }
-    const newItems = [...(editedResult.line_items ?? [])];
-    newItems[index] = { ...newItems[index], [field]: value };
-
-    if (field === 'quantity' || field === 'unit_price') {
-      const qty =
-        parseInt((newItems[index].quantity ?? '').replace(/[^\d]/g, '')) || 0;
-      const price =
-        parseFloat(
-          (newItems[index].unit_price ?? '').replace(/[^\d.-]/g, '')
-        ) || 0;
-      newItems[index].total_price = `$${(qty * price).toFixed(2)}`;
-    }
-
-    setEditedResult({
-      ...editedResult,
-      line_items: newItems,
-    });
-  };
-
   const handleUpload = async () => {
-    if (!file) {
-      return;
-    }
+    if (!file) return;
     setLoading(true);
     setError('');
 
     try {
       // Process the document with OCR directly
-      const ocrResult = await ocrAPI.processDocument(file, processingOptions);
+      const ocrResult = await ocrAPI.process(file);
 
-      // El backend siempre devuelve un resultado válido, simplemente lo usamos
-      setResult({
-        success: true,
-        message: 'Documento procesado exitosamente',
+      // Normalize and set result
+      const normalized: OCRResponse = {
+        success: ocrResult.success ?? true,
+        message: ocrResult.message ?? 'Documento procesado exitosamente',
         metadata: ocrResult.metadata || {},
-        line_items: ocrResult.line_items || [],
+        line_items: ocrResult.line_items || (ocrResult as any).products || [],
         detections: ocrResult.detections || [],
-        processed_image: null,
-        processing_time: 3,
-        statistics: {
-          yolo_detections: 0,
-          table_regions: 0,
-          ocr_confidence: 0.95,
-          model_status: {
-            yolo_loaded: true,
-            classes_count: 7,
-            is_loaded: true,
-          },
-        },
-        summary: ocrResult.summary || {
-          total_products: ocrResult.line_items?.length || 0,
-          total_cantidad: 0,
-          gran_total: '$0.00',
-          promedio_precio: '$0.00',
-          processing_time: '< 1s',
-          confidence: 'High',
-        },
-      });
+        processed_image: ocrResult.processed_image || null,
+        processing_time: ocrResult.processing_time || 3,
+        statistics: ocrResult.statistics || {},
+        summary: ocrResult.summary || {},
+      };
+
+      setResult(normalized);
     } catch (err: any) {
       setError(
         `Error procesando documento: ${err.message}. Por favor intenta de nuevo.`
@@ -241,6 +133,59 @@ const OCRResultPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handlers for editing items
+  const handleEditResult = () => {
+    setIsEditing(true);
+    setEditedResult(result);
+  };
+
+  const handleItemChange = (items: OCRLineItem[]) => {
+    setEditedResult(
+      (prev) =>
+        ({
+          ...(prev || result || { success: true }),
+          line_items: items,
+        } as OCRResponse)
+    );
+  };
+
+  // Adapter for ItemsTable which expects (index, field, value)
+  const handleTableChange = (index: number, field: string, value: any) => {
+    const items = (
+      editedResult?.line_items ||
+      result?.line_items ||
+      []
+    ).slice();
+    const item = { ...(items[index] || {}) } as any;
+    item[field] = value;
+    items[index] = item;
+    handleItemChange(items as OCRLineItem[]);
+  };
+
+  const handleProcessAnother = () => {
+    setFile(null);
+    setResult(null);
+    setError('');
+    setIsEditing(false);
+    setEditedResult(null);
+    const fileInput = document.getElementById(
+      'file-upload'
+    ) as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  };
+
+  const handleSaveEdit = () => {
+    if (editedResult) {
+      setResult(editedResult);
+      setIsEditing(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditedResult(null);
+    setIsEditing(false);
   };
 
   return (
@@ -301,7 +246,7 @@ const OCRResultPage: React.FC = () => {
                   : result?.line_items ?? []) as OCRLineItem[]
               }
               isEditing={isEditing}
-              onChange={handleItemChange}
+              onChange={handleTableChange}
             />
 
             {result?.summary && (

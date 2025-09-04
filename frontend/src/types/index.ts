@@ -323,3 +323,20 @@ export interface OCRSupportedFormatsResponse {
     orientation: string;
   };
 }
+
+export interface OCRProduct {
+  name?: string;
+  description?: string;
+  unit_price?: number | string;
+  quantity?: number | string;
+  total_price?: number | string;
+  sku?: string;
+  category?: string;
+  [key: string]: unknown;
+}
+
+export interface OCRBulkResult {
+  status: 'success' | 'error';
+  response_status: number;
+  endpoint_response: unknown;
+}

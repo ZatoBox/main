@@ -196,6 +196,12 @@ export const productsAPI = {
     }),
 };
 
+export const getActiveProducts = async (): Promise<ProductsResponse> => {
+  return apiRequest('/api/products/active');
+};
+
+export const getAllProducts = getActiveProducts;
+
 /// Inventory
 export const inventoryAPI = {
   get: (): Promise<InventoryResponse> => apiRequest('/api/inventory'),
@@ -217,6 +223,54 @@ export const inventoryAPI = {
     message?: string;
     product?: InventoryProduct;
   }> => apiRequest(`/api/inventory/${productId}`),
+};
+
+const ocrAxios: AxiosInstance = axios.create({
+  baseURL: API_CONFIG.OCR_BASE_URL,
+  timeout: API_CONFIG.TIMEOUT,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+ocrAxios.interceptors.request.use((cfg) => {
+  const token = getAuthToken();
+  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  return cfg;
+});
+
+const ocrRequest = async <T>(
+  endpoint: string,
+  config: AxiosRequestConfig = {}
+): Promise<T> => {
+  try {
+    const res: AxiosResponse<T> = await ocrAxios.request({
+      url: endpoint,
+      ...config,
+    });
+    return res.data;
+  } catch (err: any) {
+    if (err.response) {
+      const d = err.response.data || {};
+      throw new Error(
+        d.message || d.error || `HTTP error ${err.response.status}`
+      );
+    }
+    throw new Error(err.message || 'Network error');
+  }
+};
+
+export const ocrAPI = {
+  process: (file: File): Promise<OCRResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return ocrRequest('/ocr', {
+      method: 'POST',
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  bulk: (data: OCRResponse): Promise<import('@/types').OCRBulkResult> =>
+    ocrRequest('/bulk', { method: 'POST', data }),
+  root: (): Promise<{ message: string }> => ocrRequest('/'),
 };
 
 /// Sales

@@ -8,7 +8,14 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const pathname = usePathname();
-  const showSidebar = pathname !== '/';
+  const noSidebarPaths = [
+    '/',
+    '/login',
+    '/register',
+    '/auth/login',
+    '/auth/register',
+  ];
+  const showSidebar = !noSidebarPaths.includes(pathname || '/');
 
   return (
     <div className='flex min-h-screen'>

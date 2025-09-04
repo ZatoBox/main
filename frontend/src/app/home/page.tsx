@@ -7,7 +7,7 @@ import HomeStats from '@/components/home/HomeStats';
 import SalesDrawer from '@/components/SalesDrawer';
 import PaymentScreen from '@/components/PaymentScreen';
 import PaymentSuccessScreen from '@/components/PaymentSuccessScreen';
-import { inventoryAPI, salesAPI } from '@/services/api.service';
+import { getActiveProducts, salesAPI } from '@/services/api.service';
 import type { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 
@@ -54,18 +54,14 @@ const HomePage: React.FC<HomePageProps> = ({
 
       try {
         setLoading(true);
-        const response = await inventoryAPI.getAll();
-        if (response && response.success && Array.isArray(response.inventory)) {
-          const availableProducts = response.inventory
-            .filter((item: any) => item.product)
-            .map((item: any) => {
-              const product = item.product as Product;
-              return {
-                ...product,
-                id: product.id ?? item.product_id ?? 0,
-                stock: Number(item.quantity ?? product.stock ?? 0),
-              } as Product;
-            });
+        const response = await getActiveProducts();
+        if (response && response.success && Array.isArray(response.products)) {
+          const availableProducts = response.products.map((product: any) => {
+            return {
+              ...product,
+              stock: Number(product.stock ?? 0),
+            } as Product;
+          });
           setProducts(availableProducts);
         } else {
           setProducts([]);
@@ -236,19 +232,15 @@ const HomePage: React.FC<HomePageProps> = ({
     try {
       setLoading(true);
       setError(null);
-      const response = await inventoryAPI.getAll();
+      const response = await getActiveProducts();
 
-      if (response && response.success && Array.isArray(response.inventory)) {
-        const availableProducts = response.inventory
-          .filter((item: any) => item.product)
-          .map((item: any) => {
-            const product = item.product as Product;
-            return {
-              ...product,
-              id: product.id ?? item.product_id ?? 0,
-              stock: Number(item.quantity ?? product.stock ?? 0),
-            } as Product;
-          });
+      if (response && response.success && Array.isArray(response.products)) {
+        const availableProducts = response.products.map((product: any) => {
+          return {
+            ...product,
+            stock: Number(product.stock ?? 0),
+          } as Product;
+        });
         setProducts(availableProducts);
       } else {
         setProducts([]);
