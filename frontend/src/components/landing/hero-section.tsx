@@ -572,10 +572,17 @@ export function HeroSection() {
       </div>
 
       <div className='absolute inset-0 z-20 pointer-events-none'>
-        <div className='absolute inset-0 bg-gradient-to-br from-[#FF6A00] via-[#FF7A18] to-[#FFAA33] opacity-100' />
+        <div
+          className='absolute inset-0 opacity-100'
+          style={{
+            background:
+              'linear-gradient(135deg, #FF6A00 0%, rgba(255,255,255,0.12) 18%, #FF7A18 50%, #FFAA33 100%)',
+          }}
+        />
         <div className='absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_left,_#fff0,_#0000)]' />
         <div className='absolute -top-36 -left-56 w-[820px] h-[820px] rounded-full blur-[220px] bg-[#FF7A18] opacity-100 mix-blend-screen' />
         <div className='absolute -bottom-56 -right-36 w-[980px] h-[980px] rounded-full blur-[320px] bg-[#FF8C42] opacity-96 mix-blend-screen' />
+        <div className='absolute top-12 left-16 w-[220px] h-[220px] rounded-full blur-[80px] bg-white opacity-12 mix-blend-screen' />
         <svg
           className='absolute inset-0 w-full h-full opacity-9'
           viewBox='0 0 200 200'
