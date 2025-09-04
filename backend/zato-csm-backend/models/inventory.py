@@ -1,51 +1,25 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, Dict, Any, List
-from datetime import datetime
+from typing import Optional, List
+from pydantic import BaseModel, Field
+from uuid import UUID
 
 
-class InventoryItem(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    name: str
-    description: Optional[str]
-    price: float
-    stock: int
-    min_stock: int
-    category_id: str
-    images: List[str] = []
-    status: str
-    weight: Optional[float]
-    sku: Optional[str]
-    creator_id: str
-    unit: str
-    product_type: str
-    localization: Optional[str]
-    created_at: datetime
-    last_updated: datetime
+class Product(BaseModel):
+    id: UUID
+    name: Optional[str] = None
+    status: Optional[str] = None
 
 
 class Inventory(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: str
-    inventory_owner: str
-    products: Dict[str, InventoryItem] = Field(default_factory=dict)  # JSONB structure
+    id: Optional[UUID] = None
+    inventory_owner: Optional[UUID] = None
+    products: List[Product] = Field(default_factory=list)
+    created_at: Optional[str] = None
+    last_updated: Optional[str] = None
 
 
 class InventoryResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
     success: bool
-    inventory: List[InventoryItem]
-    total_products: int
-    total_stock: int
-    low_stock_count: int
-
-
-class InventoryUpdateRequest(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    product_id: str
-    quantity: int
-    reason: Optional[str] = None
+    inventory: Optional[Inventory] = None
+    total_products: int = 0
+    total_stock: Optional[int] = None
+    low_stock_count: Optional[int] = None

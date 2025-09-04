@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from repositories.inventory_repositories import InventoryRepository
-from models.inventory import InventoryItem, InventoryResponse
+from models.inventory import Product, InventoryResponse
 
 
 class InventoryService:
@@ -10,11 +10,11 @@ class InventoryService:
         self.supabase = supabase
         self.inventory_repo = InventoryRepository(supabase)
 
-    def get_inventory(self) -> List[InventoryItem]:
+    def get_inventory(self) -> List[Product]:
         """Obtiene todos los inventories (solo para admin)"""
         return []
 
-    def get_inventory_by_user(self, user_id: str) -> List[InventoryItem]:
+    def get_inventory_by_user(self, user_id: str) -> List[Product]:
         """Obtiene el inventory de un usuario específico"""
         return self.inventory_repo.get_inventory_items(user_id)
 
@@ -27,25 +27,15 @@ class InventoryService:
         reason: Optional[str] = None,
     ):
         """Actualiza el stock de un producto en el inventory del usuario"""
-        if quantity < 0:
-            raise HTTPException(status_code=400, detail="Quantity cannot be negative")
+        raise HTTPException(
+            status_code=400, detail="Updating stock on inventory.jsonb is not supported"
+        )
 
-        updates = {"stock": quantity, "last_updated": datetime.now()}
-
-        if reason:
-            updates["last_stock_update_reason"] = reason
-
-        return self.inventory_repo.update_inventory_item(user_id, product_id, updates)
-
-    def get_inventory_item(
-        self, user_id: str, product_id: str
-    ) -> Optional[InventoryItem]:
+    def get_inventory_item(self, user_id: str, product_id: str) -> Optional[Product]:
         """Obtiene un item específico del inventory"""
         return self.inventory_repo.get_inventory_item(user_id, product_id)
 
-    def check_low_stock(
-        self, user_id: str, min_threshold: int = 0
-    ) -> List[InventoryItem]:
+    def check_low_stock(self, user_id: str, min_threshold: int = 0) -> List[Product]:
         """Obtiene productos con stock bajo para un usuario"""
         return self.inventory_repo.check_low_stock(user_id, min_threshold)
 
@@ -60,8 +50,14 @@ class InventoryService:
 
         return InventoryResponse(
             success=True,
-            inventory=items,
-            total_products=summary["total_products"],
-            total_stock=summary["total_stock"],
-            low_stock_count=summary["low_stock_count"],
+            inventory={
+                "id": None,
+                "inventory_owner": user_id,
+                "products": [p.dict() if isinstance(p, Product) else p for p in items],
+                "created_at": None,
+                "last_updated": None,
+            },
+            total_products=summary.get("total_products", 0),
+            total_stock=summary.get("total_stock"),
+            low_stock_count=summary.get("low_stock_count"),
         )

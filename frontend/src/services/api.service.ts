@@ -2,16 +2,25 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import type {
   AuthResponse,
   User,
+  LoginRequest,
+  RegisterRequest,
   ProductsResponse,
   ProductResponse,
   Product,
+  CreateProductRequest,
+  UpdateProductRequest,
   InventoryResponse,
-  InventoryItem,
+  InventoryProduct,
   InventorySummary,
   SalesResponse,
   SaleResponse,
   Sale,
-  SalesStatsResponse,
+  CreateSaleRequest,
+  LayoutResponse,
+  LayoutsResponse,
+  Layout,
+  CreateLayoutRequest,
+  UpdateLayoutRequest,
   NotificationSettings,
   Session,
   ProfileStats,
@@ -92,205 +101,149 @@ const apiRequest = async <T>(
   }
 };
 
+/// Auth
 export const authAPI = {
-  register: (userData: Partial<User>): Promise<AuthResponse> =>
-    apiRequest('/auth/register', { method: 'POST', data: userData }),
-  login: (credentials: {
-    email: string;
-    password: string;
-  }): Promise<AuthResponse> =>
-    apiRequest('/auth/login', { method: 'POST', data: credentials }),
-  logout: (): Promise<{ success: boolean; message: string }> =>
-    apiRequest('/auth/logout', { method: 'POST' }),
-  getCurrentUser: async (): Promise<{ success: boolean; user: User }> => {
-    const data = await apiRequest<any>('/auth/me');
-    return 'user' in data
-      ? { success: true, user: data.user as User }
-      : { success: true, user: data as User };
+  login: (credentials: LoginRequest): Promise<AuthResponse> =>
+    apiRequest('/api/auth/login', { method: 'POST', data: credentials }),
+  register: (userData: RegisterRequest): Promise<AuthResponse> =>
+    apiRequest('/api/auth/register', { method: 'POST', data: userData }),
+  getCurrentUser: (): Promise<User> => apiRequest('/api/auth/me'),
+  getUserById: (userId: string): Promise<User> =>
+    apiRequest(`/api/auth/users/${userId}`),
+  getAllUsers: (): Promise<User[]> => apiRequest('/api/auth/users'),
+  uploadProfileImage: (
+    file: File
+  ): Promise<{ success: boolean; message: string; image_url?: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiRequest('/api/auth/upload-profile-image', {
+      method: 'POST',
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   },
-  forgotPassword: (
-    email: string
-  ): Promise<{ success: boolean; message: string }> =>
-    apiRequest('/auth/forgot-password', { method: 'POST', data: { email } }),
-  socialRegister: (
-    access_token: string
-  ): Promise<{ user: User; token: string }> =>
-    apiRequest('/auth/social', { method: 'POST', data: { access_token } }),
-  checkEmail: (email: string): Promise<{ exists: boolean }> =>
-    apiRequest(`/auth/check-email?email=${encodeURIComponent(email)}`),
-  refresh: (): Promise<{ success: boolean; token: string }> =>
-    apiRequest('/auth/refresh', { method: 'POST' }),
+  deleteProfileImage: (): Promise<{ success: boolean; message: string }> =>
+    apiRequest('/api/auth/delete-profile-image', { method: 'DELETE' }),
+  updateProfileImage: (
+    file: File
+  ): Promise<{ success: boolean; message: string; image_url?: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiRequest('/api/auth/update-profile-image', {
+      method: 'PUT',
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
+/// Products
 export const productsAPI = {
-  getAll: (
-    params: Record<string, string | number | boolean> = {}
-  ): Promise<ProductsResponse> => {
-    const queryString = new URLSearchParams(
-      params as Record<string, string>
-    ).toString();
-    return apiRequest(`/products?${queryString}`);
-  },
-  getById: (id: number): Promise<ProductResponse> =>
-    apiRequest(`/products/${id}`),
-  create: (productData: Partial<Product>): Promise<ProductResponse> =>
-    apiRequest('/products', { method: 'POST', data: productData }),
-  update: (
-    id: number,
-    productData: Partial<Product>
-  ): Promise<ProductResponse> => {
-    const payload = Object.entries(
-      productData as Record<string, unknown>
-    ).reduce<Record<string, unknown>>((acc, [k, v]) => {
-      if (v !== undefined) acc[k] = v;
-      return acc;
-    }, {});
-    return apiRequest(`/products/${id}`, { method: 'PUT', data: payload });
-  },
-  uploadImages: async (
-    id: number,
-    formData: FormData
-  ): Promise<{ success: boolean; images: string[] }> => {
-    const token = getAuthToken();
-    const res = await axios.post(
-      `${API_BASE_URL}/products/${id}/images`,
-      formData,
-      {
-        headers: { Authorization: token ? `Bearer ${token}` : undefined },
-      }
-    );
-    return res.data;
-  },
-  delete: (id: number): Promise<{ success: boolean; message: string }> =>
-    apiRequest(`/products/${id}`, { method: 'DELETE' }),
-};
-
-export const inventoryAPI = {
-  getUserInventory: (): Promise<InventoryResponse> =>
-    apiRequest('/inventory/user'),
-  getAll: (): Promise<InventoryResponse> => apiRequest('/inventory'),
-  getSummary: (): Promise<{ success: boolean; summary: InventorySummary }> =>
-    apiRequest('/inventory/summary'),
-  getLowStock: (
-    threshold: number = 0
-  ): Promise<{ success: boolean; low_stock_products: InventoryItem[] }> =>
-    apiRequest(`/inventory/low-stock?threshold=${threshold}`),
+  create: (productData: CreateProductRequest): Promise<ProductResponse> =>
+    apiRequest('/api/products/', { method: 'POST', data: productData }),
+  createBulk: (
+    productsData: CreateProductRequest[]
+  ): Promise<ProductResponse[]> =>
+    apiRequest('/api/products/bulk', { method: 'POST', data: productsData }),
   getById: (
     productId: string
-  ): Promise<{ success: boolean; product?: InventoryItem; message?: string }> =>
-    apiRequest(`/inventory/${productId}`),
-  updateStock: (
-    productId: string,
-    quantity: number,
-    reason?: string
-  ): Promise<{ success: boolean; message: string; product: InventoryItem }> =>
-    apiRequest(`/inventory/${productId}`, {
-      method: 'PUT',
-      data: { quantity, reason },
-    }),
-};
-
-export const salesAPI = {
-  getAll: (
-    params: Record<string, string | number | boolean> = {}
-  ): Promise<SalesResponse> => {
-    const queryString = new URLSearchParams(
-      params as Record<string, string>
-    ).toString();
-    return apiRequest(`/sales?${queryString}`);
-  },
-  getById: (id: number): Promise<SaleResponse> => apiRequest(`/sales/${id}`),
-  create: (saleData: Partial<Sale>): Promise<SaleResponse> =>
-    apiRequest('/sales', { method: 'POST', data: saleData }),
-  update: (id: number, saleData: Partial<Sale>): Promise<SaleResponse> =>
-    apiRequest(`/sales/${id}`, { method: 'PUT', data: saleData }),
-  delete: (id: number): Promise<{ success: boolean; message: string }> =>
-    apiRequest(`/sales/${id}`, { method: 'DELETE' }),
-  getStats: (): Promise<SalesStatsResponse> => apiRequest('/sales/stats'),
-};
-
-export const profileAPI = {
-  get: (): Promise<{ success: boolean; user: User }> => apiRequest('/profile'),
+  ): Promise<{ success: boolean; message: string; product: Product }> =>
+    apiRequest(`/api/products/${productId}`),
   update: (
-    profileData: Partial<User>
-  ): Promise<{ success: boolean; message: string; user: User }> =>
-    apiRequest('/profile', { method: 'PUT', data: profileData }),
-  changePassword: (passwordData: {
-    oldPassword: string;
-    newPassword: string;
-  }): Promise<{ success: boolean; message: string }> =>
-    apiRequest('/profile/password', { method: 'PUT', data: passwordData }),
-  updateNotifications: (
-    notificationData: NotificationSettings
-  ): Promise<{ success: boolean; settings: NotificationSettings }> =>
-    apiRequest('/profile/notifications', {
+    productId: string,
+    updates: UpdateProductRequest
+  ): Promise<{ success: boolean; message: string; product: Product }> =>
+    apiRequest(`/api/products/${productId}`, { method: 'PUT', data: updates }),
+  delete: (
+    productId: string
+  ): Promise<{ success: boolean; message: string; product: Product }> =>
+    apiRequest(`/api/products/${productId}`, { method: 'DELETE' }),
+  list: (): Promise<ProductsResponse> => apiRequest('/api/products/'),
+  addImages: (
+    productId: string,
+    images: File[]
+  ): Promise<{ success: boolean; message: string; product: Product }> => {
+    const formData = new FormData();
+    images.forEach((image) => formData.append('images', image));
+    return apiRequest(`/api/products/${productId}/images`, {
+      method: 'POST',
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  getImages: (
+    productId: string
+  ): Promise<{ success: boolean; images: string[] }> =>
+    apiRequest(`/api/products/${productId}/images`),
+  updateImages: (
+    productId: string,
+    images: File[]
+  ): Promise<{ success: boolean; message: string; product: Product }> => {
+    const formData = new FormData();
+    images.forEach((image) => formData.append('images', image));
+    return apiRequest(`/api/products/${productId}/images`, {
       method: 'PUT',
-      data: notificationData,
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  deleteImage: (
+    productId: string,
+    imageIndex: number
+  ): Promise<{ success: boolean; message: string; product: Product }> =>
+    apiRequest(`/api/products/${productId}/images/${imageIndex}`, {
+      method: 'DELETE',
     }),
-  getSessions: (): Promise<{ success: boolean; sessions: Session[] }> =>
-    apiRequest('/profile/sessions'),
-  closeSession: (
-    sessionId: string
-  ): Promise<{ success: boolean; message: string }> =>
-    apiRequest(`/profile/sessions/${sessionId}`, { method: 'DELETE' }),
-  getStats: (): Promise<{ success: boolean; stats: ProfileStats }> =>
-    apiRequest('/profile/stats'),
-  exportData: (): Promise<{ success: boolean; data: unknown }> =>
-    apiRequest('/profile/export'),
-  deleteAccount: (
-    password: string
-  ): Promise<{ success: boolean; message: string }> =>
-    apiRequest('/profile', { method: 'DELETE', data: { password } }),
 };
 
-export const ocrAPI = {
-  processDocument: async (
-    file: File,
-    options: {
-      enhance_ocr?: boolean;
-      rotation_correction?: boolean;
-      confidence_threshold?: number;
-    } = {}
-  ): Promise<OCRResponse> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (options.enhance_ocr !== undefined)
-      formData.append('enhance_ocr', String(options.enhance_ocr));
-    if (options.rotation_correction !== undefined)
-      formData.append(
-        'rotation_correction',
-        String(options.rotation_correction)
-      );
-    if (options.confidence_threshold !== undefined)
-      formData.append(
-        'confidence_threshold',
-        String(options.confidence_threshold)
-      );
-    const res = await axios.post(
-      `${API_CONFIG.OCR_BASE_URL}/invoice/process`,
-      formData,
-      { withCredentials: false }
-    );
-    return res.data;
-  },
-  validateDocument: async (file: File): Promise<OCRResponse> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const res = await axios.post(
-      `${API_CONFIG.OCR_BASE_URL}/invoice/validate`,
-      formData,
-      { withCredentials: false }
-    );
-    return res.data;
-  },
-  getDebugInfo: async (): Promise<OCRDebugResponse> => {
-    const res = await axios.get(`${API_CONFIG.OCR_BASE_URL}/invoice/debug`);
-    return res.data;
-  },
-  getSupportedFormats: async (): Promise<OCRSupportedFormatsResponse> => {
-    const res = await axios.get(
-      `${API_CONFIG.OCR_BASE_URL}/invoice/supported-formats`
-    );
-    return res.data;
-  },
+/// Inventory
+export const inventoryAPI = {
+  get: (): Promise<InventoryResponse> => apiRequest('/api/inventory'),
+  getUser: (): Promise<InventoryResponse> => apiRequest('/api/inventory/user'),
+  getSummary: (): Promise<{ success: boolean; summary: InventorySummary }> =>
+    apiRequest('/api/inventory/summary'),
+  getLowStock: (
+    threshold?: number
+  ): Promise<{ success: boolean; low_stock_products: InventoryProduct[] }> =>
+    apiRequest(
+      `/api/inventory/low-stock${
+        threshold !== undefined ? `?threshold=${threshold}` : ''
+      }`
+    ),
+  getItem: (
+    productId: string
+  ): Promise<{
+    success: boolean;
+    message?: string;
+    product?: InventoryProduct;
+  }> => apiRequest(`/api/inventory/${productId}`),
+};
+
+/// Sales
+export const salesAPI = {
+  create: (saleData: CreateSaleRequest): Promise<Sale> =>
+    apiRequest('/api/sales/', { method: 'POST', data: saleData }),
+  getById: (saleId: string): Promise<Sale> =>
+    apiRequest(`/api/sales/${saleId}`),
+  getHistory: (): Promise<Sale[]> => apiRequest('/api/sales/'),
+};
+
+/// Layouts
+export const layoutsAPI = {
+  create: (layoutData: CreateLayoutRequest): Promise<LayoutResponse> =>
+    apiRequest('/api/layouts/', { method: 'POST', data: layoutData }),
+  getBySlug: (layoutSlug: string): Promise<LayoutResponse> =>
+    apiRequest(`/api/layouts/${layoutSlug}`),
+  update: (
+    layoutSlug: string,
+    updates: UpdateLayoutRequest
+  ): Promise<LayoutResponse> =>
+    apiRequest(`/api/layouts/${layoutSlug}`, { method: 'PUT', data: updates }),
+  delete: (layoutSlug: string): Promise<LayoutResponse> =>
+    apiRequest(`/api/layouts/${layoutSlug}`, { method: 'DELETE' }),
+  list: (): Promise<LayoutsResponse> => apiRequest('/api/layouts/'),
+  listByOwner: (ownerId: string): Promise<LayoutsResponse> =>
+    apiRequest(`/api/layouts/owner/${ownerId}`),
+  listByInventory: (inventoryId: string): Promise<LayoutsResponse> =>
+    apiRequest(`/api/layouts/inventory/${inventoryId}`),
 };
