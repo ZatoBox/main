@@ -2,7 +2,7 @@
 
 <div align="center">
   <a href="https://github.com/ZatoBox/main">
-    <img src="public/logo.png" alt="ZatoBox Logo" width="200">
+    <img src="frontend/public/image/logo.png" alt="ZatoBox Logo" width="200">
   </a>
 
   <p>
