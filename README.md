@@ -5,6 +5,21 @@
     <img src="frontend/public/image/logo.png" alt="ZatoBox Logo" width="200">
   </a>
 
+## 💎 Tecnologías
+
+![Next.js](https://skillicons.dev/icons?i=nextjs)
+![React](https://skillicons.dev/icons?i=react)
+![TypeScript](https://skillicons.dev/icons?i=ts)
+![Python](https://skillicons.dev/icons?i=python)
+![FastAPI](https://skillicons.dev/icons?i=fastapi)
+![Supabase](https://skillicons.dev/icons?i=supabase)
+![Tailwind CSS](https://skillicons.dev/icons?i=tailwind)
+![Docker](https://skillicons.dev/icons?i=docker)
+![PostgreSQL](https://skillicons.dev/icons?i=postgresql)
+![Vercel](https://skillicons.dev/icons?i=vercel)
+![Git](https://skillicons.dev/icons?i=git)
+![GitHub](https://skillicons.dev/icons?i=github)
+
   <p>
     Sistema completo de punto de venta con inventario inteligente, OCR, gestión avanzada de productos y configuración profesional.
     <br />
@@ -19,6 +34,28 @@
   </p>
 </div>
 
+## 🏆 Top Contributors
+
+<div align="center">
+  <a href="https://github.com/ZatoBox/main/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=ZatoBox/main" />
+  </a>
+</div>
+
+### Contribuidores Destacados
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/Frysccou">
+        <img src="https://github.com/Frysccou.png" width="100px;" alt="Frysccou"/><br />
+        <sub><b>Frysccou</b></sub>
+      </a><br />
+      <span title="Code">💻</span> <span title="Documentation">📖</span> <span title="Maintenance">🚧</span>
+    </td>
+    <!-- Agregar más contribuidores aquí -->
+  </tr>
+</table>
 
 ## 📋 Tabla de Contenidos
 
