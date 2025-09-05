@@ -42,20 +42,6 @@
   </a>
 </div>
 
-### Contribuidores Destacados
-
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/Frysccou">
-        <img src="https://github.com/Frysccou.png" width="100px;" alt="Frysccou"/><br />
-        <sub><b>Frysccou</b></sub>
-      </a><br />
-      <span title="Code">💻</span> <span title="Documentation">📖</span> <span title="Maintenance">🚧</span>
-    </td>
-    <!-- Agregar más contribuidores aquí -->
-  </tr>
-</table>
 
 ## 📋 Tabla de Contenidos
 
