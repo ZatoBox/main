@@ -3,7 +3,6 @@ import { GeistSans } from 'geist/font/sans';
 import { LanguageProvider } from '@/context/language-context';
 import { PluginProvider } from '@/context/plugin-context';
 import { AuthProvider } from '@/components/auth/AuthProvider';
-import SideMenu from '@/components/SideMenu';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import './globals.css';
 
