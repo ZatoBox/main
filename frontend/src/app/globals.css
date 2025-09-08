@@ -1,0 +1,51 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Principal Colors */
+  --color-zatobox-50: #fef9ec;
+  --color-zatobox-100: #fbefca;
+  --color-zatobox-200: #f6de91;
+  --color-zatobox-300: #f1c658;
+  --color-zatobox-400: #eeb131;
+  --color-zatobox-500: #e28e18;
+  --color-zatobox-600: #cc6e13;
+  --color-zatobox-700: #a94d14;
+  --color-zatobox-800: #8a3d16;
+  --color-zatobox-900: #723315;
+  --color-zatobox-950: #411807;
+
+  /* Semantic Component Colors */
+  --background: #fef9ec;
+  --foreground: #411807;
+  --card: #fef9ec;
+  --card-foreground: #411807;
+  --popover: #fef9ec;
+  --popover-foreground: #411807;
+  --primary: #723315;
+  --primary-foreground: #fef9ec;
+  --secondary: #fbefca;
+  --secondary-foreground: #723315;
+  --muted: #fbefca;
+  --muted-foreground: #a94d14;
+  --accent: #f6de91;
+  --accent-foreground: #723315;
+  --destructive: #cc6e13;
+  --destructive-foreground: #fef9ec;
+  --border: #f6de91;
+  --input: #fbefca;
+  --ring: #e28e18;
+  --chart-1: #eeb131;
+  --chart-2: #cc6e13;
+  --chart-3: #8a3d16;
+  --chart-4: #f6de91;
+  --chart-5: #fbefca;
+  --radius: 0.5rem;
+  --sidebar-background: #fbefca;
+  --sidebar-foreground: #411807;
+  --sidebar-primary: #723315;
+  --sidebar-primary-foreground: #fef9ec;
+  --sidebar-accent: #f6de91;
+  --sidebar-accent-foreground: #723315;
+  --sidebar-border: #f1c658;
+  --sidebar-ring: #e28e18;
+}
