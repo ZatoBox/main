@@ -122,7 +122,7 @@ const SideMenu: React.FC = () => {
     {
       name: 'Home',
       icon: Home,
-      path: '/',
+      path: '/home',
       description: 'Main page',
       alwaysVisible: true,
     },
