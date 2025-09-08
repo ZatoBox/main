@@ -13,7 +13,6 @@ import {
 } from '@/types/index';
 import Header from '@/components/ocr-result/Header';
 import FileUploader from '@/components/ocr-result/FileUploader';
-import ProcessingOptions from '@/components/ocr-result/ProcessingOptions';
 import ResultOverview from '@/components/ocr-result/ResultOverview';
 import ItemsTable from '@/components/ocr-result/ItemsTable';
 import ActionsBar from '@/components/ocr-result/ActionsBar';
@@ -202,18 +201,12 @@ const OCRResultPage: React.FC = () => {
                 setError('');
               }}
             />
-            <ProcessingOptions
-              options={processingOptions}
-              onChange={(opts) =>
-                setProcessingOptions((prev) => ({ ...prev, ...opts }))
-              }
-            />
 
             <div className='text-center'>
               <button
                 onClick={handleUpload}
                 disabled={!file || loading}
-                className='flex items-center px-6 py-3 mx-auto font-medium text-white transition-all duration-300 transform rounded-lg bg-complement md:px-8 md:py-4 hover:bg-complement-700 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105'
+                className='flex items-center px-6 py-3 mx-auto font-medium text-white transition-all duration-300 transform rounded-lg bg-[#F88612] md:px-8 md:py-4 hover:bg-[#D35400] disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105'
               >
                 {loading ? (
                   <>
