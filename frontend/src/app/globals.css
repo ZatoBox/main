@@ -2,6 +2,7 @@
 
 @theme {
   /* Principal Colors */
+  --color-zatobox-10: #FFFFFF;
   --color-zatobox-50: #fef9ec;
   --color-zatobox-100: #fbefca;
   --color-zatobox-200: #f6de91;
@@ -48,4 +49,7 @@
   --sidebar-accent-foreground: #723315;
   --sidebar-border: #f1c658;
   --sidebar-ring: #e28e18;
+  --border:#CBD5E1;
+  --shadow-card: 0px 1px 2px -1px rgba(0,0,0,0.1),
+               0px 1px 3px 0px rgba(0,0,0,0.1);
 }
