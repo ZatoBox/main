@@ -337,7 +337,7 @@ function RegisterPage(): JSX.Element {
             <button
               type="submit"
               disabled={isLoading}
-              className="bg-[#E28E18] text-white w-full h-11 bg-primary hover:bg-[#c97a13]  font-medium rounded transition-all duration-150 ease-in-out hover:shadow-md transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#E28E18] text-white w-full h-11 bg-[#E28E18] hover:bg-[#c97a13]  font-medium rounded transition-all duration-150 ease-in-out hover:shadow-md transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Creating account..." : "Create Account"}
             </button>
@@ -559,7 +559,7 @@ function RegisterPage(): JSX.Element {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full font-medium text-black transition-all duration-150 ease-in-out rounded-lg h-11 bg-primary hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-11 font-medium rounded transition-all duration-150 ease-in-out bg-[#E28E18] text-white border border-[#E28E18] hover:bg-[#E28E18] hover:border-[#E28E18] hover:text-white hover:shadow-md transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Creating account..." : "Create Account"}
               </button>
