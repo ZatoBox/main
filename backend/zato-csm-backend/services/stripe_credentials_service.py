@@ -18,6 +18,19 @@ class StripeCredentialsService:
         creds = self.repo.get_by_user(user_id)
         if not creds:
             raise HTTPException(status_code=404, detail="Credentials not found")
+        pub = creds.get("stripe_pub_key")
+        if pub:
+            try:
+                creds["stripe_pub_key"] = "****" + str(pub)[-4:]
+            except Exception:
+                creds["stripe_pub_key"] = "****"
+
+        sec = creds.get("stripe_sec_key")
+        if sec:
+            try:
+                creds["stripe_sec_key"] = "****" + str(sec)[-4:]
+            except Exception:
+                creds["stripe_sec_key"] = "****"
         return creds
 
     def update_credentials(
