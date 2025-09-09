@@ -10,7 +10,6 @@ app = FastAPI(title="CSM API", description="Headless CSM for Zatobox", version="
 # --- Swagger Bearer Token Support ---
 from fastapi.openapi.utils import get_openapi
 
-
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
