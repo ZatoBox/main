@@ -7,9 +7,9 @@ type Props = {
 
 const AvatarUploader: React.FC<Props> = ({ imageUrl, onChange }) => {
   return (
-    <div className='flex items-center space-x-4'>
+    <div className='flex items-center space-x-4  '>
       <div className='relative'>
-        <div className='flex items-center justify-center w-20 h-20 rounded-full bg-[#E28E18]'>
+        <div className='flex items-center justify-center w-20 h-20 rounded-full bg-[#E28E18] '>
           {imageUrl ? (
             <img
               src={imageUrl}

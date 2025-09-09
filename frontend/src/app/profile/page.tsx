@@ -120,7 +120,7 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className='mb-6 lg:hidden'>
-            <div className='overflow-hidden border rounded-lg shadow-sm bg-bg-surface border-divider'>
+            <div className='overflow-hidden border rounded-lg shadow-sm bg-bg-surface border-[#CBD5E1]'>
               {sections.map((s) => (
                 <button
                   key={s.id}
@@ -138,14 +138,14 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className='lg:col-span-3'>
-            <div className='p-6 mb-6 border rounded-lg shadow-sm bg-bg-surface border-divider'>
+            <div className='p-6 mb-6 border rounded-lg shadow-sm bg-bg-surface border-[#CBD5E1]'>
               <h2 className='mb-6 text-xl font-semibold text-text-primary'>
                 {sections.find((s) => s.id === activeSection)?.name}
               </h2>
 
               {activeSection === 'profile' && (
                 <div className='flex flex-col gap-6'>
-                  <div className='p-6 mb-6 border rounded-lg shadow-sm bg-bg-surface border-divider'>
+                  <div className='p-6 mb-6 border rounded-lg shadow-sm bg-bg-surface border-[#CBD5E1]'>
                     <div className='flex flex-col items-start space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-6'>
                       <AvatarUploader
                         imageUrl={profileData.image || null}
