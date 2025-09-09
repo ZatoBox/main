@@ -20,16 +20,20 @@ const FAQItem = ({ question, answer, isOpen, onToggle }: FAQItemProps) => {
   };
   return (
     <div
-      className={`w-full bg-zatobox-50/50 shadow-[0px_2px_4px_rgba(0,0,0,0.16)] overflow-hidden rounded-[10px] outline-1 outline-border outline-offset-[-1px] transition-all duration-500 ease-out cursor-pointer`}
+      className={`w-full bg-transparent overflow-hidden rounded-[10px] transition-all duration-500 ease-out cursor-pointer`}
       onClick={handleClick}
+      style={{
+        boxShadow: '0px 2px 4px rgba(0,0,0,0.08)',
+        border: '1px solid #E7ECEB',
+      }}
     >
       <div className='w-full px-5 py-[18px] pr-4 flex justify-between items-center gap-5 text-left transition-all duration-300 ease-out'>
-        <div className='flex-1 text-zatobox-900 text-base font-medium leading-6 break-words'>
+        <div className='flex-1 text-black text-base font-medium leading-6 break-words'>
           {question}
         </div>
         <div className='flex justify-center items-center'>
           <ChevronDown
-            className={`w-6 h-6 text-zatobox-600 transition-all duration-500 ease-out ${
+            className={`w-6 h-6 text-black transition-all duration-500 ease-out ${
               isOpen ? 'rotate-180 scale-110' : 'rotate-0 scale-100'
             }`}
           />
@@ -49,7 +53,7 @@ const FAQItem = ({ question, answer, isOpen, onToggle }: FAQItemProps) => {
             isOpen ? 'pb-[18px] pt-2 translate-y-0' : 'pb-0 pt-0 -translate-y-2'
           }`}
         >
-          <div className='text-zatobox-700 text-sm font-normal leading-6 break-words'>
+          <div className='text-black text-sm font-normal leading-6 break-words'>
             {answer}
           </div>
         </div>
@@ -101,13 +105,19 @@ export function FAQSection() {
   ];
   return (
     <section className='w-full pt-[66px] pb-20 md:pb-40 px-5 relative flex flex-col justify-center items-center'>
-      <div className='w-[300px] h-[500px] absolute top-[150px] left-1/2 -translate-x-1/2 origin-top-left rotate-[-33.39deg] bg-zatobox-500/10 blur-[100px] z-0' />
+      <div
+        className='w-[300px] h-[500px] absolute top-[150px] left-1/2 -translate-x-1/2 origin-top-left rotate-[-33.39deg] blur-[120px] z-0'
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(255,157,20,0.18), rgba(255,157,20,0.08))',
+        }}
+      />
       <div className='self-stretch pt-8 pb-8 md:pt-14 md:pb-14 flex flex-col justify-center items-center gap-2 relative z-10'>
         <div className='flex flex-col justify-start items-center gap-4'>
-          <h2 className='w-full max-w-[435px] text-center text-zatobox-900 text-4xl font-semibold leading-10 break-words'>
+          <h2 className='w-full max-w-[435px] text-center text-black text-4xl font-semibold leading-10 break-words'>
             {getTranslation(language, 'faq.title')}
           </h2>
-          <p className='self-stretch text-center text-zatobox-600 text-sm font-medium leading-[18.20px] break-words'>
+          <p className='self-stretch text-center text-[#404040] text-sm font-medium leading-[18.20px] break-words'>
             {getTranslation(language, 'faq.subtitle')}
           </p>
         </div>
