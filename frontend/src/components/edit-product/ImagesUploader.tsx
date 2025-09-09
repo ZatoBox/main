@@ -11,11 +11,11 @@ const ImagesUploader: React.FC<Props> = ({ onFiles }) => {
   };
 
   return (
-    <div className='p-6 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
-      <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+    <div className='p-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
+      <label className='block mb-2 text-sm font-medium text-[#000000]'>
         Product Images
       </label>
-      <label className='block w-full p-8 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-zatobox-200 hover:border-zatobox-400'>
+      <label className='block w-full p-8 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-[#CBD5E1] hover:border-gray-400'>
         <input
           type='file'
           accept='image/*'
@@ -23,9 +23,9 @@ const ImagesUploader: React.FC<Props> = ({ onFiles }) => {
           onChange={handleChange}
           className='hidden'
         />
-        <Upload size={48} className='mx-auto mb-4 text-zatobox-600' />
-        <p className='mb-2 text-zatobox-600'>Drag and drop images here</p>
-        <p className='text-sm text-zatobox-600'>or click to select files</p>
+        <Upload size={48} className='mx-auto mb-4 text-[#88888888]' />
+        <p className='mb-2 text-[#88888888]'>Drag and drop images here</p>
+        <p className='text-sm text-[#88888888]'>or click to select files</p>
       </label>
     </div>
   );
