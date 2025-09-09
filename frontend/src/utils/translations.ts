@@ -139,7 +139,7 @@ export const translations = {
         enterprise: {
           name: 'Enterprise',
           description:
-            'Soluciones completas para negocios medianos y grandes. Gratuito durante el período Beta.',
+            'Próximamente: Soluciones completas para negocios medianos y grandes.',
           features: [
             'Soporte dedicado',
             'Entrenamiento inicial para el equipo',
@@ -409,7 +409,7 @@ export const translations = {
         enterprise: {
           name: 'Enterprise',
           description:
-            'Complete solutions for medium and large businesses. Free during the Beta period.',
+            'Coming Soon: Complete solutions for medium and large businesses.',
           features: [
             'Dedicated support',
             'Initial team training',

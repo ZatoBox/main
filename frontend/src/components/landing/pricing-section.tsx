@@ -23,8 +23,8 @@ export function PricingSection() {
     },
     {
       name: getTranslation(language, 'pricing.plans.starter.name'),
-      monthlyPrice: '$0',
-      annualPrice: '$0',
+      monthlyPrice: '$30',
+      annualPrice: '$200',
       description: getTranslation(
         language,
         'pricing.plans.starter.description'
@@ -37,8 +37,8 @@ export function PricingSection() {
     },
     {
       name: getTranslation(language, 'pricing.plans.enterprise.name'),
-      monthlyPrice: '$0',
-      annualPrice: '$0',
+      monthlyPrice: '',
+      annualPrice: '',
       description: getTranslation(
         language,
         'pricing.plans.enterprise.description'
@@ -136,49 +136,51 @@ export function PricingSection() {
                   )}
                 </div>
                 <div className='flex flex-col items-start self-stretch justify-start gap-1'>
-                  <div className='flex justify-start items-center gap-1.5'>
-                    <div
-                      className={`relative h-10 flex items-center text-3xl font-medium leading-10 ${
-                        plan.popular ? 'text-white' : 'text-black'
-                      }`}
-                    >
-                      <span className='invisible'>
-                        {isAnnual ? plan.annualPrice : plan.monthlyPrice}
-                      </span>
-                      <span
-                        className='absolute inset-0 flex items-center transition-all duration-500'
-                        style={{
-                          opacity: isAnnual ? 1 : 0,
-                          transform: `scale(${isAnnual ? 1 : 0.8})`,
-                          filter: `blur(${isAnnual ? 0 : 4}px)`,
-                        }}
-                        aria-hidden={!isAnnual}
+                  {(plan.monthlyPrice || plan.annualPrice) && (
+                    <div className='flex justify-start items-center gap-1.5'>
+                      <div
+                        className={`relative h-10 flex items-center text-3xl font-medium leading-10 ${
+                          plan.popular ? 'text-white' : 'text-black'
+                        }`}
                       >
-                        {plan.annualPrice}
-                      </span>
-                      <span
-                        className='absolute inset-0 flex items-center transition-all duration-500'
-                        style={{
-                          opacity: !isAnnual ? 1 : 0,
-                          transform: `scale(${!isAnnual ? 1 : 0.8})`,
-                          filter: `blur(${!isAnnual ? 0 : 4}px)`,
-                        }}
-                        aria-hidden={isAnnual}
+                        <span className='invisible'>
+                          {isAnnual ? plan.annualPrice : plan.monthlyPrice}
+                        </span>
+                        <span
+                          className='absolute inset-0 flex items-center transition-all duration-500'
+                          style={{
+                            opacity: isAnnual ? 1 : 0,
+                            transform: `scale(${isAnnual ? 1 : 0.8})`,
+                            filter: `blur(${isAnnual ? 0 : 4}px)`,
+                          }}
+                          aria-hidden={!isAnnual}
+                        >
+                          {plan.annualPrice}
+                        </span>
+                        <span
+                          className='absolute inset-0 flex items-center transition-all duration-500'
+                          style={{
+                            opacity: !isAnnual ? 1 : 0,
+                            transform: `scale(${!isAnnual ? 1 : 0.8})`,
+                            filter: `blur(${!isAnnual ? 0 : 4}px)`,
+                          }}
+                          aria-hidden={isAnnual}
+                        >
+                          {plan.monthlyPrice}
+                        </span>
+                      </div>
+                      <div
+                        className={`text-center text-sm font-medium leading-tight ${
+                          plan.popular ? 'text-white' : 'text-black'
+                        }`}
                       >
-                        {plan.monthlyPrice}
-                      </span>
+                        {plan.name ===
+                        getTranslation(language, 'pricing.plans.tester.name')
+                          ? getTranslation(language, 'pricing.period.tester')
+                          : getTranslation(language, 'pricing.period.other')}
+                      </div>
                     </div>
-                    <div
-                      className={`text-center text-sm font-medium leading-tight ${
-                        plan.popular ? 'text-white' : 'text-black'
-                      }`}
-                    >
-                      {plan.name ===
-                      getTranslation(language, 'pricing.plans.tester.name')
-                        ? getTranslation(language, 'pricing.period.tester')
-                        : getTranslation(language, 'pricing.period.other')}
-                    </div>
-                  </div>
+                  )}
                   <div
                     className={`self-stretch text-sm font-medium leading-tight ${
                       plan.popular ? 'text-white/70' : 'text-black/70'
@@ -226,25 +228,59 @@ export function PricingSection() {
                 </div>
               </div>
 
-              <Button
-                className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
-              >
-                <div className='px-1.5 flex justify-center items-center gap-2'>
-                  <span
-                    className={`text-center text-sm font-medium leading-tight ${
-                      plan.name ===
-                      getTranslation(language, 'pricing.plans.tester.name')
-                        ? 'text-gray-800'
-                        : plan.name ===
-                          getTranslation(language, 'pricing.plans.starter.name')
-                        ? 'text-orange-500'
-                        : 'text-black'
-                    }`}
-                  >
-                    {plan.buttonText}
-                  </span>
-                </div>
-              </Button>
+              {plan.name ===
+              getTranslation(language, 'pricing.plans.starter.name') ? (
+                <a
+                  href={
+                    isAnnual
+                      ? process.env.NEXT_PUBLIC_POLAR_YEARLY_PLAN_ID
+                      : process.env.NEXT_PUBLIC_POLAR_MONTHLY_PLAN_ID
+                  }
+                  className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
+                >
+                  <div className='px-1.5 flex justify-center items-center gap-2'>
+                    <span
+                      className={`text-center text-sm font-medium leading-tight ${
+                        plan.name ===
+                        getTranslation(language, 'pricing.plans.tester.name')
+                          ? 'text-gray-800'
+                          : plan.name ===
+                            getTranslation(
+                              language,
+                              'pricing.plans.starter.name'
+                            )
+                          ? 'text-orange-500'
+                          : 'text-black'
+                      }`}
+                    >
+                      {plan.buttonText}
+                    </span>
+                  </div>
+                </a>
+              ) : (
+                <Button
+                  className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
+                >
+                  <div className='px-1.5 flex justify-center items-center gap-2'>
+                    <span
+                      className={`text-center text-sm font-medium leading-tight ${
+                        plan.name ===
+                        getTranslation(language, 'pricing.plans.tester.name')
+                          ? 'text-gray-800'
+                          : plan.name ===
+                            getTranslation(
+                              language,
+                              'pricing.plans.starter.name'
+                            )
+                          ? 'text-orange-500'
+                          : 'text-black'
+                      }`}
+                    >
+                      {plan.buttonText}
+                    </span>
+                  </div>
+                </Button>
+              )}
             </div>
           </div>
         ))}
