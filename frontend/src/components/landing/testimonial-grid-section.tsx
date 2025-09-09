@@ -42,7 +42,6 @@ const TestimonialCard = ({
   type,
   language,
 }: TestimonialCardProps) => {
-  // Validación de seguridad para evitar errores
   if (!type || !quote || !name || !company || !avatar) {
     console.warn('TestimonialCard: Faltan propiedades requeridas', {
       quote,
@@ -61,7 +60,7 @@ const TestimonialCard = ({
     : 'rounded-[30.75px]';
   const padding = isLargeCard ? 'p-6' : 'p-[30px]';
 
-  let cardClasses = `flex flex-col justify-between items-start overflow-hidden rounded-[10px] shadow-[0px_2px_4px_rgba(0,0,0,0.08)] relative ${padding}`;
+  let cardClasses = `flex flex-col justify-between items-start overflow-hidden rounded-[10px] shadow-[0px_2px_4px_rgba(128,128,128,0.08)] relative ${padding}`;
   let quoteClasses = '';
   let nameClasses = '';
   let companyClasses = '';
@@ -70,7 +69,7 @@ const TestimonialCard = ({
   const cardWidth = 'w-full md:w-[384px]';
 
   if (type === 'large-teal') {
-    cardClasses += ' bg-zatobox-500';
+    cardClasses += ' bg-[#FF9D14]';
     quoteClasses += ' text-white text-2xl font-medium leading-8';
     nameClasses += ' text-white text-base font-normal leading-6';
     companyClasses += ' text-white/60 text-base font-normal leading-6';
@@ -85,10 +84,10 @@ const TestimonialCard = ({
       />
     );
   } else if (type === 'large-light') {
-    cardClasses += ' bg-zatobox-50/30 border border-border';
-    quoteClasses += ' text-zatobox-900 text-2xl font-medium leading-8';
-    nameClasses += ' text-zatobox-900 text-base font-semibold leading-6';
-    companyClasses += ' text-zatobox-600 text-base font-normal leading-6';
+    cardClasses += ' bg-white border border-gray-200';
+    quoteClasses += ' text-black text-2xl font-medium leading-8';
+    nameClasses += ' text-black text-base font-semibold leading-6';
+    companyClasses += ' text-black text-base font-normal leading-6';
     cardHeight = 'h-[502px]';
     backgroundElements = (
       <div
@@ -100,11 +99,10 @@ const TestimonialCard = ({
       />
     );
   } else {
-    cardClasses +=
-      ' bg-zatobox-50 outline-1 outline-border outline-offset-[-1px]';
-    quoteClasses += ' text-zatobox-700 text-[17px] font-normal leading-6';
-    nameClasses += ' text-zatobox-900 text-sm font-normal leading-[22px]';
-    companyClasses += ' text-zatobox-600 text-sm font-normal leading-[22px]';
+    cardClasses += ' bg-white border border-gray-200';
+    quoteClasses += ' text-black text-[17px] font-normal leading-6';
+    nameClasses += ' text-black text-sm font-normal leading-[22px]';
+    companyClasses += ' text-black text-sm font-normal leading-[22px]';
     cardHeight = 'h-[244px]';
   }
 
@@ -126,7 +124,7 @@ const TestimonialCard = ({
           className={`w-${avatarSize / 4} h-${
             avatarSize / 4
           } ${avatarBorderRadius}`}
-          style={{ border: '1px solid rgba(255, 255, 255, 0.08)' }}
+          style={{ border: '1px solid rgba(128, 128, 128, 0.12)' }}
         />
         <div className='flex flex-col justify-start items-start gap-0.5'>
           <div className={nameClasses}>{name}</div>
@@ -140,7 +138,6 @@ const TestimonialCard = ({
 export function TestimonialGridSection() {
   const { language }: { language: Language } = useLanguageContext();
 
-  // Obtener testimonios traducidos
   const testimonials = getTranslation(language, 'testimonials.items').map(
     (item: any, index: number) => ({
       quote: item.quote,
@@ -155,10 +152,10 @@ export function TestimonialGridSection() {
     <section className='flex flex-col justify-start w-full px-5 py-6 overflow-hidden md:py-8 lg:py-14'>
       <div className='flex flex-col items-center self-stretch justify-center gap-2 py-6 md:py-8 lg:py-14'>
         <div className='flex flex-col items-center justify-start gap-4'>
-          <h2 className='text-center text-zatobox-900 text-3xl md:text-4xl lg:text-[40px] font-semibold leading-tight md:leading-tight lg:leading-[40px]'>
+          <h2 className='text-center text-black text-3xl md:text-4xl lg:text-[40px] font-semibold leading-tight md:leading-tight lg:leading-[40px]'>
             {getTranslation(language, 'testimonials.title')}
           </h2>
-          <p className='self-stretch text-center text-zatobox-600 text-sm md:text-sm lg:text-base font-medium leading-[18.20px] md:leading-relaxed lg:leading-relaxed'>
+          <p className='self-stretch text-center text-black text-sm md:text-sm lg:text-base font-medium leading-[18.20px] md:leading-relaxed lg:leading-relaxed'>
             {getTranslation(language, 'testimonials.subtitle')}
           </p>
         </div>

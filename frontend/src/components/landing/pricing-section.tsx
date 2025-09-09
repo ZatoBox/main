@@ -32,7 +32,7 @@ export function PricingSection() {
       features: getTranslation(language, 'pricing.plans.starter.features'),
       buttonText: getTranslation(language, 'pricing.plans.starter.buttonText'),
       buttonClass:
-        'bg-primary-foreground shadow-[0px_1px_1px_-0.5px_rgba(16,24,40,0.20)] text-primary text-shadow-[0px_1px_1px_rgba(16,24,40,0.08)] hover:bg-primary-foreground/90',
+        'bg-white shadow-[0px_1px_1px_-0.5px_rgba(16,24,40,0.20)] text-orange-500 text-shadow-[0px_1px_1px_rgba(16,24,40,0.08)] hover:bg-white/90',
       popular: true,
     },
     {
@@ -49,7 +49,7 @@ export function PricingSection() {
         'pricing.plans.enterprise.buttonText'
       ),
       buttonClass:
-        'bg-secondary shadow-[0px_1px_1px_-0.5px_rgba(16,24,40,0.20)] text-secondary-foreground text-shadow-[0px_1px_1px_rgba(16,24,40,0.08)] hover:bg-secondary/90',
+        'bg-[#F2F2F2] shadow-[0px_1px_1px_-0.5px_rgba(16,24,40,0.20)] text-black text-shadow-[0px_1px_1px_rgba(16,24,40,0.08)] hover:bg-[#F2F2F2]/90',
     },
   ];
 
@@ -57,10 +57,10 @@ export function PricingSection() {
     <section className='flex flex-col items-center justify-start w-full px-5 py-8 my-0 overflow-hidden md:py-14'>
       <div className='relative flex flex-col items-center self-stretch justify-center gap-2 py-0'>
         <div className='flex flex-col items-center justify-start gap-4'>
-          <h2 className='text-center text-zatobox-900 text-4xl md:text-5xl font-semibold leading-tight md:leading-[40px]'>
+          <h2 className='text-center text-black text-4xl md:text-5xl font-semibold leading-tight md:leading-[40px]'>
             {getTranslation(language, 'pricing.title')}
           </h2>
-          <p className='self-stretch text-sm font-medium leading-tight text-center text-zatobox-600'>
+          <p className='self-stretch text-sm font-medium leading-tight text-center text-[#404040]'>
             {getTranslation(language, 'pricing.subtitle')}
           </p>
         </div>
@@ -70,13 +70,13 @@ export function PricingSection() {
               onClick={() => setIsAnnual(true)}
               className={`pl-2 pr-1 py-1 flex justify-start items-start gap-2 rounded-md ${
                 isAnnual
-                  ? 'bg-accent shadow-[0px_1px_1px_-0.5px_rgba(0,0,0,0.08)]'
+                  ? 'bg-[#F2F2F2] shadow-[0px_1px_1px_-0.5px_rgba(0,0,0,0.08)]'
                   : ''
               }`}
             >
               <span
                 className={`text-center text-sm font-medium leading-tight ${
-                  isAnnual ? 'text-zatobox-900' : 'text-zatobox-600'
+                  isAnnual ? 'text-black' : 'text-[#404040]'
                 }`}
               >
                 {getTranslation(language, 'pricing.toggle.annual')}
@@ -86,13 +86,13 @@ export function PricingSection() {
               onClick={() => setIsAnnual(false)}
               className={`px-2 py-1 flex justify-start items-start rounded-md ${
                 !isAnnual
-                  ? 'bg-accent shadow-[0px_1px_1px_-0.5px_rgba(0,0,0,0.08)]'
+                  ? 'bg-[#F2F2F2] shadow-[0px_1px_1px_-0.5px_rgba(0,0,0,0.08)]'
                   : ''
               }`}
             >
               <span
                 className={`text-center text-sm font-medium leading-tight ${
-                  !isAnnual ? 'text-zatobox-900' : 'text-zatobox-600'
+                  !isAnnual ? 'text-black' : 'text-[#404040]'
                 }`}
               >
                 {getTranslation(language, 'pricing.toggle.monthly')}
@@ -107,14 +107,14 @@ export function PricingSection() {
             key={plan.name}
             className={`flex-1 p-4 overflow-hidden rounded-xl flex flex-col justify-start items-start gap-6 h-full min-h-[600px] ${
               plan.popular
-                ? 'bg-zatobox-500 shadow-[0px_4px_8px_-2px_rgba(0,0,0,0.10)]'
-                : 'bg-zatobox-50'
+                ? 'bg-[#FF9D14] shadow-[0px_4px_8px_-2px_rgba(0,0,0,0.10)]'
+                : 'bg-transparent'
             }`}
             style={
               plan.popular
                 ? {}
                 : {
-                    outline: '1px solid hsl(var(--border))',
+                    outline: '1px solid rgba(128, 128, 128, 0.12)',
                     outlineOffset: '-1px',
                   }
             }
@@ -123,13 +123,13 @@ export function PricingSection() {
               <div className='flex flex-col items-start self-stretch justify-start gap-8'>
                 <div
                   className={`w-full h-5 text-sm font-medium leading-tight ${
-                    plan.popular ? 'text-primary-foreground' : 'text-foreground'
+                    plan.popular ? 'text-white' : 'text-black'
                   }`}
                 >
                   {plan.name}
                   {plan.popular && (
-                    <div className='ml-2 px-2 overflow-hidden rounded-full justify-center items-center gap-2.5 inline-flex mt-0 py-0.5 bg-gradient-to-b from-primary-light/50 to-primary-light bg-white'>
-                      <div className='text-xs font-normal leading-tight text-center break-words text-primary-foreground'>
+                    <div className='ml-2 px-2 overflow-hidden rounded-full justify-center items-center gap-2.5 inline-flex mt-0 py-0.5 bg-gradient-to-b from-white/30 to-[#FFC44D]'>
+                      <div className='text-xs font-normal leading-tight text-center break-words text-white'>
                         {getTranslation(language, 'pricing.popular')}
                       </div>
                     </div>
@@ -139,9 +139,7 @@ export function PricingSection() {
                   <div className='flex justify-start items-center gap-1.5'>
                     <div
                       className={`relative h-10 flex items-center text-3xl font-medium leading-10 ${
-                        plan.popular
-                          ? 'text-primary-foreground'
-                          : 'text-foreground'
+                        plan.popular ? 'text-white' : 'text-black'
                       }`}
                     >
                       <span className='invisible'>
@@ -172,9 +170,7 @@ export function PricingSection() {
                     </div>
                     <div
                       className={`text-center text-sm font-medium leading-tight ${
-                        plan.popular
-                          ? 'text-primary-foreground/70'
-                          : 'text-muted-foreground'
+                        plan.popular ? 'text-white' : 'text-black'
                       }`}
                     >
                       {plan.name ===
@@ -185,9 +181,7 @@ export function PricingSection() {
                   </div>
                   <div
                     className={`self-stretch text-sm font-medium leading-tight ${
-                      plan.popular
-                        ? 'text-primary-foreground/70'
-                        : 'text-muted-foreground'
+                      plan.popular ? 'text-white/70' : 'text-black/70'
                     }`}
                   >
                     {plan.description}
@@ -198,9 +192,7 @@ export function PricingSection() {
               <div className='flex flex-col items-start self-stretch justify-start gap-4'>
                 <div
                   className={`self-stretch text-sm font-medium leading-tight ${
-                    plan.popular
-                      ? 'text-primary-foreground/70'
-                      : 'text-muted-foreground'
+                    plan.popular ? 'text-white/70' : 'text-black/70'
                   }`}
                 >
                   {plan.name ===
@@ -209,32 +201,28 @@ export function PricingSection() {
                     : plan.name}
                 </div>
                 <div className='flex flex-col items-start self-stretch justify-start gap-3'>
-                    {plan.features.map((feature: string) => (
+                  {plan.features.map((feature: string) => (
                     <div
                       key={feature}
                       className='flex items-center self-stretch justify-start gap-2'
                     >
                       <div className='flex items-center justify-center w-4 h-4'>
-                      <Check
-                        className={`w-full h-full ${
-                        plan.popular
-                          ? 'text-primary-foreground'
-                          : 'text-muted-foreground'
-                        }`}
-                        strokeWidth={2}
-                      />
+                        <Check
+                          className={`w-full h-full ${
+                            plan.popular ? 'text-white' : 'text-black'
+                          }`}
+                          strokeWidth={2}
+                        />
                       </div>
                       <div
-                      className={`leading-tight font-normal text-sm text-left ${
-                        plan.popular
-                        ? 'text-primary-foreground'
-                        : 'text-muted-foreground'
-                      }`}
+                        className={`leading-tight font-normal text-sm text-left ${
+                          plan.popular ? 'text-white' : 'text-black'
+                        }`}
                       >
-                      {feature}
+                        {feature}
                       </div>
                     </div>
-                    ))}
+                  ))}
                 </div>
               </div>
 
@@ -249,8 +237,8 @@ export function PricingSection() {
                         ? 'text-gray-800'
                         : plan.name ===
                           getTranslation(language, 'pricing.plans.starter.name')
-                        ? 'text-primary'
-                        : 'text-zinc-950'
+                        ? 'text-orange-500'
+                        : 'text-black'
                     }`}
                   >
                     {plan.buttonText}

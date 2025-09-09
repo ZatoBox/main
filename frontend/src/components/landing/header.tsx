@@ -44,7 +44,7 @@ export function Header() {
   };
 
   return (
-    <header className='bg-white w-full py-4 px-6'>
+    <header className='w-full py-4 px-6'>
       <div className='max-w-7xl mx-auto flex items-center justify-between'>
         <div className='flex items-center gap-6'>
           <div className='flex items-center gap-3'>
@@ -60,7 +60,7 @@ export function Header() {
                 key={item.name}
                 href={item.href}
                 onClick={(e) => handleScroll(e, item.href)} // Add onClick handler
-                className='text-black px-4 py-2 rounded-full font-medium'
+                className='text-[#888888] px-4 py-2 rounded-full font-medium'
               >
                 {item.name}
               </Link>
@@ -75,7 +75,7 @@ export function Header() {
             rel='noopener noreferrer'
             className='hidden md:block'
           >
-            <Button className='bg-zatobox-500 text-white hover:opacity-90 px-6 py-2 rounded-full font-medium shadow-sm'>
+            <Button className='bg-white text-black hover:opacity-90 px-6 py-2 rounded-full font-medium shadow-sm'>
               {getTranslation(language, 'nav.tryFree')}
             </Button>
           </Link>

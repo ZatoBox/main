@@ -9,7 +9,7 @@ export function SocialProof() {
 
   return (
     <section className='self-stretch py-4 md:py-8 flex flex-col justify-center items-center gap-4 md:gap-6 overflow-hidden'>
-      <div className='text-center bg-gradient-to-r from-zatobox-500 to-zatobox-300 text-transparent bg-clip-text text-sm font-medium leading-tight'>
+      <div className='text-center text-[#D1D5DB] bg-clip-text text-sm font-medium leading-tight'>
         {getTranslation(language, 'socialProof.text')}
       </div>
       <div className='self-stretch flex flex-col gap-4 md:gap-8 items-center max-w-[800px] mx-auto'>
