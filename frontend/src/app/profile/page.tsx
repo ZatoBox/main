@@ -102,7 +102,7 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className='min-h-screen pt-16 bg-bg-main'>
+    <div className='min-h-screen bg-bg-main'>
       <Header
         onBack={() => router.push('/')}
         onSave={() => setSubmitSignal((s) => s + 1)}

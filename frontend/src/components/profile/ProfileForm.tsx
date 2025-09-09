@@ -60,15 +60,15 @@ const ProfileForm: React.FC<Props> = ({
         submitRef.current = formik.submitForm;
         return (
           <Form>
-            <div className='p-6 mb-6 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
+            <div className='p-6 mb-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-[#000000]'>
                     Full Name
                   </label>
                   <Field
                     name='full_name'
-                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
+                    className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-[#FFFFFF] text-[#000000]'
                   />
                   <div className='mt-1 text-xs text-red-500'>
                     <ErrorMessage name='full_name' />
@@ -76,13 +76,13 @@ const ProfileForm: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-[#000000]'>
                     Email
                   </label>
                   <Field
                     name='email'
                     type='email'
-                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
+                    className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-[#FFFFFF] text-[#000000]'
                   />
                   <div className='mt-1 text-xs text-red-500'>
                     <ErrorMessage name='email' />
@@ -90,37 +90,37 @@ const ProfileForm: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-[#000000]'>
                     Phone
                   </label>
                   <Field
                     name='phone'
-                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
+                    className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-[#FFFFFF] text-[#000000]'
                   />
                 </div>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-[#000000]'>
                     Address
                   </label>
                   <Field
                     name='address'
-                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
+                    className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-[#FFFFFF] text-[#000000]'
                   />
                 </div>
               </div>
             </div>
 
-            <div className='p-6 mb-6 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
+            <div className='p-6 mb-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-[#000000]'>
                     Language
                   </label>
                   <Field
                     as='select'
                     name='language'
-                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
+                    className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-[#FFFFFF] text-[#000000]'
                   >
                     <option value='en'>English</option>
                     <option value='es'>Spanish</option>
@@ -130,13 +130,13 @@ const ProfileForm: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-[#000000]'>
                     Timezone
                   </label>
                   <Field
                     as='select'
                     name='timezone'
-                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
+                    className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-[#FFFFFF] text-[#000000]'
                   >
                     <option value='America/Mexico_City'>
                       Mexico City (GMT-6)
@@ -150,13 +150,13 @@ const ProfileForm: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-[#000000]'>
                     Date Format
                   </label>
                   <Field
                     as='select'
                     name='dateFormat'
-                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
+                    className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-[#FFFFFF] text-[#000000]'
                   >
                     <option value='DD/MM/YYYY'>DD/MM/YYYY</option>
                     <option value='MM/DD/YYYY'>MM/DD/YYYY</option>
@@ -165,13 +165,13 @@ const ProfileForm: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-[#000000]'>
                     Currency
                   </label>
                   <Field
                     as='select'
                     name='currency'
-                    className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
+                    className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-[#FFFFFF] text-[#000000]'
                   >
                     <option value='USD'>USD - US Dollar</option>
                     <option value='MXN'>MXN - Mexican Peso</option>
@@ -183,7 +183,7 @@ const ProfileForm: React.FC<Props> = ({
                 <div>
                   <label className='flex items-center space-x-2'>
                     <Field type='checkbox' name='twoFactorEnabled' />
-                    <span className='text-sm text-zatobox-900'>
+                    <span className='text-sm text-[#000000]'>
                       Two-factor authentication
                     </span>
                   </label>
