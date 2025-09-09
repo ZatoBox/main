@@ -22,7 +22,7 @@ const EditHeader: React.FC<Props> = ({
   togglingStatus,
 }) => {
   return (
-   <div className='border-b shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
+   <div className='border-b  bg-[#FFFFFF] border-[#CBD5E1]'>
       <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between h-16'>
           <div className='flex items-center space-x-4'>

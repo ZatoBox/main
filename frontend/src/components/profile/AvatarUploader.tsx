@@ -7,9 +7,9 @@ type Props = {
 
 const AvatarUploader: React.FC<Props> = ({ imageUrl, onChange }) => {
   return (
-    <div className='flex items-center space-x-4'>
+    <div className='flex items-center space-x-4  '>
       <div className='relative'>
-        <div className='flex items-center justify-center w-20 h-20 rounded-full bg-zatobox-500'>
+        <div className='flex items-center justify-center w-20 h-20 rounded-full bg-[#E28E18] '>
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -33,7 +33,7 @@ const AvatarUploader: React.FC<Props> = ({ imageUrl, onChange }) => {
             </svg>
           )}
         </div>
-        <label className='absolute flex items-center justify-center w-8 h-8 transition-colors rounded-full cursor-pointer -bottom-1 -right-1 bg-zatobox-500 hover:bg-zatobox-600'>
+        <label className='absolute flex items-center justify-center w-8 h-8 transition-colors rounded-full cursor-pointer -bottom-1 -right-1 bg-[#A94D14] hover:bg-[#8A3D16]'>
           <input
             type='file'
             accept='image/*'
@@ -60,10 +60,10 @@ const AvatarUploader: React.FC<Props> = ({ imageUrl, onChange }) => {
         </label>
       </div>
       <div>
-        <div className='text-sm font-medium text-zatobox-900'>
+        <div className='text-sm font-medium text-[#A94D14]'>
           Change avatar
         </div>
-        <div className='text-sm text-zatobox-600'>PNG, JPG up to 5MB</div>
+        <div className='text-sm text-[#88888888]'>PNG, JPG up to 5MB</div>
       </div>
     </div>
   );
