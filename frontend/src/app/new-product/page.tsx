@@ -92,7 +92,7 @@ const NewProductPage: React.FC = () => {
   };
 
   return (
-    <div className='min-h-screen pt-16 bg-bg-main'>
+    <div className='min-h-screen bg-bg-main'>
       <Header
         onBack={() => router.push('/inventory')}
         onSave={() => setSubmitSignal((s) => s + 1)}
@@ -103,6 +103,11 @@ const NewProductPage: React.FC = () => {
       <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
           <div className='space-y-6'>
+            <ImagesUploader
+              files={files}
+              onAddFiles={handleAddFiles}
+              onRemove={handleRemoveFile}
+            />
             <NewProductForm
               existingCategories={existingCategories}
               unitOptions={unitOptions}
@@ -110,15 +115,11 @@ const NewProductPage: React.FC = () => {
               onSubmit={onSubmit}
               submitSignal={submitSignal}
             />
-            <ImagesUploader
-              files={files}
-              onAddFiles={handleAddFiles}
-              onRemove={handleRemoveFile}
-            />
+            
           </div>
 
           <div className='space-y-6'>
-            <div className='p-6 border rounded-lg shadow-sm bg-bg-surface border-divider'>
+            <div className='p-6 border rounded-lg shadow-sm bg-bg-surface border-[#CBD5E1]'>
               <label className='block mb-2 text-sm font-medium text-text-primary'>
                 Locations
               </label>
