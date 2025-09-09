@@ -124,44 +124,45 @@ const NewProductForm: React.FC<Props> = ({
             </div>
 
             <div className="p-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1] mt-6">
-              <h3 className="mb-4 text-lg font-medium text-black">
-                Categorization
-              </h3>
-              <div className="space-y-2">
-                {existingCategories.map((category) => {
-                  const isSelected = formik.values.category === category;
-                  return (
-                    <label
-                      key={category}
-                      className="flex items-center space-x-2 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="category"
-                        value={category}
-                        checked={isSelected}
-                        onChange={() =>
-                          formik.setFieldValue("category", category)
-                        }
-                        className={`w-4 h-4 rounded-full border border-[#CBD5E1] 
-                        bg-white checked:bg-[#EEB131] checked:border-[#EEB131] 
-                        focus:outline-none focus:ring-2 focus:ring-[#767676] appearance-none`}
-                      />
-                      <span
-                        className={`text-sm ${
-                          isSelected ? "text-[#000000]" : "text-[#888888]"
-                        }`}
-                      >
-                        {category}
-                      </span>
-                    </label>
-                  );
-                })}
-                <div className="mt-1 text-xs text-red-500">
-                  <ErrorMessage name="category" />
-                </div>
-              </div>
-            </div>
+  <h3 className="mb-4 text-lg font-medium text-black">
+    Categorization
+  </h3>
+  <div className="space-y-2">
+    {existingCategories.map((category) => {
+      const isSelected = formik.values.category === category;
+      return (
+        <label
+          key={category}
+          className="flex items-center space-x-2 cursor-pointer"
+        >
+          <input
+            type="radio"
+            name="category"
+            value={category}
+            checked={isSelected}
+            onChange={() => formik.setFieldValue("category", category)}
+            className="
+              w-4 h-4 rounded-full border border-[#767676]
+              bg-white
+              appearance-none
+              checked:bg-[#EEB131]
+              focus:outline-none focus:ring-2 focus:ring-[#CBD5E1]
+            "
+          />
+          <span
+            className={`text-sm ${isSelected ? "text-[#000000]" : "text-[#888888]"}`}
+          >
+            {category}
+          </span>
+        </label>
+      );
+    })}
+    <div className="mt-1 text-xs text-red-500">
+      <ErrorMessage name="category" />
+    </div>
+  </div>
+</div>
+
 
             <div className="p-6 border rounded-lg shadow-sm bg-#FFFFFF border-[#CBD5E1] mt-6">
               <h3 className="mb-4 text-lg font-medium text-#000000">Units</h3>

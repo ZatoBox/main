@@ -184,11 +184,11 @@ const EditProductPage: React.FC = () => {
 
   if (loading)
     return (
-      <div className='min-h-screen pt-16 bg-bg-main'>Loading product...</div>
+      <div className='min-h-screen  bg-bg-main'>Loading product...</div>
     );
 
   return (
-    <div className='min-h-screen pt-16 bg-bg-main'>
+    <div className='min-h-screen  bg-bg-main'>
       <EditHeader
         onBack={() => router.push('/inventory')}
         onDelete={handleDelete}
@@ -202,11 +202,11 @@ const EditProductPage: React.FC = () => {
       <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
           <div className='space-y-6'>
+            <ImagesUploader onFiles={() => {}} />
             <ProductForm
               formData={formData as any}
               onChange={handleInputChange}
             />
-            <ImagesUploader onFiles={() => {}} />
             <Categorization
               existingCategories={existingCategories}
               selectedCategories={selectedCategories}

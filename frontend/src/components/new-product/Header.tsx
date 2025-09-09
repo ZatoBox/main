@@ -36,7 +36,6 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
       </div>
 
       <div className="flex items-center space-x-4">
-        {/* Status del producto */}
         <div className="w-[158px] h-[40px] flex items-center justify-center bg-[#FFFFFF] rounded-lg border border-[#CBD5E1] gap-2">
           <span className="text-[#000000] font-medium">Status:</span>
           <span className="text-[#F88612] font-medium">Active</span>
@@ -44,7 +43,6 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
 
         {error && <div className="text-sm text-red-500">{error}</div>}
 
-        {/* Botón Delete */}
         <button
           onClick={() => console.log("Delete pressed")}
           className="bg-[#A94D14] hover:bg-[#8A3D16] text-[#FFFFFF] font-semibold px-6 py-2 rounded-lg transition-colors flex items-center space-x-2"
@@ -52,7 +50,6 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
           <span>Delete</span>
         </button>
 
-        {/* Botón Save */}
         <button
           onClick={onSave}
           disabled={saving}
