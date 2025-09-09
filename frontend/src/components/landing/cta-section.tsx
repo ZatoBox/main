@@ -27,7 +27,7 @@ export function CTASection() {
           </p>
         </div>
         <Link
-          href='https://vercel.com/home'
+          href='https://zatobox.io/'
           target='_blank'
           rel='noopener noreferrer'
         >
