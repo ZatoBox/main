@@ -93,7 +93,7 @@ const NewProductForm: React.FC<Props> = ({
                 </label>
                 <Field
                   name="name"
-                  className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-#000000 focus:border-transparent bg-#FFFFFF text-#000000"
+                  className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-#FFFFFF text-#000000"
                 />
                 <div className="mt-1 text-xs text-red-500">
                   <ErrorMessage name="name" />
@@ -108,22 +108,22 @@ const NewProductForm: React.FC<Props> = ({
                   as="textarea"
                   name="description"
                   rows={3}
-                  className="w-full p-3 border rounded-lg resize-none border-[#CBD5E1] focus:ring-2 focus:ring-#000000 focus:border-transparent bg-#FFFFFF text-#000000"
+                  className="w-full p-3 border rounded-lg resize-none border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-#FFFFFF text-#000000"
                 />
               </div>
             </div>
 
-            <div className="p-6 border rounded-lg shadow-sm bg-#FFFFFF border-[#CBD5E1]">
+            <div className="p-6 border rounded-lg shadow-sm bg-#FFFFFF border-[#CBD5E1] mt-6">
               <label className="block mb-2 text-sm font-medium text-#000000">
                 Locations
               </label>
               <Field
                 name="location"
-                className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-#000000 focus:border-transparent bg-#FFFFFF text-#000000"
+                className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-#FFFFFF text-#000000"
               />
             </div>
 
-            <div className="p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]">
+            <div className="p-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1] mt-6">
               <h3 className="mb-4 text-lg font-medium text-black">
                 Categorization
               </h3>
@@ -163,7 +163,7 @@ const NewProductForm: React.FC<Props> = ({
               </div>
             </div>
 
-            <div className="p-6 border rounded-lg shadow-sm bg-#FFFFFF border-[#CBD5E1]">
+            <div className="p-6 border rounded-lg shadow-sm bg-#FFFFFF border-[#CBD5E1] mt-6">
               <h3 className="mb-4 text-lg font-medium text-#000000">Units</h3>
               <div className="space-y-4">
                 <div>
@@ -173,7 +173,7 @@ const NewProductForm: React.FC<Props> = ({
                   <Field
                     as="select"
                     name="unit"
-                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-#FFFFFF text-#000000"
+                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-#FFFFFF text-#000000"
                   >
                     {unitOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -193,7 +193,7 @@ const NewProductForm: React.FC<Props> = ({
                   <Field
                     as="select"
                     name="productType"
-                    className="w-full p-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus: ring-[#CBD5E1] focus:border-transparent bg-bg-surface text-text-primary"
                   >
                     {productTypeOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -211,7 +211,7 @@ const NewProductForm: React.FC<Props> = ({
                     name="weight"
                     type="number"
                     step="0.01"
-                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-#FFFFFF text-#000000"
+                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-#FFFFFF text-#000000"
                   />
                 </div>
 
@@ -227,7 +227,7 @@ const NewProductForm: React.FC<Props> = ({
                       name="price"
                       type="number"
                       step="0.01"
-                      className="w-full py-3 pl-8 pr-3 border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary"
+                      className="w-full py-3 pl-8 pr-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus: ring-[#CBD5E1] focus:border-transparent bg-bg-surface text-text-primary"
                     />
                   </div>
                   <div className="mt-1 text-xs text-red-500">
@@ -237,7 +237,7 @@ const NewProductForm: React.FC<Props> = ({
               </div>
             </div>
 
-            <div className="p-6 border rounded-lg shadow-sm bg-#FFFFFF border-[#CBD5E1]">
+            <div className="p-6 border rounded-lg shadow-sm bg-#FFFFFF border-[#CBD5E1] mt-6">
               <h3 className="mb-4 text-lg font-medium text-#000000">
                 Inventory
               </h3>
@@ -249,7 +249,7 @@ const NewProductForm: React.FC<Props> = ({
                   <Field
                     name="inventoryQuantity"
                     type="number"
-                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-#FFFFFF text-#000000"
+                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus: ring-[#CBD5E1] focus:border-transparent bg-#FFFFFF text-#000000"
                   />
                   <div className="mt-1 text-xs text-red-500">
                     <ErrorMessage name="inventoryQuantity" />
@@ -263,7 +263,7 @@ const NewProductForm: React.FC<Props> = ({
                   <Field
                     name="lowStockAlert"
                     type="number"
-                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-#FFFFFF text-#000000"
+                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus: ring-[#CBD5E1] focus:border-transparent bg-#FFFFFF text-#000000"
                   />
                 </div>
 
@@ -273,7 +273,7 @@ const NewProductForm: React.FC<Props> = ({
                   </label>
                   <Field
                     name="sku"
-                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-#FFFFFF text-#000000"
+                    className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus: ring-[#CBD5E1] focus:border-transparent bg-#FFFFFF text-#000000"
                   />
                 </div>
               </div>

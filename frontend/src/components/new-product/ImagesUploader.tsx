@@ -27,13 +27,13 @@ const ImagesUploader: React.FC<Props> = ({ files, onAddFiles, onRemove }) => {
   };
 
   return (
-    <div className='p-6 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
-      <label className='block mb-4 text-sm font-medium text-zatobox-900'>
+    <div className='p-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
+      <label className='block mb-4 text-sm font-medium text-[#000000]'>
         Product Images
       </label>
       <div
-        className={`border-2 border-dashed border-zatobox-200 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer ${
-          dragActive ? 'border-zatobox-500' : ''
+        className={`border-2 border-dashed border-[#CBD5E1] rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer ${
+          dragActive ? 'border-[#CBD5E1]' : ''
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -58,14 +58,14 @@ const ImagesUploader: React.FC<Props> = ({ files, onAddFiles, onRemove }) => {
             strokeWidth='2'
             strokeLinecap='round'
             strokeLinejoin='round'
-            className='mx-auto mb-4 text-zatobox-700'
+            className='mx-auto mb-4 text-[#88888888]'
           >
             <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' />
             <polyline points='7 10 12 15 17 10' />
             <line x1='12' y1='15' x2='12' y2='3' />
           </svg>
-          <p className='mb-2 text-zatobox-700'>Drag and drop images here</p>
-          <p className='text-sm text-zatobox-700'>or click to select files</p>
+          <p className='mb-2 text-[#88888888]'>Drag and drop images here</p>
+          <p className='text-sm text-[#88888888]'>or click to select files</p>
         </label>
       </div>
 
