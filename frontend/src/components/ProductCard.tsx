@@ -115,7 +115,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         </div>
 
         {/* Product Name */}
-  <h3 className='text-lg font-semibold transition-colors duration-300 text-black/75 group-hover:text-black line-clamp-2'>
+        <h3 className='text-lg font-semibold transition-colors duration-300 text-black/75 group-hover:text-black line-clamp-2'>
           {product.name}
         </h3>
 
@@ -136,11 +136,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
               {unitLabel}
             </span>
           </div>
-
-          {/* Add to Cart Button */}
-          <button className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 ease-out transform translate-y-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-0 bg-complement hover:bg-complement-600 hover:shadow-xl'>
-            Add
-          </button>
         </div>
       </div>
 

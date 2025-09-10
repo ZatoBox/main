@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, products, inventory, sales, layouts, stripe_credentials
+from routes import auth, products, inventory, sales, layouts
 
 # Import middleware registry
 from middleware.middleware import register_middlewares
@@ -35,7 +35,9 @@ app.openapi = custom_openapi
 # CORS config (adjust origins as needed)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,7 +51,6 @@ app.include_router(products.router)
 app.include_router(inventory.router)
 app.include_router(sales.router)
 app.include_router(layouts.router)
-app.include_router(stripe_credentials.router)
 
 
 @app.get("/")

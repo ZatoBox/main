@@ -71,8 +71,8 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
       )}
 
       {/* Header */}
-      <div className='relative flex items-center justify-center p-4 border-b border-zatobox-200 bg-zatobox-50'>
-        <h1 className='text-lg font-semibold text-zatobox-900 animate-slide-in-left'>
+      <div className='relative flex items-center justify-center p-4 border-b border-[#CBD5E1] bg-white'>
+        <h1 className='text-lg font-semibold text-black animate-slide-in-left'>
           Payment Successful
         </h1>
       </div>
@@ -97,17 +97,17 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
 
               {/* Success Message */}
               <div className='space-y-2 text-center'>
-                <h2 className='text-2xl font-bold text-zatobox-900 animate-slide-in-left'>
+                <h2 className='text-2xl font-bold text-black animate-slide-in-left'>
                   Payment Confirmed!
                 </h2>
-                <p className='text-zatobox-700 animate-slide-in-right'>
+                <p className='text-[#CBD5E1] animate-slide-in-right'>
                   Your transaction has been processed successfully
                 </p>
-                <div className='p-3 border rounded-lg bg-gray-50 border-zatobox-200 animate-bounce-in'>
-                  <span className='text-sm text-zatobox-700'>
+                <div className='p-3 border rounded-lg bg-white border-[#CBD5E1] animate-bounce-in'>
+                  <span className='text-sm text-[#CBD5E1]'>
                     Payment method:{' '}
                   </span>
-                  <span className='font-medium text-zatobox-900'>
+                  <span className='font-medium text-black'>
                     {paymentMethod}
                   </span>
                 </div>
@@ -115,7 +115,7 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
 
               {/* Email Section */}
               <div className='w-full max-w-md space-y-4 animate-fade-in'>
-                <h3 className='text-lg font-semibold text-center text-zatobox-900'>
+                <h3 className='text-lg font-semibold text-center text-black'>
                   Get your receipt
                 </h3>
                 <div className='flex space-x-2'>
@@ -124,9 +124,9 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder='Enter your email'
-                    className='flex-1 px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
+                    className='flex-1 px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                   />
-                  <button className='flex items-center px-6 py-3 text-white transition-colors rounded-lg bg-zatobox-500 hover:bg-zatobox-600'>
+                  <button className='flex items-center px-6 py-3 text-black transition-colors rounded-lg bg-white hover:bg-zatobox-600'>
                     <Mail size={16} className='mr-2' />
                     Send
                   </button>
@@ -137,11 +137,11 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
               <div className='flex flex-col w-full max-w-md gap-3 sm:flex-row animate-fade-in'>
                 <button
                   onClick={onNewOrder}
-                  className='flex-1 px-6 py-3 font-medium text-black transition-colors rounded-lg bg-primary hover:bg-primary-600'
+                  className='flex-1 px-6 py-3 font-medium text-black transition-colors rounded-lg bg-[#fbd952] hover:bg-[#faca15] flex items-center justify-center'
                 >
                   New Order
                 </button>
-                <button className='flex items-center justify-center flex-1 px-6 py-3 font-medium transition-colors bg-gray-100 rounded-lg text-zatobox-900 hover:bg-gray-200'>
+                <button className='flex items-center justify-center flex-1 px-6 py-3 font-medium transition-colors bg-white rounded-lg text-black hover:bg-gray-200'>
                   <Download size={16} className='mr-2' />
                   Download Receipt
                 </button>
@@ -149,31 +149,29 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
             </div>
 
             {/* Right Side - Invoice Details */}
-            <div className='p-6 border rounded-lg bg-zatobox-50 border-zatobox-200 animate-slide-in-right'>
+            <div className='p-6 border rounded-lg bg-white border-[#CBD5E1] animate-slide-in-right'>
               <div className='flex items-center justify-between mb-6'>
-                <h3 className='text-xl font-bold text-zatobox-900'>Invoice</h3>
+                <h3 className='text-xl font-bold text-black'>Invoice</h3>
                 <div className='text-right'>
-                  <div className='text-sm text-zatobox-700'>Invoice #</div>
-                  <div className='font-medium text-zatobox-900'>
-                    {invoiceNumber}
-                  </div>
+                  <div className='text-sm text-[#6B7280]'>Invoice #</div>
+                  <div className='font-medium text-black'>{invoiceNumber}</div>
                 </div>
               </div>
 
               <div className='mb-6 space-y-4'>
                 <div className='flex justify-between text-sm'>
-                  <span className='text-zatobox-700'>Date:</span>
-                  <span className='text-zatobox-900'>{currentDate}</span>
+                  <span className='text-[#6B7280]'>Date:</span>
+                  <span className='text-black'>{currentDate}</span>
                 </div>
                 <div className='flex justify-between text-sm'>
-                  <span className='text-zatobox-700'>Payment Method:</span>
-                  <span className='text-zatobox-900'>{paymentMethod}</span>
+                  <span className='text-[#6B7280]'>Payment Method:</span>
+                  <span className='text-black'>{paymentMethod}</span>
                 </div>
               </div>
 
               {/* Items List */}
-              <div className='pt-4 mb-6 border-t border-zatobox-200'>
-                <h4 className='mb-3 font-semibold text-zatobox-900'>Items</h4>
+              <div className='pt-4 mb-6 border-t border-[#6B7280]'>
+                <h4 className='mb-3 font-semibold text-black'>Items</h4>
                 <div className='space-y-3'>
                   {items.map((item) => (
                     <div
@@ -181,18 +179,18 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
                       className='flex items-center justify-between'
                     >
                       <div className='flex-1'>
-                        <div className='font-medium text-zatobox-900'>
+                        <div className='font-medium text-black'>
                           {item.name}
                         </div>
-                        <div className='text-sm text-zatobox-700'>
+                        <div className='text-sm text-[#6B7280]'>
                           Qty: {item.quantity}
                         </div>
                       </div>
                       <div className='text-right'>
-                        <div className='font-medium text-zatobox-900'>
+                        <div className='font-medium text-black'>
                           ${(item.price * item.quantity).toFixed(2)}
                         </div>
-                        <div className='text-sm text-zatobox-700'>
+                        <div className='text-sm text-[#6B7280]'>
                           ${item.price.toFixed(2)} each
                         </div>
                       </div>
@@ -202,31 +200,29 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
               </div>
 
               {/* Totals */}
-              <div className='pt-4 space-y-2 border-t border-zatobox-200'>
+              <div className='pt-4 space-y-2 border-t border-[#6B7280]'>
                 <div className='flex justify-between text-sm'>
-                  <span className='text-zatobox-700'>Subtotal:</span>
-                  <span className='text-zatobox-900'>
-                    ${subtotal.toFixed(2)}
-                  </span>
+                  <span className='text-[#6B7280]'>Subtotal:</span>
+                  <span className='text-black'>${subtotal.toFixed(2)}</span>
                 </div>
                 <div className='flex justify-between text-sm'>
-                  <span className='text-zatobox-700'>Tax (15%):</span>
-                  <span className='text-zatobox-900'>${tax.toFixed(2)}</span>
+                  <span className='text-[#6B7280]'>Tax (15%):</span>
+                  <span className='text-black'>${tax.toFixed(2)}</span>
                 </div>
-                <div className='flex justify-between pt-2 text-lg font-bold border-t border-zatobox-200'>
-                  <span className='text-zatobox-900'>Total:</span>
+                <div className='flex justify-between pt-2 text-lg font-bold border-t border-[#6B7280]'>
+                  <span className='text-[#E28E18]'>Total:</span>
                   <span className='text-success'>${total.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* Thank You Message */}
-              <div className='p-4 mt-6 border border-green-200 rounded-lg bg-green-50'>
+              <div className='p-4 mt-6 border border-[#E28E18] rounded-lg bg-[#FEF9EC]'>
                 <div className='text-center'>
-                  <div className='mb-2 text-green-600'>🎉</div>
-                  <h4 className='mb-1 font-semibold text-green-800'>
+                  <div className='mb-2 text-[#E28E18]'>🎉</div>
+                  <h4 className='mb-1 font-semibold text-black'>
                     Thank you for your purchase!
                   </h4>
-                  <p className='text-sm text-green-700'>
+                  <p className='text-sm text-[#6B7280]'>
                     Your order has been processed successfully. You will receive
                     a confirmation email shortly.
                   </p>
