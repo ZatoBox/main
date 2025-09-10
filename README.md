@@ -1,68 +1,55 @@
-# 🚀 ZatoBox v2.0 - Sistema Inteligente de Punto de Venta
 
 <div align="center">
-  <a href="https://github.com/ZatoBox/main">
-    <img src="frontend/public/image/logo.png" alt="ZatoBox Logo" width="200">
+  <a href="https://zatobox.io">
+    <img src="shared/images/Frame 270988297.png" alt="ZatoBox Logo" width="1080">
   </a>
 
-## 💎 Tecnologías
-
-![Next.js](https://skillicons.dev/icons?i=nextjs)
-![React](https://skillicons.dev/icons?i=react)
-![TypeScript](https://skillicons.dev/icons?i=ts)
-![Python](https://skillicons.dev/icons?i=python)
-![FastAPI](https://skillicons.dev/icons?i=fastapi)
-![Supabase](https://skillicons.dev/icons?i=supabase)
-![Tailwind CSS](https://skillicons.dev/icons?i=tailwind)
-![Docker](https://skillicons.dev/icons?i=docker)
-![PostgreSQL](https://skillicons.dev/icons?i=postgresql)
-![Vercel](https://skillicons.dev/icons?i=vercel)
-![Git](https://skillicons.dev/icons?i=git)
-![GitHub](https://skillicons.dev/icons?i=github)
+[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![LinkedIn][linkedin-shield]][linkedin-url] [![Discord][discord-shield]][discord-url]
+[![License][license-shield]][license-url]
+[![Status][status-shield]][status-url]
+[![Version][version-shield]][version-url]
 
   <p>
-    Sistema completo de punto de venta con inventario inteligente, OCR, gestión avanzada de productos y configuración profesional.
+    ZatoBox is a modular, open-source POS system for SMEs and entrepreneurs. It includes cloud-based inventory management, online catalogs with ZatoLink, payment connection through ZatoConnect, and upcoming modules like Smart Inventory and automation. Designed to be simple, scalable, and adaptable to any business.
     <br />
-    <a href="https://github.com/ZatoBox/Documents"><strong>Explorar Documentación »</strong></a>
+    <a href="https://github.com/ZatoBox/Documents"><strong>Explore Documentation »</strong></a>
     <br />
     <br />
-    <a href="https://youtu.be/gA_XNPI7Bbs?si=7t28gQsBMOhAyA_X">Ver Demo</a>
+    <a href="https://youtu.be/gA_XNPI7Bbs?si=7t28gQsBMOhAyA_X">Watch Demo</a>
     ·
-    <a href="https://github.com/ZatoBox/main/issues/new?labels=bug&template=bug-report---.md">Reportar Bug</a>
+    <a href="https://github.com/ZatoBox/main/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
-    <a href="https://github.com/ZatoBox/main/issues/new?labels=enhancement&template=feature-request---.md">Solicitar Funcionalidad</a>
+    <a href="https://github.com/ZatoBox/main/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
-## 🏆 Top Contributors
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#general-description">General Description</a></li>
+    <li><a href="#system-architecture">System Architecture</a></li>
+	<li><a href="#technologies">Technologies</a></li>
+    <li><a href="#frontend">Frontend</a></li>
+    <li><a href="#backend">Backend</a></li>
+    <li><a href="#ocr">OCR</a></li>
+    <li><a href="#installation-and-configuration">Installation and Configuration</a></li>
+    <li><a href="#deployment">Deployment</a></li>
+    <li><a href="#contribution">Contribution</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#useful-links">Useful Links</a></li>
+  </ol>
+</details>
 
-<div align="center">
-  <a href="https://github.com/ZatoBox/main/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=ZatoBox/main" />
-  </a>
-</div>
+## General Description
 
+ZatoBox is a modern and complete point of sale system that integrates three main components:
 
-## 📋 Tabla de Contenidos
+- **Frontend**: Modern user interface built with Next.js
+- **Backend**: Robust REST API with FastAPI and admin panel with Streamlit
+- **OCR**: Optical character recognition service with Google Gemini AI
 
-- [Descripción General](#-descripción-general)
-- [Arquitectura del Sistema](#-arquitectura-del-sistema)
-- [Frontend](#-frontend)
-- [Backend](#-backend)
-- [OCR](#-ocr)
-- [Instalación y Configuración](#-instalación-y-configuración)
-- [Despliegue](#-despliegue)
-- [Contribución](#-contribución)
-
-## 🔍 Descripción General
-
-ZatoBox es un sistema de punto de venta moderno y completo que integra tres componentes principales:
-
-- **Frontend**: Interfaz de usuario moderna construida con Next.js
-- **Backend**: API REST robusta con FastAPI y panel de administración con Streamlit
-- **OCR**: Servicio de reconocimiento óptico de caracteres con IA de Google Gemini
-
-## 🏗️ Arquitectura del Sistema
+## System Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -85,271 +72,316 @@ ZatoBox es un sistema de punto de venta moderno y completo que integra tres comp
                        └─────────────────┘
 ```
 
-## 🎨 Frontend
 
-### Tecnologías Principales
+## Technologies
 
-- **Framework**: Next.js 15.5.0 con React 19.1.0
-- **Lenguaje**: TypeScript
-- **Estilos**: Tailwind CSS 4
+![Next.js](https://skillicons.dev/icons?i=nextjs)
+![React](https://skillicons.dev/icons?i=react)
+![TypeScript](https://skillicons.dev/icons?i=ts)
+![Python](https://skillicons.dev/icons?i=python)
+![FastAPI](https://skillicons.dev/icons?i=fastapi)
+![Supabase](https://skillicons.dev/icons?i=supabase)
+![Tailwind CSS](https://skillicons.dev/icons?i=tailwind)
+![Docker](https://skillicons.dev/icons?i=docker)
+![PostgreSQL](https://skillicons.dev/icons?i=postgresql)
+![Vercel](https://skillicons.dev/icons?i=vercel)
+![Git](https://skillicons.dev/icons?i=git)
+![GitHub](https://skillicons.dev/icons?i=github)
+
+## Frontend
+
+### Main Technologies
+
+- **Framework**: Next.js 15.5.0 with React 19.1.0
+- **Language**: TypeScript
+- **Styles**: Tailwind CSS 4
 - **UI Components**: Radix UI
-- **Estado**: Zustand
-- **Formularios**: React Hook Form + Formik + Yup
-- **Autenticación**: Supabase Auth
+- **State**: Zustand
+- **Forms**: React Hook Form + Formik + Yup
+- **Authentication**: Supabase Auth
 - **HTTP Client**: Axios
 
-### Características Principales
+### Main Features
 
-- ✅ Interfaz moderna y responsive
-- ✅ Sistema de autenticación completo
-- ✅ Gestión de inventario en tiempo real
-- ✅ Dashboard con gráficos y reportes
-- ✅ Modo oscuro/claro
-- ✅ Gestión de productos con imágenes
-- ✅ Sistema de ventas integrado
+- ✅ Modern and responsive interface
+- ✅ Complete authentication system
+- ✅ Real-time inventory management
+- ✅ Dashboard with charts and reports
+- ✅ Dark/light mode
+- ✅ Product management with images
+- ✅ Integrated sales system
 
-### Iniciar el Frontend
+### Starting the Frontend
 
 ```bash
 cd frontend
 
-# Instalar dependencias
+# Install dependencies
 pnpm install
 
-# Configurar variables de entorno
+# Configure environment variables
 cp .env.example .env.local
-# Editar .env.local con tus credenciales
+# Edit .env.local with your credentials
 
-# Modo desarrollo
-pnpm dev
+# Development mode
+pnpm devZatoBox is a modular, open-source POS system for SMEs and entrepreneurs. It includes cloud-based inventory management, online catalogs with ZatoLink, payment connection through ZatoConnect, and upcoming modules like Smart Inventory (AI + OCR) and automation. Designed to be simple, scalable, and adaptable to any business.
 
-# Construir para producción
+# Build for production
 pnpm build
 pnpm start
 ```
 
-### Variables de Entorno Requeridas
+### Required Environment Variables
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=tu_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_OCR_API_URL=http://localhost:8001
 ```
 
-## ⚙️ Backend
+## Backend
 
-### Arquitectura del Backend
+### Backend Architecture
 
-El backend está dividido en dos componentes:
+The backend is divided into two components:
 
-#### 1. API Principal (zato-csm-backend)
+#### 1. Main API (zato-csm-backend)
 
 - **Framework**: FastAPI 0.116.1
-- **Base de Datos**: Supabase (PostgreSQL)
-- **Autenticación**: JWT + Supabase Auth
-- **ORM**: Repositorio personalizado con psycopg2
-- **Validación**: Pydantic 2.11.7
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: JWT + Supabase Auth
+- **ORM**: Custom repository with psycopg2
+- **Validation**: Pydantic 2.11.7
 
-#### 2. Panel de Administración (admin-dashboard)
+#### 2. Admin Panel (admin-dashboard)
 
 - **Framework**: Streamlit
-- **Funcionalidad**: Dashboard administrativo con métricas
-- **Integración**: Conecta con la API principal
+- **Functionality**: Administrative dashboard with metrics
+- **Integration**: Connects with the main API
 
-### Características Principales
+### Main Features
 
-- ✅ API REST completa con documentación automática (Swagger)
-- ✅ Sistema de autenticación JWT
-- ✅ CRUD completo para productos, inventario, ventas
-- ✅ Gestión de layouts de tienda
-- ✅ Middleware personalizado
-- ✅ Manejo de imágenes con Cloudinary
-- ✅ Panel administrativo interactivo
+- ✅ Complete REST API with automatic documentation (Swagger)
+- ✅ JWT authentication system
+- ✅ Complete CRUD for products, inventory, sales
+- ✅ Store layout management
+- ✅ Custom middleware
+- ✅ Image handling with Cloudinary
+- ✅ Interactive admin panel
 
-### Iniciar el Backend
+### Starting the Backend
 
-#### API Principal
+#### Main API
 
 ```bash
 cd backend/zato-csm-backend
 
-# Crear entorno virtual
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# o
+# or
 venv\Scripts\activate     # Windows
 
-# Instalar dependencias
+# Install dependencies
 pip install -r requirements.txt
 
-# Configurar variables de entorno
+# Configure environment variables
 cp .env.example .env
-# Editar .env con tus credenciales
+# Edit .env with your credentials
 
-# Iniciar servidor
+# Start server
 uvicorn main:app --reload --port 4444
 ```
 
-#### Panel de Administración
+#### Admin Panel
 
 ```bash
 cd backend/admin-dashboard
 
-# Instalar dependencias (si no las tienes)
+# Install dependencies (if you don't have them)
 pip install streamlit requests pandas
 
-# Iniciar dashboard
-streamlit run main.py --server.port 8080 (dashboard no esta andando)
+# Start dashboard
+streamlit run main.py --server.port 8080 (dashboard is not working)
 ```
 
-### Variables de Entorno del Backend
+### Backend Environment Variables
 
 ```env
-SUPABASE_URL=tu_supabase_url
-SUPABASE_KEY=tu_supabase_service_role_key
-SUPABASE_JWT_SECRET=tu_supabase_jwt_secret
-SECRET_KEY=tu_secret_key_para_jwt
-CLOUDINARY_CLOUD_NAME=tu_cloudinary_cloud_name
-CLOUDINARY_API_KEY=tu_cloudinary_api_key
-CLOUDINARY_API_SECRET=tu_cloudinary_api_secret
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_service_role_key
+SUPABASE_JWT_SECRET=your_supabase_jwt_secret
+SECRET_KEY=your_secret_key_for_jwt
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
 
-### Endpoints Principales
+### Main Endpoints
 
 - **Auth**: `/auth/login`, `/auth/register`, `/auth/me`
-- **Productos**: `/products/` (CRUD completo)
-- **Inventario**: `/inventory/` (gestión de stock)
-- **Ventas**: `/sales/` (procesamiento de ventas)
-- **Layouts**: `/layouts/` (configuración de tienda)
+- **Products**: `/products/` (complete CRUD)
+- **Inventory**: `/inventory/` (stock management)
+- **Sales**: `/sales/` (sales processing)
+- **Layouts**: `/layouts/` (store configuration)
 
-## 🔍 OCR
+## OCR
 
-### Tecnologías
+### Technologies
 
 - **Framework**: FastAPI
-- **IA**: Google Gemini 1.5 Flash
-- **Procesamiento**: Análisis de imágenes con IA generativa
+- **AI**: Google Gemini 1.5 Flash
+- **Processing**: Image analysis with generative AI
 
-### Características
+### Features
 
-- ✅ Reconocimiento óptico de caracteres avanzado
-- ✅ Extracción de datos de productos de imágenes
-- ✅ Rate limiting (5 minutos entre peticiones por usuario)
-- ✅ Procesamiento de múltiples formatos de imagen
-- ✅ Integración con la API principal
+- ✅ Advanced optical character recognition
+- ✅ Product data extraction from images
+- ✅ Rate limiting (5 minutes between requests per user)
+- ✅ Multiple image format processing
+- ✅ Integration with main API
 
-### Iniciar el Servicio OCR
+### Starting the OCR Service
 
 ```bash
 cd OCR
 
-# Crear entorno virtual
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# o
+# or
 venv\Scripts\activate     # Windows
 
-# Instalar dependencias
+# Install dependencies
 pip install -r requirements.txt
 
-# Configurar variables de entorno
+# Configure environment variables
 cp .env.example .env
-# Editar .env con tu API key de Gemini
+# Edit .env with your Gemini API key
 
-# Iniciar servidor
+# Start server
 uvicorn main:app --reload --port 500
 ```
 
-### Variables de Entorno del OCR
+### OCR Environment Variables
 
 ```env
-GEMINI_API_KEY=tu_google_gemini_api_key
+GEMINI_API_KEY=your_google_gemini_api_key
 ```
 
-### Endpoints del OCR
+### OCR Endpoints
 
-- **POST** `/extract-product/`: Extrae información de productos de imágenes
-- **GET** `/health`: Health check del servicio
+- **POST** `/extract-product/`: Extract product information from images
+- **GET** `/health`: Service health check
 
-## 🚀 Instalación y Configuración
+## Installation and Configuration
 
-### Prerrequisitos
+### Prerequisites
 
-- Node.js 18+ y pnpm
+- Node.js 18+ and pnpm
 - Python 3.8+
-- Cuenta de Supabase
-- Cuenta de Google AI (para Gemini API)
-- Cuenta de Cloudinary (opcional, para imágenes)
+- Supabase account
+- Google AI account (for Gemini API)
+- Cloudinary account (optional, for images)
 
-### Configuración Completa
+### Complete Configuration
 
-1. **Clonar el repositorio**
+1. **Clone the repository**
 
 ```bash
 git clone https://github.com/ZatoBox/main.git
 cd main
 ```
 
-2. **Configurar Base de Datos**
+2. **Configure Database**
 
-   - Crear proyecto en Supabase
-   - Ejecutar migraciones SQL necesarias
-   - Obtener URL y claves de API
+   - Create project in Supabase
+   - Run necessary SQL migrations
+   - Get URL and API keys
 
-3. **Configurar cada servicio** (seguir instrucciones específicas arriba)
+3. **Configure each service** (follow specific instructions above)
 
-4. **Orden de inicio recomendado**:
-   1. Backend API (puerto 4444)
-   2. Servicio OCR (puerto 5000)
-   3. Frontend (puerto 3000)
-   4. Panel Admin (puerto 8080)
+4. **Recommended startup order**:
+   1. Backend API (port 4444)
+   2. OCR Service (port 5000)
+   3. Frontend (port 3000)
+   4. Admin Panel (port 8080)
 
-## 🐳 Despliegue
+## Deployment
 
 ### Docker
 
-El proyecto incluye Dockerfiles para el backend y OCR:
+The project includes Dockerfiles for backend and OCR:
 
 ```bash
-# Construir imágenes
+# Build images
 docker build -f Dockerfile.backend -t zatobox-backend .
 docker build -f Dockerfile.ocr -t zatobox-ocr .
 
-# Ejecutar contenedores
+# Run containers
 docker run -p 8000:8000 zatobox-backend
 docker run -p 8001:8001 zatobox-ocr
 ```
 
-### Producción
+### Production
 
-- **Frontend**: Vercel (recomendado)
-- **Backend + OCR**: Railway, Render, o cualquier proveedor Docker
-- **Base de Datos**: Supabase (ya incluido)
+- **Frontend**: Vercel (recommended)
+- **Backend + OCR**: Railway, Render, or any Docker provider
+- **Database**: Supabase (already included)
 
-Ver `DEPLOYMENT.md` para instrucciones detalladas de despliegue.
+See `DEPLOYMENT.md` for detailed deployment instructions.
 
-## 🤝 Contribución
+## Contribution
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add: AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add: AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📝 Licencia
+### Top Contributors
 
-Este proyecto está bajo la licencia especificada en `LICENSE.txt`.
+<div>
+  <a href="https://github.com/ZatoBox/main/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=ZatoBox/main" />
+  </a>
+</div>
 
-## 🔗 Enlaces Útiles
 
-- [Documentación](https://github.com/ZatoBox/Documents)
-- [Demo en Video](https://youtu.be/gA_XNPI7Bbs?si=7t28gQsBMOhAyA_X)
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
+
+## Useful Links
+
+- [Documentation](https://github.com/ZatoBox/Documents)
+- [Video Demo](https://youtu.be/gA_XNPI7Bbs?si=7t28gQsBMOhAyA_X)
 - [Issues](https://github.com/ZatoBox/main/issues)
 - [Discord Community](https://discord.gg/FmdyRveX3G)
 
 ---
 
 <div align="center">
-	<p>Hecho con ❤️ por el equipo de ZatoBox</p>
+	<p>Made with ❤️ by the ZatoBox team</p>
 </div>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[contributors-shield]: https://img.shields.io/github/contributors/ZatoBox/main.svg?style=for-the-badge
+[contributors-url]: https://github.com/ZatoBox/main/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/ZatoBox/main.svg?style=for-the-badge
+[forks-url]: https://github.com/ZatoBox/main/network/members
+[stars-shield]: https://img.shields.io/github/stars/ZatoBox/main.svg?style=for-the-badge
+[stars-url]: https://github.com/ZatoBox/main/stargazers
+[issues-shield]: https://img.shields.io/badge/issues-0%20open-green?style=for-the-badge
+[issues-url]: https://github.com/ZatoBox/main/issues
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/in/ikhunsa/
+[discord-shield]: https://img.shields.io/badge/Discord-Join%20Chat-5865F2?style=for-the-badge&logo=discord&logoColor=white
+[discord-url]: https://discord.gg/FmdyRveX3G
+[license-shield]: https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge
+[license-url]: LICENSE.txt
+[status-shield]: https://img.shields.io/badge/status-active-success?style=for-the-badge
+[status-url]: https://github.com/ZatoBox/main
+[version-shield]: https://img.shields.io/badge/version-2.0.1-blue?style=for-the-badge
+[version-url]: https://github.com/ZatoBox/main/releases
