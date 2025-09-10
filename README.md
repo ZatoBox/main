@@ -27,9 +27,9 @@
 <details>
   <summary>Table of Contents</summary>
   <ol>
-    <li><a href="#technologies">Technologies</a></li>
     <li><a href="#general-description">General Description</a></li>
     <li><a href="#system-architecture">System Architecture</a></li>
+	<li><a href="#technologies">Technologies</a></li>
     <li><a href="#frontend">Frontend</a></li>
     <li><a href="#backend">Backend</a></li>
     <li><a href="#ocr">OCR</a></li>
@@ -40,23 +40,6 @@
     <li><a href="#useful-links">Useful Links</a></li>
   </ol>
 </details>
-
-
-
-## Technologies
-
-![Next.js](https://skillicons.dev/icons?i=nextjs)
-![React](https://skillicons.dev/icons?i=react)
-![TypeScript](https://skillicons.dev/icons?i=ts)
-![Python](https://skillicons.dev/icons?i=python)
-![FastAPI](https://skillicons.dev/icons?i=fastapi)
-![Supabase](https://skillicons.dev/icons?i=supabase)
-![Tailwind CSS](https://skillicons.dev/icons?i=tailwind)
-![Docker](https://skillicons.dev/icons?i=docker)
-![PostgreSQL](https://skillicons.dev/icons?i=postgresql)
-![Vercel](https://skillicons.dev/icons?i=vercel)
-![Git](https://skillicons.dev/icons?i=git)
-![GitHub](https://skillicons.dev/icons?i=github)
 
 ## General Description
 
@@ -88,6 +71,22 @@ ZatoBox is a modern and complete point of sale system that integrates three main
                        │   (Database)    │
                        └─────────────────┘
 ```
+
+
+## Technologies
+
+![Next.js](https://skillicons.dev/icons?i=nextjs)
+![React](https://skillicons.dev/icons?i=react)
+![TypeScript](https://skillicons.dev/icons?i=ts)
+![Python](https://skillicons.dev/icons?i=python)
+![FastAPI](https://skillicons.dev/icons?i=fastapi)
+![Supabase](https://skillicons.dev/icons?i=supabase)
+![Tailwind CSS](https://skillicons.dev/icons?i=tailwind)
+![Docker](https://skillicons.dev/icons?i=docker)
+![PostgreSQL](https://skillicons.dev/icons?i=postgresql)
+![Vercel](https://skillicons.dev/icons?i=vercel)
+![Git](https://skillicons.dev/icons?i=git)
+![GitHub](https://skillicons.dev/icons?i=github)
 
 ## Frontend
 
