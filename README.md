@@ -380,7 +380,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [discord-shield]: https://img.shields.io/badge/Discord-Join%20Chat-5865F2?style=for-the-badge&logo=discord&logoColor=white
 [discord-url]: https://discord.gg/FmdyRveX3G
 [license-shield]: https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge
-[license-url]: https://github.com/ZatoBox/main/blob/main/LICENSE
+[license-url]: LICENSE.txt
 [status-shield]: https://img.shields.io/badge/status-active-success?style=for-the-badge
 [status-url]: https://github.com/ZatoBox/main
 [version-shield]: https://img.shields.io/badge/version-2.0.0-blue?style=for-the-badge
