@@ -23,27 +23,27 @@
   </p>
 </div>
 
-## 🏆 Top Contributors
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#technologies">Technologies</a></li>
+    <li><a href="#general-description">General Description</a></li>
+    <li><a href="#system-architecture">System Architecture</a></li>
+    <li><a href="#frontend">Frontend</a></li>
+    <li><a href="#backend">Backend</a></li>
+    <li><a href="#ocr">OCR</a></li>
+    <li><a href="#installation-and-configuration">Installation and Configuration</a></li>
+    <li><a href="#deployment">Deployment</a></li>
+    <li><a href="#contribution">Contribution</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#useful-links">Useful Links</a></li>
+  </ol>
+</details>
 
-<div align="center">
-  <a href="https://github.com/ZatoBox/main/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=ZatoBox/main" />
-  </a>
-</div>
 
 
-## 📋 Table of Contents
-
-- [General Description](#-general-description)
-- [System Architecture](#-system-architecture)
-- [Frontend](#-frontend)
-- [Backend](#-backend)
-- [OCR](#-ocr)
-- [Installation and Configuration](#-installation-and-configuration)
-- [Deployment](#-deployment)
-- [Contribution](#-contribution)
-
-## 💎 Technologies
+## Technologies
 
 ![Next.js](https://skillicons.dev/icons?i=nextjs)
 ![React](https://skillicons.dev/icons?i=react)
@@ -58,7 +58,7 @@
 ![Git](https://skillicons.dev/icons?i=git)
 ![GitHub](https://skillicons.dev/icons?i=github)
 
-## 🔍 General Description
+## General Description
 
 ZatoBox is a modern and complete point of sale system that integrates three main components:
 
@@ -66,7 +66,7 @@ ZatoBox is a modern and complete point of sale system that integrates three main
 - **Backend**: Robust REST API with FastAPI and admin panel with Streamlit
 - **OCR**: Optical character recognition service with Google Gemini AI
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -89,7 +89,7 @@ ZatoBox is a modern and complete point of sale system that integrates three main
                        └─────────────────┘
 ```
 
-## 🎨 Frontend
+## Frontend
 
 ### Main Technologies
 
@@ -125,7 +125,7 @@ cp .env.example .env.local
 # Edit .env.local with your credentials
 
 # Development mode
-pnpm dev
+pnpm devZatoBox is a modular, open-source POS system for SMEs and entrepreneurs. It includes cloud-based inventory management, online catalogs with ZatoLink, payment connection through ZatoConnect, and upcoming modules like Smart Inventory (AI + OCR) and automation. Designed to be simple, scalable, and adaptable to any business.
 
 # Build for production
 pnpm build
@@ -141,7 +141,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_OCR_API_URL=http://localhost:8001
 ```
 
-## ⚙️ Backend
+## Backend
 
 ### Backend Architecture
 
@@ -227,7 +227,7 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 - **Sales**: `/sales/` (sales processing)
 - **Layouts**: `/layouts/` (store configuration)
 
-## 🔍 OCR
+## OCR
 
 ### Technologies
 
@@ -276,7 +276,7 @@ GEMINI_API_KEY=your_google_gemini_api_key
 - **POST** `/extract-product/`: Extract product information from images
 - **GET** `/health`: Service health check
 
-## 🚀 Installation and Configuration
+## Installation and Configuration
 
 ### Prerequisites
 
@@ -309,7 +309,7 @@ cd main
    3. Frontend (port 3000)
    4. Admin Panel (port 8080)
 
-## 🐳 Deployment
+## Deployment
 
 ### Docker
 
@@ -333,7 +333,7 @@ docker run -p 8001:8001 zatobox-ocr
 
 See `DEPLOYMENT.md` for detailed deployment instructions.
 
-## 🤝 Contribution
+## Contribution
 
 1. Fork the project
 2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
@@ -341,11 +341,20 @@ See `DEPLOYMENT.md` for detailed deployment instructions.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 License
+### Top Contributors
+
+<div>
+  <a href="https://github.com/ZatoBox/main/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=ZatoBox/main" />
+  </a>
+</div>
+
+
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔗 Useful Links
+## Useful Links
 
 - [Documentation](https://github.com/ZatoBox/Documents)
 - [Video Demo](https://youtu.be/gA_XNPI7Bbs?si=7t28gQsBMOhAyA_X)
