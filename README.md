@@ -25,7 +25,7 @@
 ![GitHub](https://skillicons.dev/icons?i=github)
 
   <p>
-    Complete point of sale system with intelligent inventory, OCR, advanced product management and professional configuration.
+    ZatoBox is a modular, open-source POS system for SMEs and entrepreneurs. It includes cloud-based inventory management, online catalogs with ZatoLink, payment connection through ZatoConnect, and upcoming modules like Smart Inventory (AI + OCR) and automation. Designed to be simple, scalable, and adaptable to any business.
     <br />
     <a href="https://github.com/ZatoBox/Documents"><strong>Explore Documentation »</strong></a>
     <br />
