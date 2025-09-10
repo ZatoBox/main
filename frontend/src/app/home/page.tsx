@@ -327,7 +327,7 @@ const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Responsive Grid with white background */}
-          <div className='p-6 bg-white border rounded-lg border-divider animate-scale-in'>
+          <div className='p-6 bg-white border rounded-lg border-gray-300 animate-scale-in'>
             <ProductGrid
               products={filteredProducts}
               onProductClick={handleProductClick}
