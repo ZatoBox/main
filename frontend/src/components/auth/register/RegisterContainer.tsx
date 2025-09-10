@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface Props {
   children: React.ReactNode;
@@ -16,22 +16,22 @@ const RegisterContainer: React.FC<Props> = ({
   logoAlt,
 }) => {
   return (
-    <div className='w-full max-w-md space-y-6'>
-      <div className='text-center lg:text-left'>
+    <div className="w-full max-w-md space-y-6">
+      <div className="text-center lg:text-left">
         {logoSrc && (
-          <div className='mb-4'>
+          <div className="mb-4">
             <img
               src={logoSrc}
-              alt={logoAlt || 'logo'}
-              className='object-contain w-40 mx-auto lg:mx-0'
+              alt={logoAlt || "logo"}
+              className="object-contain w-40 mx-auto lg:mx-0"
             />
           </div>
         )}
         {title && (
-          <h1 className='mb-4 text-3xl font-bold text-zatobox-900'>{title}</h1>
+          <h1 className="mb-4 text-3xl font-bold text-color-black">{title}</h1>
         )}
         {description && (
-          <p className='leading-relaxed text-zatobox-600'>{description}</p>
+          <p className="leading-relaxed text-color-black">{description}</p>
         )}
       </div>
       {children}
