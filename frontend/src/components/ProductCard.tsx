@@ -40,7 +40,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   return (
     <div
       onClick={handleClick}
-      className='relative overflow-hidden transition-all duration-300 ease-in-out transform bg-white border rounded-lg cursor-pointer group border-zatobox-200 hover:scale-105 hover:shadow-lg hover:border-zatobox-500/30 animate-fade-in'
+      className='relative overflow-hidden transition-all duration-300 ease-in-out transform bg-white border rounded-lg cursor-pointer group border-gray-300 hover:scale-105 hover:shadow-lg hover:border-gray-300 animate-fade-in'
       style={{
         animationDelay: `${product.id * 100}ms`,
       }}
@@ -102,26 +102,26 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
 
       {/* Product Info */}
       <div className='p-4 space-y-3'>
-        {/* Category */}
+        {/* Category  text-zatobox-700*/}
         <div className='flex items-center justify-between'>
-          <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-700 group-hover:text-zatobox-500'>
+          <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
             {product.category_id ?? ''}
           </span>
           {product.sku && (
-            <span className='text-xs transition-colors duration-300 text-zatobox-700 group-hover:text-zatobox-900'>
+            <span className='text-xs transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
               {product.sku}
             </span>
           )}
         </div>
 
         {/* Product Name */}
-        <h3 className='text-lg font-semibold transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-500 line-clamp-2'>
+  <h3 className='text-lg font-semibold transition-colors duration-300 text-black/75 group-hover:text-black line-clamp-2'>
           {product.name}
         </h3>
 
         {/* Description */}
         {product.description ? (
-          <p className='text-sm transition-colors duration-300 text-zatobox-700 line-clamp-2 group-hover:text-zatobox-900'>
+          <p className='text-sm transition-colors duration-300 text-gray-500 line-clamp-2 group-hover:text-gray-500'>
             {product.description}
           </p>
         ) : null}
@@ -129,10 +129,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         {/* Price and Action */}
         <div className='flex items-center justify-between pt-2'>
           <div className='flex flex-col'>
-            <span className='text-2xl font-bold transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-500'>
+            <span className='text-2xl font-bold transition-colors duration-300  text-black group-hover:text-zatobox-500'>
               ${product.price.toFixed(2)}
             </span>
-            <span className='text-xs transition-colors duration-300 text-zatobox-700 group-hover:text-zatobox-900'>
+            <span className='text-xs transition-colors duration-300 text-gray-500  group-hover:text-gray-500'>
               {unitLabel}
             </span>
           </div>
