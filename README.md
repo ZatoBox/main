@@ -4,7 +4,7 @@
 
 <div align="center">
   <a href="https://github.com/ZatoBox/main">
-    <img src="frontend/public/image/logo.png" alt="ZatoBox Logo" width="200">
+    <img src="shared/images/Frame 270988297.png" alt="ZatoBox Logo" width="1080">
   </a>
 
 [![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![LinkedIn][linkedin-shield]][linkedin-url] [![Discord][discord-shield]][discord-url]
