@@ -383,5 +383,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) 
 [license-url]: LICENSE.txt
 [status-shield]: https://img.shields.io/badge/status-active-success?style=for-the-badge
 [status-url]: https://github.com/ZatoBox/main
-[version-shield]: https://img.shields.io/badge/version-2.0.0-blue?style=for-the-badge
+[version-shield]: https://img.shields.io/badge/version-2.0.1-blue?style=for-the-badge
 [version-url]: https://github.com/ZatoBox/main/releases
