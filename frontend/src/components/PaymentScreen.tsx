@@ -114,16 +114,16 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
   }
 
   return (
-    <div className='fixed inset-0 z-50 flex flex-col bg-zatobox-50 animate-scale-in'>
+    <div className='fixed inset-0 z-50 flex flex-col bg-white animate-scale-in'>
       {/* Header */}
-      <div className='flex items-center justify-between p-4 border-b border-zatobox-200 bg-zatobox-50'>
+      <div className='flex items-center justify-between p-4 border-b border-[#CBD5E1] bg-[#F9FAFB]'>
         <button
           onClick={onBack}
           className='p-2 transition-all duration-300 rounded-full hover:bg-gray-50 hover:scale-110 icon-bounce'
         >
-          <ArrowLeft size={20} className='text-zatobox-900' />
+          <ArrowLeft size={20} className='text-black' />
         </button>
-        <h1 className='text-lg font-semibold text-zatobox-900 animate-slide-in-left'>
+        <h1 className='text-lg font-semibold text-black animate-slide-in-left'>
           Payment Options
         </h1>
         <div className='w-10'></div> {/* Spacer */}
@@ -132,10 +132,10 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
       {/* Content */}
       <div className='flex-1 p-4 pb-24 overflow-y-auto'>
         {/* Total Amount */}
-        <div className='p-4 mb-6 border rounded-lg bg-gray-50 border-zatobox-200 animate-bounce-in'>
+        <div className='p-4 mb-6 border rounded-lg bg-gray-50 border-[#CBD5E1] animate-bounce-in'>
           <div className='text-center'>
-            <span className='text-sm text-zatobox-700'>Total to pay</span>
-            <div className='text-2xl font-bold text-zatobox-900'>
+            <span className='text-sm text-[#6B7280]'>Total to pay</span>
+            <div className='text-2xl font-bold text-black'>
               {formatCurrency(total)}
             </div>
           </div>
@@ -148,7 +148,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
               selectedMethod === 'card'
                 ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
-                : 'border-zatobox-200 hover:border-gray-300 bg-zatobox-50'
+                : 'border-[#CBD5E1] hover:bg-[#FEF9EC] bg-white'
             }`}
             onClick={() => setSelectedMethod('card')}
           >
@@ -157,19 +157,19 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
                   selectedMethod === 'card'
                     ? 'border-zatobox-500 bg-zatobox-500'
-                    : 'border-gray-300'
+                    : 'border-gray-300 hover:border-[#F88612] hover:bg-[#F88612]'
                 }`}
               >
                 {selectedMethod === 'card' && (
                   <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
                 )}
               </div>
-              <CreditCard size={20} className='text-zatobox-700 icon-bounce' />
+              <CreditCard size={20} className='text-black icon-bounce' />
               <div>
-                <div className='font-medium text-zatobox-900 text-glow'>
+                <div className='font-medium text-black text-glow'>
                   Credit/Debit Card
                 </div>
-                <div className='text-sm text-zatobox-700'>
+                <div className='text-sm text-[#CBD5E1]'>
                   Visa, Mastercard, American Express
                 </div>
               </div>
@@ -181,7 +181,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
               selectedMethod === 'wallet'
                 ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
-                : 'border-zatobox-200 hover:border-gray-300 bg-zatobox-50'
+                : 'border-[#CBD5E1] hover:bg-[#FEF9EC] bg-white'
             }`}
             onClick={() => setSelectedMethod('wallet')}
           >
@@ -190,19 +190,19 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
                   selectedMethod === 'wallet'
                     ? 'border-zatobox-500 bg-zatobox-500'
-                    : 'border-gray-300'
+                    : 'border-gray-300 hover:border-[#F88612] hover:bg-[#F88612]'
                 }`}
               >
                 {selectedMethod === 'wallet' && (
                   <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
                 )}
               </div>
-              <Smartphone size={20} className='text-zatobox-700 icon-bounce' />
+              <Smartphone size={20} className='text-black icon-bounce' />
               <div>
-                <div className='font-medium text-zatobox-900 text-glow'>
+                <div className='font-medium text-black text-glow'>
                   Apple Pay / Google Pay
                 </div>
-                <div className='text-sm text-zatobox-700'>
+                <div className='text-sm text-[#CBD5E1]'>
                   Quick payment with your wallet
                 </div>
               </div>
@@ -214,7 +214,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
               selectedMethod === 'crypto'
                 ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
-                : 'border-zatobox-200 hover:border-gray-300 bg-zatobox-50'
+                : 'border-[#CBD5E1] hover:bg-[#FEF9EC] bg-white'
             }`}
             onClick={() => setSelectedMethod('crypto')}
           >
@@ -223,19 +223,19 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
                   selectedMethod === 'crypto'
                     ? 'border-zatobox-500 bg-zatobox-500'
-                    : 'border-gray-300'
+                    : 'border-gray-300 hover:border-[#F88612] hover:bg-[#F88612]'
                 }`}
               >
                 {selectedMethod === 'crypto' && (
                   <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
                 )}
               </div>
-              <Bitcoin size={20} className='text-zatobox-700 icon-bounce' />
+              <Bitcoin size={20} className='text-black icon-bounce' />
               <div>
-                <div className='font-medium text-zatobox-900 text-glow'>
+                <div className='font-medium text-black text-glow'>
                   Coinbase Pay / Crypto
                 </div>
-                <div className='text-sm text-zatobox-700'>
+                <div className='text-sm text-[#CBD5E1]'>
                   Bitcoin, Ethereum, and more
                 </div>
               </div>
@@ -247,7 +247,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
               selectedMethod === 'cash'
                 ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
-                : 'border-zatobox-200 hover:border-gray-300 bg-zatobox-50'
+                : 'border-[#CBD5E1] hover:bg-[#FEF9EC] bg-white'
             }`}
             onClick={() => setSelectedMethod('cash')}
           >
@@ -256,19 +256,19 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
                   selectedMethod === 'cash'
                     ? 'border-zatobox-500 bg-zatobox-500'
-                    : 'border-gray-300'
+                    : 'border-gray-300 hover:border-[#F88612] hover:bg-[#F88612]'
                 }`}
               >
                 {selectedMethod === 'cash' && (
                   <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
                 )}
               </div>
-              <Banknote size={20} className='text-zatobox-700 icon-bounce' />
+              <Banknote size={20} className='text-black icon-bounce' />
               <div>
-                <div className='font-medium text-zatobox-900 text-glow'>
+                <div className='font-medium text-black text-glow'>
                   Cash on Delivery
                 </div>
-                <div className='text-sm text-zatobox-700'>
+                <div className='text-sm text-[#CBD5E1]'>
                   Pay with cash upon delivery
                 </div>
               </div>
@@ -278,15 +278,15 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
 
         {/* Payment Method Forms */}
         {selectedMethod && (
-          <div className='p-6 mb-6 border rounded-lg bg-zatobox-50 border-zatobox-200 animate-fade-in'>
+          <div className='p-6 mb-6 border rounded-lg bg-white border-[#CBD5E1] animate-fade-in'>
             {selectedMethod === 'card' && (
               <div className='space-y-4'>
-                <h3 className='mb-4 text-lg font-semibold text-zatobox-900'>
+                <h3 className='mb-4 text-lg font-semibold text-black'>
                   Card Information
                 </h3>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-black'>
                     Card Number
                   </label>
                   <input
@@ -296,14 +296,14 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                       handleInputChange('cardNumber', e.target.value)
                     }
                     placeholder='1234 5678 9012 3456'
-                    className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
+                    className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                     maxLength={19}
                   />
                 </div>
 
                 <div className='grid grid-cols-2 gap-4'>
                   <div>
-                    <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                    <label className='block mb-2 text-sm font-medium text-black'>
                       Expiry Date
                     </label>
                     <input
@@ -313,12 +313,12 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                         handleInputChange('expiryDate', e.target.value)
                       }
                       placeholder='MM/YY'
-                      className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
+                      className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                       maxLength={5}
                     />
                   </div>
                   <div>
-                    <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                    <label className='block mb-2 text-sm font-medium text-black'>
                       CVC
                     </label>
                     <input
@@ -326,14 +326,14 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                       value={formData.cvc}
                       onChange={(e) => handleInputChange('cvc', e.target.value)}
                       placeholder='123'
-                      className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
+                      className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                       maxLength={4}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-black'>
                     Cardholder Name
                   </label>
                   <input
@@ -343,7 +343,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                       handleInputChange('cardName', e.target.value)
                     }
                     placeholder='John Doe'
-                    className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
+                    className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                   />
                 </div>
               </div>
@@ -351,12 +351,12 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
 
             {selectedMethod === 'crypto' && (
               <div className='space-y-4'>
-                <h3 className='mb-4 text-lg font-semibold text-zatobox-900'>
+                <h3 className='mb-4 text-lg font-semibold text-black'>
                   Crypto Payment
                 </h3>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-black'>
                     Cryptocurrency
                   </label>
                   <select
@@ -364,7 +364,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                     onChange={(e) =>
                       handleInputChange('cryptoCurrency', e.target.value)
                     }
-                    className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
+                    className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                   >
                     <option value='bitcoin'>Bitcoin (BTC)</option>
                     <option value='ethereum'>Ethereum (ETH)</option>
@@ -374,7 +374,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 </div>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-black'>
                     Wallet Address
                   </label>
                   <input
@@ -384,7 +384,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                       handleInputChange('walletAddress', e.target.value)
                     }
                     placeholder='Enter your wallet address'
-                    className='w-full px-4 py-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
+                    className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                   />
                 </div>
               </div>
@@ -392,12 +392,12 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
 
             {selectedMethod === 'cash' && (
               <div className='space-y-4'>
-                <h3 className='mb-4 text-lg font-semibold text-zatobox-900'>
+                <h3 className='mb-4 text-lg font-semibold text-black'>
                   Cash Payment
                 </h3>
 
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-black'>
                     Amount Received
                   </label>
                   <input
@@ -408,7 +408,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-zatobox-500 focus:border-transparent ${
                       isSufficientAmount
                         ? 'border-green-500'
-                        : 'border-zatobox-200'
+                        : 'border-[#CBD5E1]'
                     }`}
                     min={total}
                     step='0.01'
@@ -423,7 +423,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
 
                 {/* Quick Amount Buttons */}
                 <div>
-                  <label className='block mb-2 text-sm font-medium text-zatobox-900'>
+                  <label className='block mb-2 text-sm font-medium text-black'>
                     Quick Amount
                   </label>
                   <div className='grid grid-cols-3 gap-2'>
@@ -434,7 +434,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                         onClick={() =>
                           handleCashReceivedChange(amount.toString())
                         }
-                        className='px-3 py-2 text-sm transition-colors border rounded-lg border-zatobox-200 hover:bg-gray-50'
+                        className='px-3 py-2 text-sm transition-colors border rounded-lg border-[#CBD5E1] hover:bg-gray-50'
                       >
                         ${amount}
                       </button>
@@ -446,7 +446,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 {cashReceived > 0 && (
                   <div className='p-4 rounded-lg bg-gray-50'>
                     <div className='flex items-center justify-between mb-2'>
-                      <span className='text-sm text-zatobox-700'>
+                      <span className='text-sm text-[#CBD5E1]'>
                         Change to return:
                       </span>
                       <span
@@ -471,10 +471,10 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
             {selectedMethod === 'wallet' && (
               <div className='py-8 text-center'>
                 <div className='mb-4 text-4xl'>📱</div>
-                <h3 className='mb-2 text-lg font-semibold text-zatobox-900'>
+                <h3 className='mb-2 text-lg font-semibold text-black'>
                   Mobile Payment
                 </h3>
-                <p className='text-zatobox-700'>
+                <p className='text-[#CBD5E1]'>
                   Use your mobile wallet to complete the payment
                 </p>
               </div>
