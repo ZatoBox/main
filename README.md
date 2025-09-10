@@ -9,21 +9,6 @@
 [![Status][status-shield]][status-url]
 [![Version][version-shield]][version-url]
 
-## 💎 Technologies
-
-![Next.js](https://skillicons.dev/icons?i=nextjs)
-![React](https://skillicons.dev/icons?i=react)
-![TypeScript](https://skillicons.dev/icons?i=ts)
-![Python](https://skillicons.dev/icons?i=python)
-![FastAPI](https://skillicons.dev/icons?i=fastapi)
-![Supabase](https://skillicons.dev/icons?i=supabase)
-![Tailwind CSS](https://skillicons.dev/icons?i=tailwind)
-![Docker](https://skillicons.dev/icons?i=docker)
-![PostgreSQL](https://skillicons.dev/icons?i=postgresql)
-![Vercel](https://skillicons.dev/icons?i=vercel)
-![Git](https://skillicons.dev/icons?i=git)
-![GitHub](https://skillicons.dev/icons?i=github)
-
   <p>
     ZatoBox is a modular, open-source POS system for SMEs and entrepreneurs. It includes cloud-based inventory management, online catalogs with ZatoLink, payment connection through ZatoConnect, and upcoming modules like Smart Inventory (AI + OCR) and automation. Designed to be simple, scalable, and adaptable to any business.
     <br />
@@ -57,6 +42,21 @@
 - [Installation and Configuration](#-installation-and-configuration)
 - [Deployment](#-deployment)
 - [Contribution](#-contribution)
+
+## 💎 Technologies
+
+![Next.js](https://skillicons.dev/icons?i=nextjs)
+![React](https://skillicons.dev/icons?i=react)
+![TypeScript](https://skillicons.dev/icons?i=ts)
+![Python](https://skillicons.dev/icons?i=python)
+![FastAPI](https://skillicons.dev/icons?i=fastapi)
+![Supabase](https://skillicons.dev/icons?i=supabase)
+![Tailwind CSS](https://skillicons.dev/icons?i=tailwind)
+![Docker](https://skillicons.dev/icons?i=docker)
+![PostgreSQL](https://skillicons.dev/icons?i=postgresql)
+![Vercel](https://skillicons.dev/icons?i=vercel)
+![Git](https://skillicons.dev/icons?i=git)
+![GitHub](https://skillicons.dev/icons?i=github)
 
 ## 🔍 General Description
 
