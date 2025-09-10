@@ -10,7 +10,7 @@
 [![Version][version-shield]][version-url]
 
   <p>
-    ZatoBox is a modular, open-source POS system for SMEs and entrepreneurs. It includes cloud-based inventory management, online catalogs with ZatoLink, payment connection through ZatoConnect, and upcoming modules like Smart Inventory (AI + OCR) and automation. Designed to be simple, scalable, and adaptable to any business.
+    ZatoBox is a modular, open-source POS system for SMEs and entrepreneurs. It includes cloud-based inventory management, online catalogs with ZatoLink, payment connection through ZatoConnect, and upcoming modules like Smart Inventory and automation. Designed to be simple, scalable, and adaptable to any business.
     <br />
     <a href="https://github.com/ZatoBox/Documents"><strong>Explore Documentation »</strong></a>
     <br />
