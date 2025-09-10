@@ -1,7 +1,4 @@
 
-# 🚀 ZatoBox- Intelligent Point of Sale System
-
-
 <div align="center">
   <a href="https://github.com/ZatoBox/main">
     <img src="shared/images/Frame 270988297.png" alt="ZatoBox Logo" width="1080">
