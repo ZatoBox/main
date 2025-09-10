@@ -1,6 +1,6 @@
 
 <div align="center">
-  <a href="https://github.com/ZatoBox/main">
+  <a href="https://zatobox.io">
     <img src="shared/images/Frame 270988297.png" alt="ZatoBox Logo" width="1080">
   </a>
 
