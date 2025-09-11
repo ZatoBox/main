@@ -1,6 +1,6 @@
-import React from 'react';
-import InventoryCard from './InventoryCard';
-import { Package } from 'lucide-react';
+import React from "react";
+import InventoryCard from "./InventoryCard";
+import { Package } from "lucide-react";
 
 interface Product {
   id: string;
@@ -28,120 +28,127 @@ const InventoryGrid: React.FC<Props> = ({
 }) => {
   return (
     <>
-      <div className='hidden overflow-hidden border rounded-lg shadow-sm md:block bg-zatobox-50 border-zatobox-200'>
-        <table className='w-full'>
-          <thead className='border-b bg-zatobox-100 border-zatobox-200'>
+      <div className="hidden overflow-hidden border rounded-lg  md:block bg-[#FBEFCA] border-[#CBD5E1]">
+        <table className="w-full">
+          <thead className="border-b bg-[#FBEFCA] border-[#CBD5E1]">
             <tr>
-              <th className='w-12 px-4 py-3'></th>
-              <th className='w-16 px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600'>
+              <th className="w-12 px-4 py-3"></th>
+              <th className="w-16 px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600">
                 Image
               </th>
-              <th className='px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600'>
+              <th className="px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600">
                 Item
               </th>
-              <th className='px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600'>
+              <th className="px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600">
                 Category
               </th>
-              <th className='hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600 lg:table-cell'>
+              <th className="hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600 lg:table-cell">
                 Stock
               </th>
-              <th className='hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600 xl:table-cell'>
+              <th className="hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-zatobox-600 xl:table-cell">
                 Price
               </th>
-              <th className='w-12 px-4 py-3'></th>
+              <th className="w-12 px-4 py-3"></th>
             </tr>
           </thead>
-          <tbody className='divide-y bg-zatobox-50 divide-zatobox-200'>
+          <tbody className="divide-y bg-[#FFFFFF] divide-[#CBD5E1]">
             {items.map((item) => (
               <tr
                 key={item.id}
-                className='transition-colors cursor-pointer hover:bg-zatobox-100'
+                className={`transition-colors cursor-pointer hover:bg-zatobox-100 ${
+                  selectedItems.includes(item.id) ? "bg-[#FEF9EC]" : "bg-[#FFFFFF]"
+                }`}
               >
-                <td className='px-4 py-4'>
+                <td className="px-4 py-4">
                   <input
-                    type='checkbox'
+                    type="checkbox"
                     checked={selectedItems.includes(item.id)}
                     onChange={(e) => onSelectItem(item.id, e.target.checked)}
-                    className='w-4 h-4 border-gray-300 rounded text-zatobox-500 focus:ring-zatobox-500'
+                     className="
+                  w-4 h-4 rounded border border-[#767676] bg-white
+                  appearance-none
+                  checked:bg-[#EEB131]
+                  focus:outline-none focus:ring-2 focus:ring-[#CBD5E1]
+                "
                   />
                 </td>
-                <td className='px-4 py-4'>
-                  <div className='flex items-center justify-center w-10 h-10 bg-zatobox-100 rounded-lg'>
-                    <Package size={20} className='text-zatobox-600' />
+                <td className="px-4 py-4">
+                  <div className="flex items-center justify-center w-10 h-10 bg-[#FBEFCA] rounded-lg">
+                    <Package size={20} className="text-zatobox-600" />
                   </div>
                 </td>
-                <td className='px-4 py-4'>
-                  <div className='flex flex-col'>
-                    <span className='text-sm font-medium text-zatobox-900'>
+                <td className="px-4 py-4">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-zatobox-900">
                       {item.name}
                     </span>
                     <span
                       className={`text-xs ${
-                        item.status === 'active'
-                          ? 'text-zatobox-600'
-                          : 'text-red-600'
+                        item.status === "active"
+                          ? "text-[#10B981]"
+                          : "text-[#E7000B80]"
                       }`}
                     >
-                      {item.status === 'active' ? 'Active' : 'Inactive'}
+                      {item.status === "active" ? "Active" : "Inactive"}
                     </span>
                   </div>
                 </td>
-                <td className='px-4 py-4 text-sm text-zatobox-900'>
+                <td className="px-4 py-4 text-sm text-[#000000] text-semibold">
                   {item.category}
                 </td>
-                <td className='hidden px-4 py-4 text-sm text-text-primary lg:table-cell'>
+                <td className="hidden px-4 py-4 text-sm text-text-primary lg:table-cell">
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                       item.stock > 10
-                        ? 'bg-success-100 text-success-800'
-                        : item.stock > 0
-                        ? 'bg-warning-100 text-warning-800'
-                        : 'bg-error-100 text-error-800'
+                        ? "bg-[#D1FAE5] text-[#065F46]"
+                        : item.stock === 0
+                        ? "bg-[#FEE2E2] text-[#991B1B]"
+                        : "bg-[#FEF3C7] text-[#92400E]"
                     }`}
                   >
                     {item.stock} units
                   </span>
                 </td>
-                <td className='hidden px-4 py-4 text-sm font-medium text-zatobox-900 xl:table-cell'>
+                <td className="hidden px-4 py-4 text-sm font-medium text-[#000000] xl:table-cell">
                   ${item.price.toFixed(2)}
                 </td>
-                <td className='px-4 py-4'>
-                  <div className='flex items-center space-x-1'>
+                <td className="px-4 py-4">
+                  <div className="flex items-center space-x-1">
                     <button
                       onClick={() => onEditProduct(item.id)}
-                      className='p-1 transition-colors rounded hover:bg-zatobox-100'
-                      title='Edit'
+                      className="p-1 transition-colors rounded hover:bg-zatobox-100"
+                      title="Edit"
                     >
                       <svg
-                        className='w-4 h-4 text-zatobox-600'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
+                        className="w-4 h-4 text-zatobox-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
                         <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           strokeWidth={2}
-                          d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                         />
                       </svg>
                     </button>
                     <button
                       onClick={(e) => onDeleteClick(item.id, e)}
-                      className='p-1 transition-colors rounded hover:bg-red-100'
-                      title='Delete'
+                      className="p-1 transition-colors rounded hover:bg-red-100"
+                      title="Delete"
                     >
                       <svg
-                        className='w-4 h-4 text-red-600'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
+                        className="w-4 h-4 text-red-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
                         <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           strokeWidth={2}
-                          d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                         />
                       </svg>
                     </button>
@@ -153,7 +160,7 @@ const InventoryGrid: React.FC<Props> = ({
         </table>
       </div>
 
-      <div className='space-y-4 md:hidden'>
+      <div className="space-y-4 md:hidden">
         {items.map((item) => (
           <InventoryCard
             key={item.id}
