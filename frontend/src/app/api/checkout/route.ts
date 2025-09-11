@@ -2,7 +2,7 @@ import { api } from '@/utils/polar/polar';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  const { cartAmount, productId } = await request.json();
+  const { cartAmount } = await request.json();
 
   try {
     const checkout = await api.checkouts.create({
