@@ -4,14 +4,12 @@ type Props = {
   title?: string;
 };
 
-const Header: React.FC<Props> = ({ title = 'OCR Invoice' }) => {
+const Header: React.FC<Props> = ({ title = 'OCR Processing Result' }) => {
   return (
-    <div className='mb-6 text-center'>
-      <h2 className='mb-2 text-2xl font-bold md:text-3xl text-black'>
-        {title}
-      </h2>
-      <p className='text-sm text-[#888888] md:text-base'>
-        Upload a document to extract information automatically
+    <div className='mb-8 text-center'>
+      <h2 className='text-2xl font-bold text-[#1F1F1F] md:text-3xl'>{title}</h2>
+      <p className='mt-2 text-sm text-[#666666] md:text-base'>
+        Documento procesado exitosamente
       </p>
     </div>
   );

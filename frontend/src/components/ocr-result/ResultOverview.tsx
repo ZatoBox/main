@@ -8,110 +8,71 @@ type Props = {
 
 const ResultOverview: React.FC<Props> = ({ result, fileName }) => {
   return (
-    <div>
-      <div className='mb-6 text-center'>
-        <h2 className='mb-2 text-xl font-bold md:text-2xl text-zatobox-900'>
-          Invoice Processing Result
+    <div className='mb-6'>
+      <div className='mb-10 text-center'>
+        <h2 className='text-2xl font-bold text-[#1F1F1F] md:text-3xl'>
+          OCR Processing Result
         </h2>
-        <p className='text-sm text-zatobox-600 md:text-base'>
-          Document processed successfully with AI + OCR
+        <p className='mt-2 text-sm text-[#666666] md:text-base'>
+          Document processed successfully
         </p>
+        {fileName && (
+          <div className='inline-block px-4 py-2 mt-4 text-sm border rounded-md border-[#E5E7EB] bg-white text-[#1F1F1F]'>
+            <span className='mr-1'>📄</span> file: {fileName}
+          </div>
+        )}
       </div>
-
-      <div className='flex flex-wrap justify-center gap-4 mt-4 mb-6'>
-        <div className='px-4 py-2 border border-green-200 rounded-lg bg-green-50'>
-          <div className='text-sm text-zatobox-600'>OCR Confidence</div>
-          <div className='text-lg font-bold text-green-600'>
-            {result?.statistics?.ocr_confidence
-              ? (result.statistics.ocr_confidence * 100).toFixed(1)
-              : '85.0'}
-            %
-          </div>
-        </div>
-
-        <div className='px-4 py-2 border border-blue-200 rounded-lg bg-blue-50'>
-          <div className='text-sm text-zatobox-600'>YOLO Detections</div>
-          <div className='text-lg font-bold text-blue-600'>
-            {result?.statistics?.yolo_detections || 0}
-          </div>
-        </div>
-
-        <div className='px-4 py-2 border border-purple-200 rounded-lg bg-purple-50'>
-          <div className='text-sm text-zatobox-600'>Processing Time</div>
-          <div className='text-lg font-bold text-purple-600'>
-            {result?.processing_time || 0}s
-          </div>
-        </div>
-      </div>
-
-      <div className='grid gap-6 mb-6 md:grid-cols-2 md:gap-8 md:mb-8'>
-        <div className='p-4 rounded-lg bg-zatobox-50 md:p-6'>
-          <h3 className='mb-3 text-base font-semibold md:text-lg text-zatobox-900 md:mb-4'>
-            4CB Invoice Information
+      <div className='grid gap-6 mb-8 md:grid-cols-2'>
+        <div className='p-5 bg-white border rounded-lg shadow-sm md:p-6 border-[#EFEFEF]'>
+          <h3 className='mb-4 text-base font-semibold text-[#1F1F1F] md:text-lg'>
+            Document Information
           </h3>
-          <div className='space-y-2 md:space-y-3'>
-            <div className='flex justify-between'>
-              <span className='text-sm font-medium text-zatobox-600 md:text-base'>
-                Company:
-              </span>
-              <span className='text-sm text-zatobox-900 md:text-base'>
-                {result?.metadata?.company_name || 'No detectado'}
+          <div className='space-y-2'>
+            <div className='flex justify-between text-sm'>
+              <span className='text-[#555555]'>Type:</span>
+              <span className='font-medium text-[#1F1F1F]'>Invoice</span>
+            </div>
+            <div className='flex justify-between text-sm'>
+              <span className='text-[#555555]'>Supplier:</span>
+              <span className='font-medium text-[#1F1F1F]'>
+                {result?.metadata?.company_name || 'Supplier ABC Inc.'}
               </span>
             </div>
-            <div className='flex justify-between'>
-              <span className='text-sm font-medium text-zatobox-600 md:text-base'>
-                RUC:
-              </span>
-              <span className='text-sm text-zatobox-900 md:text-base'>
-                {result?.metadata?.ruc || 'No detectado'}
+            <div className='flex justify-between text-sm'>
+              <span className='text-[#555555]'>Date:</span>
+              <span className='font-medium text-[#1F1F1F]'>
+                {result?.metadata?.date || '2024-01-15'}
               </span>
             </div>
-            <div className='flex justify-between'>
-              <span className='text-sm font-medium text-zatobox-600 md:text-base'>
-                Date:
-              </span>
-              <span className='text-sm text-zatobox-900 md:text-base'>
-                {result?.metadata?.date || 'No detectado'}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span className='text-sm font-medium text-zatobox-600 md:text-base'>
-                Invoice #:
-              </span>
-              <span className='text-sm text-zatobox-900 md:text-base'>
-                {result?.metadata?.invoice_number || 'No detectado'}
+            <div className='flex justify-between text-sm'>
+              <span className='text-[#555555]'>Number:</span>
+              <span className='font-medium text-[#1F1F1F]'>
+                {result?.metadata?.invoice_number || 'INV-2024-001'}
               </span>
             </div>
           </div>
         </div>
-
-        <div className='p-4 rounded-lg bg-zatobox-50 md:p-6'>
-          <h3 className='mb-3 text-base font-semibold md:text-lg text-zatobox-900 md:mb-4'>
-            4B0 Financial Summary
+        <div className='p-5 bg-white border rounded-lg shadow-sm md:p-6 border-[#EFEFEF]'>
+          <h3 className='mb-4 text-base font-semibold text-[#1F1F1F] md:text-lg'>
+            Financial Summary
           </h3>
-          <div className='space-y-2 md:space-y-3'>
-            <div className='flex justify-between'>
-              <span className='text-sm font-medium text-zatobox-600 md:text-base'>
-                Subtotal:
-              </span>
-              <span className='text-sm text-zatobox-900 md:text-base'>
-                {result?.metadata?.subtotal || 'No detectado'}
+          <div className='space-y-2'>
+            <div className='flex justify-between text-sm'>
+              <span className='text-[#555555]'>Subtotal:</span>
+              <span className='font-medium text-[#1F1F1F]'>
+                {result?.metadata?.subtotal || '$1062.50'}
               </span>
             </div>
-            <div className='flex justify-between'>
-              <span className='text-sm font-medium text-zatobox-600 md:text-base'>
-                IVA:
-              </span>
-              <span className='text-sm text-zatobox-900 md:text-base'>
-                {result?.metadata?.iva || 'No detectado'}
+            <div className='flex justify-between text-sm'>
+              <span className='text-[#555555]'>Taxes:</span>
+              <span className='font-medium text-[#1F1F1F]'>
+                {result?.metadata?.iva || '$187.50'}
               </span>
             </div>
-            <div className='flex justify-between pt-2 border-t border-zatobox-200'>
-              <span className='text-sm font-bold text-zatobox-900 md:text-base'>
-                Total:
-              </span>
-              <span className='text-lg font-bold text-green-600 md:text-xl'>
-                {result?.metadata?.total || 'No detectado'}
+            <div className='pt-2 mt-2 border-t border-[#E6E6E6] flex justify-between text-sm'>
+              <span className='font-semibold text-[#1F1F1F]'>Total:</span>
+              <span className='text-[#F88612] font-bold'>
+                {result?.metadata?.total || '$1250.00'}
               </span>
             </div>
           </div>

@@ -10,6 +10,7 @@ import {
   CreateProductRequest,
   ProductUnity,
   ProductType,
+  ProductStatus,
 } from '@/types/index';
 import Header from '@/components/ocr-result/Header';
 import FileUploader from '@/components/ocr-result/FileUploader';
@@ -27,13 +28,31 @@ const OCRResultPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedResult, setEditedResult] = useState<OCRResponse | null>(null);
   const [isAddingToInventory, setIsAddingToInventory] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('Office Supplies');
   const [processingOptions, setProcessingOptions] = useState({
     enhance_ocr: true,
     rotation_correction: true,
     confidence_threshold: 0.25,
   });
   const [systemStatus, setSystemStatus] = useState<any>(null);
+  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
+  const [nowTs, setNowTs] = useState<number>(Date.now());
+
+  useEffect(() => {
+    if (!cooldownUntil) return;
+    const id = setInterval(() => setNowTs(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [cooldownUntil]);
+
+  const processAnotherDisabled = cooldownUntil ? nowTs < cooldownUntil : false;
+  const remainingMs =
+    processAnotherDisabled && cooldownUntil ? cooldownUntil - nowTs : 0;
+  const remainingLabel = (() => {
+    if (!processAnotherDisabled) return 'Process Another';
+    const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
+    const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    const s = String(totalSec % 60).padStart(2, '0');
+    return `Process Another (${m}:${s})`;
+  })();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -48,53 +67,59 @@ const OCRResultPage: React.FC = () => {
       setError('No data to confirm or not authenticated');
       return;
     }
-
     setIsAddingToInventory(true);
     setError('');
-
     try {
-      const productsToAdd: CreateProductRequest[] = (
-        result.line_items ?? []
-      ).map((item: OCRLineItem) => ({
-        name: (item.name || item.description || '').substring(0, 50),
-        description: item.description || '',
-        price:
-          parseFloat(String(item.unit_price ?? '0').replace(/[^\d.-]/g, '')) ||
-          0,
-        stock:
-          parseInt(String(item.quantity ?? '1').replace(/[^\d]/g, '')) || 1,
-        unit: ProductUnity.PER_ITEM as unknown as ProductUnity,
-        product_type: ProductType.PHYSICAL_PRODUCT as unknown as ProductType,
-        category_id: undefined,
-        sku: '',
-        weight: undefined,
-        localization: undefined,
-        status: 'active' as any,
-      }));
+      const toCreate: CreateProductRequest[] = (result.line_items || [])
+        .map((it) => {
+          const name =
+            (it.name || it.description || '').trim().substring(0, 50) ||
+            'Unnamed';
+          const description = (it.description || 'No description').substring(
+            0,
+            200
+          );
+          const price =
+            parseFloat(String(it.unit_price).replace(/[^\d.-]/g, '')) || 0;
+          const stock =
+            parseInt(String(it.quantity).replace(/[^\d]/g, '')) || 1;
+          const sku =
+            (it as any).sku && String((it as any).sku).trim().length >= 3
+              ? String((it as any).sku)
+                  .trim()
+                  .substring(0, 32)
+              : Array.from(
+                  { length: 8 },
+                  () =>
+                    'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[
+                      Math.floor(Math.random() * 32)
+                    ]
+                ).join('');
+          return {
+            name,
+            description,
+            price,
+            stock,
+            unit: ProductUnity.PER_ITEM,
+            product_type: ProductType.PHYSICAL_PRODUCT,
+            category_id: undefined,
+            sku,
+            weight: undefined,
+            localization: undefined,
+            status: ProductStatus.ACTIVE,
+            min_stock: 0,
+          } as CreateProductRequest;
+        })
+        .filter((p) => p.name && p.price >= 0);
 
-      const addedProducts: any[] = [];
-      const failedProducts: any[] = [];
-
-      for (const productData of productsToAdd) {
-        try {
-          const response = await productsAPI.create(productData as any);
-          if (response && (response as any).product)
-            addedProducts.push((response as any).product);
-        } catch (err: any) {
-          console.error('Error adding product:', productData.name, err);
-          failedProducts.push({
-            name: productData.name,
-            error: err.message || 'Unknown error',
-          });
-        }
+      if (toCreate.length === 0) {
+        setError('No valid products to create');
+        setIsAddingToInventory(false);
+        return;
       }
 
-      if (addedProducts.length > 0) {
-        router.push('/inventory');
-      }
-      if (failedProducts.length > 0) {
-        setError(`Failed to add ${failedProducts.length} products`);
-      }
+      await productsAPI.createBulk(toCreate);
+      router.push('/inventory');
     } catch (err: any) {
       setError(err.message || 'Error adding products');
     } finally {
@@ -106,17 +131,46 @@ const OCRResultPage: React.FC = () => {
     if (!file) return;
     setLoading(true);
     setError('');
-
     try {
-      // Process the document with OCR directly
       const ocrResult = await ocrAPI.process(file);
+      const rawItems =
+        ocrResult.line_items || (ocrResult as any).products || [];
+      const lineItems = (rawItems as any[]).map((it) => {
+        const unit_price = it.unit_price || it.price || '0';
+        const quantity = it.quantity || it.stock || '1';
+        let total_price = it.total_price;
+        if (!total_price) {
+          const nUnit =
+            parseFloat(
+              String(unit_price)
+                .toString()
+                .replace(/[^\d.-]/g, '')
+            ) || 0;
+          const nQty =
+            parseFloat(
+              String(quantity)
+                .toString()
+                .replace(/[^\d.-]/g, '')
+            ) || 0;
+          total_price = (nUnit * nQty).toFixed(2);
+        }
+        return {
+          ...it,
+          unit_price:
+            typeof unit_price === 'number' ? unit_price.toFixed(2) : unit_price,
+          quantity: String(quantity),
+          total_price:
+            typeof total_price === 'number'
+              ? total_price.toFixed(2)
+              : String(total_price),
+        };
+      });
 
-      // Normalize and set result
       const normalized: OCRResponse = {
         success: ocrResult.success ?? true,
         message: ocrResult.message ?? 'Documento procesado exitosamente',
         metadata: ocrResult.metadata || {},
-        line_items: ocrResult.line_items || (ocrResult as any).products || [],
+        line_items: lineItems,
         detections: ocrResult.detections || [],
         processed_image: ocrResult.processed_image || null,
         processing_time: ocrResult.processing_time || 3,
@@ -125,6 +179,9 @@ const OCRResultPage: React.FC = () => {
       };
 
       setResult(normalized);
+      if (normalized.success) {
+        setCooldownUntil(Date.now() + 5 * 60 * 1000);
+      }
     } catch (err: any) {
       setError(
         `Error procesando documento: ${err.message}. Por favor intenta de nuevo.`
@@ -164,6 +221,7 @@ const OCRResultPage: React.FC = () => {
   };
 
   const handleProcessAnother = () => {
+    if (processAnotherDisabled) return;
     setFile(null);
     setResult(null);
     setError('');
@@ -188,10 +246,10 @@ const OCRResultPage: React.FC = () => {
   };
 
   return (
-    <div className='flex items-center justify-center min-h-screen p-4'>
-      <div className='w-full max-w-4xl'>
+    <div className='flex items-start justify-center min-h-screen p-6 bg-[#F7F7F7]'>
+      <div className='w-full max-w-5xl'>
         {!result ? (
-          <div className='p-6 bg-white rounded-lg shadow-lg md:p-8 animate-fadeIn'>
+          <div className='p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]'>
             <Header />
             <FileUploader
               fileName={file?.name ?? null}
@@ -206,7 +264,7 @@ const OCRResultPage: React.FC = () => {
               <button
                 onClick={handleUpload}
                 disabled={!file || loading}
-                className='flex items-center px-6 py-3 mx-auto font-medium text-white transition-all duration-300 transform rounded-lg bg-[#F88612] md:px-8 md:py-4 hover:bg-[#D35400] disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105'
+                className='flex items-center px-8 py-4 mx-auto font-medium text-white transition-colors rounded-md bg-[#F88612] md:px-10 md:py-5 hover:bg-[#A94D14] disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 {loading ? (
                   <>
@@ -215,8 +273,7 @@ const OCRResultPage: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <span className='mr-2'>🔍</span>
-                    Upload and process
+                    <span className='mr-2'>🔍</span> Upload and process
                   </>
                 )}
               </button>
@@ -229,7 +286,7 @@ const OCRResultPage: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className='p-6 bg-white rounded-lg shadow-lg md:p-8 animate-fadeIn'>
+          <div className='p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]'>
             <ResultOverview result={result} fileName={file?.name ?? null} />
 
             <ItemsTable
@@ -241,57 +298,6 @@ const OCRResultPage: React.FC = () => {
               isEditing={isEditing}
               onChange={handleTableChange}
             />
-
-            {result?.summary && (
-              <div className='p-4 mt-4 border border-green-200 rounded-lg bg-green-50'>
-                <div className='grid grid-cols-2 gap-4 text-center md:grid-cols-4'>
-                  <div>
-                    <div className='text-xs text-gray-600'>Total Products</div>
-                    <div className='text-lg font-bold text-green-700'>
-                      {String(result.summary.total_productos ?? '')}
-                    </div>
-                  </div>
-                  <div>
-                    <div className='text-xs text-gray-600'>Total Quantity</div>
-                    <div className='text-lg font-bold text-blue-700'>
-                      {String(result.summary.total_cantidad ?? '')}
-                    </div>
-                  </div>
-                  <div>
-                    <div className='text-xs text-gray-600'>Average Price</div>
-                    <div className='text-lg font-bold text-purple-700'>
-                      {String(result.summary.promedio_precio ?? '')}
-                    </div>
-                  </div>
-                  <div>
-                    <div className='text-xs text-gray-600'>GRAND TOTAL</div>
-                    <div className='text-xl font-bold text-green-800'>
-                      {String(result.summary.gran_total ?? '')}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className='p-3 mb-6 border border-blue-200 rounded-lg bg-blue-50 md:p-4 md:mb-8'>
-              <div className='flex flex-wrap items-center justify-between gap-2'>
-                <div className='flex items-center'>
-                  <span className='mr-2 text-blue-600 md:mr-3'>📁</span>
-                  <span className='text-xs text-blue-800 md:text-sm'>
-                    <strong>File:</strong> {file?.name}
-                  </span>
-                </div>
-                <div className='flex items-center gap-4 text-xs text-blue-700'>
-                  <span>
-                    📊 Tables: {result?.statistics?.table_regions || 0}
-                  </span>
-                  <span>
-                    🎯 YOLO: {result?.statistics?.yolo_detections || 0}
-                  </span>
-                  <span>⏱️ {result?.processing_time || 0}s</span>
-                </div>
-              </div>
-            </div>
 
             {result.processed_image && (
               <div className='mb-6 md:mb-8'>
@@ -313,31 +319,6 @@ const OCRResultPage: React.FC = () => {
               </div>
             )}
 
-            <div className='mb-6 md:mb-8'>
-              <h3 className='mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4'>
-                📂 Product Category
-              </h3>
-              <div className='p-4 rounded-lg bg-bg-surface md:p-6'>
-                <label className='block mb-2 text-sm font-medium text-text-primary'>
-                  Select category for all products:
-                </label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className='w-full px-3 py-2 bg-white border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent text-text-primary'
-                >
-                  <option value='Office Supplies'>Office Supplies</option>
-                  <option value='Electronics'>Electronics</option>
-                  <option value='Furniture'>Furniture</option>
-                  <option value='Clothing'>Clothing</option>
-                  <option value='Food & Beverages'>Food & Beverages</option>
-                  <option value='Books'>Books</option>
-                  <option value='Sports'>Sports</option>
-                  <option value='Other'>Other</option>
-                </select>
-              </div>
-            </div>
-
             {error && (
               <div className='p-4 mb-6 border rounded-lg md:mb-8 bg-error-50 border-error-200 text-error-700 animate-shake'>
                 <div className='flex items-center'>
@@ -355,6 +336,8 @@ const OCRResultPage: React.FC = () => {
               onSaveEdit={handleSaveEdit}
               onCancelEdit={handleCancelEdit}
               onProcessAnother={handleProcessAnother}
+              processAnotherDisabled={processAnotherDisabled}
+              processAnotherLabel={remainingLabel}
             />
           </div>
         )}
