@@ -1,38 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import {
-  ArrowLeft,
-  CreditCard,
-  Smartphone,
-  Bitcoin,
-  Banknote,
-} from 'lucide-react';
+import { ArrowLeft, Banknote } from 'lucide-react';
+import { checkoutCart } from '@/services/payments-service';
 
 interface PaymentScreenProps {
   isOpen: boolean;
   onBack: () => void;
   onPaymentSuccess: (method: string) => void;
-  total: number;
+  cartAmount: number;
 }
 
-type PaymentMethod = 'card' | 'wallet' | 'crypto' | 'cash';
+type PaymentMethod = 'cash' | 'polar';
 
 const PaymentScreen: React.FC<PaymentScreenProps> = ({
   isOpen,
   onBack,
   onPaymentSuccess,
-  total,
+  cartAmount,
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(
     null
   );
   const [formData, setFormData] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvc: '',
-    cardName: '',
-    cryptoCurrency: 'bitcoin',
-    walletAddress: '',
-    cashAmount: total.toString(),
+    cashAmount: (isNaN(cartAmount) ? 0 : cartAmount).toString(),
     needsChange: false,
     changeFor: '',
   });
@@ -45,10 +34,11 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
   // Calculate change automatically when received amount changes
   useEffect(() => {
     const received = parseFloat(cashReceived.toString()) || 0;
-    const change = received - total;
+    const validCartAmount = isNaN(cartAmount) ? 0 : cartAmount;
+    const change = received - validCartAmount;
     setChangeAmount(change);
-    setIsSufficientAmount(received >= total);
-  }, [cashReceived, total]);
+    setIsSufficientAmount(received >= validCartAmount);
+  }, [cashReceived, cartAmount]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -61,19 +51,10 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
 
   const isFormValid = () => {
     switch (selectedMethod) {
-      case 'card':
-        return (
-          formData.cardNumber &&
-          formData.expiryDate &&
-          formData.cvc &&
-          formData.cardName
-        );
-      case 'wallet':
-        return true; // Wallet payments are handled externally
-      case 'crypto':
-        return formData.walletAddress;
       case 'cash':
-        return cashReceived >= total; // Must receive at least the total
+        return cashReceived >= (isNaN(cartAmount) ? 0 : cartAmount);
+      case 'polar':
+        return true;
       default:
         return false;
     }
@@ -81,32 +62,43 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
 
   const getPaymentMethodName = (method: PaymentMethod | null) => {
     switch (method) {
-      case 'card':
-        return 'Credit/Debit Card';
-      case 'wallet':
-        return 'Apple Pay / Google Pay';
-      case 'crypto':
-        return 'Coinbase Pay / Crypto';
       case 'cash':
         return 'Cash on Delivery';
+      case 'polar':
+        return 'Polar';
       default:
         return 'Payment method';
     }
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     if (isFormValid() && selectedMethod) {
-      onPaymentSuccess(getPaymentMethodName(selectedMethod));
+      if (selectedMethod === 'polar') {
+        if (!cartAmount || cartAmount <= 0) {
+          console.error('Invalid cart amount');
+          return;
+        }
+
+        try {
+          const response = await checkoutCart(cartAmount);
+          window.location.href = response.url;
+        } catch (error) {
+          console.error('Error creating checkout:', error);
+        }
+      } else {
+        onPaymentSuccess(getPaymentMethodName(selectedMethod));
+      }
     }
   };
 
   // Function to format currency
   const formatCurrency = (amount: number) => {
+    const validAmount = isNaN(amount) ? 0 : amount;
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
-    }).format(amount);
+    }).format(validAmount);
   };
 
   if (!isOpen) {
@@ -136,112 +128,13 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
           <div className='text-center'>
             <span className='text-sm text-[#6B7280]'>Total to pay</span>
             <div className='text-2xl font-bold text-black'>
-              {formatCurrency(total)}
+              {formatCurrency(cartAmount)}
             </div>
           </div>
         </div>
 
         {/* Payment Methods */}
         <div className='mb-6 space-y-4 animate-stagger'>
-          {/* Credit/Debit Card */}
-          <div
-            className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
-              selectedMethod === 'card'
-                ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
-                : 'border-[#CBD5E1] hover:bg-[#FEF9EC] bg-white'
-            }`}
-            onClick={() => setSelectedMethod('card')}
-          >
-            <div className='flex items-center space-x-3'>
-              <div
-                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
-                  selectedMethod === 'card'
-                    ? 'border-zatobox-500 bg-zatobox-500'
-                    : 'border-gray-300 hover:border-[#F88612] hover:bg-[#F88612]'
-                }`}
-              >
-                {selectedMethod === 'card' && (
-                  <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
-                )}
-              </div>
-              <CreditCard size={20} className='text-black icon-bounce' />
-              <div>
-                <div className='font-medium text-black text-glow'>
-                  Credit/Debit Card
-                </div>
-                <div className='text-sm text-[#CBD5E1]'>
-                  Visa, Mastercard, American Express
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Apple Pay / Google Pay */}
-          <div
-            className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
-              selectedMethod === 'wallet'
-                ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
-                : 'border-[#CBD5E1] hover:bg-[#FEF9EC] bg-white'
-            }`}
-            onClick={() => setSelectedMethod('wallet')}
-          >
-            <div className='flex items-center space-x-3'>
-              <div
-                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
-                  selectedMethod === 'wallet'
-                    ? 'border-zatobox-500 bg-zatobox-500'
-                    : 'border-gray-300 hover:border-[#F88612] hover:bg-[#F88612]'
-                }`}
-              >
-                {selectedMethod === 'wallet' && (
-                  <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
-                )}
-              </div>
-              <Smartphone size={20} className='text-black icon-bounce' />
-              <div>
-                <div className='font-medium text-black text-glow'>
-                  Apple Pay / Google Pay
-                </div>
-                <div className='text-sm text-[#CBD5E1]'>
-                  Quick payment with your wallet
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Crypto */}
-          <div
-            className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
-              selectedMethod === 'crypto'
-                ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
-                : 'border-[#CBD5E1] hover:bg-[#FEF9EC] bg-white'
-            }`}
-            onClick={() => setSelectedMethod('crypto')}
-          >
-            <div className='flex items-center space-x-3'>
-              <div
-                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
-                  selectedMethod === 'crypto'
-                    ? 'border-zatobox-500 bg-zatobox-500'
-                    : 'border-gray-300 hover:border-[#F88612] hover:bg-[#F88612]'
-                }`}
-              >
-                {selectedMethod === 'crypto' && (
-                  <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
-                )}
-              </div>
-              <Bitcoin size={20} className='text-black icon-bounce' />
-              <div>
-                <div className='font-medium text-black text-glow'>
-                  Coinbase Pay / Crypto
-                </div>
-                <div className='text-sm text-[#CBD5E1]'>
-                  Bitcoin, Ethereum, and more
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Cash on Delivery */}
           <div
             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
@@ -274,122 +167,44 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Polar */}
+          <div
+            className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
+              selectedMethod === 'polar'
+                ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
+                : 'border-[#CBD5E1] hover:bg-[#FEF9EC] bg-white'
+            }`}
+            onClick={() => setSelectedMethod('polar')}
+          >
+            <div className='flex items-center space-x-3'>
+              <div
+                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                  selectedMethod === 'polar'
+                    ? 'border-zatobox-500 bg-zatobox-500'
+                    : 'border-gray-300 hover:border-[#F88612] hover:bg-[#F88612]'
+                }`}
+              >
+                {selectedMethod === 'polar' && (
+                  <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
+                )}
+              </div>
+              <div className='w-5 h-5 bg-black rounded-full flex items-center justify-center'>
+                <span className='text-white text-xs font-bold'>P</span>
+              </div>
+              <div>
+                <div className='font-medium text-black text-glow'>Polar</div>
+                <div className='text-sm text-[#CBD5E1]'>
+                  Secure payment with Polar
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Payment Method Forms */}
         {selectedMethod && (
           <div className='p-6 mb-6 border rounded-lg bg-white border-[#CBD5E1] animate-fade-in'>
-            {selectedMethod === 'card' && (
-              <div className='space-y-4'>
-                <h3 className='mb-4 text-lg font-semibold text-black'>
-                  Card Information
-                </h3>
-
-                <div>
-                  <label className='block mb-2 text-sm font-medium text-black'>
-                    Card Number
-                  </label>
-                  <input
-                    type='text'
-                    value={formData.cardNumber}
-                    onChange={(e) =>
-                      handleInputChange('cardNumber', e.target.value)
-                    }
-                    placeholder='1234 5678 9012 3456'
-                    className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
-                    maxLength={19}
-                  />
-                </div>
-
-                <div className='grid grid-cols-2 gap-4'>
-                  <div>
-                    <label className='block mb-2 text-sm font-medium text-black'>
-                      Expiry Date
-                    </label>
-                    <input
-                      type='text'
-                      value={formData.expiryDate}
-                      onChange={(e) =>
-                        handleInputChange('expiryDate', e.target.value)
-                      }
-                      placeholder='MM/YY'
-                      className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
-                      maxLength={5}
-                    />
-                  </div>
-                  <div>
-                    <label className='block mb-2 text-sm font-medium text-black'>
-                      CVC
-                    </label>
-                    <input
-                      type='text'
-                      value={formData.cvc}
-                      onChange={(e) => handleInputChange('cvc', e.target.value)}
-                      placeholder='123'
-                      className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
-                      maxLength={4}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className='block mb-2 text-sm font-medium text-black'>
-                    Cardholder Name
-                  </label>
-                  <input
-                    type='text'
-                    value={formData.cardName}
-                    onChange={(e) =>
-                      handleInputChange('cardName', e.target.value)
-                    }
-                    placeholder='John Doe'
-                    className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
-                  />
-                </div>
-              </div>
-            )}
-
-            {selectedMethod === 'crypto' && (
-              <div className='space-y-4'>
-                <h3 className='mb-4 text-lg font-semibold text-black'>
-                  Crypto Payment
-                </h3>
-
-                <div>
-                  <label className='block mb-2 text-sm font-medium text-black'>
-                    Cryptocurrency
-                  </label>
-                  <select
-                    value={formData.cryptoCurrency}
-                    onChange={(e) =>
-                      handleInputChange('cryptoCurrency', e.target.value)
-                    }
-                    className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
-                  >
-                    <option value='bitcoin'>Bitcoin (BTC)</option>
-                    <option value='ethereum'>Ethereum (ETH)</option>
-                    <option value='litecoin'>Litecoin (LTC)</option>
-                    <option value='cardano'>Cardano (ADA)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className='block mb-2 text-sm font-medium text-black'>
-                    Wallet Address
-                  </label>
-                  <input
-                    type='text'
-                    value={formData.walletAddress}
-                    onChange={(e) =>
-                      handleInputChange('walletAddress', e.target.value)
-                    }
-                    placeholder='Enter your wallet address'
-                    className='w-full px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
-                  />
-                </div>
-              </div>
-            )}
-
             {selectedMethod === 'cash' && (
               <div className='space-y-4'>
                 <h3 className='mb-4 text-lg font-semibold text-black'>
@@ -410,13 +225,13 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                         ? 'border-green-500'
                         : 'border-[#CBD5E1]'
                     }`}
-                    min={total}
+                    min={isNaN(cartAmount) ? 0 : cartAmount}
                     step='0.01'
                   />
                   {!isSufficientAmount && cashReceived > 0 && (
                     <p className='mt-1 text-sm text-red-500'>
                       Insufficient amount. Please enter at least{' '}
-                      {formatCurrency(total)}
+                      {formatCurrency(cartAmount)}
                     </p>
                   )}
                 </div>
@@ -468,14 +283,15 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
               </div>
             )}
 
-            {selectedMethod === 'wallet' && (
+            {selectedMethod === 'polar' && (
               <div className='py-8 text-center'>
-                <div className='mb-4 text-4xl'>📱</div>
+                <div className='mb-4 text-4xl'>🔒</div>
                 <h3 className='mb-2 text-lg font-semibold text-black'>
-                  Mobile Payment
+                  Polar Checkout
                 </h3>
                 <p className='text-[#CBD5E1]'>
-                  Use your mobile wallet to complete the payment
+                  You will be redirected to Polar to complete your payment
+                  securely
                 </p>
               </div>
             )}
@@ -492,8 +308,8 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          {selectedMethod === 'cash'
-            ? `Confirm Payment - ${formatCurrency(total)}`
+          {selectedMethod === 'cash' || selectedMethod === 'polar'
+            ? `Confirm Payment - ${formatCurrency(cartAmount)}`
             : 'Confirm Payment'}
         </button>
       </div>

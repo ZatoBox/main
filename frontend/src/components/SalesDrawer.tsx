@@ -28,22 +28,17 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
   removeCartItem,
   clearCart,
 }) => {
-  // @ts-ignore
-  const [isAdjustableAmount, setIsAdjustableAmount] = useState(false);
-  // @ts-ignore
-  const [customAmount, setCustomAmount] = useState('');
-  // @ts-ignore
-  const [internalNote, setInternalNote] = useState('');
-
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.quantity * item.price,
-    0
-  );
-  const tax = subtotal * 0.15; // 15% tax
-  const total = subtotal + tax;
+  const subtotal = cartItems.reduce((sum, item) => {
+    const itemTotal = (item.quantity || 0) * (item.price || 0);
+    return sum + (isNaN(itemTotal) ? 0 : itemTotal);
+  }, 0);
+  // const tax = subtotal * 0.15; // 15% tax
+  // const cartAmount = subtotal + tax;
+  const cartAmount = subtotal;
 
   const handlePaymentClick = () => {
-    onNavigateToPayment(total);
+    const validCartAmount = isNaN(cartAmount) ? 0 : cartAmount;
+    onNavigateToPayment(validCartAmount);
   };
 
   if (!isOpen) {
@@ -142,13 +137,17 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                   <span className='text-[#CBD5E1]'>Subtotal:</span>
                   <span className='text-black'>${subtotal.toFixed(2)}</span>
                 </div>
+
+                {/* 
                 <div className='flex justify-between text-sm'>
                   <span className='text-[#CBD5E1]'>Tax (15%):</span>
                   <span className='text-black'>${tax.toFixed(2)}</span>
                 </div>
+                */}
+
                 <div className='flex justify-between pt-2 text-lg font-bold border-t border-[#CBD5E1]'>
                   <span className='text-black'>Total:</span>
-                  <span className='text-success'>${total.toFixed(2)}</span>
+                  <span className='text-success'>${cartAmount.toFixed(2)}</span>
                 </div>
               </div>
             </div>
