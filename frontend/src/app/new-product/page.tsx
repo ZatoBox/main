@@ -7,6 +7,9 @@ import ImagesUploader from '@/components/new-product/ImagesUploader';
 import NewProductForm from '@/components/new-product/NewProductForm';
 import { useAuth } from '@/context/auth-store';
 import { productsAPI } from '@/services/api.service';
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+import ProductInfoForm from '@/components/new-product/ProductInfoForm';
 
 const NewProductPage: React.FC = () => {
   const router = useRouter();
@@ -91,8 +94,37 @@ const NewProductPage: React.FC = () => {
     }
   };
 
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required('Name is required'),
+    unit: Yup.string().required('Unit is required'),
+    price: Yup.number()
+      .typeError('Price must be a number')
+      .positive('Price must be greater than 0')
+      .required('Price is required'),
+    inventoryQuantity: Yup.number()
+      .typeError('Inventory must be a number')
+      .integer('Inventory must be an integer')
+      .min(0, 'Inventory must be 0 or more')
+      .required('Inventory is required'),
+    category: Yup.string().required('Category is required'),
+  });
+
+  const initialValues = {
+    productType: 'Physical Product',
+    name: '',
+    description: '',
+    location: '',
+    unit: 'Per item',
+    weight: '',
+    price: '',
+    inventoryQuantity: '',
+    lowStockAlert: '',
+    sku: '',
+    category: '',
+  };
+
   return (
-    <div className='min-h-screen bg-bg-main'>
+    <div className="min-h-screen bg-bg-main">
       <Header
         onBack={() => router.push('/inventory')}
         onSave={() => setSubmitSignal((s) => s + 1)}
@@ -100,38 +132,41 @@ const NewProductPage: React.FC = () => {
         error={error}
       />
 
-      <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
-        <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
-          <div className='space-y-6'>
-            <ImagesUploader
-              files={files}
-              onAddFiles={handleAddFiles}
-              onRemove={handleRemoveFile}
-            />
-            <NewProductForm
-              existingCategories={existingCategories}
-              unitOptions={unitOptions}
-              productTypeOptions={productTypeOptions}
-              onSubmit={onSubmit}
-              submitSignal={submitSignal}
-            />
-            
-          </div>
+      <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={onSubmit}
+        >
+          {(formik) => (
+            <Form>
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                <div className="space-y-6">
+                  <ImagesUploader
+                    files={files}
+                    onAddFiles={handleAddFiles}
+                    onRemove={handleRemoveFile}
+                  />
 
-          <div className='space-y-6'>
-            <div className='p-6 border rounded-lg shadow-sm bg-bg-surface border-[#CBD5E1]'>
-              <label className='block mb-2 text-sm font-medium text-text-primary'>
-                Locations
-              </label>
-              <div className='text-sm text-text-secondary'>
-                Set location in the form on the left.
+                  <ProductInfoForm
+                    formik={formik}
+                    existingCategories={existingCategories}
+                  />
+                </div>
+
+                <NewProductForm
+                  formik={formik}
+                  unitOptions={unitOptions}
+                  productTypeOptions={productTypeOptions}
+                />
               </div>
-            </div>
-          </div>
-        </div>
+            </Form>
+          )}
+        </Formik>
       </div>
     </div>
   );
 };
 
 export default NewProductPage;
+
