@@ -340,3 +340,42 @@ export interface OCRBulkResult {
   response_status: number;
   endpoint_response: unknown;
 }
+
+/// Subscriptions
+export enum SubscriptionStatus {
+  CREATED = 'created',
+  ACTIVE = 'active',
+  CANCELED = 'canceled',
+  REVOKED = 'revoked',
+}
+
+export interface Subscription {
+  id: string;
+  user_id: string;
+  plan: string;
+  cycle: string;
+  status: SubscriptionStatus;
+  start_date: string;
+  end_date?: string;
+  polar_subscription_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateSubscriptionRequest {
+  user_id: string;
+  plan: string;
+  cycle: string;
+  status: SubscriptionStatus;
+  start_date: string;
+  end_date?: string;
+  polar_subscription_id: string;
+}
+
+export interface UpdateSubscriptionRequest {
+  plan?: string;
+  cycle?: string;
+  status?: SubscriptionStatus;
+  start_date?: string;
+  end_date?: string;
+}
