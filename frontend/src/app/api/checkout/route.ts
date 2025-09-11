@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const checkout = await api.checkouts.create({
-      products: [productId],
+      products: [process.env.POLAR_PRODUCT_ID!],
       amount: cartAmount * 100,
       successUrl: `${process.env.NEXT_PUBLIC_URL}/confirmation?checkout_id={CHECKOUT_ID}`,
     });
