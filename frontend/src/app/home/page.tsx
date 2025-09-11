@@ -350,7 +350,7 @@ const HomePage: React.FC<HomePageProps> = ({
         isOpen={isPaymentOpen}
         onBack={handleBackFromPayment}
         onPaymentSuccess={handlePaymentSuccess}
-        total={paymentTotal}
+        cartAmount={paymentTotal}
       />
 
       <PaymentSuccessScreen

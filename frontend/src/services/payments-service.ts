@@ -19,8 +19,6 @@ export const createCheckout = async (
 };
 
 export const checkoutCart = async (cartAmount: number) => {
-  const response = await axios.post('/api/checkout', {
-    cartAmount,
-  });
+  const response = await axios.post('/api/checkout', { cartAmount });
   return response.data;
 };
