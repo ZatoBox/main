@@ -10,6 +10,7 @@ import {
   CreateProductRequest,
   ProductUnity,
   ProductType,
+  ProductStatus,
 } from '@/types/index';
 import Header from '@/components/ocr-result/Header';
 import FileUploader from '@/components/ocr-result/FileUploader';
@@ -66,53 +67,59 @@ const OCRResultPage: React.FC = () => {
       setError('No data to confirm or not authenticated');
       return;
     }
-
     setIsAddingToInventory(true);
     setError('');
-
     try {
-      const productsToAdd: CreateProductRequest[] = (
-        result.line_items ?? []
-      ).map((item: OCRLineItem) => ({
-        name: (item.name || item.description || '').substring(0, 50),
-        description: item.description || '',
-        price:
-          parseFloat(String(item.unit_price ?? '0').replace(/[^\d.-]/g, '')) ||
-          0,
-        stock:
-          parseInt(String(item.quantity ?? '1').replace(/[^\d]/g, '')) || 1,
-        unit: ProductUnity.PER_ITEM as unknown as ProductUnity,
-        product_type: ProductType.PHYSICAL_PRODUCT as unknown as ProductType,
-        category_id: undefined,
-        sku: '',
-        weight: undefined,
-        localization: undefined,
-        status: 'active' as any,
-      }));
+      const toCreate: CreateProductRequest[] = (result.line_items || [])
+        .map((it) => {
+          const name =
+            (it.name || it.description || '').trim().substring(0, 50) ||
+            'Unnamed';
+          const description = (it.description || 'No description').substring(
+            0,
+            200
+          );
+          const price =
+            parseFloat(String(it.unit_price).replace(/[^\d.-]/g, '')) || 0;
+          const stock =
+            parseInt(String(it.quantity).replace(/[^\d]/g, '')) || 1;
+          const sku =
+            (it as any).sku && String((it as any).sku).trim().length >= 3
+              ? String((it as any).sku)
+                  .trim()
+                  .substring(0, 32)
+              : Array.from(
+                  { length: 8 },
+                  () =>
+                    'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[
+                      Math.floor(Math.random() * 32)
+                    ]
+                ).join('');
+          return {
+            name,
+            description,
+            price,
+            stock,
+            unit: ProductUnity.PER_ITEM,
+            product_type: ProductType.PHYSICAL_PRODUCT,
+            category_id: undefined,
+            sku,
+            weight: undefined,
+            localization: undefined,
+            status: ProductStatus.ACTIVE,
+            min_stock: 0,
+          } as CreateProductRequest;
+        })
+        .filter((p) => p.name && p.price >= 0);
 
-      const addedProducts: any[] = [];
-      const failedProducts: any[] = [];
-
-      for (const productData of productsToAdd) {
-        try {
-          const response = await productsAPI.create(productData as any);
-          if (response && (response as any).product)
-            addedProducts.push((response as any).product);
-        } catch (err: any) {
-          console.error('Error adding product:', productData.name, err);
-          failedProducts.push({
-            name: productData.name,
-            error: err.message || 'Unknown error',
-          });
-        }
+      if (toCreate.length === 0) {
+        setError('No valid products to create');
+        setIsAddingToInventory(false);
+        return;
       }
 
-      if (addedProducts.length > 0) {
-        router.push('/inventory');
-      }
-      if (failedProducts.length > 0) {
-        setError(`Failed to add ${failedProducts.length} products`);
-      }
+      await productsAPI.createBulk(toCreate);
+      router.push('/inventory');
     } catch (err: any) {
       setError(err.message || 'Error adding products');
     } finally {
@@ -124,12 +131,8 @@ const OCRResultPage: React.FC = () => {
     if (!file) return;
     setLoading(true);
     setError('');
-
     try {
-      // Process the document with OCR directly
       const ocrResult = await ocrAPI.process(file);
-
-      // Normalize and set result
       const rawItems =
         ocrResult.line_items || (ocrResult as any).products || [];
       const lineItems = (rawItems as any[]).map((it) => {
