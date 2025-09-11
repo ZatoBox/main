@@ -27,7 +27,6 @@ const OCRResultPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedResult, setEditedResult] = useState<OCRResponse | null>(null);
   const [isAddingToInventory, setIsAddingToInventory] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('Office Supplies');
   const [processingOptions, setProcessingOptions] = useState({
     enhance_ocr: true,
     rotation_correction: true,
@@ -188,10 +187,10 @@ const OCRResultPage: React.FC = () => {
   };
 
   return (
-    <div className='flex items-center justify-center min-h-screen p-4'>
-      <div className='w-full max-w-4xl'>
+    <div className='flex items-start justify-center min-h-screen p-6 bg-[#F7F7F7]'>
+      <div className='w-full max-w-5xl'>
         {!result ? (
-          <div className='p-6 bg-white rounded-lg shadow-lg md:p-8 animate-fadeIn'>
+          <div className='p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]'>
             <Header />
             <FileUploader
               fileName={file?.name ?? null}
@@ -206,7 +205,7 @@ const OCRResultPage: React.FC = () => {
               <button
                 onClick={handleUpload}
                 disabled={!file || loading}
-                className='flex items-center px-6 py-3 mx-auto font-medium text-white transition-all duration-300 transform rounded-lg bg-[#F88612] md:px-8 md:py-4 hover:bg-[#D35400] disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105'
+                className='flex items-center px-8 py-4 mx-auto font-medium text-white transition-colors rounded-md bg-[#F88612] md:px-10 md:py-5 hover:bg-[#A94D14] disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 {loading ? (
                   <>
@@ -215,8 +214,7 @@ const OCRResultPage: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <span className='mr-2'>🔍</span>
-                    Upload and process
+                    <span className='mr-2'>🔍</span> Upload and process
                   </>
                 )}
               </button>
@@ -229,7 +227,7 @@ const OCRResultPage: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className='p-6 bg-white rounded-lg shadow-lg md:p-8 animate-fadeIn'>
+          <div className='p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]'>
             <ResultOverview result={result} fileName={file?.name ?? null} />
 
             <ItemsTable
@@ -241,57 +239,6 @@ const OCRResultPage: React.FC = () => {
               isEditing={isEditing}
               onChange={handleTableChange}
             />
-
-            {result?.summary && (
-              <div className='p-4 mt-4 border border-green-200 rounded-lg bg-green-50'>
-                <div className='grid grid-cols-2 gap-4 text-center md:grid-cols-4'>
-                  <div>
-                    <div className='text-xs text-gray-600'>Total Products</div>
-                    <div className='text-lg font-bold text-green-700'>
-                      {String(result.summary.total_productos ?? '')}
-                    </div>
-                  </div>
-                  <div>
-                    <div className='text-xs text-gray-600'>Total Quantity</div>
-                    <div className='text-lg font-bold text-blue-700'>
-                      {String(result.summary.total_cantidad ?? '')}
-                    </div>
-                  </div>
-                  <div>
-                    <div className='text-xs text-gray-600'>Average Price</div>
-                    <div className='text-lg font-bold text-purple-700'>
-                      {String(result.summary.promedio_precio ?? '')}
-                    </div>
-                  </div>
-                  <div>
-                    <div className='text-xs text-gray-600'>GRAND TOTAL</div>
-                    <div className='text-xl font-bold text-green-800'>
-                      {String(result.summary.gran_total ?? '')}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className='p-3 mb-6 border border-blue-200 rounded-lg bg-blue-50 md:p-4 md:mb-8'>
-              <div className='flex flex-wrap items-center justify-between gap-2'>
-                <div className='flex items-center'>
-                  <span className='mr-2 text-blue-600 md:mr-3'>📁</span>
-                  <span className='text-xs text-blue-800 md:text-sm'>
-                    <strong>File:</strong> {file?.name}
-                  </span>
-                </div>
-                <div className='flex items-center gap-4 text-xs text-blue-700'>
-                  <span>
-                    📊 Tables: {result?.statistics?.table_regions || 0}
-                  </span>
-                  <span>
-                    🎯 YOLO: {result?.statistics?.yolo_detections || 0}
-                  </span>
-                  <span>⏱️ {result?.processing_time || 0}s</span>
-                </div>
-              </div>
-            </div>
 
             {result.processed_image && (
               <div className='mb-6 md:mb-8'>
@@ -312,31 +259,6 @@ const OCRResultPage: React.FC = () => {
                 </div>
               </div>
             )}
-
-            <div className='mb-6 md:mb-8'>
-              <h3 className='mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4'>
-                📂 Product Category
-              </h3>
-              <div className='p-4 rounded-lg bg-bg-surface md:p-6'>
-                <label className='block mb-2 text-sm font-medium text-text-primary'>
-                  Select category for all products:
-                </label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className='w-full px-3 py-2 bg-white border rounded-lg border-divider focus:ring-2 focus:ring-complement focus:border-transparent text-text-primary'
-                >
-                  <option value='Office Supplies'>Office Supplies</option>
-                  <option value='Electronics'>Electronics</option>
-                  <option value='Furniture'>Furniture</option>
-                  <option value='Clothing'>Clothing</option>
-                  <option value='Food & Beverages'>Food & Beverages</option>
-                  <option value='Books'>Books</option>
-                  <option value='Sports'>Sports</option>
-                  <option value='Other'>Other</option>
-                </select>
-              </div>
-            </div>
 
             {error && (
               <div className='p-4 mb-6 border rounded-lg md:mb-8 bg-error-50 border-error-200 text-error-700 animate-shake'>
