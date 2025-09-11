@@ -23,6 +23,9 @@ const ItemsTable: React.FC<Props> = ({
             <thead>
               <tr className='bg-[#FAF8F6]'>
                 <th className='px-4 py-3 text-left font-medium text-[#444444]'>
+                  Name
+                </th>
+                <th className='px-4 py-3 text-left font-medium text-[#444444]'>
                   Description
                 </th>
                 <th className='px-4 py-3 text-right font-medium text-[#444444]'>
@@ -57,6 +60,22 @@ const ItemsTable: React.FC<Props> = ({
                       {isEditing ? (
                         <input
                           type='text'
+                          value={String(item.name ?? '')}
+                          onChange={(e) =>
+                            onChange && onChange(index, 'name', e.target.value)
+                          }
+                          className='w-full px-2 py-1 border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none'
+                        />
+                      ) : (
+                        <span className='font-medium text-[#1F1F1F]'>
+                          {item.name || 'Unnamed'}
+                        </span>
+                      )}
+                    </td>
+                    <td className='px-4 py-3 align-top'>
+                      {isEditing ? (
+                        <input
+                          type='text'
                           value={String(item.description ?? '')}
                           onChange={(e) =>
                             onChange &&
@@ -65,8 +84,8 @@ const ItemsTable: React.FC<Props> = ({
                           className='w-full px-2 py-1 border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none'
                         />
                       ) : (
-                        <span className='font-medium text-[#1F1F1F]'>
-                          {item.description}
+                        <span className='text-[#1F1F1F]'>
+                          {item.description || 'No description'}
                         </span>
                       )}
                     </td>

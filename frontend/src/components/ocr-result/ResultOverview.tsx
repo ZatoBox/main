@@ -9,6 +9,19 @@ type Props = {
 const ResultOverview: React.FC<Props> = ({ result, fileName }) => {
   return (
     <div className='mb-6'>
+      <div className='mb-10 text-center'>
+        <h2 className='text-2xl font-bold text-[#1F1F1F] md:text-3xl'>
+          OCR Processing Result
+        </h2>
+        <p className='mt-2 text-sm text-[#666666] md:text-base'>
+          Document processed successfully
+        </p>
+        {fileName && (
+          <div className='inline-block px-4 py-2 mt-4 text-sm border rounded-md border-[#E5E7EB] bg-white text-[#1F1F1F]'>
+            <span className='mr-1'>📄</span> file: {fileName}
+          </div>
+        )}
+      </div>
       <div className='grid gap-6 mb-8 md:grid-cols-2'>
         <div className='p-5 bg-white border rounded-lg shadow-sm md:p-6 border-[#EFEFEF]'>
           <h3 className='mb-4 text-base font-semibold text-[#1F1F1F] md:text-lg'>

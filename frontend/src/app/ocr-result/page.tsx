@@ -33,6 +33,25 @@ const OCRResultPage: React.FC = () => {
     confidence_threshold: 0.25,
   });
   const [systemStatus, setSystemStatus] = useState<any>(null);
+  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
+  const [nowTs, setNowTs] = useState<number>(Date.now());
+
+  useEffect(() => {
+    if (!cooldownUntil) return;
+    const id = setInterval(() => setNowTs(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [cooldownUntil]);
+
+  const processAnotherDisabled = cooldownUntil ? nowTs < cooldownUntil : false;
+  const remainingMs =
+    processAnotherDisabled && cooldownUntil ? cooldownUntil - nowTs : 0;
+  const remainingLabel = (() => {
+    if (!processAnotherDisabled) return 'Process Another';
+    const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
+    const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    const s = String(totalSec % 60).padStart(2, '0');
+    return `Process Another (${m}:${s})`;
+  })();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -111,21 +130,36 @@ const OCRResultPage: React.FC = () => {
       const ocrResult = await ocrAPI.process(file);
 
       // Normalize and set result
-      const rawItems = ocrResult.line_items || (ocrResult as any).products || [];
+      const rawItems =
+        ocrResult.line_items || (ocrResult as any).products || [];
       const lineItems = (rawItems as any[]).map((it) => {
         const unit_price = it.unit_price || it.price || '0';
         const quantity = it.quantity || it.stock || '1';
         let total_price = it.total_price;
         if (!total_price) {
-          const nUnit = parseFloat(String(unit_price).toString().replace(/[^\d.-]/g, '')) || 0;
-          const nQty = parseFloat(String(quantity).toString().replace(/[^\d.-]/g, '')) || 0;
-            total_price = (nUnit * nQty).toFixed(2);
+          const nUnit =
+            parseFloat(
+              String(unit_price)
+                .toString()
+                .replace(/[^\d.-]/g, '')
+            ) || 0;
+          const nQty =
+            parseFloat(
+              String(quantity)
+                .toString()
+                .replace(/[^\d.-]/g, '')
+            ) || 0;
+          total_price = (nUnit * nQty).toFixed(2);
         }
         return {
           ...it,
-          unit_price: typeof unit_price === 'number' ? unit_price.toFixed(2) : unit_price,
+          unit_price:
+            typeof unit_price === 'number' ? unit_price.toFixed(2) : unit_price,
           quantity: String(quantity),
-          total_price: typeof total_price === 'number' ? total_price.toFixed(2) : String(total_price),
+          total_price:
+            typeof total_price === 'number'
+              ? total_price.toFixed(2)
+              : String(total_price),
         };
       });
 
@@ -142,6 +176,9 @@ const OCRResultPage: React.FC = () => {
       };
 
       setResult(normalized);
+      if (normalized.success) {
+        setCooldownUntil(Date.now() + 5 * 60 * 1000);
+      }
     } catch (err: any) {
       setError(
         `Error procesando documento: ${err.message}. Por favor intenta de nuevo.`
@@ -181,6 +218,7 @@ const OCRResultPage: React.FC = () => {
   };
 
   const handleProcessAnother = () => {
+    if (processAnotherDisabled) return;
     setFile(null);
     setResult(null);
     setError('');
@@ -295,6 +333,8 @@ const OCRResultPage: React.FC = () => {
               onSaveEdit={handleSaveEdit}
               onCancelEdit={handleCancelEdit}
               onProcessAnother={handleProcessAnother}
+              processAnotherDisabled={processAnotherDisabled}
+              processAnotherLabel={remainingLabel}
             />
           </div>
         )}

@@ -8,6 +8,8 @@ type Props = {
   onSaveEdit: () => void;
   onCancelEdit: () => void;
   onProcessAnother: () => void;
+  processAnotherDisabled?: boolean;
+  processAnotherLabel?: string;
 };
 
 const baseBtn =
@@ -21,6 +23,8 @@ const ActionsBar: React.FC<Props> = ({
   onSaveEdit,
   onCancelEdit,
   onProcessAnother,
+  processAnotherDisabled,
+  processAnotherLabel,
 }) => {
   return (
     <div className='flex flex-col justify-center gap-3 sm:flex-row md:gap-4'>
@@ -43,9 +47,10 @@ const ActionsBar: React.FC<Props> = ({
         <>
           <button
             onClick={onProcessAnother}
+            disabled={processAnotherDisabled}
             className={`${baseBtn} bg-white border border-[#E2E2E2] hover:bg-[#FFF5EC] text-[#A94D14]`}
           >
-            Process Another
+            {processAnotherLabel || 'Process Another'}
           </button>
           <button
             onClick={onEdit}
