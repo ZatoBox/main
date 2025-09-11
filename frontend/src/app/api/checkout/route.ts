@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: checkout.url });
   } catch (error) {
+    console.log('Error creating checkout:', error);
     return NextResponse.json(
       { error: 'Failed to create checkout' },
       { status: 500 }

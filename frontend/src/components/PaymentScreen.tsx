@@ -6,6 +6,7 @@ import {
   Bitcoin,
   Banknote,
 } from 'lucide-react';
+import { checkoutCart } from '@/services/payments-service';
 
 interface PaymentScreenProps {
   isOpen: boolean;
@@ -14,7 +15,7 @@ interface PaymentScreenProps {
   total: number;
 }
 
-type PaymentMethod = 'card' | 'wallet' | 'crypto' | 'cash';
+type PaymentMethod = 'card' | 'wallet' | 'crypto' | 'cash' | 'polar';
 
 const PaymentScreen: React.FC<PaymentScreenProps> = ({
   isOpen,
@@ -69,11 +70,13 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
           formData.cardName
         );
       case 'wallet':
-        return true; // Wallet payments are handled externally
+        return true;
       case 'crypto':
         return formData.walletAddress;
       case 'cash':
-        return cashReceived >= total; // Must receive at least the total
+        return cashReceived >= total;
+      case 'polar':
+        return true;
       default:
         return false;
     }
@@ -89,14 +92,25 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
         return 'Coinbase Pay / Crypto';
       case 'cash':
         return 'Cash on Delivery';
+      case 'polar':
+        return 'Polar';
       default:
         return 'Payment method';
     }
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     if (isFormValid() && selectedMethod) {
-      onPaymentSuccess(getPaymentMethodName(selectedMethod));
+      if (selectedMethod === 'polar') {
+        try {
+          const response = await checkoutCart(total);
+          window.location.href = response.url;
+        } catch (error) {
+          console.error('Error creating checkout:', error);
+        }
+      } else {
+        onPaymentSuccess(getPaymentMethodName(selectedMethod));
+      }
     }
   };
 
@@ -270,6 +284,39 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 </div>
                 <div className='text-sm text-[#CBD5E1]'>
                   Pay with cash upon delivery
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Polar */}
+          <div
+            className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 hover-lift ${
+              selectedMethod === 'polar'
+                ? 'border-zatobox-500 bg-zatobox-100 shadow-lg'
+                : 'border-[#CBD5E1] hover:bg-[#FEF9EC] bg-white'
+            }`}
+            onClick={() => setSelectedMethod('polar')}
+          >
+            <div className='flex items-center space-x-3'>
+              <div
+                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                  selectedMethod === 'polar'
+                    ? 'border-zatobox-500 bg-zatobox-500'
+                    : 'border-gray-300 hover:border-[#F88612] hover:bg-[#F88612]'
+                }`}
+              >
+                {selectedMethod === 'polar' && (
+                  <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5 animate-scale-in'></div>
+                )}
+              </div>
+              <div className='w-5 h-5 bg-black rounded-full flex items-center justify-center'>
+                <span className='text-white text-xs font-bold'>P</span>
+              </div>
+              <div>
+                <div className='font-medium text-black text-glow'>Polar</div>
+                <div className='text-sm text-[#CBD5E1]'>
+                  Secure payment with Polar
                 </div>
               </div>
             </div>
@@ -476,6 +523,19 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 </h3>
                 <p className='text-[#CBD5E1]'>
                   Use your mobile wallet to complete the payment
+                </p>
+              </div>
+            )}
+
+            {selectedMethod === 'polar' && (
+              <div className='py-8 text-center'>
+                <div className='mb-4 text-4xl'>🔒</div>
+                <h3 className='mb-2 text-lg font-semibold text-black'>
+                  Polar Checkout
+                </h3>
+                <p className='text-[#CBD5E1]'>
+                  You will be redirected to Polar to complete your payment
+                  securely
                 </p>
               </div>
             )}
