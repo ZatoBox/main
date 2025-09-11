@@ -111,11 +111,29 @@ const OCRResultPage: React.FC = () => {
       const ocrResult = await ocrAPI.process(file);
 
       // Normalize and set result
+      const rawItems = ocrResult.line_items || (ocrResult as any).products || [];
+      const lineItems = (rawItems as any[]).map((it) => {
+        const unit_price = it.unit_price || it.price || '0';
+        const quantity = it.quantity || it.stock || '1';
+        let total_price = it.total_price;
+        if (!total_price) {
+          const nUnit = parseFloat(String(unit_price).toString().replace(/[^\d.-]/g, '')) || 0;
+          const nQty = parseFloat(String(quantity).toString().replace(/[^\d.-]/g, '')) || 0;
+            total_price = (nUnit * nQty).toFixed(2);
+        }
+        return {
+          ...it,
+          unit_price: typeof unit_price === 'number' ? unit_price.toFixed(2) : unit_price,
+          quantity: String(quantity),
+          total_price: typeof total_price === 'number' ? total_price.toFixed(2) : String(total_price),
+        };
+      });
+
       const normalized: OCRResponse = {
         success: ocrResult.success ?? true,
         message: ocrResult.message ?? 'Documento procesado exitosamente',
         metadata: ocrResult.metadata || {},
-        line_items: ocrResult.line_items || (ocrResult as any).products || [],
+        line_items: lineItems,
         detections: ocrResult.detections || [],
         processed_image: ocrResult.processed_image || null,
         processing_time: ocrResult.processing_time || 3,
