@@ -5,10 +5,13 @@ import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguageContext } from '@/context/language-context';
 import { getTranslation } from '@/utils/translations';
+import { useAuth } from '@/context/auth-store';
+import { createCheckout } from '@/services/payments-service';
 
 export function PricingSection() {
   const { language } = useLanguageContext();
   const [isAnnual, setIsAnnual] = useState(true);
+  const { user } = useAuth();
 
   const pricingPlans = [
     {
@@ -52,6 +55,22 @@ export function PricingSection() {
         'bg-[#F2F2F2] shadow-[0px_1px_1px_-0.5px_rgba(16,24,40,0.20)] text-black text-shadow-[0px_1px_1px_rgba(16,24,40,0.08)] hover:bg-[#F2F2F2]/90',
     },
   ];
+
+  const handleSubscribe = async () => {
+    try {
+      const userId = user?.id;
+      if (!userId) {
+        window.location.href = '/auth/login';
+        return;
+      }
+      const cycle = isAnnual ? 'annual' : 'monthly';
+      const plan = 'starter';
+      const res = await createCheckout(userId, plan, cycle);
+      if (res?.url) {
+        window.location.href = res.url;
+      }
+    } catch {}
+  };
 
   return (
     <section className='flex flex-col items-center justify-start w-full px-5 py-8 my-0 overflow-hidden md:py-14'>
@@ -230,12 +249,8 @@ export function PricingSection() {
 
               {plan.name ===
               getTranslation(language, 'pricing.plans.starter.name') ? (
-                <a
-                  href={
-                    isAnnual
-                      ? process.env.NEXT_PUBLIC_POLAR_YEARLY_PLAN_ID
-                      : process.env.NEXT_PUBLIC_POLAR_MONTHLY_PLAN_ID
-                  }
+                <Button
+                  onClick={handleSubscribe}
                   className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
                 >
                   <div className='px-1.5 flex justify-center items-center gap-2'>
@@ -256,7 +271,7 @@ export function PricingSection() {
                       {plan.buttonText}
                     </span>
                   </div>
-                </a>
+                </Button>
               ) : (
                 <Button
                   className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
