@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/utils/supabase/server';
+import { CartCacheService } from '@/services/cart-cache.service';
 import crypto from 'crypto';
 
 function verifyPolarSignature(payload: string, signature: string): boolean {
@@ -44,12 +46,81 @@ export async function POST(request: NextRequest) {
     const isSuccess = true;
 
     if (isSuccess) {
+      const checkoutId = eventData.checkout_id || eventData.checkout?.id;
+
+      if (!checkoutId) {
+        return NextResponse.json(
+          { error: 'Checkout ID no encontrado' },
+          { status: 400 }
+        );
+      }
+
+      const cartData = CartCacheService.getCart(checkoutId);
+
+      if (!cartData) {
+        return NextResponse.json(
+          { error: 'Datos del carrito no encontrados' },
+          { status: 404 }
+        );
+      }
+
+      const supabase = await createClient();
+
+      const orderData = {
+        user_id: cartData.userId,
+        order_id: eventData.id,
+        checkout_id: checkoutId,
+        total_amount: cartData.totalAmount,
+        currency: 'USD',
+        status: 'completed',
+        payment_method: 'polar',
+        items: cartData.items,
+        billing_info: cartData.billingInfo,
+        shipping_info: cartData.shippingInfo,
+        metadata: {
+          ...cartData.metadata,
+          polar_order_id: eventData.id,
+          polar_amount: eventData.amount,
+          processed_at: new Date().toISOString(),
+        },
+      };
+
+      const { error: insertError } = await supabase
+        .from('orders')
+        .insert(orderData);
+
+      if (insertError) {
+        console.error('Error guardando orden:', insertError);
+        return NextResponse.json(
+          { error: 'Error guardando orden' },
+          { status: 500 }
+        );
+      }
+
+      const { data: stockResult, error: stockError } = await supabase.rpc(
+        'decrease_product_stock',
+        { product_items: cartData.items }
+      );
+
+      if (stockError || !stockResult?.success) {
+        console.error(
+          'Error actualizando stock:',
+          stockError || stockResult?.error
+        );
+        return NextResponse.json(
+          { error: 'Error actualizando stock' },
+          { status: 500 }
+        );
+      }
+
+      CartCacheService.removeCart(checkoutId);
+
       return NextResponse.json({
         success: true,
-        message: 'Pago confirmado',
+        message: 'Orden guardada y stock actualizado',
         order_id: eventData.id,
-        checkout_id: eventData.checkout_id,
-        amount: eventData.amount / 100,
+        checkout_id: checkoutId,
+        stock_updates: stockResult.updated_products,
       });
     }
 
