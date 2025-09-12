@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, products, inventory, sales, layouts
+from routes import auth, products, inventory, sales, layouts, categories
 
 # Import middleware registry
 from middleware.middleware import register_middlewares
@@ -9,6 +9,7 @@ app = FastAPI(title="CSM API", description="Headless CSM for Zatobox", version="
 
 # --- Swagger Bearer Token Support ---
 from fastapi.openapi.utils import get_openapi
+
 
 def custom_openapi():
     if app.openapi_schema:
@@ -50,6 +51,7 @@ app.include_router(products.router)
 app.include_router(inventory.router)
 app.include_router(sales.router)
 app.include_router(layouts.router)
+app.include_router(categories.router)
 
 
 @app.get("/")

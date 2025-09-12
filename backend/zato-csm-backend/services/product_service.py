@@ -16,7 +16,14 @@ class ProductService:
         type_val = getattr(
             product_data.product_type, "value", product_data.product_type
         )
-        category_id_val = getattr(product_data, "category_id")
+        category_ids_val = getattr(product_data, "category_ids", []) or []
+        if not isinstance(category_ids_val, list):
+            raise HTTPException(status_code=400, detail="category_ids must be a list")
+        for cid in category_ids_val:
+            if not isinstance(cid, str) or not cid:
+                raise HTTPException(
+                    status_code=400, detail="Invalid category id in category_ids"
+                )
         initial_images: List[str] = []
         if len(initial_images) > MAX_IMAGES:
             raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
@@ -27,7 +34,7 @@ class ProductService:
             stock=int(product_data.stock),
             unit=unit_val,
             product_type=type_val,
-            category_id=category_id_val,
+            category_ids=category_ids_val,
             sku=product_data.sku,
             min_stock=int(getattr(product_data, "min_stock", 0)),
             status=getattr(
@@ -68,7 +75,7 @@ class ProductService:
             "description",
             "price",
             "stock",
-            "category_id",
+            "category_ids",
             "images",
             "sku",
             "weight",
@@ -84,7 +91,7 @@ class ProductService:
         for fld in (
             "product_type",
             "unit",
-            "category_id",
+            "category_ids",
             "description",
             "localization",
             "sku",
@@ -93,6 +100,19 @@ class ProductService:
             val = updates.get(fld)
             if val == "" or val is None:
                 updates.pop(fld, None)
+        if "category_ids" in updates:
+            if not isinstance(updates["category_ids"], list):
+                raise HTTPException(
+                    status_code=400, detail="category_ids must be a list"
+                )
+            cleaned = []
+            for cid in updates["category_ids"]:
+                if not isinstance(cid, str) or not cid:
+                    raise HTTPException(
+                        status_code=400, detail="Invalid category id in category_ids"
+                    )
+                cleaned.append(cid)
+            updates["category_ids"] = cleaned
         if "price" in updates:
             try:
                 updates["price"] = float(updates["price"])

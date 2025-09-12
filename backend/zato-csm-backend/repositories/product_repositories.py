@@ -17,7 +17,7 @@ class ProductRepository:
         stock: int,
         unit: str,
         product_type: str,
-        category_id: str,
+        category_ids: list[str] | None,
         sku: str | None,
         min_stock: int,
         status: str,
@@ -32,7 +32,7 @@ class ProductRepository:
             "price": price,
             "stock": stock,
             "min_stock": min_stock,
-            "category_id": category_id,
+            "category_ids": category_ids or [],
             "images": images or [],
             "status": status,
             "weight": weight,
@@ -53,6 +53,8 @@ class ProductRepository:
     ):
         updates.pop("id", None)
         updates.pop("created_at", None)
+        if "category_ids" in updates and updates["category_ids"] is None:
+            updates.pop("category_ids")
         updates["last_updated"] = get_current_time_with_timezone(user_timezone)
         resp = (
             self.supabase.table(self.table)
@@ -84,14 +86,8 @@ class ProductRepository:
         return data
 
     def find_by_category(self, category_id: str):
-        resp = (
-            self.supabase.table(self.table)
-            .select("*")
-            .eq("category_id", category_id)
-            .execute()
-        )
-        data = getattr(resp, "data", None) or []
-        return data
+        # Deprecated single category filter; kept for compatibility returning empty list
+        return []
 
     def find_by_name(self, name: str):
         resp = self.supabase.table(self.table).select("*").ilike("name", name).execute()

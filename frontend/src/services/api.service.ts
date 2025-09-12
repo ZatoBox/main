@@ -27,6 +27,8 @@ import type {
   OCRResponse,
   OCRDebugResponse,
   OCRSupportedFormatsResponse,
+  CategoriesResponse,
+  Category,
 } from '@/types';
 import { getAuthToken as getCookieAuthToken } from '@/services/cookies.service';
 
@@ -314,4 +316,10 @@ export const layoutsAPI = {
     apiRequest(`/api/layouts/owner/${ownerId}`),
   listByInventory: (inventoryId: string): Promise<LayoutsResponse> =>
     apiRequest(`/api/layouts/inventory/${inventoryId}`),
+};
+
+export const categoriesAPI = {
+  list: (): Promise<CategoriesResponse> => apiRequest('/api/categories/'),
+  getById: (id: string): Promise<{ success: boolean; category: Category }> =>
+    apiRequest(`/api/categories/${id}`),
 };

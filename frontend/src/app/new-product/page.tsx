@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/new-product/Header';
 import ImagesUploader from '@/components/new-product/ImagesUploader';
 import NewProductForm from '@/components/new-product/NewProductForm';
 import { useAuth } from '@/context/auth-store';
-import { productsAPI } from '@/services/api.service';
+import { productsAPI, categoriesAPI } from '@/services/api.service';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import ProductInfoForm from '@/components/new-product/ProductInfoForm';
@@ -21,17 +21,29 @@ const NewProductPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
-  const [submitSignal, setSubmitSignal] = useState(0);
 
-  const existingCategories = [
-    'Furniture',
-    'Textiles',
-    'Lighting',
-    'Electronics',
-    'Decoration',
-    'Office',
-    'Gaming',
-  ];
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    []
+  );
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      setLoadingCategories(true);
+      try {
+        const res = await categoriesAPI.list();
+        if (active && res.success) setCategories(res.categories);
+      } catch {
+      } finally {
+        if (active) setLoadingCategories(false);
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const unitOptions = [
     { label: 'Per item', value: 'Per item' },
@@ -73,17 +85,28 @@ const NewProductPage: React.FC = () => {
     try {
       const payload: Record<string, unknown> = {
         name: values.name,
-        description: values.description || null,
+        description:
+          values.description && values.description.trim() !== ''
+            ? values.description
+            : '',
         price: Number(values.price),
         stock: Number(values.inventoryQuantity),
         unit: values.unit,
-        category_id: values.category || undefined,
-        sku: values.sku || undefined,
-        product_type: values.productType || undefined,
+        product_type: values.productType || 'Physical Product',
+        status: 'active',
+        sku:
+          values.sku && values.sku.trim() !== ''
+            ? values.sku
+            : 'SKU-' + Date.now(),
+        min_stock: values.lowStockAlert ? Number(values.lowStockAlert) : 0,
+        category_ids: Array.isArray(values.category_ids)
+          ? values.category_ids
+          : [],
         weight: values.weight ? Number(values.weight) : undefined,
-        min_stock: values.lowStockAlert
-          ? Number(values.lowStockAlert)
-          : undefined,
+        localization:
+          values.location && values.location.trim() !== ''
+            ? values.location
+            : undefined,
       };
 
       Object.keys(payload).forEach((k) => {
@@ -116,7 +139,10 @@ const NewProductPage: React.FC = () => {
       .integer('Inventory must be an integer')
       .min(0, 'Inventory must be 0 or more')
       .required('Inventory is required'),
-    category: Yup.string().required('Category is required'),
+    category_ids: Yup.array()
+      .of(Yup.string().uuid('Invalid id'))
+      .min(1, 'At least one category')
+      .required('At least one category'),
   });
 
   const initialValues = {
@@ -130,50 +156,46 @@ const NewProductPage: React.FC = () => {
     inventoryQuantity: '',
     lowStockAlert: '',
     sku: '',
-    category: '',
+    category_ids: [],
   };
 
   return (
     <div className='min-h-screen bg-bg-main'>
-      <Header
-        onBack={() => router.push('/inventory')}
-        onSave={() => setSubmitSignal((s) => s + 1)}
-        saving={saving}
-        error={error}
-      />
-
-      <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={onSubmit}
-        >
-          {(formik) => (
-            <Form>
-              <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
-                <div className='space-y-6'>
-                  <ImagesUploader
-                    files={files}
-                    onAddFiles={handleAddFiles}
-                    onRemove={handleRemoveFile}
-                  />
-
-                  <ProductInfoForm
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={onSubmit}
+      >
+        {(formik) => (
+          <>
+            <Header
+              onBack={() => router.push('/inventory')}
+              onSave={formik.handleSubmit}
+              saving={saving}
+              error={error}
+            />
+            <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+              <Form>
+                <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
+                  <div className='space-y-6'>
+                    <ImagesUploader
+                      files={files}
+                      onAddFiles={handleAddFiles}
+                      onRemove={handleRemoveFile}
+                    />
+                    <ProductInfoForm formik={formik} categories={categories} />
+                  </div>
+                  <NewProductForm
                     formik={formik}
-                    existingCategories={existingCategories}
+                    unitOptions={unitOptions}
+                    productTypeOptions={productTypeOptions}
                   />
                 </div>
-
-                <NewProductForm
-                  formik={formik}
-                  unitOptions={unitOptions}
-                  productTypeOptions={productTypeOptions}
-                />
-              </div>
-            </Form>
-          )}
-        </Formik>
-      </div>
+              </Form>
+            </div>
+          </>
+        )}
+      </Formik>
     </div>
   );
 };

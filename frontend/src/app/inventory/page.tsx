@@ -132,7 +132,9 @@ const InventoryPage: React.FC = () => {
 
   const filteredItems = inventoryItems.filter((item) => {
     const matchesCategory =
-      categoryFilter === 'all' || item.category_id === categoryFilter;
+      categoryFilter === 'all' ||
+      (Array.isArray((item as any).category_ids) &&
+        (item as any).category_ids.includes(categoryFilter));
     const matchesStatus =
       statusFilter === 'all' || item.status === statusFilter;
     const matchesSearch = item.name
@@ -144,7 +146,11 @@ const InventoryPage: React.FC = () => {
   const uiItems = filteredItems.map((p) => ({
     id: p.id,
     name: p.name,
-    category: p.category_id ?? 'Uncategorized',
+    category: Array.isArray((p as any).category_ids)
+      ? (p as any).category_ids.length === 0
+        ? 'Uncategorized'
+        : `${(p as any).category_ids.length} categories`
+      : 'Uncategorized',
     status: p.status ?? 'inactive',
     stock: p.stock,
     price: p.price,

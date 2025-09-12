@@ -114,9 +114,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       </div>
       <div className='p-4 space-y-3'>
         <div className='flex items-center justify-between'>
-          <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
-            {product.category_id ?? ''}
-          </span>
+          {product.category_ids && product.category_ids.length > 0 ? (
+            <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
+              {product.category_ids.length === 1
+                ? '1 categoría'
+                : `${product.category_ids.length} categorías`}
+            </span>
+          ) : (
+            <span />
+          )}
           {product.sku && (
             <span className='text-xs transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
               {product.sku}

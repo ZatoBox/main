@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { productsAPI } from '@/services/api.service';
+import { productsAPI, categoriesAPI } from '@/services/api.service';
 import { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import EditHeader from '@/components/edit-product/EditHeader';
@@ -43,15 +43,28 @@ const EditProductPage: React.FC = () => {
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
 
-  const existingCategories = [
-    'Furniture',
-    'Textiles',
-    'Lighting',
-    'Electronics',
-    'Decoration',
-    'Office',
-    'Gaming',
-  ];
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    []
+  );
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      setLoadingCategories(true);
+      try {
+        const res = await categoriesAPI.list();
+        if (active && (res as any).success)
+          setCategories((res as any).categories);
+      } finally {
+        if (active) setLoadingCategories(false);
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!id || typeof id !== 'string') {
@@ -87,7 +100,11 @@ const EditProductPage: React.FC = () => {
         lowStockAlert: prod.min_stock != null ? String(prod.min_stock) : '',
         sku: prod.sku ?? '',
       });
-      setSelectedCategories(prod.category_id ? [prod.category_id] : []);
+      setSelectedCategories(
+        Array.isArray((prod as any).category_ids)
+          ? (prod as any).category_ids
+          : []
+      );
       setExistingImages((prod.images || []).slice(0, MAX_FILES));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error loading product');
@@ -149,7 +166,8 @@ const EditProductPage: React.FC = () => {
         min_stock: formData.lowStockAlert
           ? Number(formData.lowStockAlert)
           : undefined,
-        category_id: selectedCategories[0] ?? undefined,
+        category_ids:
+          selectedCategories.length > 0 ? selectedCategories : undefined,
       };
 
       // eliminar claves undefined para no provocar 422
@@ -287,9 +305,10 @@ const EditProductPage: React.FC = () => {
               onChange={handleInputChange}
             />
             <Categorization
-              existingCategories={existingCategories}
+              categories={categories}
               selectedCategories={selectedCategories}
               onToggle={handleCategoryToggle}
+              loading={loadingCategories}
             />
           </div>
 
