@@ -10,6 +10,7 @@ import ProductForm from '@/components/edit-product/ProductForm';
 import ImagesUploader from '@/components/edit-product/ImagesUploader';
 import Categorization from '@/components/edit-product/Categorization';
 import InventoryPanel from '@/components/edit-product/InventoryPanel';
+import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 const MAX_FILES = 4;
@@ -42,6 +43,8 @@ const EditProductPage: React.FC = () => {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
     []
@@ -201,19 +204,27 @@ const EditProductPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this product?'))
-      return;
     try {
-      setSaving(true);
+      setIsDeleting(true);
       await productsAPI.delete(id);
       router.push('/inventory');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error deleting product');
     } finally {
-      setSaving(false);
+      setIsDeleting(false);
+      setDeleteConfirmOpen(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false);
+    setIsDeleting(false);
   };
 
   const handleToggleStatus = async () => {
@@ -320,6 +331,12 @@ const EditProductPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <DeleteConfirmModal
+        open={deleteConfirmOpen}
+        onCancel={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        loading={isDeleting}
+      />
     </div>
   );
 };
