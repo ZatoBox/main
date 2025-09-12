@@ -58,6 +58,10 @@ export function PricingSection() {
 
   const handleSubscribe = async () => {
     try {
+      if (process.env.NEXT_PUBLIC_ENABLE_POLAR !== 'true') {
+        window.location.href = '/auth/login';
+        return;
+      }
       const userId = user?.id;
       if (!userId) {
         window.location.href = '/auth/login';
@@ -274,6 +278,7 @@ export function PricingSection() {
                 </Button>
               ) : (
                 <Button
+                  onClick={handleSubscribe}
                   className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
                 >
                   <div className='px-1.5 flex justify-center items-center gap-2'>
