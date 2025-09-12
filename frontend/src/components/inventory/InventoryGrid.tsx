@@ -3,7 +3,7 @@ import InventoryCard from './InventoryCard';
 import { Package } from 'lucide-react';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   category: string;
   status: string;
@@ -13,10 +13,10 @@ interface Product {
 
 interface Props {
   items: Product[];
-  selectedItems: number[];
-  onSelectItem: (id: number, checked: boolean) => void;
-  onEditProduct: (id: number) => void;
-  onDeleteClick: (id: number, e?: React.MouseEvent) => void;
+  selectedItems: string[];
+  onSelectItem: (id: string, checked: boolean) => void;
+  onEditProduct: (id: string) => void;
+  onDeleteClick: (id: string, e?: React.MouseEvent) => void;
 }
 
 const InventoryGrid: React.FC<Props> = ({
@@ -28,90 +28,102 @@ const InventoryGrid: React.FC<Props> = ({
 }) => {
   return (
     <>
-      <div className='hidden overflow-hidden border rounded-lg shadow-sm md:block bg-bg-surface border-divider'>
-        <table className='w-full'>
-          <thead className='border-b bg-gray-50 border-divider'>
+      <div className='hidden w-full overflow-x-auto md:block'>
+        <table className='min-w-full divide-y divide-[#CBD5E1]'>
+          <thead className='bg-[#FFFFFF]'>
             <tr>
-              <th className='w-12 px-4 py-3'></th>
-              <th className='w-16 px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary'>
+              <th className='w-10 px-4 py-3'>
+              </th>
+              <th className='w-16 px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-[#475569]'>
                 Image
               </th>
-              <th className='px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary'>
+              <th className='px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-[#475569]'>
                 Item
               </th>
-              <th className='px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary'>
+              <th className='px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-[#475569]'>
                 Category
               </th>
-              <th className='hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary lg:table-cell'>
+              <th className='hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-[#475569] lg:table-cell'>
                 Stock
               </th>
-              <th className='hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-text-secondary xl:table-cell'>
+              <th className='hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-[#475569] xl:table-cell'>
                 Price
               </th>
               <th className='w-12 px-4 py-3'></th>
             </tr>
           </thead>
-          <tbody className='divide-y bg-bg-surface divide-divider'>
+          <tbody className='divide-y bg-[#FFFFFF] divide-[#CBD5E1]'>
             {items.map((item) => (
               <tr
                 key={item.id}
-                className='transition-colors cursor-pointer hover:bg-gray-50'
+                onClick={() => onEditProduct(item.id)}
+                className={`transition-colors cursor-pointer hover:bg-[#FEF9EC] group ${
+                  selectedItems.includes(item.id)
+                    ? 'bg-[#FEF9EC]'
+                    : 'bg-[#FFFFFF]'
+                } ${item.status !== 'active' ? 'opacity-60' : ''}`}
               >
                 <td className='px-4 py-4'>
                   <input
                     type='checkbox'
                     checked={selectedItems.includes(item.id)}
+                    onClick={(e) => e.stopPropagation()}
                     onChange={(e) => onSelectItem(item.id, e.target.checked)}
-                    className='w-4 h-4 border-gray-300 rounded text-complement focus:ring-complement'
+                    className='w-4 h-4 rounded border border-[#767676] bg-white appearance-none checked:bg-[#EEB131] focus:outline-none focus:ring-2 focus:ring-[#CBD5E1]'
                   />
                 </td>
                 <td className='px-4 py-4'>
-                  <div className='flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg'>
-                    <Package size={20} className='text-text-secondary' />
+                  <div className='flex items-center justify-center w-10 h-10 bg-[#FBEFCA] rounded-lg'>
+                    <Package size={20} className='text-zatobox-600' />
                   </div>
                 </td>
                 <td className='px-4 py-4'>
                   <div className='flex flex-col'>
-                    <span className='text-sm font-medium text-text-primary'>
+                    <span className='text-sm font-medium text-[#374151] hover:underline group-hover:underline'>
                       {item.name}
                     </span>
                     <span
                       className={`text-xs ${
-                        item.status === 'active' ? 'text-success' : 'text-error'
+                        item.status === 'active'
+                          ? 'text-[#10B981]'
+                          : 'text-[#E7000B80]'
                       }`}
                     >
                       {item.status === 'active' ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                 </td>
-                <td className='px-4 py-4 text-sm text-text-primary'>
+                <td className='px-4 py-4 text-sm font-medium text-[#475569]'>
                   {item.category}
                 </td>
                 <td className='hidden px-4 py-4 text-sm text-text-primary lg:table-cell'>
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                       item.stock > 10
-                        ? 'bg-success-100 text-success-800'
-                        : item.stock > 0
-                        ? 'bg-warning-100 text-warning-800'
-                        : 'bg-error-100 text-error-800'
+                        ? 'bg-[#D1FAE5] text-[#065F46]'
+                        : item.stock === 0
+                        ? 'bg-[#FEE2E2] text-[#991B1B]'
+                        : 'bg-[#FEF3C7] text-[#92400E]'
                     }`}
                   >
                     {item.stock} units
                   </span>
                 </td>
-                <td className='hidden px-4 py-4 text-sm font-medium text-text-primary xl:table-cell'>
+                <td className='hidden px-4 py-4 text-sm font-semibold text-[#374151] xl:table-cell'>
                   ${item.price.toFixed(2)}
                 </td>
                 <td className='px-4 py-4'>
                   <div className='flex items-center space-x-1'>
                     <button
-                      onClick={() => onEditProduct(item.id)}
-                      className='p-1 transition-colors rounded hover:bg-gray-50'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditProduct(item.id);
+                      }}
+                      className='p-1 transition-colors rounded hover:bg-[#FEF9EC]'
                       title='Edit'
                     >
                       <svg
-                        className='w-4 h-4 text-text-secondary'
+                        className='w-4 h-4 text-zatobox-600'
                         fill='none'
                         stroke='currentColor'
                         viewBox='0 0 24 24'
@@ -125,12 +137,15 @@ const InventoryGrid: React.FC<Props> = ({
                       </svg>
                     </button>
                     <button
-                      onClick={(e) => onDeleteClick(item.id, e)}
-                      className='p-1 transition-colors rounded hover:bg-red-50'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteClick(item.id, e);
+                      }}
+                      className='p-1 transition-colors rounded hover:bg-red-100'
                       title='Delete'
                     >
                       <svg
-                        className='w-4 h-4 text-red-500'
+                        className='w-4 h-4 text-red-600'
                         fill='none'
                         stroke='currentColor'
                         viewBox='0 0 24 24'

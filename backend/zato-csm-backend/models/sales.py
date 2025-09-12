@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
@@ -19,17 +19,21 @@ class SalesStatus(str, Enum):
 
 
 class SalesItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     product_id: str = Field(..., min_length=1)
     quantity: int = Field(..., gt=0)
     price: Optional[float] = Field(None, gt=0)
 
-    @validator("quantity")
+    @field_validator("quantity")
+    @classmethod
     def quantity_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError("Quantity must be positive")
         return v
 
-    @validator("price")
+    @field_validator("price")
+    @classmethod
     def price_must_be_positive(cls, v):
         if v is not None and v <= 0:
             raise ValueError("Price must be positive")
@@ -37,10 +41,13 @@ class SalesItem(BaseModel):
 
 
 class CreateSalesItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     product_id: str = Field(..., min_length=1)
     quantity: int = Field(..., gt=0)
 
-    @validator("quantity")
+    @field_validator("quantity")
+    @classmethod
     def quantity_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError("Quantity must be positive")
@@ -48,11 +55,14 @@ class CreateSalesItem(BaseModel):
 
 
 class CreateSaleRequest(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     items: List[CreateSalesItem] = Field(..., min_items=1)
     payment_method: PaymentMethod
     status: SalesStatus = SalesStatus.COMPLETED
 
-    @validator("items")
+    @field_validator("items")
+    @classmethod
     def validate_items_not_empty(cls, v):
         if not v:
             raise ValueError("At least one item is mandatory")
@@ -60,6 +70,8 @@ class CreateSaleRequest(BaseModel):
 
 
 class SaleResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     items: List[SalesItem]
     total: float
@@ -67,6 +79,3 @@ class SaleResponse(BaseModel):
     status: SalesStatus
     creator_id: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True

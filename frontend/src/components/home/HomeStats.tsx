@@ -7,7 +7,7 @@ interface Props {
 
 const HomeStats: React.FC<Props> = ({ count, searchTerm }) => {
   return (
-    <p className='text-text-secondary animate-slide-in-right'>
+    <p className='text-gray-500 animate-slide-in-right'>
       {searchTerm ? (
         <>
           Showing {count} result{count !== 1 ? 's' : ''} for "{searchTerm}"

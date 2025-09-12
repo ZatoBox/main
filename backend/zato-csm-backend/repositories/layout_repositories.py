@@ -1,6 +1,5 @@
 from fastapi import HTTPException
 from supabase import Client
-from utils.timezone_utils import get_current_time_with_timezone
 from typing import List, Dict, Any
 
 
@@ -37,7 +36,7 @@ class LayoutRepository:
     ):
         updates.pop("slug", None)
         updates.pop("created_at", None)
-        updates["last_updated"] = get_current_time_with_timezone(user_timezone)
+        updates.pop("last_updated", None)
         resp = (
             self.supabase.table(self.table)
             .update(updates)

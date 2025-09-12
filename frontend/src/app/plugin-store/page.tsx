@@ -1,8 +1,10 @@
+'use client';
+
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/auth-store';
-import { usePlugins } from '@/context/PluginContext';
+import { usePlugins } from '@/context/plugin-context';
 import PluginGrid from '@/components/plugin-store/PluginGrid';
 import FeaturedSection from '@/components/plugin-store/FeaturedSection';
 import PluginNotification from '@/components/plugin-store/PluginNotification';
@@ -24,7 +26,7 @@ interface IPlugin {
 }
 
 const PluginStorePage: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { token } = useAuth();
   const { isPluginActive, togglePlugin } = usePlugins();
   const [plugins, setPlugins] = useState<IPlugin[]>([]);
@@ -61,7 +63,7 @@ const PluginStorePage: React.FC = () => {
         'Scan and extract data from invoices, receipts, and documents automatically',
       category: 'productivity',
       icon: '🔍',
-      status: 'maintenance',
+      status: 'active',
       version: '1.2.0',
       author: 'ZatoBox Team',
       rating: 4.8,
@@ -125,7 +127,7 @@ const PluginStorePage: React.FC = () => {
         'Connect with popular POS systems for seamless data synchronization',
       category: 'integrations',
       icon: '💳',
-      status: 'active',
+      status: 'coming-soon',
       version: '1.0.0',
       author: 'ZatoBox Team',
       rating: 4.7,
@@ -395,8 +397,10 @@ const PluginStorePage: React.FC = () => {
     return (
       <div className='flex items-center justify-center min-h-screen bg-bg-main'>
         <div className='text-center'>
-          <div className='w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary'></div>
-          <p className='text-text-secondary'>Loading Plugin Store...</p>
+          <div className='w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary'></div>
+          <p className='text-sm sm:text-base text-text-secondary'>
+            Loading Plugin Store...
+          </p>
         </div>
       </div>
     );
@@ -405,14 +409,14 @@ const PluginStorePage: React.FC = () => {
   return (
     <div className='min-h-screen bg-bg-main'>
       {/* Header */}
-      <div className='bg-white border-b shadow-sm border-divider'>
-        <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+      <div className='bg-white '>
+        <div className='px-3 mx-auto max-w-7xl sm:px-6 lg:px-8 w-full min-w-0'>
           <div className='flex items-center justify-between h-16'>
-            <div className='flex items-center space-x-4'>
-              <h1 className='text-2xl font-bold text-text-primary'>
+            <div className='flex items-center gap-2 sm:gap-4 min-w-0'>
+              <h1 className='text-xl sm:text-2xl font-bold text-text-primary truncate'>
                 Plugin Store
               </h1>
-              <p className='hidden text-sm text-text-secondary md:block'>
+              <p className='hidden text-xs sm:text-sm text-text-secondary lg:block truncate'>
                 Browse the ever-growing collection of business modules on
                 ZatoBox
               </p>
@@ -421,79 +425,80 @@ const PluginStorePage: React.FC = () => {
         </div>
       </div>
 
-      <div className='px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+      <div className='px-3 py-4 mx-auto max-w-7xl sm:px-6 sm:py-8 lg:px-8 lg:py-8 w-full min-w-0'>
         {/* Search and Filters */}
-        <div className='mb-8'>
-          <div className='flex flex-col space-y-6 xl:flex-row xl:items-center xl:justify-between xl:space-y-0'>
-            {/* Search Section */}
-            <div className='flex-1 xl:max-w-2xl animate-slide-in-left'>
-              <div className='relative plugin-store-search'>
-                <Search
-                  size={20}
-                  className='absolute transform -translate-y-1/2 left-6 top-1/2 text-text-secondary icon-bounce'
-                />
-                <input
-                  type='text'
-                  placeholder='Search plugins...'
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className='w-full py-5 pl-16 pr-8 text-sm transition-all duration-300 border rounded-lg shadow-sm border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:border-complement/50'
-                />
-              </div>
-            </div>
-
-            {/* Category Tabs with Horizontal Scroll */}
-            <div className='relative flex-1 xl:flex-none'>
-              <div className='relative'>
-                {/* Left Arrow */}
-                {canScrollLeft && (
-                  <button
-                    onClick={scrollLeft}
-                    className='absolute left-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110'
-                  >
-                    <ChevronLeft size={16} className='text-text-primary' />
-                  </button>
-                )}
-
-                {/* Right Arrow */}
-                {canScrollRight && (
-                  <button
-                    onClick={scrollRight}
-                    className='absolute right-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110'
-                  >
-                    <ChevronRight size={16} className='text-text-primary' />
-                  </button>
-                )}
-
-                {/* Categories Container */}
-                <div
-                  ref={categoriesRef}
-                  onScroll={checkScrollButtons}
-                  className='flex gap-3 px-2 py-1 overflow-x-auto scrollbar-hide category-scroll-container'
-                  style={{
-                    scrollbarWidth: 'none',
-                    msOverflowStyle: 'none',
-                  }}
+        <div className='mb-6 sm:mb-8'>
+          {/* Category Tabs with Horizontal Scroll */}
+          <div className='relative mb-4 sm:mb-6'>
+            <div className='relative'>
+              {/* Left Arrow */}
+              {canScrollLeft && (
+                <button
+                  onClick={scrollLeft}
+                  className='absolute left-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110'
                 >
-                  {categories.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
-                      className={`flex-shrink-0 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap category-tab ${
-                        selectedCategory === category.id
-                          ? 'active shadow-md transform scale-105'
-                          : 'bg-gray-100 text-text-secondary hover:bg-gray-200 hover:shadow-sm'
-                      }`}
-                    >
-                      <span className='mr-2'>{category.icon}</span>
-                      {category.name}
-                    </button>
-                  ))}
-                </div>
+                  <ChevronLeft size={16} className='text-text-primary' />
+                </button>
+              )}
 
-                {/* Gradient Overlay for Right Edge */}
-                <div className='absolute top-0 bottom-0 right-0 w-8 pointer-events-none bg-gradient-to-l from-white to-transparent'></div>
+              {/* Right Arrow */}
+              {canScrollRight && (
+                <button
+                  onClick={scrollRight}
+                  className='absolute right-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110'
+                >
+                  <ChevronRight size={16} className='text-text-primary' />
+                </button>
+              )}
+
+              {/* Categories Container */}
+              <div
+                ref={categoriesRef}
+                onScroll={checkScrollButtons}
+                className='flex gap-2 sm:gap-3 px-1 py-1 overflow-x-auto scrollbar-hide category-scroll-container w-full min-w-0'
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                }}
+              >
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`flex-shrink-0 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap category-tab ${
+                      selectedCategory === category.id
+                        ? 'active shadow-md transform scale-105'
+                        : 'bg-gray-100 text-text-secondary hover:bg-gray-200 hover:shadow-sm'
+                    }`}
+                  >
+                    <span className='mr-1 sm:mr-2'>{category.icon}</span>
+                    <span className='hidden sm:inline'>{category.name}</span>
+                    <span className='sm:hidden'>
+                      {category.name.split(' ')[0]}
+                    </span>
+                  </button>
+                ))}
               </div>
+
+              {/* Gradient Overlay for Right Edge */}
+              <div className='absolute top-0 bottom-0 right-0 w-6 sm:w-8 pointer-events-none bg-gradient-to-l from-white to-transparent'></div>
+            </div>
+          </div>
+
+          {/* Search Section */}
+          <div className='animate-slide-in-left'>
+            <div className='relative group'>
+              <Search
+                size={16}
+                className='absolute transform -translate-y-1/2 left-3 sm:left-4 top-1/2 text-gray-400 group-focus-within:text-zatobox-500 transition-colors duration-200'
+              />
+              <input
+                type='text'
+                placeholder='Search plugins...'
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className='w-full py-3 sm:py-4 pl-10 sm:pl-12 pr-4 text-sm transition-all duration-300 border rounded-xl border-gray-200 focus:ring-2 focus:ring-zatobox-500/20 focus:border-zatobox-500 bg-white text-gray-900 placeholder-gray-400 hover:border-gray-300 hover:shadow-sm focus:shadow-md'
+              />
             </div>
           </div>
         </div>
@@ -516,12 +521,12 @@ const PluginStorePage: React.FC = () => {
 
         {/* Empty State */}
         {filteredPlugins.length === 0 && (
-          <div className='py-12 text-center'>
-            <div className='mb-4 text-6xl'>🔍</div>
-            <h3 className='mb-2 text-xl font-semibold text-text-primary'>
+          <div className='py-8 sm:py-12 text-center'>
+            <div className='mb-4 text-4xl sm:text-6xl'>🔍</div>
+            <h3 className='mb-2 text-lg sm:text-xl font-semibold text-text-primary'>
               No plugins found
             </h3>
-            <p className='text-text-secondary'>
+            <p className='text-sm sm:text-base text-text-secondary'>
               Try adjusting your search or filter criteria
             </p>
           </div>
@@ -534,23 +539,6 @@ const PluginStorePage: React.FC = () => {
             type={notificationType}
           />
         )}
-        {/* Example usage buttons for navigate and showPluginNotification */}
-        <div className='fixed z-50 flex flex-col gap-2 bottom-4 right-4'>
-          <button
-            onClick={() => navigate('/')}
-            className='px-4 py-2 font-medium text-blue-800 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200'
-          >
-            Go Home (navigate)
-          </button>
-          <button
-            onClick={() =>
-              showPluginNotification('This is a test notification!', 'info')
-            }
-            className='px-4 py-2 font-medium text-green-800 transition-colors bg-green-100 rounded-lg hover:bg-green-200'
-          >
-            Show Notification
-          </button>
-        </div>
       </div>
     </div>
   );

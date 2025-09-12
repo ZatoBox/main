@@ -1,12 +1,13 @@
+'use client';
+
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   Package,
   Home,
   Plus,
   Archive,
   Brain,
-  Settings,
   LogOut,
   User,
   Menu,
@@ -14,12 +15,11 @@ import {
   Scan,
   Store,
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { usePlugins } from '../contexts/PluginContext';
-
+import { useAuth } from '../context/auth-store';
+import { usePlugins } from '@/context/plugin-context';
 const SideMenu: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   const { user, logout } = useAuth();
   const { isPluginActive } = usePlugins();
   const [showLogout, setShowLogout] = useState(false);
@@ -122,15 +122,8 @@ const SideMenu: React.FC = () => {
     {
       name: 'Home',
       icon: Home,
-      path: '/',
+      path: '/home',
       description: 'Main page',
-      alwaysVisible: true,
-    },
-    {
-      name: 'New Product',
-      icon: Plus,
-      path: '/new-product',
-      description: 'Add product',
       alwaysVisible: true,
     },
     {
@@ -173,25 +166,15 @@ const SideMenu: React.FC = () => {
     },
   ];
 
-  const bottomMenuItems = [
-    {
-      name: 'Settings',
-      icon: Settings,
-      path: '/profile',
-      description: 'Settings',
-      alwaysVisible: true,
-    },
-  ];
-
   const handleNavigation = (path: string) => {
-    navigate(path);
+    router.push(path);
     // Close mobile menu after navigation
     setIsMobileMenuOpen(false);
   };
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    router.push('/login');
     setIsMobileMenuOpen(false);
   };
 
@@ -215,7 +198,7 @@ const SideMenu: React.FC = () => {
       })
       .map((item, index) => {
         const Icon = item.icon;
-        const isActive = location.pathname === item.path;
+        const isActive = pathname === item.path;
         const isVisible = visibleItems.has(item.path);
         const isAnimating = animatingItems.has(item.path);
         const isNewItem =
@@ -249,7 +232,7 @@ const SideMenu: React.FC = () => {
               onClick={() => handleNavigation(item.path)}
               className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-300 group ${className} ${
                 isActive
-                  ? 'bg-complement-50 text-complement-700 border border-complement-200 shadow-sm'
+                  ? 'bg-[#FEF9EC] text-[#F88612] border border-[#EEB131] shadow-sm'
                   : 'text-text-secondary hover:bg-gray-50 hover:text-text-primary hover:shadow-sm'
               } ${
                 item.pluginId && isPluginActive(item.pluginId)
@@ -261,19 +244,19 @@ const SideMenu: React.FC = () => {
                 size={20}
                 className={`mr-3 transition-all duration-300 ${
                   isActive
-                    ? 'text-complement-600 scale-110'
+                    ? 'text-[#F88612] scale-110'
                     : 'text-text-secondary group-hover:text-text-primary group-hover:scale-105'
                 }`}
               />
               <div className='flex-1'>
                 <div
                   className={`font-medium transition-colors duration-300 ${
-                    isActive ? 'text-complement-700' : 'text-text-primary'
+                    isActive ? 'text-[#F88612]' : 'text-text-primary'
                   }`}
                 >
                   {item.name}
                 </div>
-                <div className='text-xs transition-colors duration-300 text-text-secondary'>
+                <div className='text-xs transition-colors duration-300 text-[#475569]'>
                   {item.description}
                 </div>
               </div>
@@ -290,12 +273,12 @@ const SideMenu: React.FC = () => {
       <div className='fixed z-50 md:hidden top-4 left-4'>
         <button
           onClick={toggleMobileMenu}
-          className='p-2 transition-colors border rounded-lg shadow-lg bg-bg-surface border-divider hover:bg-gray-50'
+          className='p-2 transition-colors border rounded-lg shadow-lg bg-white border-[#CBD5E1] hover:bg-gray-50'
         >
           {isMobileMenuOpen ? (
-            <X size={24} className='text-text-primary' />
+            <X size={24} className='text-zatobox-900' />
           ) : (
-            <Menu size={24} className='text-text-primary' />
+            <Menu size={24} className='text-zatobox-900' />
           )}
         </button>
       </div>
@@ -310,12 +293,12 @@ const SideMenu: React.FC = () => {
 
       {/* Mobile Menu Sidebar */}
       <div
-        className={`md:hidden fixed inset-y-0 left-0 w-64 bg-bg-surface border-r border-divider z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`md:hidden fixed inset-y-0 left-0 w-64 bg-white border-r border-[#CBD5E1] z-50 transform transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Logo/Brand */}
-        <div className='flex items-center justify-center h-16 px-6 border-b border-divider'>
+        <div className='flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]'>
           <img
             src='/images/logozato.png'
             alt='ZatoBox Logo'
@@ -328,28 +311,23 @@ const SideMenu: React.FC = () => {
           {renderMenuItems(menuItems)}
         </nav>
 
-        {/* Bottom Navigation */}
-        <div className='px-4 py-4 space-y-2 border-t border-divider'>
-          {renderMenuItems(bottomMenuItems)}
-        </div>
-
         {/* User Info */}
-        <div className='px-4 py-4 border-t border-divider'>
+        <div className='px-4 py-4 border-t border-[#CBD5E1]'>
           <div className='flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50'>
-            <div className='flex items-center justify-center w-8 h-8 rounded-full bg-complement'>
+            <div className='flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]'>
               <User size={16} className='text-white' />
             </div>
             <div className='flex-1 min-w-0'>
-              <div className='text-sm font-medium truncate text-text-primary'>
+              <div className='text-sm font-medium truncate text-black'>
                 {user?.full_name || 'User'}
               </div>
-              <div className='text-xs truncate text-text-secondary'>
+              <div className='text-xs truncate text-black'>
                 {user?.role === 'admin' ? 'Administrator' : 'User'}
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className='p-2 transition-colors rounded-lg text-error hover:bg-error-50'
+              className='p-2 transition-colors rounded-lg text-white hover:bg-[#FEF9EC] hover:text-[#F88612] hover:border hover:border-[#EEB131]'
             >
               <LogOut size={16} />
             </button>
@@ -358,9 +336,9 @@ const SideMenu: React.FC = () => {
       </div>
 
       {/* Desktop Side Menu */}
-      <div className='hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-bg-surface md:border-r md:border-divider md:z-40'>
+      <div className='hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-white md:border-r md:border-[#CBD5E1] md:z-40'>
         {/* Logo/Brand */}
-        <div className='flex items-center justify-center h-16 px-6 border-b border-divider'>
+        <div className='flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]'>
           <img
             src='/images/logozato.png'
             alt='ZatoBox Logo'
@@ -373,13 +351,8 @@ const SideMenu: React.FC = () => {
           {renderMenuItems(menuItems)}
         </nav>
 
-        {/* Bottom Navigation */}
-        <div className='px-4 py-4 space-y-2 border-t border-divider'>
-          {renderMenuItems(bottomMenuItems)}
-        </div>
-
         {/* User Info with Hover Animation */}
-        <div className='px-4 py-4 border-t border-divider'>
+        <div className='px-4 py-4 border-t border-[#CBD5E1]'>
           <div
             ref={userInfoRef}
             className='relative cursor-pointer'
@@ -396,18 +369,18 @@ const SideMenu: React.FC = () => {
             <div
               className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 ease-in-out ${
                 showLogout
-                  ? 'bg-error-50 border border-error-200 shadow-sm'
-                  : 'hover:bg-gray-50'
+                  ? 'bg-[#FEF9EC]  border-[#EEB131] shadow-sm'
+                  : 'hover:bg-[#FEF9EC]'
               }`}
             >
-              <div className='flex items-center justify-center w-8 h-8 rounded-full bg-complement'>
+              <div className='flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]'>
                 <User size={16} className='text-white' />
               </div>
               <div className='flex-1 min-w-0'>
-                <div className='text-sm font-medium truncate text-text-primary'>
+                <div className='text-sm font-medium truncate text-black'>
                   {user?.full_name || 'User'}
                 </div>
-                <div className='text-xs truncate text-text-secondary'>
+                <div className='text-xs truncate text-black'>
                   {user?.role === 'admin' ? 'Administrator' : 'User'}
                 </div>
               </div>
@@ -419,14 +392,14 @@ const SideMenu: React.FC = () => {
                     : 'opacity-0 translate-x-2'
                 }`}
               >
-                <LogOut size={16} className='text-error' />
+                <LogOut size={16} className='text-white' />
               </div>
             </div>
 
             <div
               className={`absolute inset-0 flex items-center justify-center rounded-lg transition-all duration-300 ease-in-out ${
                 showLogout
-                  ? 'opacity-100 bg-error-500 text-white shadow-lg transform scale-100'
+                  ? 'opacity-100 bg-[#FEF9EC] text-[#F88612] shadow-lg transform scale-100'
                   : 'opacity-0 bg-transparent transform scale-95 pointer-events-none'
               }`}
             >
@@ -434,7 +407,7 @@ const SideMenu: React.FC = () => {
                 onClick={handleLogout}
                 className='flex items-center space-x-2 text-sm font-medium'
               >
-                <LogOut size={16} />
+                <LogOut size={16} className='text-[#F88612]' />
                 <span>Logout</span>
               </button>
             </div>

@@ -1,6 +1,5 @@
 import React from 'react';
-
-import type { OCRLineItem } from '@/services/api.service';
+import { OCRLineItem } from '@/types/index';
 
 type Props = {
   items: OCRLineItem[];
@@ -14,104 +13,130 @@ const ItemsTable: React.FC<Props> = ({
   onChange,
 }) => {
   return (
-    <div className='mb-6'>
-      <h3 className='mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4'>
-        4E6 Detected Items
+    <div className='mb-8'>
+      <h3 className='mb-4 text-sm font-semibold tracking-wide text-[#A94D14] uppercase'>
+        Detected Items
       </h3>
-      <div className='overflow-hidden rounded-lg bg-bg-surface'>
+      <div className='overflow-hidden bg-white border rounded-lg shadow-sm border-[#EDEDED]'>
         <div className='overflow-x-auto'>
-          <table className='min-w-full'>
+          <table className='min-w-full text-sm'>
             <thead>
-              <tr className='bg-divider'>
-                <th className='px-3 py-3 text-xs font-medium text-left md:px-6 md:py-4 md:text-sm text-text-primary'>
+              <tr className='bg-[#FAF8F6]'>
+                <th className='px-4 py-3 text-left font-medium text-[#444444]'>
+                  Name
+                </th>
+                <th className='px-4 py-3 text-left font-medium text-[#444444]'>
                   Description
                 </th>
-                <th className='px-3 py-3 text-xs font-medium text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
+                <th className='px-4 py-3 text-right font-medium text-[#444444]'>
                   Quantity
                 </th>
-                <th className='px-3 py-3 text-xs font-medium text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
+                <th className='px-4 py-3 text-right font-medium text-[#444444]'>
                   Unit Price
                 </th>
-                <th className='px-3 py-3 text-xs font-medium text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
+                <th className='px-4 py-3 text-right font-medium text-[#444444]'>
                   Total
                 </th>
-                <th className='px-3 py-3 text-xs font-medium text-center md:px-6 md:py-4 md:text-sm text-text-primary'>
+                <th className='px-4 py-3 text-center font-medium text-[#444444]'>
                   Confidence
                 </th>
               </tr>
             </thead>
             <tbody>
-              {items.map((item, index) => (
-                <tr
-                  key={index}
-                  className='transition-colors border-b border-divider hover:bg-gray-50'
-                >
-                  <td className='px-3 py-3 text-xs md:px-6 md:py-4 md:text-sm text-text-primary'>
-                    {isEditing ? (
-                      <input
-                        type='text'
-                        value={String(item.description ?? '')}
-                        onChange={(e) =>
-                          onChange &&
-                          onChange(index, 'description', e.target.value)
-                        }
-                        className='w-full px-2 py-1 text-xs border rounded-lg md:px-3 md:py-2 border-divider focus:ring-2 focus:ring-complement focus:border-transparent md:text-sm'
-                      />
-                    ) : (
-                      <div className='max-w-xs'>
-                        <div className='font-medium text-text-primary'>
-                          {item.description}
-                        </div>
-                      </div>
-                    )}
-                  </td>
-                  <td className='px-3 py-3 text-xs text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
-                    {isEditing ? (
-                      <input
-                        type='number'
-                        value={String(item.quantity ?? '')}
-                        onChange={(e) =>
-                          onChange &&
-                          onChange(
-                            index,
-                            'quantity',
-                            parseInt(e.target.value) || 0
-                          )
-                        }
-                        className='w-16 px-2 py-1 text-xs text-right border rounded-lg md:w-20 md:px-3 md:py-2 border-divider focus:ring-2 focus:ring-complement focus:border-transparent md:text-sm'
-                      />
-                    ) : (
-                      item.quantity
-                    )}
-                  </td>
-                  <td className='px-3 py-3 text-xs text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
-                    {isEditing ? (
-                      <input
-                        type='text'
-                        value={String(item.unit_price ?? '')}
-                        onChange={(e) =>
-                          onChange &&
-                          onChange(index, 'unit_price', e.target.value)
-                        }
-                        className='w-20 px-2 py-1 text-xs text-right border rounded-lg md:w-24 md:px-3 md:py-2 border-divider focus:ring-2 focus:ring-complement focus:border-transparent md:text-sm'
-                      />
-                    ) : (
-                      item.unit_price
-                    )}
-                  </td>
-                  <td className='px-3 py-3 text-xs font-medium text-right md:px-6 md:py-4 md:text-sm text-text-primary'>
-                    {item.total_price}
-                  </td>
-                  <td className='px-3 py-3 text-xs text-center md:px-6 md:py-4 md:text-sm'>
-                    <span className='px-2 py-1 text-xs text-blue-700 bg-blue-100 rounded'>
-                      {item?.confidence
-                        ? (item.confidence * 100).toFixed(0)
-                        : '85'}
-                      %
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {items.map((item, index) => {
+                const rowTotal =
+                  item.total_price ||
+                  (item.quantity && item.unit_price
+                    ? `${(
+                        Number(item.quantity) * Number(item.unit_price)
+                      ).toFixed(2)}`
+                    : '');
+                return (
+                  <tr
+                    key={index}
+                    className='border-t border-[#F0F0F0] hover:bg-[#FFFAF5] transition-colors'
+                  >
+                    <td className='px-4 py-3 align-top'>
+                      {isEditing ? (
+                        <input
+                          type='text'
+                          value={String(item.name ?? '')}
+                          onChange={(e) =>
+                            onChange && onChange(index, 'name', e.target.value)
+                          }
+                          className='w-full px-2 py-1 border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none'
+                        />
+                      ) : (
+                        <span className='font-medium text-[#1F1F1F]'>
+                          {item.name || 'Unnamed'}
+                        </span>
+                      )}
+                    </td>
+                    <td className='px-4 py-3 align-top'>
+                      {isEditing ? (
+                        <input
+                          type='text'
+                          value={String(item.description ?? '')}
+                          onChange={(e) =>
+                            onChange &&
+                            onChange(index, 'description', e.target.value)
+                          }
+                          className='w-full px-2 py-1 border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none'
+                        />
+                      ) : (
+                        <span className='text-[#1F1F1F]'>
+                          {item.description || 'No description'}
+                        </span>
+                      )}
+                    </td>
+                    <td className='px-4 py-3 text-right'>
+                      {isEditing ? (
+                        <input
+                          type='number'
+                          value={String(item.quantity ?? '')}
+                          onChange={(e) =>
+                            onChange &&
+                            onChange(
+                              index,
+                              'quantity',
+                              parseInt(e.target.value) || 0
+                            )
+                          }
+                          className='w-20 px-2 py-1 text-right border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none'
+                        />
+                      ) : (
+                        item.quantity
+                      )}
+                    </td>
+                    <td className='px-4 py-3 text-right'>
+                      {isEditing ? (
+                        <input
+                          type='text'
+                          value={String(item.unit_price ?? '')}
+                          onChange={(e) =>
+                            onChange &&
+                            onChange(index, 'unit_price', e.target.value)
+                          }
+                          className='w-24 px-2 py-1 text-right border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none'
+                        />
+                      ) : (
+                        item.unit_price
+                      )}
+                    </td>
+                    <td className='px-4 py-3 text-right font-semibold text-[#1F1F1F]'>
+                      {rowTotal}
+                    </td>
+                    <td className='px-4 py-3 text-center'>
+                      <span className='px-2 py-1 text-xs font-medium rounded-md bg-[#FFF1E4] text-[#A94D14]'>
+                        {item?.confidence
+                          ? (item.confidence * 100).toFixed(0)
+                          : '85'}
+                        %
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

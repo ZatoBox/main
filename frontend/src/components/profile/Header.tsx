@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaRegFolder } from 'react-icons/fa6';
 
 type Props = {
   onBack: () => void;
@@ -14,13 +15,13 @@ const Header: React.FC<Props> = ({
   title = 'My Profile',
 }) => {
   return (
-    <div className='border-b shadow-sm bg-bg-surface border-divider'>
+    <div className='border-b shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
       <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between h-16'>
           <div className='flex items-center space-x-4'>
             <button
               onClick={onBack}
-              className='p-2 transition-colors rounded-full hover:bg-gray-50 md:hidden'
+              className='p-2 transition-colors rounded-full hover:bg-zatobox-100 md:hidden'
             >
               <svg
                 width='20'
@@ -31,37 +32,33 @@ const Header: React.FC<Props> = ({
                 strokeWidth='2'
                 strokeLinecap='round'
                 strokeLinejoin='round'
-                className='text-text-primary'
+                className='text-zatobox-900'
               >
                 <path d='M15 18l-6-6 6-6' />
               </svg>
             </button>
-            <h1 className='text-xl font-semibold text-text-primary'>{title}</h1>
+            <h1 className='text-xl font-semibold text-[#000000]'>{title}</h1>
           </div>
 
           <div className='flex items-center space-x-3'>
             <button
-              onClick={onSave}
-              disabled={saving}
-              className={`flex items-center px-4 py-2 text-black transition-colors rounded-lg bg-primary hover:bg-primary-600 ${
-                saving ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              <svg
-                width='16'
-                height='16'
-                viewBox='0 0 24 24'
-                fill='none'
-                stroke='currentColor'
-                strokeWidth='2'
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                className='mr-2'
-              >
-                <path d='M19 21H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2z' />
-              </svg>
-              <span>Save</span>
-            </button>
+                     onClick={onSave}
+                     disabled={saving}
+                     className={`bg-[#F88612] hover:bg-[#D9740F] text-[#FFFFFF] font-semibold 
+                         rounded-lg transition-colors flex items-center justify-center space-x-1
+                         w-[82px] h-[40px] ${
+                           saving ? "opacity-50 cursor-not-allowed" : ""
+                         }`}
+                   >
+                     {saving ? (
+                       <div className="w-4 h-4 border-b-2 border-white rounded-full animate-spin"></div>
+                     ) : (
+                       <>
+                         <FaRegFolder className="w-4 h-4 self-center" />
+                         <span >Save</span>
+                       </>
+                     )}
+                   </button>
           </div>
         </div>
       </div>

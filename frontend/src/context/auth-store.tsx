@@ -35,6 +35,7 @@ interface AuthState {
   setUser: (user: User | null) => void;
   updateProfile: (patch: Partial<User>) => Promise<void>;
   refreshToken: () => Promise<void>;
+  clearError: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => {
@@ -69,9 +70,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
       if (token && !user) {
         try {
           const res = await authAPI.getCurrentUser();
-          if (res.user) {
-            set({ user: res.user });
-            setCookie(USER_COOKIE, JSON.stringify(res.user));
+          if (res) {
+            set({ user: res });
+            setCookie(USER_COOKIE, JSON.stringify(res));
           }
         } catch {
           set({ user: null });
@@ -121,8 +122,11 @@ export const useAuthStore = create<AuthState>((set, get) => {
     updateProfile: async (patch) => {
       set({ loading: true, error: null });
       try {
-        const res = await authAPI.getCurrentUser();
-        const merged = { ...res.user, ...patch };
+        const currentUser = get().user;
+        if (!currentUser) {
+          throw new Error('No user logged in');
+        }
+        const merged = { ...currentUser, ...patch };
         set({ user: merged, loading: false });
         setCookie(USER_COOKIE, JSON.stringify(merged));
       } catch (e: any) {
@@ -135,22 +139,22 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
     refreshToken: async () => {
       try {
-        const res = await authAPI.refresh();
-        if (res.token) {
-          setAuthToken(res.token, true);
-          set({ token: res.token });
+        const currentUser = await authAPI.getCurrentUser();
+        if (currentUser) {
+          set({ user: currentUser });
+          setCookie(USER_COOKIE, JSON.stringify(currentUser));
         }
       } catch {
         get().logout();
       }
     },
     logout: async () => {
-      try {
-        await authAPI.logout();
-      } catch {}
       removeAuthToken();
       removeCookie(USER_COOKIE);
       set({ user: null, token: undefined });
+    },
+    clearError: () => {
+      set({ error: null });
     },
   };
 });
@@ -168,6 +172,7 @@ export const useAuth = () => {
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const setUser = useAuthStore((s) => s.setUser);
   const updateProfile = useAuthStore((s) => s.updateProfile);
+  const clearError = useAuthStore((s) => s.clearError);
   const isAuthenticated = !!user && !!token;
   return {
     user,
@@ -182,6 +187,7 @@ export const useAuth = () => {
     refreshToken,
     setUser,
     updateProfile,
+    clearError,
     isAuthenticated,
   };
 };

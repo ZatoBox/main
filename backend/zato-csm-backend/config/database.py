@@ -7,11 +7,20 @@ load_dotenv()
 
 
 def connect_postgres():
-    """Create and return a new PostgreSQL connection using a DATABASE_URL env var."""
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        raise Exception("DATABASE_URL environment variable is required")
-    return psycopg2.connect(database_url)
+    """Create and return a new PostgreSQL connection using separated env vars."""
+    user = os.getenv("user")
+    password = os.getenv("password")
+    host = os.getenv("host")
+    port = os.getenv("port")
+    dbname = os.getenv("dbname")
+
+    if not all([user, password, host, port, dbname]):
+        raise Exception("Missing database environment variables")
+
+    conn_str = (
+        f"dbname={dbname} user={user} password={password} host={host} port={port}"
+    )
+    return psycopg2.connect(conn_str)
 
 
 def get_db_connection():

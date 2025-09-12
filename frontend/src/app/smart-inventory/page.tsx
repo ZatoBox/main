@@ -1,9 +1,11 @@
+'use client';
+
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Brain, Archive, ArrowRight } from 'lucide-react';
 
 const SmartInventoryPage: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div className='max-w-4xl p-6 mx-auto'>
@@ -55,7 +57,7 @@ const SmartInventoryPage: React.FC = () => {
               Access the traditional inventory with all available features.
             </p>
             <button
-              onClick={() => navigate('/inventory')}
+              onClick={() => router.push('/inventory')}
               className='flex items-center font-medium text-complement hover:text-complement-700'
             >
               Go to Inventory
@@ -74,7 +76,7 @@ const SmartInventoryPage: React.FC = () => {
               Process documents with OCR to extract information automatically.
             </p>
             <button
-              onClick={() => navigate('/ocr-result')}
+              onClick={() => router.push('/ocr-result')}
               className='flex items-center font-medium text-purple-600 hover:text-purple-700'
             >
               Process Documents

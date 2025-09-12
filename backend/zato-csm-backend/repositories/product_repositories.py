@@ -17,7 +17,7 @@ class ProductRepository:
         stock: int,
         unit: str,
         product_type: str,
-        category_id: str,
+        category_ids: list[str] | None,
         sku: str | None,
         min_stock: int,
         status: str,
@@ -32,7 +32,7 @@ class ProductRepository:
             "price": price,
             "stock": stock,
             "min_stock": min_stock,
-            "category_id": category_id,
+            "category_ids": category_ids or [],
             "images": images or [],
             "status": status,
             "weight": weight,
@@ -49,10 +49,12 @@ class ProductRepository:
         return data[0]
 
     def update_product(
-        self, product_id: int, updates: dict, user_timezone: str = "UTC"
+        self, product_id: str, updates: dict, user_timezone: str = "UTC"
     ):
         updates.pop("id", None)
         updates.pop("created_at", None)
+        if "category_ids" in updates and updates["category_ids"] is None:
+            updates.pop("category_ids")
         updates["last_updated"] = get_current_time_with_timezone(user_timezone)
         resp = (
             self.supabase.table(self.table)
@@ -70,7 +72,7 @@ class ProductRepository:
         data = getattr(resp, "data", None) or []
         return data
 
-    def find_by_id(self, product_id: int):
+    def find_by_id(self, product_id: str):
         resp = (
             self.supabase.table(self.table)
             .select("*")
@@ -84,21 +86,15 @@ class ProductRepository:
         return data
 
     def find_by_category(self, category_id: str):
-        resp = (
-            self.supabase.table(self.table)
-            .select("*")
-            .eq("category_id", category_id)
-            .execute()
-        )
-        data = getattr(resp, "data", None) or []
-        return data
+        # Deprecated single category filter; kept for compatibility returning empty list
+        return []
 
     def find_by_name(self, name: str):
         resp = self.supabase.table(self.table).select("*").ilike("name", name).execute()
         data = getattr(resp, "data", None) or []
         return data
 
-    def delete_product(self, product_id: int):
+    def delete_product(self, product_id: str):
         resp = self.supabase.table(self.table).delete().eq("id", product_id).execute()
         data = getattr(resp, "data", None)
         if not data:
@@ -115,21 +111,23 @@ class ProductRepository:
         data = getattr(resp, "data", None) or []
         return data
 
-    def add_images(self, product_id: int, new_images: List[str]):
+    def add_images(self, product_id: str, new_images: List[str]):
         product = self.find_by_id(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
         current_images = product.get("images", [])
         updated_images = current_images + new_images
+        if len(updated_images) > 4:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
         return self.update_product(product_id, {"images": updated_images})
 
-    def get_images(self, product_id: int):
+    def get_images(self, product_id: str):
         product = self.find_by_id(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
         return product.get("images", [])
 
-    def delete_image(self, product_id: int, image_index: int):
+    def delete_image(self, product_id: str, image_index: int):
         product = self.find_by_id(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
@@ -141,5 +139,7 @@ class ProductRepository:
         )
         return self.update_product(product_id, {"images": updated_images})
 
-    def update_images(self, product_id: int, new_images: List[str]):
+    def update_images(self, product_id: str, new_images: List[str]):
+        if len(new_images) > 4:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
         return self.update_product(product_id, {"images": new_images})

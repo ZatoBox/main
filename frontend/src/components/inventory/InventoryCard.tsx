@@ -2,7 +2,7 @@ import React from 'react';
 import { Package } from 'lucide-react';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   category: string;
   status: string;
@@ -13,9 +13,9 @@ interface Product {
 interface Props {
   item: Product;
   selected: boolean;
-  onSelect: (id: number, checked: boolean) => void;
-  onEdit: (id: number) => void;
-  onDelete: (id: number, e?: React.MouseEvent) => void;
+  onSelect: (id: string, checked: boolean) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string, e?: React.MouseEvent) => void;
 }
 
 const InventoryCard: React.FC<Props> = ({
@@ -26,26 +26,37 @@ const InventoryCard: React.FC<Props> = ({
   onDelete,
 }) => {
   return (
-    <div className='p-4 border rounded-lg shadow-sm bg-bg-surface border-divider'>
+    <div
+      onClick={() => onEdit(item.id)}
+      className={`p-4 border rounded-lg shadow-sm border-zatobox-200 transition-colors cursor-pointer hover:bg-[#FEF9EC] group ${
+        selected ? 'bg-[#FBEFCA]' : 'bg-[#FFFFFF]'
+      } ${item.status !== 'active' ? 'opacity-60' : ''}`}
+    >
       <div className='flex items-start space-x-3'>
         <input
           type='checkbox'
           checked={selected}
+          onClick={(e) => e.stopPropagation()}
           onChange={(e) => onSelect(item.id, e.target.checked)}
-          className='w-4 h-4 mt-1 border-gray-300 rounded text-complement focus:ring-complement'
+          className='
+                  w-4 h-4 rounded border border-[#767676] bg-white
+                  appearance-none
+                  checked:bg-[#EEB131]
+                  focus:outline-none focus:ring-2 focus:ring-[#CBD5E1]
+                '
         />
 
-        <div className='flex items-center justify-center flex-shrink-0 w-12 h-12 bg-gray-100 rounded-lg'>
-          <Package size={24} className='text-text-secondary' />
+        <div className='flex items-center justify-center flex-shrink-0 w-12 h-12 bg-zatobox-100 rounded-lg'>
+          <Package size={24} className='text-[#E28E18]' />
         </div>
 
         <div className='flex-1 min-w-0'>
           <div className='flex items-start justify-between'>
             <div className='flex-1'>
-              <h3 className='text-sm font-medium truncate text-text-primary'>
+              <h3 className='text-sm font-medium truncate text-zatobox-900 group-hover:underline hover:underline'>
                 {item.name}
               </h3>
-              <p className='text-sm text-text-secondary'>{item.category}</p>
+              <p className='text-sm text-[#000000]'>{item.category}</p>
 
               <div className='flex items-center mt-2 space-x-4'>
                 <span
@@ -60,14 +71,16 @@ const InventoryCard: React.FC<Props> = ({
                   {item.stock} units
                 </span>
 
-                <span className='text-sm font-medium text-text-primary'>
+                <span className='text-sm font-medium text-[#000000]'>
                   ${item.price.toFixed(2)}
                 </span>
               </div>
 
               <span
                 className={`inline-flex mt-2 text-xs ${
-                  item.status === 'active' ? 'text-success' : 'text-error'
+                  item.status === 'active'
+                    ? 'text-[#10B981]'
+                    : 'text-[#E7000B80]'
                 }`}
               >
                 {item.status === 'active' ? 'Active' : 'Inactive'}
@@ -76,12 +89,15 @@ const InventoryCard: React.FC<Props> = ({
 
             <div className='flex items-center space-x-1'>
               <button
-                onClick={() => onEdit(item.id)}
-                className='p-1 transition-colors rounded hover:bg-gray-50'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(item.id);
+                }}
+                className='p-1 transition-colors rounded hover:bg-[#FEF9EC]'
                 title='Edit'
               >
                 <svg
-                  className='w-4 h-4 text-text-secondary'
+                  className='w-4 h-4 text-zatobox-600'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -95,12 +111,15 @@ const InventoryCard: React.FC<Props> = ({
                 </svg>
               </button>
               <button
-                onClick={(e) => onDelete(item.id, e)}
-                className='p-1 transition-colors rounded hover:bg-red-50'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(item.id, e);
+                }}
+                className='p-1 transition-colors rounded hover:bg-red-100'
                 title='Delete'
               >
                 <svg
-                  className='w-4 h-4 text-red-500'
+                  className='w-4 h-4 text-red-600'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'

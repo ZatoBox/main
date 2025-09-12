@@ -1,6 +1,7 @@
 from fastapi import HTTPException, Depends, Request
 from config.database import get_db_connection
 from repositories.user_repositories import UserRepository
+from services.auth_service import AuthService
 from utils.password_utils import hash_password
 import jwt as pyjwt
 import uuid
@@ -143,3 +144,8 @@ def get_current_token(request: Request) -> str:
         raise HTTPException(status_code=401, detail="Missing token")
     token = auth_header.split(" ")[1]
     return token
+
+
+def get_auth_service(db=Depends(get_db_connection)):
+    user_repo = UserRepository(db)
+    return AuthService(user_repo)

@@ -5,17 +5,24 @@ import RegisterForm from '@/components/auth/register/RegisterForm';
 const RegisterPage: React.FC = () => {
   return (
     <div className='min-h-screen bg-bg-main'>
-      <div className='hidden lg:flex lg:items-center lg:justify-center lg:min-h-screen lg:p-6'>
-        <div className='w-full max-w-md p-6 border rounded-lg shadow-sm bg-bg-surface border-divider'>
-          <RegisterContainer
-            title='Create Account'
-            description='Sign up to start managing your inventory'
-            logoSrc='/images/logozato.png'
-            logoAlt='ZatoBox Logo'
+      <div className='hidden min-h-screen lg:grid lg:grid-cols-5 lg:gap-6'>
+        <div className='lg:col-span-3 flex items-center justify-center'>
+          <div
+            className='w-full max-w-md p-6 rounded-lg shadow-sm bg-bg-surface'
+            style={{ border: '1px solid #e0e0e0' }}
           >
-            <RegisterForm />
-          </RegisterContainer>
+            <RegisterContainer
+              title='Create Account'
+              description='Sign up to start managing your inventory'
+              logoSrc='/images/logozato.png'
+              logoAlt='ZatoBox Logo'
+            >
+              <RegisterForm />
+            </RegisterContainer>
+          </div>
         </div>
+
+        <div className="hidden lg:block lg:col-span-2 lg:h-screen bg-[url('/images/registerbackground.jpg')] bg-cover bg-center" />
       </div>
 
       <div className='min-h-screen p-4 lg:hidden'>

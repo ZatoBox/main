@@ -18,20 +18,16 @@ class UserRepository(BaseRepository):
     def find_by_credentials(self, email: str, password: str):
         with self._get_cursor() as cursor:
             cursor.execute(
-                "SELECT id, email, full_name, role FROM users WHERE email=%s AND password=%s",
+                "SELECT id, email, full_name, role, profile_image FROM users WHERE email=%s AND password=%s",
                 (email, password),
             )
             return cursor.fetchone()
 
-    def find_by_user_id(self, user_id):
+    def find_by_user_id(self, user_id: str):
         with self._get_cursor() as cursor:
             if not user_id:
                 return None
-            try:
-                uid = int(user_id)
-            except Exception:
-                return None
-            cursor.execute("SELECT * FROM users WHERE id=%s", (uid,))
+            cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
             return cursor.fetchone()
 
     def create_user(
@@ -40,33 +36,49 @@ class UserRepository(BaseRepository):
         email: str,
         password: str,
         phone: str = None,
-        address: str = None,
         role: str = "user",
         user_timezone: str = "UTC",
+        profile_image: str = None,
     ):
         created_at = get_current_time_with_timezone(user_timezone)
         last_updated = get_current_time_with_timezone(user_timezone)
 
+        # Only include columns that exist in the database
+        columns = [
+            "full_name",
+            "email",
+            "password",
+            "phone",
+            "role",
+            "profile_image",
+            "created_at",
+            "last_updated",
+        ]
+        values = [
+            full_name,
+            email,
+            password,
+            phone,
+            role,
+            profile_image,
+            created_at,
+            last_updated,
+        ]
+
+        placeholders = ", ".join(["%s"] * len(columns))
+        columns_str = ", ".join(columns)
+
         with self._get_cursor() as cursor:
             cursor.execute(
-                "INSERT INTO users (full_name, email, password, phone, address, role, created_at, last_updated) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
-                (
-                    full_name,
-                    email,
-                    password,
-                    phone,
-                    address,
-                    role,
-                    created_at,
-                    last_updated,
-                ),
+                f"INSERT INTO users ({columns_str}) VALUES ({placeholders}) RETURNING id",
+                values,
             )
             self.db.commit()
             return cursor.fetchone()["id"]
 
-    def update_profile(self, user_id: int, updates: dict, user_timezone: str = "UTC"):
-        # Validation fields
-        allowed_fields = ["full_name", "password", "phone", "address"]
+    def update_profile(self, user_id: str, updates: dict, user_timezone: str = "UTC"):
+        # Validation fields - only include fields that exist in the database
+        allowed_fields = ["full_name", "phone", "profile_image"]
 
         # Protecting the created_at and id Update field
         protect_fields = ["email", "created_at", "id"]
@@ -76,16 +88,24 @@ class UserRepository(BaseRepository):
 
         updates["last_updated"] = get_current_time_with_timezone(user_timezone)
 
+        # Build dynamic update query
+        set_parts = []
+        values = []
+        for field in allowed_fields:
+            if field in updates:
+                set_parts.append(f"{field}=%s")
+                values.append(updates[field])
+
+        if not set_parts:
+            return self.find_by_user_id(user_id)
+
+        set_parts.append("last_updated=%s")
+        values.append(updates["last_updated"])
+        values.append(user_id)
+
+        query = f"UPDATE users SET {', '.join(set_parts)} WHERE id=%s"
+
         with self._get_cursor() as cursor:
-            cursor.execute(
-                "UPDATE users SET full_name=%s, phone=%s, address=%s, last_updated=%s WHERE id=%s",
-                (
-                    updates.get("full_name"),
-                    updates.get("phone"),
-                    updates.get("address"),
-                    updates.get("last_updated"),
-                    user_id,
-                ),
-            )
+            cursor.execute(query, values)
             self.db.commit()
             return self.find_by_user_id(user_id)

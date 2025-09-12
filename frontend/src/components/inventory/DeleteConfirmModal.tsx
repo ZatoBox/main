@@ -16,10 +16,10 @@ const DeleteConfirmModal: React.FC<Props> = ({
   if (!open) return null;
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
-      <div className='w-full max-w-md p-6 mx-4 rounded-lg shadow-lg bg-bg-surface'>
-        <div className='flex items-center mb-4'>
-          <div className='flex items-center justify-center w-10 h-10 mr-3 bg-red-100 rounded-full'>
+    <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm animate-fade-in'>
+      <div className='w-full max-w-md overflow-hidden transition-all bg-white border rounded-xl shadow-xl border-gray-300 animate-scale-in'>
+        <div className='flex items-start p-6 space-x-4 bg-gradient-to-r from-white to-zatobox-50'>
+          <div className='flex items-center justify-center flex-shrink-0 w-12 h-12 rounded-full bg-red-50'>
             <svg
               className='w-6 h-6 text-red-600'
               fill='none'
@@ -34,38 +34,39 @@ const DeleteConfirmModal: React.FC<Props> = ({
               />
             </svg>
           </div>
-          <h3 className='text-lg font-medium text-text-primary'>
-            Confirm Delete
-          </h3>
+          <div className='flex-1'>
+            <h3 className='text-xl font-semibold tracking-tight text-black'>
+              Eliminar producto
+            </h3>
+            <p className='mt-2 text-sm leading-relaxed text-gray-600'>
+              Esta acción es permanente y no se puede deshacer.
+            </p>
+          </div>
         </div>
-
-        <p className='mb-6 text-text-secondary'>
-          Are you sure you want to delete this product? This action cannot be
-          undone.
-        </p>
-
-        <div className='flex space-x-3'>
-          <button
-            onClick={onCancel}
-            disabled={loading}
-            className='flex-1 px-4 py-2 transition-colors border rounded-lg border-divider text-text-primary hover:bg-gray-50 disabled:opacity-50'
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className='flex items-center justify-center flex-1 px-4 py-2 text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50'
-          >
-            {loading ? (
-              <>
-                <div className='w-4 h-4 mr-2 border-b-2 border-white rounded-full animate-spin'></div>
-                Deleting...
-              </>
-            ) : (
-              'Delete'
-            )}
-          </button>
+        <div className='px-6 pt-2 pb-6 space-y-4'>
+          <div className='flex flex-col-reverse gap-3 sm:flex-row sm:justify-end'>
+            <button
+              onClick={onCancel}
+              disabled={loading}
+              className='w-full px-5 py-2.5 text-sm font-medium transition-all border rounded-lg sm:w-auto border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50'
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={loading}
+              className='w-full px-5 py-2.5 text-sm font-semibold text-white transition-all rounded-lg sm:w-auto bg-red-600 hover:bg-red-700 disabled:opacity-50 flex items-center justify-center'
+            >
+              {loading ? (
+                <>
+                  <div className='w-4 h-4 mr-2 border-2 border-white rounded-full border-t-transparent animate-spin'></div>
+                  Eliminando...
+                </>
+              ) : (
+                'Eliminar'
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

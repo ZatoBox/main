@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional
 from config.supabase import supabase_client
 from supabase import AuthError as SupabaseAuthError
 from datetime import datetime
+from services.auth_service import AuthService
+from utils.dependencies import get_auth_service
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -177,5 +179,49 @@ def list_all_users(current_user: dict = Depends(get_current_admin_user)):
     try:
         response = supabase_client.from_("users").select("*").execute()
         return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/upload-profile-image")
+def upload_profile_image(
+    file: UploadFile = File(...),
+    auth_service: AuthService = Depends(get_auth_service),
+    current_user: dict = Depends(get_current_user_from_token),
+):
+    """Uploads a profile image for the current user."""
+    try:
+        user_id = current_user.id
+        result = auth_service.upload_profile_image(user_id, file)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/delete-profile-image")
+def delete_profile_image(
+    auth_service: AuthService = Depends(get_auth_service),
+    current_user: dict = Depends(get_current_user_from_token),
+):
+    """Deletes the profile image for the current user."""
+    try:
+        user_id = current_user.id
+        result = auth_service.delete_profile_image(user_id)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/update-profile-image")
+def update_profile_image(
+    file: UploadFile = File(...),
+    auth_service: AuthService = Depends(get_auth_service),
+    current_user: dict = Depends(get_current_user_from_token),
+):
+    """Updates/replaces the profile image for the current user."""
+    try:
+        user_id = current_user.id
+        result = auth_service.update_profile_image(user_id, file)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
