@@ -70,7 +70,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
           <div
             className={`w-2 h-2 rounded-full mr-1 transition-all duration-300 ${
               product.stock > 10
-                ? 'bg-[#d4671e]'
+                ? 'bg-[#10B981]'
                 : product.stock > 0
                 ? 'bg-[#f0ad4e]'
                 : 'bg-[#d9534f]'
