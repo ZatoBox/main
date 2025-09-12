@@ -95,19 +95,6 @@ const HomePage: React.FC<HomePageProps> = ({
     loadCategories();
   }, []);
 
-  // Update products when page becomes visible
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        reloadProducts();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () =>
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
-
   // Map category ids to names
   const categoryIdMap: Record<string, string> = useMemo(
     () => Object.fromEntries(categories.map((c) => [c.id, c.name])),

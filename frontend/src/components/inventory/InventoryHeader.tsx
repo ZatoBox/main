@@ -27,7 +27,7 @@ const InventoryHeader: React.FC<Props> = ({ onBack, onCreate, title = 'Inventory
             className="flex items-center px-4 py-2 space-x-2 font-medium text-white transition-colors rounded-lg bg-zatobox-500 hover:bg-zatobox-600"
           >
             <Plus size={20} />
-            <span className="hidden sm:inline">Create Item</span>
+            <span className="hidden sm:inline">Create Product</span>
           </button>
         </div>
       </div>
