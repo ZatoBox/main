@@ -11,6 +11,10 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import ProductInfoForm from '@/components/new-product/ProductInfoForm';
 
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+const MAX_FILES = 4;
+const MAX_SIZE = 5 * 1024 * 1024;
+
 const NewProductPage: React.FC = () => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -44,10 +48,14 @@ const NewProductPage: React.FC = () => {
 
   const handleAddFiles = (f: FileList | null) => {
     if (!f) return;
-    const arr = Array.from(f).filter(
-      (file) => file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024
-    );
-    setFiles((prev) => [...prev, ...arr]);
+    let current = [...files];
+    for (const file of Array.from(f)) {
+      if (current.length >= MAX_FILES) break;
+      if (!ALLOWED_TYPES.includes(file.type)) continue;
+      if (file.size > MAX_SIZE) continue;
+      current.push(file);
+    }
+    setFiles(current.slice(0, MAX_FILES));
   };
 
   const handleRemoveFile = (index: number) =>
@@ -68,8 +76,8 @@ const NewProductPage: React.FC = () => {
         description: values.description || null,
         price: Number(values.price),
         stock: Number(values.inventoryQuantity),
-        unit_name: values.unit,
-        category: values.category || undefined,
+        unit: values.unit,
+        category_id: values.category || undefined,
         sku: values.sku || undefined,
         product_type: values.productType || undefined,
         weight: values.weight ? Number(values.weight) : undefined,
@@ -78,12 +86,14 @@ const NewProductPage: React.FC = () => {
           : undefined,
       };
 
+      Object.keys(payload).forEach((k) => {
+        if (payload[k] === undefined) delete payload[k];
+      });
+
       const res = await productsAPI.create(payload as any);
       const newId = (res as any).product?.id;
       if (newId && files.length > 0) {
-        const form = new FormData();
-        files.forEach((f) => form.append('images', f));
-        await productsAPI.uploadImages(newId, form);
+        await productsAPI.addImages(newId, files);
       }
 
       router.push('/inventory');
@@ -124,7 +134,7 @@ const NewProductPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bg-main">
+    <div className='min-h-screen bg-bg-main'>
       <Header
         onBack={() => router.push('/inventory')}
         onSave={() => setSubmitSignal((s) => s + 1)}
@@ -132,7 +142,7 @@ const NewProductPage: React.FC = () => {
         error={error}
       />
 
-      <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
@@ -140,8 +150,8 @@ const NewProductPage: React.FC = () => {
         >
           {(formik) => (
             <Form>
-              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                <div className="space-y-6">
+              <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
+                <div className='space-y-6'>
                   <ImagesUploader
                     files={files}
                     onAddFiles={handleAddFiles}
@@ -169,4 +179,3 @@ const NewProductPage: React.FC = () => {
 };
 
 export default NewProductPage;
-

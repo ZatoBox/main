@@ -11,15 +11,18 @@ import ImagesUploader from '@/components/edit-product/ImagesUploader';
 import Categorization from '@/components/edit-product/Categorization';
 import InventoryPanel from '@/components/edit-product/InventoryPanel';
 
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+const MAX_FILES = 4;
+const MAX_SIZE = 5 * 1024 * 1024;
+
 const EditProductPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const { isAuthenticated } = useAuth();
-  const id = (params as any)?.id as string | undefined; // usar string directa
+  const id = (params as any)?.id as string | undefined;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [formData, setFormData] = useState({
     productType: '',
     name: '',
@@ -31,12 +34,14 @@ const EditProductPage: React.FC = () => {
     lowStockAlert: '',
     sku: '',
   });
-
   const [originalProduct, setOriginalProduct] = useState<Product | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [togglingStatus, setTogglingStatus] = useState(false);
   const [status, setStatus] = useState<'active' | 'inactive' | ''>('');
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   const existingCategories = [
     'Furniture',
@@ -83,6 +88,7 @@ const EditProductPage: React.FC = () => {
         sku: prod.sku ?? '',
       });
       setSelectedCategories(prod.category_id ? [prod.category_id] : []);
+      setExistingImages((prod.images || []).slice(0, MAX_FILES));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error loading product');
     } finally {
@@ -131,7 +137,6 @@ const EditProductPage: React.FC = () => {
       setSaving(false);
       return;
     }
-
     try {
       const payload: Record<string, unknown> = {
         name: formData.name,
@@ -153,11 +158,28 @@ const EditProductPage: React.FC = () => {
       });
 
       await productsAPI.update(id, payload as any);
+      if (newFiles.length > 0) {
+        await uploadNewImages();
+      }
       router.push('/inventory');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error updating product');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const uploadNewImages = async () => {
+    if (!id || newFiles.length === 0) return;
+    setUploadingImages(true);
+    try {
+      await productsAPI.addImages(id, newFiles);
+      setNewFiles([]);
+      await fetchProduct();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error uploading images');
+    } finally {
+      setUploadingImages(false);
     }
   };
 
@@ -190,6 +212,45 @@ const EditProductPage: React.FC = () => {
     }
   };
 
+  const handleAddFiles = (files: FileList | null) => {
+    if (!files) return;
+    let current = [...newFiles];
+    for (const f of Array.from(files)) {
+      const total = existingImages.length + current.length;
+      if (total >= MAX_FILES) break;
+      if (!ALLOWED_TYPES.includes(f.type)) continue;
+      if (f.size > MAX_SIZE) continue;
+      current.push(f);
+    }
+    setNewFiles(current.slice(0, MAX_FILES - existingImages.length));
+  };
+  const handleRemoveExisting = async (index: number) => {
+    if (!id) return;
+    try {
+      await productsAPI.deleteImage(id, index);
+      setExistingImages((prev) => prev.filter((_, i) => i !== index));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error deleting image');
+    }
+  };
+  const handleRemoveNew = (index: number) => {
+    setNewFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+  const handleReplaceAll = async (files: FileList | null) => {
+    if (!id || !files) return;
+    try {
+      const valid = Array.from(files)
+        .filter((f) => ALLOWED_TYPES.includes(f.type) && f.size <= MAX_SIZE)
+        .slice(0, MAX_FILES);
+      if (valid.length === 0) return;
+      await productsAPI.updateImages(id, valid as any);
+      setNewFiles([]);
+      await fetchProduct();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error replacing images');
+    }
+  };
+
   if (loading)
     return <div className='min-h-screen  bg-bg-main'>Loading product...</div>;
 
@@ -201,14 +262,26 @@ const EditProductPage: React.FC = () => {
         onToggleStatus={handleToggleStatus}
         onSave={handleSave}
         status={status}
-        saving={saving}
+        saving={saving || uploadingImages}
         togglingStatus={togglingStatus}
       />
 
       <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+        {error && (
+          <div className='p-2 mb-4 text-sm text-white bg-red-600 rounded'>
+            {error}
+          </div>
+        )}
         <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
           <div className='space-y-6'>
-            <ImagesUploader onFiles={() => {}} />
+            <ImagesUploader
+              existingImages={existingImages}
+              newFiles={newFiles}
+              onAddFiles={handleAddFiles}
+              onRemoveExisting={handleRemoveExisting}
+              onRemoveNew={handleRemoveNew}
+              onReplaceAll={handleReplaceAll}
+            />
             <ProductForm
               formData={formData as any}
               onChange={handleInputChange}

@@ -121,6 +121,8 @@ class ProductRepository:
             raise HTTPException(status_code=404, detail="Product not found")
         current_images = product.get("images", [])
         updated_images = current_images + new_images
+        if len(updated_images) > 4:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
         return self.update_product(product_id, {"images": updated_images})
 
     def get_images(self, product_id: str):
@@ -142,4 +144,6 @@ class ProductRepository:
         return self.update_product(product_id, {"images": updated_images})
 
     def update_images(self, product_id: str, new_images: List[str]):
+        if len(new_images) > 4:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
         return self.update_product(product_id, {"images": new_images})

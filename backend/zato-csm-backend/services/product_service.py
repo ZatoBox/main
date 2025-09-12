@@ -4,6 +4,8 @@ from typing import List
 from models.product import CreateProductRequest
 from repositories.product_repositories import ProductRepository
 
+MAX_IMAGES = 4
+
 
 class ProductService:
     def __init__(self, repo: ProductRepository):
@@ -15,6 +17,9 @@ class ProductService:
             product_data.product_type, "value", product_data.product_type
         )
         category_id_val = getattr(product_data, "category_id")
+        initial_images: List[str] = []
+        if len(initial_images) > MAX_IMAGES:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
         return self.repo.create_product(
             name=product_data.name,
             description=product_data.description,
@@ -33,7 +38,7 @@ class ProductService:
             weight=getattr(product_data, "weight", None),
             localization=getattr(product_data, "localization", None),
             creator_id=str(creator_id),
-            images=[],
+            images=initial_images,
         )
 
     def list_products(self):
@@ -127,6 +132,14 @@ class ProductService:
     def add_images(self, product_id: str, new_images: List[str]):
         if not product_id:
             raise HTTPException(status_code=400, detail="Invalid product ID")
+        if len(new_images) > MAX_IMAGES:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
+        product = self.repo.find_by_id(product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        current = product.get("images", [])
+        if len(current) + len(new_images) > MAX_IMAGES:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
         return self.repo.add_images(product_id, new_images)
 
     def get_images(self, product_id: str):
@@ -142,6 +155,8 @@ class ProductService:
     def update_images(self, product_id: str, new_images: List[str]):
         if not product_id:
             raise HTTPException(status_code=400, detail="Invalid product ID")
+        if len(new_images) > MAX_IMAGES:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
         return self.repo.update_images(product_id, new_images)
 
     def delete_product(self, product_id: str):

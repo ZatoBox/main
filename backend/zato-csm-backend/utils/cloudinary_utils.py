@@ -76,3 +76,13 @@ def upload_profile_image(file) -> str:
         return result["secure_url"]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading image: {str(e)}")
+
+
+def upload_multiple_images_from_files(files) -> List[str]:
+    urls = []
+    for file in files:
+        if not file:
+            continue
+        url = upload_image_to_cloudinary(file)
+        urls.append(url)
+    return urls

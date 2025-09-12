@@ -14,24 +14,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
 
   const getImageUrl = () => {
     if (
-      product.images &&
-      Array.isArray(product.images) &&
-      product.images.length > 0
-    ) {
-      const imageUrl = product.images[0];
-      if (typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
-        return imageUrl;
-      }
-      return `http://localhost:4444${imageUrl}`;
-    }
-    if (Array.isArray(product.images) && product.images.length > 0) {
-      const imageUrl = product.images[0];
-      if (typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
-        return imageUrl;
-      }
-      return `http://localhost:4444${imageUrl}`;
-    }
-    return null;
+      !product.images ||
+      !Array.isArray(product.images) ||
+      product.images.length === 0
+    )
+      return null;
+    const raw = product.images[0];
+    if (typeof raw !== 'string' || raw.trim() === '') return null;
+    // Aceptar urls absolutas (http/https), data URIs, blob URLs
+    if (/^(https?:\/\/|data:|blob:)/i.test(raw)) return raw;
+    // Evitar añadir localhost si ya parece una ruta absoluta sin protocolo (ej: //res.cloudinary...)
+    if (/^\/\//.test(raw)) return `https:${raw}`;
+    // Si es una ruta relativa, no forzar puerto fijo; usar NEXT_PUBLIC_API_URL si existe
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4444';
+    return `${apiBase.replace(/\/$/, '')}${
+      raw.startsWith('/') ? '' : '/'
+    }${raw}`;
   };
 
   const imageUrl = getImageUrl();
@@ -41,9 +39,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
     <div
       onClick={handleClick}
       className='relative overflow-hidden transition-all duration-300 ease-in-out transform bg-white border rounded-lg cursor-pointer group border-gray-300 hover:scale-105 hover:shadow-lg hover:border-gray-300 animate-fade-in'
-      style={{
-        animationDelay: `${product.id * 100}ms`,
-      }}
     >
       {/* Stock Badge */}
       <div className='absolute z-10 top-3 right-3'>
@@ -70,24 +65,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       </div>
 
       {/* Product Image */}
-      <div className='relative h-48 overflow-hidden transition-colors duration-300 bg-gray-100 group-hover:bg-gray-50'>
-        {imageUrl ? (
+      <div className='relative h-48 overflow-hidden transition-colors duration-300 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 group-hover:from-gray-100 group-hover:to-gray-50'>
+        {imageUrl && (
           <img
             src={imageUrl}
             alt={product.name}
+            loading='lazy'
             className='object-cover w-full h-full transition-transform duration-500 transform group-hover:scale-110'
             onError={(e) => {
-              // Si la imagen falla, mostrar el placeholder
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
-              target.nextElementSibling?.classList.remove('hidden');
+              const fallback =
+                target.parentElement?.querySelector('.img-fallback');
+              if (fallback) fallback.classList.remove('hidden');
             }}
           />
-        ) : null}
-
-        {/* Fallback placeholder */}
+        )}
         <div
-          className={`w-full h-full flex items-center justify-center ${
+          className={`img-fallback absolute inset-0 flex items-center justify-center ${
             imageUrl ? 'hidden' : ''
           }`}
         >
@@ -95,9 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
             <Package className='w-16 h-16' />
           </div>
         </div>
-
-        {/* Overlay on hover */}
-        <div className='absolute inset-0 transition-all duration-300 bg-black bg-opacity-0 group-hover:bg-opacity-10'></div>
+        <div className='absolute inset-0 transition-all duration-300 bg-black/0 group-hover:bg-black/10' />
       </div>
 
       {/* Product Info */}
