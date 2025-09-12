@@ -48,7 +48,7 @@ const LoginForm: React.FC = () => {
               name='email'
               type='email'
               placeholder='Example@email.com'
-              className='w-full h-12 px-4 transition-all duration-150 ease-in-out border rounded border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900 placeholder-zatobox-600 hover:shadow-sm'
+              className='w-full h-12 px-4 transition-all duration-150 ease-in-out border rounded border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-white text-black placeholder-[#888888] hover:shadow-sm'
             />
             <div className='mt-1 text-sm text-error-700'>
               <ErrorMessage name='email' />
@@ -60,7 +60,7 @@ const LoginForm: React.FC = () => {
               name='password'
               type={showPassword ? 'text' : 'password'}
               placeholder='at least 8 characters'
-              className='w-full h-12 px-4 pr-12 transition-all duration-150 ease-in-out border rounded border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900 placeholder-zatobox-600 hover:shadow-sm'
+              className='w-full h-12 px-4 transition-all duration-150 ease-in-out border rounded border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-white text-black placeholder-[#888888] hover:shadow-sm'
             />
             <button
               type='button'
@@ -75,11 +75,11 @@ const LoginForm: React.FC = () => {
           </div>
 
           <div className='flex items-center justify-between'>
-            <label className='flex items-center space-x-2 text-sm cursor-pointer select-none text-zatobox-600'>
+            <label className='flex items-center space-x-2 text-sm cursor-pointer select-none text-[#888888]'>
               <Field
                 type='checkbox'
                 name='remember'
-                className='w-4 h-4 border-gray-300 rounded text-zatobox-500 focus:ring-zatobox-500'
+                className='w-4 h-4 border-gray-300 rounded text-black focus:ring-zatobox-500'
               />
               <span>Remember me</span>
             </label>
@@ -109,10 +109,10 @@ const LoginForm: React.FC = () => {
 
       <div className='relative mt-4'>
         <div className='absolute inset-0 flex items-center'>
-          <div className='w-full border-t border-zatobox-200'></div>
+          <div className='w-full border-t border-[#CBD5E1]'></div>
         </div>
         <div className='relative flex justify-center text-sm'>
-          <span className='px-2 bg-zatobox-50 text-zatobox-600'>
+          <span className='px-2 bg-white text-black'>
             Or continue with
           </span>
         </div>
@@ -121,11 +121,11 @@ const LoginForm: React.FC = () => {
       <SocialButtons />
 
       <div className='mt-4 text-center'>
-        <p className='text-zatobox-600'>
+        <p className='text-[#888888]'>
           Don't have an account?{' '}
           <button
             onClick={() => router.push('/register')}
-            className='font-medium transition-colors text-zatobox-500 hover:text-zatobox-600'
+            className='font-medium transition-colors text-black hover:text-zatobox-600'
           >
             Sign up
           </button>
