@@ -63,7 +63,7 @@ const PluginStorePage: React.FC = () => {
         'Scan and extract data from invoices, receipts, and documents automatically',
       category: 'productivity',
       icon: '🔍',
-      status: 'maintenance',
+      status: 'active',
       version: '1.2.0',
       author: 'ZatoBox Team',
       rating: 4.8,
@@ -127,7 +127,7 @@ const PluginStorePage: React.FC = () => {
         'Connect with popular POS systems for seamless data synchronization',
       category: 'integrations',
       icon: '💳',
-      status: 'active',
+      status: 'coming-soon',
       version: '1.0.0',
       author: 'ZatoBox Team',
       rating: 4.7,
@@ -407,7 +407,7 @@ const PluginStorePage: React.FC = () => {
   return (
     <div className='min-h-screen bg-bg-main'>
       {/* Header */}
-      <div className='bg-white border-b shadow-sm border-divider'>
+      <div className='bg-white  border-divider'>
         <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
           <div className='flex items-center justify-between h-16'>
             <div className='flex items-center space-x-4'>
@@ -426,76 +426,74 @@ const PluginStorePage: React.FC = () => {
       <div className='px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         {/* Search and Filters */}
         <div className='mb-8'>
-          <div className='flex flex-col space-y-6 xl:flex-row xl:items-center xl:justify-between xl:space-y-0'>
-            {/* Search Section */}
-            <div className='flex-1 xl:max-w-2xl animate-slide-in-left'>
-              <div className='relative plugin-store-search'>
-                <Search
-                  size={20}
-                  className='absolute transform -translate-y-1/2 left-6 top-1/2 text-text-secondary icon-bounce'
-                />
-                <input
-                  type='text'
-                  placeholder='Search plugins...'
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className='w-full py-5 pl-16 pr-8 text-sm transition-all duration-300 border rounded-lg shadow-sm border-divider focus:ring-2 focus:ring-complement focus:border-transparent bg-bg-surface text-text-primary placeholder-text-secondary hover:border-complement/50'
-                />
-              </div>
-            </div>
-
-            {/* Category Tabs with Horizontal Scroll */}
-            <div className='relative flex-1 xl:flex-none'>
-              <div className='relative'>
-                {/* Left Arrow */}
-                {canScrollLeft && (
-                  <button
-                    onClick={scrollLeft}
-                    className='absolute left-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110'
-                  >
-                    <ChevronLeft size={16} className='text-text-primary' />
-                  </button>
-                )}
-
-                {/* Right Arrow */}
-                {canScrollRight && (
-                  <button
-                    onClick={scrollRight}
-                    className='absolute right-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110'
-                  >
-                    <ChevronRight size={16} className='text-text-primary' />
-                  </button>
-                )}
-
-                {/* Categories Container */}
-                <div
-                  ref={categoriesRef}
-                  onScroll={checkScrollButtons}
-                  className='flex gap-3 px-2 py-1 overflow-x-auto scrollbar-hide category-scroll-container'
-                  style={{
-                    scrollbarWidth: 'none',
-                    msOverflowStyle: 'none',
-                  }}
+          {/* Category Tabs with Horizontal Scroll */}
+          <div className='relative mb-6'>
+            <div className='relative'>
+              {/* Left Arrow */}
+              {canScrollLeft && (
+                <button
+                  onClick={scrollLeft}
+                  className='absolute left-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110'
                 >
-                  {categories.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
-                      className={`flex-shrink-0 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap category-tab ${
-                        selectedCategory === category.id
-                          ? 'active shadow-md transform scale-105'
-                          : 'bg-gray-100 text-text-secondary hover:bg-gray-200 hover:shadow-sm'
-                      }`}
-                    >
-                      <span className='mr-2'>{category.icon}</span>
-                      {category.name}
-                    </button>
-                  ))}
-                </div>
+                  <ChevronLeft size={16} className='text-text-primary' />
+                </button>
+              )}
 
-                {/* Gradient Overlay for Right Edge */}
-                <div className='absolute top-0 bottom-0 right-0 w-8 pointer-events-none bg-gradient-to-l from-white to-transparent'></div>
+              {/* Right Arrow */}
+              {canScrollRight && (
+                <button
+                  onClick={scrollRight}
+                  className='absolute right-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110'
+                >
+                  <ChevronRight size={16} className='text-text-primary' />
+                </button>
+              )}
+
+              {/* Categories Container */}
+              <div
+                ref={categoriesRef}
+                onScroll={checkScrollButtons}
+                className='flex gap-3 px-2 py-1 overflow-x-auto scrollbar-hide category-scroll-container'
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                }}
+              >
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`flex-shrink-0 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap category-tab ${
+                      selectedCategory === category.id
+                        ? 'active shadow-md transform scale-105'
+                        : 'bg-gray-100 text-text-secondary hover:bg-gray-200 hover:shadow-sm'
+                    }`}
+                  >
+                    <span className='mr-2'>{category.icon}</span>
+                    {category.name}
+                  </button>
+                ))}
               </div>
+
+              {/* Gradient Overlay for Right Edge */}
+              <div className='absolute top-0 bottom-0 right-0 w-8 pointer-events-none bg-gradient-to-l from-white to-transparent'></div>
+            </div>
+          </div>
+
+          {/* Search Section */}
+          <div className='animate-slide-in-left'>
+            <div className='relative group'>
+              <Search
+                size={18}
+                className='absolute transform -translate-y-1/2 left-4 top-1/2 text-gray-400 group-focus-within:text-zatobox-500 transition-colors duration-200'
+              />
+              <input
+                type='text'
+                placeholder='Search plugins...'
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className='w-full py-4 pl-12 pr-4 text-sm transition-all duration-300 border rounded-xl border-gray-200 focus:ring-2 focus:ring-zatobox-500/20 focus:border-zatobox-500 bg-white text-gray-900 placeholder-gray-400 hover:border-gray-300 hover:shadow-sm focus:shadow-md'
+              />
             </div>
           </div>
         </div>
@@ -536,23 +534,6 @@ const PluginStorePage: React.FC = () => {
             type={notificationType}
           />
         )}
-        {/* Example usage buttons for navigate and showPluginNotification */}
-        <div className='fixed z-50 flex flex-col gap-2 bottom-4 right-4'>
-          <button
-            onClick={() => router.push('/')}
-            className='px-4 py-2 font-medium text-blue-800 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200'
-          >
-            Go Home (navigate)
-          </button>
-          <button
-            onClick={() =>
-              showPluginNotification('This is a test notification!', 'info')
-            }
-            className='px-4 py-2 font-medium text-green-800 transition-colors bg-green-100 rounded-lg hover:bg-green-200'
-          >
-            Show Notification
-          </button>
-        </div>
       </div>
     </div>
   );

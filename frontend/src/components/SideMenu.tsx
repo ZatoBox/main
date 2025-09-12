@@ -127,13 +127,6 @@ const SideMenu: React.FC = () => {
       alwaysVisible: true,
     },
     {
-      name: 'New Product',
-      icon: Plus,
-      path: '/new-product',
-      description: 'Add product',
-      alwaysVisible: true,
-    },
-    {
       name: 'Inventory',
       icon: Archive,
       path: '/inventory',
