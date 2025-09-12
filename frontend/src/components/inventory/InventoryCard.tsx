@@ -26,20 +26,24 @@ const InventoryCard: React.FC<Props> = ({
   onDelete,
 }) => {
   return (
-    <div  className={`p-4 border rounded-lg shadow-sm border-zatobox-200 ${
-    selected ? 'bg-[#FBEFCA]' : 'bg-[#FFFFFF]'
-  }`}>
+    <div
+      onClick={() => onEdit(item.id)}
+      className={`p-4 border rounded-lg shadow-sm border-zatobox-200 transition-colors cursor-pointer hover:bg-[#FEF9EC] group ${
+        selected ? 'bg-[#FBEFCA]' : 'bg-[#FFFFFF]'
+      } ${item.status !== 'active' ? 'opacity-60' : ''}`}
+    >
       <div className='flex items-start space-x-3'>
         <input
           type='checkbox'
           checked={selected}
+          onClick={(e) => e.stopPropagation()}
           onChange={(e) => onSelect(item.id, e.target.checked)}
-           className="
+          className='
                   w-4 h-4 rounded border border-[#767676] bg-white
                   appearance-none
                   checked:bg-[#EEB131]
                   focus:outline-none focus:ring-2 focus:ring-[#CBD5E1]
-                "
+                '
         />
 
         <div className='flex items-center justify-center flex-shrink-0 w-12 h-12 bg-zatobox-100 rounded-lg'>
@@ -49,7 +53,7 @@ const InventoryCard: React.FC<Props> = ({
         <div className='flex-1 min-w-0'>
           <div className='flex items-start justify-between'>
             <div className='flex-1'>
-              <h3 className='text-sm font-medium truncate text-zatobox-900'>
+              <h3 className='text-sm font-medium truncate text-zatobox-900 group-hover:underline hover:underline'>
                 {item.name}
               </h3>
               <p className='text-sm text-[#000000]'>{item.category}</p>
@@ -74,7 +78,9 @@ const InventoryCard: React.FC<Props> = ({
 
               <span
                 className={`inline-flex mt-2 text-xs ${
-                  item.status === 'active' ? 'text-[#10B981]' : 'text-[#E7000B80]'
+                  item.status === 'active'
+                    ? 'text-[#10B981]'
+                    : 'text-[#E7000B80]'
                 }`}
               >
                 {item.status === 'active' ? 'Active' : 'Inactive'}
@@ -83,8 +89,11 @@ const InventoryCard: React.FC<Props> = ({
 
             <div className='flex items-center space-x-1'>
               <button
-                onClick={() => onEdit(item.id)}
-                className='p-1 transition-colors rounded hover:bg-zatobox-100'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(item.id);
+                }}
+                className='p-1 transition-colors rounded hover:bg-[#FEF9EC]'
                 title='Edit'
               >
                 <svg
@@ -102,7 +111,10 @@ const InventoryCard: React.FC<Props> = ({
                 </svg>
               </button>
               <button
-                onClick={(e) => onDelete(item.id, e)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(item.id, e);
+                }}
                 className='p-1 transition-colors rounded hover:bg-red-100'
                 title='Delete'
               >
