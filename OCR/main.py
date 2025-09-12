@@ -35,7 +35,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:3001",
-        "https://zatobox.io/",
+        "https://zatobox.io",
+        "https://www.zatobox.io",
     ],
     allow_credentials=True,
     allow_methods=["*"],
