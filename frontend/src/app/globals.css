@@ -1,5 +1,24 @@
 @import 'tailwindcss';
 
+/* Prevent horizontal overflow globally */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+#__next {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 @theme {
   /* Principal Colors */
   --color-zatobox-50: #fef9ec;
@@ -49,4 +68,3 @@
   --sidebar-border: #f1c658;
   --sidebar-ring: #e28e18;
 }
-
