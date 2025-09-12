@@ -26,17 +26,24 @@ const InventoryCard: React.FC<Props> = ({
   onDelete,
 }) => {
   return (
-    <div className='p-4 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
+    <div  className={`p-4 border rounded-lg shadow-sm border-zatobox-200 ${
+    selected ? 'bg-[#FBEFCA]' : 'bg-[#FFFFFF]'
+  }`}>
       <div className='flex items-start space-x-3'>
         <input
           type='checkbox'
           checked={selected}
           onChange={(e) => onSelect(item.id, e.target.checked)}
-          className='w-4 h-4 mt-1 border-gray-300 rounded text-zatobox-500 focus:ring-zatobox-500'
+           className="
+                  w-4 h-4 rounded border border-[#767676] bg-white
+                  appearance-none
+                  checked:bg-[#EEB131]
+                  focus:outline-none focus:ring-2 focus:ring-[#CBD5E1]
+                "
         />
 
         <div className='flex items-center justify-center flex-shrink-0 w-12 h-12 bg-zatobox-100 rounded-lg'>
-          <Package size={24} className='text-zatobox-600' />
+          <Package size={24} className='text-[#E28E18]' />
         </div>
 
         <div className='flex-1 min-w-0'>
@@ -45,7 +52,7 @@ const InventoryCard: React.FC<Props> = ({
               <h3 className='text-sm font-medium truncate text-zatobox-900'>
                 {item.name}
               </h3>
-              <p className='text-sm text-zatobox-600'>{item.category}</p>
+              <p className='text-sm text-[#000000]'>{item.category}</p>
 
               <div className='flex items-center mt-2 space-x-4'>
                 <span
@@ -60,14 +67,14 @@ const InventoryCard: React.FC<Props> = ({
                   {item.stock} units
                 </span>
 
-                <span className='text-sm font-medium text-zatobox-900'>
+                <span className='text-sm font-medium text-[#000000]'>
                   ${item.price.toFixed(2)}
                 </span>
               </div>
 
               <span
                 className={`inline-flex mt-2 text-xs ${
-                  item.status === 'active' ? 'text-zatobox-600' : 'text-red-600'
+                  item.status === 'active' ? 'text-[#10B981]' : 'text-[#E7000B80]'
                 }`}
               >
                 {item.status === 'active' ? 'Active' : 'Inactive'}

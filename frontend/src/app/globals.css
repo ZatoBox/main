@@ -68,3 +68,15 @@ body {
   --sidebar-border: #f1c658;
   --sidebar-ring: #e28e18;
 }
+
+.custom-checkbox {
+  accent-color: #E28E18; 
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  
+}
+
+.custom-checkbox:checked {
+  color: #E28E18; 
+}

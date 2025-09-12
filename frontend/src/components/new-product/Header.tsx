@@ -13,7 +13,6 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between h-auto sm:h-16 px-4 sm:px-6 py-4 sm:py-0 border-b border-[#CBD5E1] bg-white gap-4 sm:gap-0">
   <div className="flex items-center w-full sm:w-auto gap-2">
-  {/* Botón siempre visible */}
   <button
     onClick={onBack}
     className="p-2 transition-colors rounded-full hover:bg-gray-50 flex-shrink-0"
@@ -21,7 +20,6 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
     <IoMdArrowRoundBack className="w-6 h-6 text-[#F88612]" />
   </button>
 
-  {/* Título con margen responsivo */}
   <h1 className="text-xl font-semibold text-[#F88612] ml-2 sm:ml-4 md:ml-0">
     New Product
   </h1>

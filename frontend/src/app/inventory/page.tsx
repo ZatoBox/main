@@ -152,7 +152,7 @@ const InventoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className='flex items-center justify-center min-h-screen pt-16 bg-bg-main'>
+      <div className='flex items-center justify-center min-h-screen  bg-bg-main'>
         <div className='text-center'>
           <div className='w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary'></div>
           <p className='text-text-secondary'>Loading products...</p>
@@ -163,7 +163,7 @@ const InventoryPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className='flex items-center justify-center min-h-screen pt-16 bg-bg-main'>
+      <div className='flex items-center justify-center min-h-screen bg-bg-main'>
         <div className='text-center'>
           <div className='mb-4 text-red-500'>
             <svg
@@ -193,7 +193,7 @@ const InventoryPage: React.FC = () => {
   }
 
   return (
-    <div className='min-h-screen pt-16 bg-bg-main'>
+    <div className='min-h-screen bg-bg-main'>
       <InventoryHeader
         onBack={() => router.push('/')}
         onCreate={() => router.push('/new-product')}
