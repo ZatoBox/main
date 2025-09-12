@@ -9,17 +9,12 @@ class ProductService:
     def __init__(self, repo: ProductRepository):
         self.repo = repo
 
-    def create_product(
-        self,
-        product_data: CreateProductRequest,
-        creator_id: str,
-    ):
+    def create_product(self, product_data: CreateProductRequest, creator_id: str):
         unit_val = getattr(product_data.unit, "value", product_data.unit)
         type_val = getattr(
             product_data.product_type, "value", product_data.product_type
         )
         category_id_val = getattr(product_data, "category_id")
-
         return self.repo.create_product(
             name=product_data.name,
             description=product_data.description,
@@ -51,20 +46,18 @@ class ProductService:
         return self.repo.find_by_name(name)
 
     def get_product(self, product_id: str):
-        if not product_id or not isinstance(product_id, str):
+        if not product_id:
             raise HTTPException(status_code=400, detail="Invalid product ID")
-
         product = self.repo.find_by_id(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
         return product
 
     def update_product(
-        self,
-        product_id: int,
-        updates: dict,
-        user_timezone: str = "UTC",
+        self, product_id: str, updates: dict, user_timezone: str = "UTC"
     ):
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
         allowed_fields = [
             "name",
             "description",
@@ -80,11 +73,9 @@ class ProductService:
             "product_type",
             "unit",
         ]
-
         for field in list(updates.keys()):
             if field not in allowed_fields:
                 raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
-
         for fld in (
             "product_type",
             "unit",
@@ -97,7 +88,6 @@ class ProductService:
             val = updates.get(fld)
             if val == "" or val is None:
                 updates.pop(fld, None)
-
         if "price" in updates:
             try:
                 updates["price"] = float(updates["price"])
@@ -107,7 +97,6 @@ class ProductService:
                     )
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid price value")
-
         if "stock" in updates:
             try:
                 updates["stock"] = int(updates["stock"])
@@ -117,7 +106,6 @@ class ProductService:
                     )
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid stock value")
-
         if "min_stock" in updates:
             try:
                 updates["min_stock"] = int(updates["min_stock"])
@@ -127,7 +115,6 @@ class ProductService:
                     )
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid min_stock value")
-
         if "weight" in updates:
             try:
                 updates["weight"] = float(updates["weight"])
@@ -135,30 +122,29 @@ class ProductService:
                     raise HTTPException(status_code=400, detail="Invalid weight value")
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid weight value")
-
-        images_list = updates.get("images")
-        if images_list and isinstance(images_list, list):
-            pass
-
         return self.repo.update_product(product_id, updates, user_timezone)
 
-    def _process_images(self, images):
-        processed = []
-        for img in images:
-            if hasattr(img, "filename"):
-                processed.append(img.filename)
-            else:
-                processed.append(str(img))
-        return processed
-
     def add_images(self, product_id: str, new_images: List[str]):
-        return self.repo.add_images(int(product_id), new_images)
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
+        return self.repo.add_images(product_id, new_images)
 
     def get_images(self, product_id: str):
-        return self.repo.get_images(int(product_id))
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
+        return self.repo.get_images(product_id)
 
     def delete_image(self, product_id: str, image_index: int):
-        return self.repo.delete_image(int(product_id), image_index)
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
+        return self.repo.delete_image(product_id, image_index)
 
     def update_images(self, product_id: str, new_images: List[str]):
-        return self.repo.update_images(int(product_id), new_images)
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
+        return self.repo.update_images(product_id, new_images)
+
+    def delete_product(self, product_id: str):
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
+        return self.repo.delete_product(product_id)

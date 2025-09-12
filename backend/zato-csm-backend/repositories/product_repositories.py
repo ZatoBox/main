@@ -49,7 +49,7 @@ class ProductRepository:
         return data[0]
 
     def update_product(
-        self, product_id: int, updates: dict, user_timezone: str = "UTC"
+        self, product_id: str, updates: dict, user_timezone: str = "UTC"
     ):
         updates.pop("id", None)
         updates.pop("created_at", None)
@@ -70,7 +70,7 @@ class ProductRepository:
         data = getattr(resp, "data", None) or []
         return data
 
-    def find_by_id(self, product_id: int):
+    def find_by_id(self, product_id: str):
         resp = (
             self.supabase.table(self.table)
             .select("*")
@@ -98,7 +98,7 @@ class ProductRepository:
         data = getattr(resp, "data", None) or []
         return data
 
-    def delete_product(self, product_id: int):
+    def delete_product(self, product_id: str):
         resp = self.supabase.table(self.table).delete().eq("id", product_id).execute()
         data = getattr(resp, "data", None)
         if not data:
@@ -115,7 +115,7 @@ class ProductRepository:
         data = getattr(resp, "data", None) or []
         return data
 
-    def add_images(self, product_id: int, new_images: List[str]):
+    def add_images(self, product_id: str, new_images: List[str]):
         product = self.find_by_id(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
@@ -123,13 +123,13 @@ class ProductRepository:
         updated_images = current_images + new_images
         return self.update_product(product_id, {"images": updated_images})
 
-    def get_images(self, product_id: int):
+    def get_images(self, product_id: str):
         product = self.find_by_id(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
         return product.get("images", [])
 
-    def delete_image(self, product_id: int, image_index: int):
+    def delete_image(self, product_id: str, image_index: int):
         product = self.find_by_id(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
@@ -141,5 +141,5 @@ class ProductRepository:
         )
         return self.update_product(product_id, {"images": updated_images})
 
-    def update_images(self, product_id: int, new_images: List[str]):
+    def update_images(self, product_id: str, new_images: List[str]):
         return self.update_product(product_id, {"images": new_images})

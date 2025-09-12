@@ -123,7 +123,7 @@ def update_product(
 
 @router.delete("/{product_id}")
 def delete_product(
-    product_id: int,
+    product_id: str,
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):

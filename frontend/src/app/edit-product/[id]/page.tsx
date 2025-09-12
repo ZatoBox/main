@@ -15,8 +15,7 @@ const EditProductPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const { isAuthenticated } = useAuth();
-  const idParam = (params as any)?.id;
-  const id = idParam ? Number(idParam) : NaN;
+  const id = (params as any)?.id as string | undefined; // usar string directa
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,19 +49,20 @@ const EditProductPage: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (!isNaN(id)) {
-      fetchProduct();
-    } else {
+    if (!id || typeof id !== 'string') {
       setError('Invalid product id');
       setLoading(false);
+      return;
     }
+    fetchProduct();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchProduct = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await productsAPI.getById(id);
+      const res = await productsAPI.getById(id!);
       const prod = (res as any).product as Product;
       if (!prod) {
         setError('Product not found');
@@ -103,6 +103,7 @@ const EditProductPage: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (!id) return;
     setSaving(true);
     setError(null);
     if (!isAuthenticated) {
@@ -146,6 +147,11 @@ const EditProductPage: React.FC = () => {
         category_id: selectedCategories[0] ?? undefined,
       };
 
+      // eliminar claves undefined para no provocar 422
+      Object.keys(payload).forEach((k) => {
+        if (payload[k] === undefined) delete payload[k];
+      });
+
       await productsAPI.update(id, payload as any);
       router.push('/inventory');
     } catch (err) {
@@ -156,6 +162,7 @@ const EditProductPage: React.FC = () => {
   };
 
   const handleDelete = async () => {
+    if (!id) return;
     if (!window.confirm('Are you sure you want to delete this product?'))
       return;
     try {
@@ -170,6 +177,7 @@ const EditProductPage: React.FC = () => {
   };
 
   const handleToggleStatus = async () => {
+    if (!id) return;
     setTogglingStatus(true);
     try {
       const newStatus = status === 'active' ? 'inactive' : 'active';
@@ -183,9 +191,7 @@ const EditProductPage: React.FC = () => {
   };
 
   if (loading)
-    return (
-      <div className='min-h-screen  bg-bg-main'>Loading product...</div>
-    );
+    return <div className='min-h-screen  bg-bg-main'>Loading product...</div>;
 
   return (
     <div className='min-h-screen  bg-bg-main'>
