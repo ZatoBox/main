@@ -37,7 +37,7 @@ export function HeroSection() {
       </div>
 
       <Link
-        href='https://zatobox.io/'
+        href='https://zatobox.io/login'
         target='_blank'
         rel='noopener noreferrer'
       >
