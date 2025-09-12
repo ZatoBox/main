@@ -18,10 +18,14 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
   const showSidebar = !noSidebarPaths.includes(pathname || '/');
 
   return (
-    <div className='flex min-h-screen'>
+    <div className='flex min-h-screen w-full overflow-x-hidden'>
       {showSidebar && <SideMenu />}
       <div
-        className={`${showSidebar ? 'flex-1 ml-0 md:ml-64' : 'flex-1 w-full'}`}
+        className={`${
+          showSidebar
+            ? 'flex-1 ml-0 md:ml-64 min-w-0 w-full overflow-x-hidden'
+            : 'flex-1 w-full min-w-0 overflow-x-hidden'
+        }`}
       >
         {children}
       </div>

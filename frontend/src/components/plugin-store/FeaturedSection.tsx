@@ -14,19 +14,19 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({
   onToggle,
 }) => {
   return (
-    <div className='mb-8'>
-      <h2 className='mb-4 text-xl font-bold text-black'>
+    <div className='mb-6 sm:mb-8'>
+      <h2 className='mb-3 sm:mb-4 text-lg sm:text-xl font-bold text-black'>
         🔥 MOST INSTALLS By popular demand
       </h2>
-      <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+      <div className='grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 w-full min-w-0'>
         {plugins.slice(0, 3).map((plugin) => {
           return (
             <div
               key={plugin.id}
-              className='overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'
+              className='w-full min-w-0 overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'
             >
               {plugin.screenshot && (
-                <div className='h-48 overflow-hidden bg-white'>
+                <div className='h-32 sm:h-48 overflow-hidden bg-white'>
                   <img
                     src={plugin.screenshot}
                     alt={plugin.name}
@@ -34,31 +34,31 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({
                   />
                 </div>
               )}
-              <div className='p-6'>
-                <div className='flex items-start justify-between mb-3'>
-                  <div className='flex items-center space-x-3'>
-                    <span className='text-3xl'>{plugin.icon}</span>
-                    <div>
-                      <h3 className='text-lg font-semibold text-black'>
-                        {plugin.name}
-                      </h3>
-                      <p className='text-sm text-[#a8a8a8]'>
-                        {plugin.description}
-                      </p>
-                    </div>
+              <div className='p-4 sm:p-6'>
+                <div className='flex items-start gap-2 sm:gap-3 mb-3'>
+                  <span className='text-2xl sm:text-3xl flex-shrink-0'>
+                    {plugin.icon}
+                  </span>
+                  <div className='min-w-0 flex-1'>
+                    <h3 className='text-base sm:text-lg font-semibold text-black truncate'>
+                      {plugin.name}
+                    </h3>
+                    <p className='text-xs sm:text-sm text-[#a8a8a8] line-clamp-2'>
+                      {plugin.description}
+                    </p>
                   </div>
                 </div>
-                <div className='flex items-center justify-between mb-4'>
-                  <div className='flex items-center space-x-2'>
+                <div className='flex items-center justify-between mb-4 gap-2'>
+                  <div className='flex items-center gap-1 sm:gap-2 flex-wrap'>
                     {getStatusBadge(plugin.status)}
                     {getPriceBadge(plugin.price)}
                   </div>
-                  <div className='flex items-center space-x-1'>
+                  <div className='flex items-center gap-1 flex-shrink-0'>
                     <span className='text-yellow-400'>⭐</span>
-                    <span className='text-sm text-zatobox-600'>
+                    <span className='text-xs sm:text-sm text-zatobox-600'>
                       {plugin.rating}
                     </span>
-                    <span className='text-sm text-zatobox-600'>
+                    <span className='text-xs sm:text-sm text-zatobox-600'>
                       ({plugin.installs})
                     </span>
                   </div>

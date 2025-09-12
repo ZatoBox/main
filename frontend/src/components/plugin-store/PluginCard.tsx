@@ -14,29 +14,33 @@ const PluginCard: React.FC<PluginCardProps> = ({
   getPriceBadge,
 }) => {
   return (
-    <div className='overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'>
-      <div className='p-6'>
-        <div className='flex items-start justify-between mb-3'>
-          <div className='flex items-center space-x-3'>
-            <span className='text-2xl'>{plugin.icon}</span>
-            <div>
-              <h3 className='text-lg font-semibold text-black'>
-                {plugin.name}
-              </h3>
-              <p className='text-sm text-[#a8a8a8]'>{plugin.description}</p>
-            </div>
+    <div className='w-full min-w-0 overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'>
+      <div className='p-4 sm:p-6'>
+        <div className='flex items-start gap-2 sm:gap-3 mb-3'>
+          <span className='text-xl sm:text-2xl flex-shrink-0'>
+            {plugin.icon}
+          </span>
+          <div className='min-w-0 flex-1'>
+            <h3 className='text-base sm:text-lg font-semibold text-black truncate'>
+              {plugin.name}
+            </h3>
+            <p className='text-xs sm:text-sm text-[#a8a8a8] line-clamp-2'>
+              {plugin.description}
+            </p>
           </div>
         </div>
 
-        <div className='flex items-center justify-between mb-4'>
-          <div className='flex items-center space-x-2'>
+        <div className='flex items-center justify-between mb-4 gap-2'>
+          <div className='flex items-center gap-1 sm:gap-2 flex-wrap'>
             {getStatusBadge(plugin.status)}
             {getPriceBadge(plugin.price)}
           </div>
-          <div className='flex items-center space-x-1'>
+          <div className='flex items-center gap-1 flex-shrink-0'>
             <span className='text-yellow-400'>⭐</span>
-            <span className='text-sm text-zatobox-600'>{plugin.rating}</span>
-            <span className='text-sm text-zatobox-600'>
+            <span className='text-xs sm:text-sm text-zatobox-600'>
+              {plugin.rating}
+            </span>
+            <span className='text-xs sm:text-sm text-zatobox-600'>
               ({plugin.installs})
             </span>
           </div>
