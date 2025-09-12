@@ -30,7 +30,9 @@ class CreateProductRequest(BaseModel):
     stock: int = Field(..., ge=0)
     unit: ProductUnity = Field(...)
     product_type: ProductType = Field(...)
-    category_id: Optional[str] = Field(None, description="UUID de la categoría")
+    category_ids: list[str] = Field(
+        default_factory=list, description="Lista de UUIDs de categorías"
+    )
 
     description: str = Field(..., description="Descripción del producto")
     sku: str = Field(..., max_length=255, description="SKU del producto")
@@ -56,7 +58,7 @@ class UpdateProductRequest(BaseModel):
     description: Optional[str] = None
     price: Optional[float] = Field(None, gt=0)
     stock: Optional[int] = Field(None, ge=0)
-    category_id: Optional[str] = None
+    category_ids: Optional[list[str]] = None
     sku: Optional[str] = Field(None, max_length=255)
     weight: Optional[float] = Field(None, ge=0)
     localization: Optional[str] = None
@@ -75,7 +77,7 @@ class ProductResponse(BaseModel):
     price: float
     stock: int
     min_stock: int
-    category_id: Optional[str]
+    category_ids: List[str] = []
     images: Optional[List[str]] = []
     status: str
     weight: Optional[float]

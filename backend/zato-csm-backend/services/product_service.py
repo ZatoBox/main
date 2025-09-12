@@ -4,22 +4,29 @@ from typing import List
 from models.product import CreateProductRequest
 from repositories.product_repositories import ProductRepository
 
+MAX_IMAGES = 4
+
 
 class ProductService:
     def __init__(self, repo: ProductRepository):
         self.repo = repo
 
-    def create_product(
-        self,
-        product_data: CreateProductRequest,
-        creator_id: str,
-    ):
+    def create_product(self, product_data: CreateProductRequest, creator_id: str):
         unit_val = getattr(product_data.unit, "value", product_data.unit)
         type_val = getattr(
             product_data.product_type, "value", product_data.product_type
         )
-        category_id_val = getattr(product_data, "category_id")
-
+        category_ids_val = getattr(product_data, "category_ids", []) or []
+        if not isinstance(category_ids_val, list):
+            raise HTTPException(status_code=400, detail="category_ids must be a list")
+        for cid in category_ids_val:
+            if not isinstance(cid, str) or not cid:
+                raise HTTPException(
+                    status_code=400, detail="Invalid category id in category_ids"
+                )
+        initial_images: List[str] = []
+        if len(initial_images) > MAX_IMAGES:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
         return self.repo.create_product(
             name=product_data.name,
             description=product_data.description,
@@ -27,7 +34,7 @@ class ProductService:
             stock=int(product_data.stock),
             unit=unit_val,
             product_type=type_val,
-            category_id=category_id_val,
+            category_ids=category_ids_val,
             sku=product_data.sku,
             min_stock=int(getattr(product_data, "min_stock", 0)),
             status=getattr(
@@ -38,7 +45,7 @@ class ProductService:
             weight=getattr(product_data, "weight", None),
             localization=getattr(product_data, "localization", None),
             creator_id=str(creator_id),
-            images=[],
+            images=initial_images,
         )
 
     def list_products(self):
@@ -51,26 +58,24 @@ class ProductService:
         return self.repo.find_by_name(name)
 
     def get_product(self, product_id: str):
-        if not product_id or not isinstance(product_id, str):
+        if not product_id:
             raise HTTPException(status_code=400, detail="Invalid product ID")
-
         product = self.repo.find_by_id(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
         return product
 
     def update_product(
-        self,
-        product_id: int,
-        updates: dict,
-        user_timezone: str = "UTC",
+        self, product_id: str, updates: dict, user_timezone: str = "UTC"
     ):
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
         allowed_fields = [
             "name",
             "description",
             "price",
             "stock",
-            "category_id",
+            "category_ids",
             "images",
             "sku",
             "weight",
@@ -80,15 +85,13 @@ class ProductService:
             "product_type",
             "unit",
         ]
-
         for field in list(updates.keys()):
             if field not in allowed_fields:
                 raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
-
         for fld in (
             "product_type",
             "unit",
-            "category_id",
+            "category_ids",
             "description",
             "localization",
             "sku",
@@ -97,7 +100,19 @@ class ProductService:
             val = updates.get(fld)
             if val == "" or val is None:
                 updates.pop(fld, None)
-
+        if "category_ids" in updates:
+            if not isinstance(updates["category_ids"], list):
+                raise HTTPException(
+                    status_code=400, detail="category_ids must be a list"
+                )
+            cleaned = []
+            for cid in updates["category_ids"]:
+                if not isinstance(cid, str) or not cid:
+                    raise HTTPException(
+                        status_code=400, detail="Invalid category id in category_ids"
+                    )
+                cleaned.append(cid)
+            updates["category_ids"] = cleaned
         if "price" in updates:
             try:
                 updates["price"] = float(updates["price"])
@@ -107,7 +122,6 @@ class ProductService:
                     )
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid price value")
-
         if "stock" in updates:
             try:
                 updates["stock"] = int(updates["stock"])
@@ -117,7 +131,6 @@ class ProductService:
                     )
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid stock value")
-
         if "min_stock" in updates:
             try:
                 updates["min_stock"] = int(updates["min_stock"])
@@ -127,7 +140,6 @@ class ProductService:
                     )
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid min_stock value")
-
         if "weight" in updates:
             try:
                 updates["weight"] = float(updates["weight"])
@@ -135,30 +147,39 @@ class ProductService:
                     raise HTTPException(status_code=400, detail="Invalid weight value")
             except (ValueError, TypeError):
                 raise HTTPException(status_code=400, detail="Invalid weight value")
-
-        images_list = updates.get("images")
-        if images_list and isinstance(images_list, list):
-            pass
-
         return self.repo.update_product(product_id, updates, user_timezone)
 
-    def _process_images(self, images):
-        processed = []
-        for img in images:
-            if hasattr(img, "filename"):
-                processed.append(img.filename)
-            else:
-                processed.append(str(img))
-        return processed
-
     def add_images(self, product_id: str, new_images: List[str]):
-        return self.repo.add_images(int(product_id), new_images)
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
+        if len(new_images) > MAX_IMAGES:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
+        product = self.repo.find_by_id(product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        current = product.get("images", [])
+        if len(current) + len(new_images) > MAX_IMAGES:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
+        return self.repo.add_images(product_id, new_images)
 
     def get_images(self, product_id: str):
-        return self.repo.get_images(int(product_id))
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
+        return self.repo.get_images(product_id)
 
     def delete_image(self, product_id: str, image_index: int):
-        return self.repo.delete_image(int(product_id), image_index)
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
+        return self.repo.delete_image(product_id, image_index)
 
     def update_images(self, product_id: str, new_images: List[str]):
-        return self.repo.update_images(int(product_id), new_images)
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
+        if len(new_images) > MAX_IMAGES:
+            raise HTTPException(status_code=400, detail="Maximum 4 images allowed")
+        return self.repo.update_images(product_id, new_images)
+
+    def delete_product(self, product_id: str):
+        if not product_id:
+            raise HTTPException(status_code=400, detail="Invalid product ID")
+        return self.repo.delete_product(product_id)

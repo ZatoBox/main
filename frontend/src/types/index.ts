@@ -69,7 +69,7 @@ export interface Product {
   price: number;
   stock: number;
   min_stock: number;
-  category_id?: string;
+  category_ids?: string[];
   images?: string[];
   status: ProductStatus;
   weight?: number;
@@ -82,13 +82,25 @@ export interface Product {
   last_updated: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  created_at?: string;
+  last_updated?: string;
+}
+
+export interface CategoriesResponse {
+  success: boolean;
+  categories: Category[];
+}
+
 export interface CreateProductRequest {
   name: string;
   price: number;
   stock: number;
   unit: ProductUnity;
   product_type: ProductType;
-  category_id?: string;
+  category_ids?: string[];
   description: string;
   sku: string;
   weight?: number;
@@ -102,7 +114,7 @@ export interface UpdateProductRequest {
   description?: string;
   price?: number;
   stock?: number;
-  category_id?: string;
+  category_ids?: string[];
   sku?: string;
   weight?: number;
   localization?: string;
