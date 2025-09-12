@@ -4,9 +4,6 @@ from dotenv import load_dotenv
 from fastapi import HTTPException
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
-# print("SUPABASE_URL:", os.getenv("SUPABASE_URL"))
-# print("SUPABASE_SERVICE_KEY:", os.getenv("SUPABASE_SERVICE_KEY"))
-
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")

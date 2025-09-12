@@ -48,8 +48,8 @@ class ProductService:
             images=initial_images,
         )
 
-    def list_products(self):
-        return self.repo.find_all()
+    def list_products(self, creator_id: str):
+        return self.repo.find_by_creator(creator_id)
 
     def search_by_category(self, category: str):
         return self.repo.find_by_category(category)
