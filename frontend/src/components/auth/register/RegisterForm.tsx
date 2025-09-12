@@ -227,6 +227,18 @@ const RegisterForm: React.FC = () => {
         >
           {isLoading ? 'Creating account...' : 'Create Account'}
         </button>
+        <div className='mt-4 text-center'>
+          <p className='text-[#888888]'>
+            ¿Ya tienes cuenta?{' '}
+            <button
+              type='button'
+              onClick={() => router.push('/login')}
+              className='font-medium transition-colors text-black hover:text-zatobox-600'
+            >
+              Inicia sesión
+            </button>
+          </p>
+        </div>
       </Form>
     </Formik>
   );
