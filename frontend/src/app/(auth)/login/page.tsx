@@ -17,7 +17,7 @@ const LoginPage: React.FC = () => {
           </LoginContainer>
         </div>
 
-        <div className='hidden lg:flex lg:items-center lg:justify-center lg:bg-gradient-to-br lg:from-primary lg:to-complement lg:p-8'>
+        <div className="hidden lg:flex lg:items-center lg:justify-center lg:p-8 bg-[url('/images/zatobackground.svg')] bg-cover bg-center">
           <div className='text-center text-white'>
             <div className='mb-6'>
               <img
@@ -26,8 +26,8 @@ const LoginPage: React.FC = () => {
                 className='object-contain w-40 mx-auto'
               />
             </div>
-            <h2 className='mb-4 text-3xl font-bold'>Welcome to ZatoBox</h2>
-            <p className='text-lg leading-relaxed opacity-90'>
+            <h2 className='text-black mb-4 text-3xl font-bold'>Welcome to ZatoBox</h2>
+            <p className='text-black text-lg leading-relaxed opacity-90'>
               The complete solution for inventory and sales management.
               <br />
               Start managing your business efficiently today.

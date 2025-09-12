@@ -14,16 +14,16 @@ const PluginCard: React.FC<PluginCardProps> = ({
   getPriceBadge,
 }) => {
   return (
-    <div className='overflow-hidden transition-shadow bg-zatobox-50 rounded-lg shadow-lg hover:shadow-xl'>
+    <div className='overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl'>
       <div className='p-6'>
         <div className='flex items-start justify-between mb-3'>
           <div className='flex items-center space-x-3'>
             <span className='text-2xl'>{plugin.icon}</span>
             <div>
-              <h3 className='text-lg font-semibold text-zatobox-900'>
+              <h3 className='text-lg font-semibold text-black'>
                 {plugin.name}
               </h3>
-              <p className='text-sm text-zatobox-600'>{plugin.description}</p>
+              <p className='text-sm text-[#a8a8a8]'>{plugin.description}</p>
             </div>
           </div>
         </div>
