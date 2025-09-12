@@ -59,21 +59,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
     >
       <div className='absolute z-10 top-3 right-3'>
         <span
-          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 bg-[#FEF3C7] ${
             product.stock > 10
-              ? 'bg-success-100 text-success-800 group-hover:bg-success-200'
+              ? 'text-success-800'
               : product.stock > 0
-              ? 'bg-warning-100 text-warning-800 group-hover:bg-warning-200'
-              : 'bg-error-100 text-error-800 group-hover:bg-error-200'
+              ? 'text-warning-800'
+              : 'text-error-800'
           }`}
         >
           <div
             className={`w-2 h-2 rounded-full mr-1 transition-all duration-300 ${
               product.stock > 10
-                ? 'bg-success-500'
+                ? 'bg-[#10B981]'
                 : product.stock > 0
-                ? 'bg-warning-500'
-                : 'bg-error-500'
+                ? 'bg-[#f0ad4e]'
+                : 'bg-[#d9534f]'
             }`}
           ></div>
           {product.stock} in stock
@@ -114,11 +114,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       </div>
       <div className='p-4 space-y-3'>
         <div className='flex items-center justify-between'>
-          {product.category_ids && product.category_ids.length > 0 ? (
+          {Array.isArray((product as any).category_names) &&
+          (product as any).category_names.length > 0 ? (
             <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
-              {product.category_ids.length === 1
-                ? '1 categoría'
-                : `${product.category_ids.length} categorías`}
+              {(product as any).category_names.join(', ')}
+            </span>
+          ) : product.category_ids && product.category_ids.length > 0 ? (
+            <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
+              {product.category_ids.join(', ')}
             </span>
           ) : (
             <span />
