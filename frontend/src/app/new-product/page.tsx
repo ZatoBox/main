@@ -114,11 +114,16 @@ const NewProductPage: React.FC = () => {
       });
 
       const res = await productsAPI.create(payload as any);
-      const newId = (res as any).product?.id;
-      if (newId && files.length > 0) {
+      const productObj = (res as any).product ? (res as any).product : res;
+      const newId = productObj?.id;
+      if (!newId) {
+        setError('No se pudo obtener el ID del producto');
+        setSaving(false);
+        return;
+      }
+      if (files.length > 0) {
         await productsAPI.addImages(newId, files);
       }
-
       router.push('/inventory');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error creating product');
