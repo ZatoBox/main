@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Package } from 'lucide-react';
-import { productsAPI } from '@/services/api.service';
+import { productsAPI, categoriesAPI } from '@/services/api.service';
 import { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import InventoryHeader from '@/components/inventory/InventoryHeader';
@@ -19,6 +19,10 @@ const InventoryPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [inventoryItems, setInventoryItems] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    []
+  );
+  const [loadingCategories, setLoadingCategories] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -56,13 +60,23 @@ const InventoryPage: React.FC = () => {
     fetchInventory();
   }, [isAuthenticated, initialized]);
 
-  const categories = [
-    'all',
-    'Furniture',
-    'Textiles',
-    'Lighting',
-    'Electronics',
-  ];
+  useEffect(() => {
+    let active = true;
+    const loadCats = async () => {
+      setLoadingCategories(true);
+      try {
+        const res = await categoriesAPI.list();
+        if (active && (res as any).success)
+          setCategories((res as any).categories);
+      } finally {
+        if (active) setLoadingCategories(false);
+      }
+    };
+    loadCats();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -130,11 +144,18 @@ const InventoryPage: React.FC = () => {
     setIsDeleting(false);
   };
 
+  const categoryIdMap: Record<string, string> = Object.fromEntries(
+    categories.map((c) => [c.id, c.name])
+  );
+  const nameToId: Record<string, string> = Object.fromEntries(
+    categories.map((c) => [c.name, c.id])
+  );
   const filteredItems = inventoryItems.filter((item) => {
-    const matchesCategory =
-      categoryFilter === 'all' ||
-      (Array.isArray((item as any).category_ids) &&
-        (item as any).category_ids.includes(categoryFilter));
+    const ids = Array.isArray((item as any).category_ids)
+      ? (item as any).category_ids
+      : [];
+    const targetId = categoryFilter === 'all' ? null : nameToId[categoryFilter];
+    const matchesCategory = !targetId || ids.includes(targetId);
     const matchesStatus =
       statusFilter === 'all' || item.status === statusFilter;
     const matchesSearch = item.name
@@ -143,18 +164,22 @@ const InventoryPage: React.FC = () => {
     return matchesCategory && matchesStatus && matchesSearch;
   });
 
-  const uiItems = filteredItems.map((p) => ({
-    id: p.id,
-    name: p.name,
-    category: Array.isArray((p as any).category_ids)
-      ? (p as any).category_ids.length === 0
-        ? 'Uncategorized'
-        : `${(p as any).category_ids.length} categories`
-      : 'Uncategorized',
-    status: p.status ?? 'inactive',
-    stock: p.stock,
-    price: p.price,
-  }));
+  const uiItems = filteredItems.map((p) => {
+    const ids = Array.isArray((p as any).category_ids)
+      ? (p as any).category_ids
+      : [];
+    const names = ids
+      .map((id: string) => categoryIdMap[id])
+      .filter(Boolean) as string[];
+    return {
+      id: p.id,
+      name: p.name,
+      category: names.length === 0 ? 'Uncategorized' : names.join(', '),
+      status: p.status ?? 'inactive',
+      stock: p.stock,
+      price: p.price,
+    };
+  });
 
   if (loading) {
     return (
@@ -207,7 +232,7 @@ const InventoryPage: React.FC = () => {
 
       <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
         <InventoryFilters
-          categories={categories}
+          categories={['all', ...categories.map((c) => c.name)]}
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}
           statusFilter={statusFilter}
