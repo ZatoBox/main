@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1
-ENV PORT=5000
+ENV PORT=8000
 ENV WEB_CONCURRENCY=2
 WORKDIR /app
 
@@ -28,7 +28,6 @@ RUN groupadd -r app && useradd -r -g app app \
 
 USER app
 
-EXPOSE 5000
+EXPOSE 8000
 
-# Execute with gunicorn
-CMD ["sh", "-c", "exec gunicorn -k uvicorn.workers.UvicornWorker -w ${WEB_CONCURRENCY:-2} -b 0.0.0.0:${PORT:-5000} main:app"]
+CMD ["sh", "-c", "exec uvicorn main:app --reload --host 0.0.0.0 --port ${PORT:-8000}"]
