@@ -7,7 +7,11 @@ import HomeStats from '@/components/home/HomeStats';
 import SalesDrawer from '@/components/SalesDrawer';
 import PaymentScreen from '@/components/PaymentScreen';
 import PaymentSuccessScreen from '@/components/PaymentSuccessScreen';
-import { getActiveProducts, salesAPI } from '@/services/api.service';
+import {
+  getActiveProducts,
+  salesAPI,
+  categoriesAPI,
+} from '@/services/api.service';
 import type { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 
@@ -30,10 +34,13 @@ const HomePage: React.FC<HomePageProps> = ({
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    []
+  );
 
   // Shopping cart
   interface CartItem {
-    id: number;
+    id: string;
     name: string;
     price: number;
     stock: number;
@@ -77,6 +84,17 @@ const HomePage: React.FC<HomePageProps> = ({
     fetchProducts();
   }, [isAuthenticated]);
 
+  // Fetch categories
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await categoriesAPI.list();
+        if ((res as any).success) setCategories((res as any).categories);
+      } catch {}
+    };
+    loadCategories();
+  }, []);
+
   // Update products when page becomes visible
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -90,27 +108,44 @@ const HomePage: React.FC<HomePageProps> = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
+  // Map category ids to names
+  const categoryIdMap: Record<string, string> = useMemo(
+    () => Object.fromEntries(categories.map((c) => [c.id, c.name])),
+    [categories]
+  );
+
+  const enrichedProducts = useMemo(() => {
+    return products.map((p: any) => {
+      const ids = Array.isArray(p.category_ids) ? p.category_ids : [];
+      const names = ids.map((id: string) => categoryIdMap[id]).filter(Boolean);
+      return { ...p, category_names: names } as Product & {
+        category_names?: string[];
+      };
+    });
+  }, [products, categoryIdMap]);
+
   // Filter products based on search term
   const filteredProducts = useMemo(() => {
     if (!activeSearchTerm.trim()) {
-      return products;
+      return enrichedProducts;
     }
 
-    return products.filter((product) =>
+    return enrichedProducts.filter((product: any) =>
       product.name.toLowerCase().includes(activeSearchTerm.toLowerCase())
     );
-  }, [activeSearchTerm, products]);
+  }, [activeSearchTerm, enrichedProducts]);
 
   // When clicking on a product, add it to cart
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setIsDrawerOpen(true);
     setCartItems((prevCart) => {
-      const existing = prevCart.find((item) => item.id === product.id);
+      const pid = String(product.id);
+      const existing = prevCart.find((item) => item.id === pid);
       if (existing) {
         // Add quantity, respecting stock
         return prevCart.map((item) =>
-          item.id === product.id
+          item.id === pid
             ? { ...item, quantity: Math.min(item.quantity + 1, product.stock) }
             : item
         );
@@ -118,7 +153,7 @@ const HomePage: React.FC<HomePageProps> = ({
         return [
           ...prevCart,
           {
-            id: product.id,
+            id: pid,
             name: product.name,
             price: product.price,
             stock: product.stock,
@@ -145,26 +180,27 @@ const HomePage: React.FC<HomePageProps> = ({
   const handlePaymentSuccess = async (method: string) => {
     try {
       // Prepare sale data
-      const saleData = {
+      const saleData: any = {
         items: cartItems.map((item) => ({
           product_id: item.id,
           quantity: item.quantity,
           price: item.price,
         })),
         total: paymentTotal,
-        paymentMethod: method,
+        payment_method: method,
       };
 
       // Send sale to backend
-      const saleResponse = await salesAPI.create(saleData);
+      const saleResponse: any = await salesAPI.create(saleData);
 
-      if (saleResponse.success) {
+      if (saleResponse && saleResponse.success) {
         console.log('Sale created successfully:', saleResponse);
 
         // Update local inventory immediately
         setProducts((prevProducts) =>
           prevProducts.map((product) => {
-            const cartItem = cartItems.find((item) => item.id === product.id);
+            const pid = String(product.id);
+            const cartItem = cartItems.find((item) => item.id === pid);
             if (cartItem) {
               return {
                 ...product,
@@ -206,10 +242,13 @@ const HomePage: React.FC<HomePageProps> = ({
   };
 
   // Modify quantity of a product in cart
-  const updateCartItemQuantity = (productId: number, change: number) => {
+  const updateCartItemQuantity = (
+    productId: number | string,
+    change: number
+  ) => {
     setCartItems((prev) => {
       const updatedItems = prev.map((item) =>
-        item.id === productId
+        item.id === String(productId)
           ? { ...item, quantity: Math.max(0, item.quantity + change) }
           : item
       );
@@ -218,8 +257,10 @@ const HomePage: React.FC<HomePageProps> = ({
   };
 
   // Remove product from cart
-  const removeFromCart = (productId: number) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== productId));
+  const removeFromCart = (productId: number | string) => {
+    setCartItems((prev) =>
+      prev.filter((item) => item.id !== String(productId))
+    );
   };
 
   // Clear cart
@@ -340,7 +381,7 @@ const HomePage: React.FC<HomePageProps> = ({
         isOpen={isDrawerOpen && !isPaymentOpen && !isSuccessOpen}
         onClose={handleCloseDrawer}
         onNavigateToPayment={handleNavigateToPayment}
-        cartItems={cartItems}
+        cartItems={cartItems.map((ci) => ({ ...ci, id: Number(ci.id) })) as any}
         updateCartItemQuantity={updateCartItemQuantity}
         removeCartItem={removeFromCart}
         clearCart={clearCart}
@@ -358,7 +399,7 @@ const HomePage: React.FC<HomePageProps> = ({
         onNewOrder={handleNewOrder}
         paymentMethod={paymentMethod}
         total={paymentTotal}
-        items={cartItems}
+        items={cartItems.map((ci) => ({ ...ci, id: Number(ci.id) })) as any}
       />
     </>
   );
