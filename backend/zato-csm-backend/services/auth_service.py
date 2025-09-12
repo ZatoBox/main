@@ -10,6 +10,7 @@ from jwt import (
 )
 from config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from utils.password_utils import hash_password, verify_password
+from utils.cloudinary_utils import upload_profile_image
 
 
 class AuthService:
@@ -98,7 +99,12 @@ class AuthService:
         # Create user
         try:
             user_id = self.user_repo.create_user(
-                full_name, email, hashed_password, phone, address
+                full_name,
+                email,
+                hashed_password,
+                phone,
+                role="user",
+                user_timezone="UTC",
             )
             print(f"User created with ID: {user_id}")
         except Exception as e:
@@ -131,7 +137,7 @@ class AuthService:
             user_id = payload.get("user_id")
             if not user_id:
                 raise HTTPException(status_code=401, detail="Invalid Token")
-            user = self.user_repo.find_by_user_id(user_id)
+            user = self.user_repo.find_by_user_id(str(user_id))
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
 
@@ -148,10 +154,42 @@ class AuthService:
         users = self.user_repo.find_all_users()
         return {"success": True, "users": users}
 
-    def get_profile_user(self, user_id):
+    def get_profile_user(self, user_id: str):
         user = self.user_repo.find_by_user_id(user_id)
         return {"success": True, "user": user}
 
-    def update_profile(self, user_id: int, updates: dict):
+    def update_profile(self, user_id: str, updates: dict):
         user = self.user_repo.update_profile(user_id, updates)
         return {"success": True, "user": user}
+
+    def upload_profile_image(self, user_id: str, file):
+        try:
+            image_url = upload_profile_image(file)
+            updates = {"profile_image": image_url}
+            user = self.user_repo.update_profile(user_id, updates)
+            return {"success": True, "user": user}
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Error uploading profile image: {str(e)}"
+            )
+
+    def delete_profile_image(self, user_id: str):
+        try:
+            updates = {"profile_image": None}
+            user = self.user_repo.update_profile(user_id, updates)
+            return {"success": True, "user": user}
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Error deleting profile image: {str(e)}"
+            )
+
+    def update_profile_image(self, user_id: str, file):
+        try:
+            image_url = upload_profile_image(file)
+            updates = {"profile_image": image_url}
+            user = self.user_repo.update_profile(user_id, updates)
+            return {"success": True, "user": user}
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Error updating profile image: {str(e)}"
+            )

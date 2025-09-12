@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { Check, Download, Mail } from 'lucide-react';
 
@@ -36,22 +38,27 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
     }
   }, [isOpen]);
 
-  const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.quantity * item.price,
+    0
+  );
   const tax = subtotal * 0.15;
   const invoiceNumber = `INV-${Date.now().toString().slice(-6)}`;
   const currentDate = new Date().toLocaleDateString('en-US');
 
-  if (!isOpen) {return null;}
+  if (!isOpen) {
+    return null;
+  }
 
   return (
-    <div className="fixed inset-0 bg-bg-main z-50 flex flex-col animate-scale-in">
+    <div className='fixed inset-0 z-50 flex flex-col bg-zatobox-50 animate-scale-in'>
       {/* Confetti Animation */}
       {showConfetti && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className='absolute inset-0 overflow-hidden pointer-events-none'>
           {[...Array(20)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-2 h-2 bg-primary animate-bounce"
+              className='absolute w-2 h-2 bg-primary animate-bounce'
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 50}%`,
@@ -64,105 +71,128 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-center p-4 border-b border-divider bg-bg-surface relative">
-        <h1 className="text-lg font-semibold text-text-primary animate-slide-in-left">Payment Successful</h1>
+      <div className='relative flex items-center justify-center p-4 border-b border-[#CBD5E1] bg-white'>
+        <h1 className='text-lg font-semibold text-black animate-slide-in-left'>
+          Payment Successful
+        </h1>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto p-4 lg:p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
+      <div className='flex-1 overflow-y-auto'>
+        <div className='max-w-6xl p-4 mx-auto lg:p-8'>
+          <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
             {/* Left Side - Success Banner */}
-            <div className="flex flex-col items-center justify-center space-y-6 lg:pr-8 animate-stagger">
-
+            <div className='flex flex-col items-center justify-center space-y-6 lg:pr-8 animate-stagger'>
               {/* Animated Checkmark */}
-              <div className={`relative transition-all duration-500 ${
-                showCheckmark ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
-              }`}>
-                <div className="w-24 h-24 bg-success rounded-full flex items-center justify-center animate-pulse-glow">
-                  <Check size={48} className="text-white animate-bounce-in" />
+              <div
+                className={`relative transition-all duration-500 ${
+                  showCheckmark ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+                }`}
+              >
+                <div className='flex items-center justify-center w-24 h-24 rounded-full bg-success animate-pulse-glow'>
+                  <Check size={48} className='text-white animate-bounce-in' />
                 </div>
-                <div className="absolute inset-0 w-24 h-24 bg-success rounded-full animate-ping opacity-20"></div>
+                <div className='absolute inset-0 w-24 h-24 rounded-full bg-success animate-ping opacity-20'></div>
               </div>
 
               {/* Success Message */}
-              <div className="text-center space-y-2">
-                <h2 className="text-2xl font-bold text-text-primary animate-slide-in-left">Payment Confirmed!</h2>
-                <p className="text-text-secondary animate-slide-in-right">Your transaction has been processed successfully</p>
-                <div className="bg-gray-50 p-3 rounded-lg border border-divider animate-bounce-in">
-                  <span className="text-sm text-text-secondary">Payment method: </span>
-                  <span className="font-medium text-text-primary">{paymentMethod}</span>
+              <div className='space-y-2 text-center'>
+                <h2 className='text-2xl font-bold text-black animate-slide-in-left'>
+                  Payment Confirmed!
+                </h2>
+                <p className='text-[#CBD5E1] animate-slide-in-right'>
+                  Your transaction has been processed successfully
+                </p>
+                <div className='p-3 border rounded-lg bg-white border-[#CBD5E1] animate-bounce-in'>
+                  <span className='text-sm text-[#CBD5E1]'>
+                    Payment method:{' '}
+                  </span>
+                  <span className='font-medium text-black'>
+                    {paymentMethod}
+                  </span>
                 </div>
               </div>
 
               {/* Email Section */}
-              <div className="w-full max-w-md space-y-4 animate-fade-in">
-                <h3 className="text-lg font-semibold text-text-primary text-center">Get your receipt</h3>
-                <div className="flex space-x-2">
+              <div className='w-full max-w-md space-y-4 animate-fade-in'>
+                <h3 className='text-lg font-semibold text-center text-black'>
+                  Get your receipt
+                </h3>
+                <div className='flex space-x-2'>
                   <input
-                    type="email"
+                    type='email'
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="flex-1 px-4 py-3 border border-divider rounded-lg focus:ring-2 focus:ring-complement focus:border-transparent"
+                    placeholder='Enter your email'
+                    className='flex-1 px-4 py-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent'
                   />
-                  <button className="px-6 py-3 bg-complement text-white rounded-lg hover:bg-complement-700 transition-colors flex items-center">
-                    <Mail size={16} className="mr-2" />
+                  <button className='flex items-center px-6 py-3 text-black transition-colors rounded-lg bg-white hover:bg-zatobox-600'>
+                    <Mail size={16} className='mr-2' />
                     Send
                   </button>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md animate-fade-in">
+              <div className='flex flex-col w-full max-w-md gap-3 sm:flex-row animate-fade-in'>
                 <button
                   onClick={onNewOrder}
-                  className="flex-1 bg-primary text-black font-medium px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"
+                  className='flex-1 px-6 py-3 font-medium text-black transition-colors rounded-lg bg-[#fbd952] hover:bg-[#faca15] flex items-center justify-center'
                 >
                   New Order
                 </button>
-                <button className="flex-1 bg-gray-100 text-text-primary font-medium px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center">
-                  <Download size={16} className="mr-2" />
+                <button className='flex items-center justify-center flex-1 px-6 py-3 font-medium transition-colors bg-white rounded-lg text-black hover:bg-gray-200'>
+                  <Download size={16} className='mr-2' />
                   Download Receipt
                 </button>
               </div>
             </div>
 
             {/* Right Side - Invoice Details */}
-            <div className="bg-bg-surface rounded-lg border border-divider p-6 animate-slide-in-right">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-text-primary">Invoice</h3>
-                <div className="text-right">
-                  <div className="text-sm text-text-secondary">Invoice #</div>
-                  <div className="font-medium text-text-primary">{invoiceNumber}</div>
+            <div className='p-6 border rounded-lg bg-white border-[#CBD5E1] animate-slide-in-right'>
+              <div className='flex items-center justify-between mb-6'>
+                <h3 className='text-xl font-bold text-black'>Invoice</h3>
+                <div className='text-right'>
+                  <div className='text-sm text-[#6B7280]'>Invoice #</div>
+                  <div className='font-medium text-black'>{invoiceNumber}</div>
                 </div>
               </div>
 
-              <div className="space-y-4 mb-6">
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-secondary">Date:</span>
-                  <span className="text-text-primary">{currentDate}</span>
+              <div className='mb-6 space-y-4'>
+                <div className='flex justify-between text-sm'>
+                  <span className='text-[#6B7280]'>Date:</span>
+                  <span className='text-black'>{currentDate}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-secondary">Payment Method:</span>
-                  <span className="text-text-primary">{paymentMethod}</span>
+                <div className='flex justify-between text-sm'>
+                  <span className='text-[#6B7280]'>Payment Method:</span>
+                  <span className='text-black'>{paymentMethod}</span>
                 </div>
               </div>
 
               {/* Items List */}
-              <div className="border-t border-divider pt-4 mb-6">
-                <h4 className="font-semibold text-text-primary mb-3">Items</h4>
-                <div className="space-y-3">
+              <div className='pt-4 mb-6 border-t border-[#6B7280]'>
+                <h4 className='mb-3 font-semibold text-black'>Items</h4>
+                <div className='space-y-3'>
                   {items.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <div className="font-medium text-text-primary">{item.name}</div>
-                        <div className="text-sm text-text-secondary">Qty: {item.quantity}</div>
+                    <div
+                      key={item.id}
+                      className='flex items-center justify-between'
+                    >
+                      <div className='flex-1'>
+                        <div className='font-medium text-black'>
+                          {item.name}
+                        </div>
+                        <div className='text-sm text-[#6B7280]'>
+                          Qty: {item.quantity}
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-medium text-text-primary">${(item.price * item.quantity).toFixed(2)}</div>
-                        <div className="text-sm text-text-secondary">${item.price.toFixed(2)} each</div>
+                      <div className='text-right'>
+                        <div className='font-medium text-black'>
+                          ${(item.price * item.quantity).toFixed(2)}
+                        </div>
+                        <div className='text-sm text-[#6B7280]'>
+                          ${item.price.toFixed(2)} each
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -170,28 +200,31 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
               </div>
 
               {/* Totals */}
-              <div className="border-t border-divider pt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-secondary">Subtotal:</span>
-                  <span className="text-text-primary">${subtotal.toFixed(2)}</span>
+              <div className='pt-4 space-y-2 border-t border-[#6B7280]'>
+                <div className='flex justify-between text-sm'>
+                  <span className='text-[#6B7280]'>Subtotal:</span>
+                  <span className='text-black'>${subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-secondary">Tax (15%):</span>
-                  <span className="text-text-primary">${tax.toFixed(2)}</span>
+                <div className='flex justify-between text-sm'>
+                  <span className='text-[#6B7280]'>Tax (15%):</span>
+                  <span className='text-black'>${tax.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-lg font-bold border-t border-divider pt-2">
-                  <span className="text-text-primary">Total:</span>
-                  <span className="text-success">${total.toFixed(2)}</span>
+                <div className='flex justify-between pt-2 text-lg font-bold border-t border-[#6B7280]'>
+                  <span className='text-[#E28E18]'>Total:</span>
+                  <span className='text-success'>${total.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* Thank You Message */}
-              <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="text-center">
-                  <div className="text-green-600 mb-2">🎉</div>
-                  <h4 className="font-semibold text-green-800 mb-1">Thank you for your purchase!</h4>
-                  <p className="text-sm text-green-700">
-                    Your order has been processed successfully. You will receive a confirmation email shortly.
+              <div className='p-4 mt-6 border border-[#E28E18] rounded-lg bg-[#FEF9EC]'>
+                <div className='text-center'>
+                  <div className='mb-2 text-[#E28E18]'>🎉</div>
+                  <h4 className='mb-1 font-semibold text-black'>
+                    Thank you for your purchase!
+                  </h4>
+                  <p className='text-sm text-[#6B7280]'>
+                    Your order has been processed successfully. You will receive
+                    a confirmation email shortly.
                   </p>
                 </div>
               </div>

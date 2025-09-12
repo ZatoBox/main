@@ -219,4 +219,4 @@ installed.txt
 # Git artifacts
 filter-repo/
 .git/
-
+.next/

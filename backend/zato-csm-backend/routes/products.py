@@ -1,52 +1,99 @@
 from fastapi import (
     APIRouter,
-    Form,
-    UploadFile,
-    File,
     Depends,
     HTTPException,
     Body,
     Request,
+    Form,
+    File,
+    UploadFile,
 )
-from typing import List, Optional
-import os
-
-from models.product import ProductResponse, CreateProductRequest
+from typing import Optional, List
+from models.product import ProductResponse, CreateProductRequest, UpdateProductRequest
 from repositories.product_repositories import ProductRepository
 from utils.dependencies import get_current_user
-from config.database import get_db_connection
-
+from config.supabase import get_supabase_client
 from services.product_service import ProductService
 from utils.timezone_utils import get_user_timezone_from_request
 
 router = APIRouter(prefix="/api/products", tags=["products"])
 
-"""
-This function aims to create repository and service instance for this Route.
-"""
 
-
-def _get_product_service(db=Depends(get_db_connection)) -> ProductService:
-    product_repo = ProductRepository(db)  # postgres is default bank
+def _get_product_service(supabase=Depends(get_supabase_client)) -> ProductService:
+    product_repo = ProductRepository(supabase)
     return ProductService(product_repo)
 
 
 @router.post("/", response_model=ProductResponse)
 def create_product(
-    product_data: CreateProductRequest,
+    product_data: CreateProductRequest = Body(...),
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
     product = product_service.create_product(
         product_data,
-        creator_id=current_user['id'],
+        creator_id=current_user["id"],
     )
     return ProductResponse(**product)
 
 
+@router.post("/bulk", response_model=List[ProductResponse])
+def create_products_bulk(
+    products_data: List[CreateProductRequest] = Body(...),
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    products = []
+    for i, product_data in enumerate(products_data):
+        try:
+            product = product_service.create_product(
+                product_data,
+                creator_id=current_user["id"],
+            )
+            products.append(ProductResponse(**product))
+        except Exception as e:
+            # Si hay error (ej. SKU duplicado), intentar con SKU modificado
+            if "duplicate key value violates unique constraint" in str(e):
+                try:
+                    # Modificar el SKU agregando un sufijo
+                    modified_data = product_data.copy()
+                    modified_data.sku = f"{product_data.sku}_{i+1}"
+                    product = product_service.create_product(
+                        modified_data,
+                        creator_id=current_user["id"],
+                    )
+                    products.append(ProductResponse(**product))
+                except Exception as e2:
+                    # Si aún falla, saltar este producto
+                    print(f"Error creando producto {i+1}: {str(e2)}")
+                    continue
+            else:
+                # Otro error, saltar
+                print(f"Error creando producto {i+1}: {str(e)}")
+                continue
+    return products
+
+
+@router.get("/active")
+def list_active_products(
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    try:
+        products = product_service.list_products()
+        active_products = [
+            p for p in products if str(p.get("status", "")).lower() == "active"
+        ]
+        return {"success": True, "products": active_products}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching active products: {str(e)}"
+        )
+
+
 @router.get("/{product_id}")
 def get_product(
-    product_id: int,
+    product_id: str,
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
@@ -55,52 +102,18 @@ def get_product(
 
 
 @router.put("/{product_id}")
-async def update_product(
+def update_product(
+    product_id: str,
     request: Request,
-    product_id: int,
-    name: Optional[str] = Form(None),
-    description: Optional[str] = Form(None),
-    price: Optional[float] = Form(None),
-    stock: Optional[int] = Form(None),
-    category: Optional[str] = Form(None),
-    images: List[UploadFile] = File(None),
-    body: Optional[dict] = Body(None),
+    updates: UpdateProductRequest = Body(...),
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
     user_timezone = get_user_timezone_from_request(request)
 
-    updates = {}
-
-    if body:
-        updates.update(body)
-
-    if name is not None:
-        updates["name"] = name
-    if description is not None:
-        updates["description"] = description
-    if price is not None:
-        updates["price"] = price
-    if stock is not None:
-        updates["stock"] = stock
-    if category is not None:
-        updates["category"] = category
-
-    if images:
-        updates["images"] = images
-
-    if not updates:
-        try:
-            raw = await request.json()
-            if isinstance(raw, dict):
-                updates.update(raw)
-        except Exception:
-            pass
-
-    if not updates:
-        raise HTTPException(status_code=400, detail="No update fields provided")
-
-    product_updated = product_service.update_product(product_id, updates, user_timezone)
+    product_updated = product_service.update_product(
+        product_id, updates.dict(exclude_unset=True), user_timezone
+    )
     return {
         "success": True,
         "message": "Product updated successfully",
@@ -110,7 +123,7 @@ async def update_product(
 
 @router.delete("/{product_id}")
 def delete_product(
-    product_id: int,
+    product_id: str,
     current_user=Depends(get_current_user),
     product_service=Depends(_get_product_service),
 ):
@@ -134,3 +147,65 @@ def list_products(
         raise HTTPException(
             status_code=500, detail=f"Error fetching products: {str(e)}"
         )
+
+
+# CRUD for product images
+@router.post("/{product_id}/images")
+def add_product_images(
+    product_id: str,
+    images: List[UploadFile] = File(...),
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    from utils.cloudinary_utils import upload_multiple_images_from_files
+
+    image_urls = upload_multiple_images_from_files(images)
+    product_updated = product_service.add_images(product_id, image_urls)
+    return {
+        "success": True,
+        "message": "Images added successfully",
+        "product": product_updated,
+    }
+
+
+@router.get("/{product_id}/images")
+def get_product_images(
+    product_id: str,
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    images = product_service.get_images(product_id)
+    return {"success": True, "images": images}
+
+
+@router.put("/{product_id}/images")
+def update_product_images(
+    product_id: str,
+    images: List[UploadFile] = File(...),
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    from utils.cloudinary_utils import upload_multiple_images_from_files
+
+    image_urls = upload_multiple_images_from_files(images)
+    product_updated = product_service.update_images(product_id, image_urls)
+    return {
+        "success": True,
+        "message": "Images updated successfully",
+        "product": product_updated,
+    }
+
+
+@router.delete("/{product_id}/images/{image_index}")
+def delete_product_image(
+    product_id: str,
+    image_index: int,
+    current_user=Depends(get_current_user),
+    product_service=Depends(_get_product_service),
+):
+    product_updated = product_service.delete_image(product_id, image_index)
+    return {
+        "success": True,
+        "message": "Image deleted successfully",
+        "product": product_updated,
+    }

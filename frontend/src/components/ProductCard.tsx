@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Package } from 'lucide-react';
-import type { Product } from '../services/api';
+import { Product } from '@/types/index';
 
 interface ProductCardProps {
   product: Product;
@@ -8,139 +8,150 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
-  const handleClick = () => {
-    onClick(product);
+  const getImageUrls = () => {
+    if (
+      !product.images ||
+      !Array.isArray(product.images) ||
+      product.images.length === 0
+    )
+      return [];
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4444';
+    return product.images
+      .filter((v) => typeof v === 'string' && v.trim() !== '')
+      .map((raw) => {
+        if (/^(https?:\/\/|data:|blob:)/i.test(raw)) return raw;
+        if (/^\/\//.test(raw)) return `https:${raw}`;
+        return `${apiBase.replace(/\/$/, '')}${
+          raw.startsWith('/') ? '' : '/'
+        }${raw}`;
+      });
   };
-
-  const getImageUrl = () => {
-    if (product.image && typeof product.image === 'string') {
-      if (product.image.startsWith('http')) {
-        return product.image;
-      }
-      return `http://localhost:4444${product.image}`;
-    }
-    if (Array.isArray(product.images) && product.images.length > 0) {
-      const imageUrl = product.images[0];
-      if (typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
-        return imageUrl;
-      }
-      return `http://localhost:4444${imageUrl}`;
-    }
-    return null;
-  };
-
-  const imageUrl = getImageUrl();
+  const images = getImageUrls();
+  const [index, setIndex] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const unitLabel = (product as any).unit_name ?? 'per unit';
-
+  const startSlide = () => {
+    if (images.length <= 1) return;
+    if (intervalRef.current) return;
+    intervalRef.current = setInterval(() => {
+      setIndex((prev) => (prev + 1) % images.length);
+    }, 2000);
+  };
+  const stopSlide = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setIndex(0);
+  };
+  useEffect(
+    () => () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    },
+    []
+  );
   return (
     <div
-      onClick={handleClick}
-      className='relative overflow-hidden transition-all duration-300 ease-in-out transform bg-white border rounded-lg cursor-pointer group border-divider hover:scale-105 hover:shadow-lg hover:border-complement/30 animate-fade-in'
-      style={{
-        animationDelay: `${product.id * 100}ms`,
-      }}
+      onClick={() => onClick(product)}
+      onMouseEnter={startSlide}
+      onMouseLeave={stopSlide}
+      className='relative overflow-hidden transition-all duration-300 ease-in-out transform bg-white border rounded-lg cursor-pointer group border-gray-300 hover:scale-105 hover:shadow-lg hover:border-gray-300 animate-fade-in'
     >
-      {/* Stock Badge */}
       <div className='absolute z-10 top-3 right-3'>
         <span
-          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 bg-[#FEF3C7] ${
             product.stock > 10
-              ? 'bg-success-100 text-success-800 group-hover:bg-success-200'
+              ? 'text-success-800'
               : product.stock > 0
-              ? 'bg-warning-100 text-warning-800 group-hover:bg-warning-200'
-              : 'bg-error-100 text-error-800 group-hover:bg-error-200'
+              ? 'text-warning-800'
+              : 'text-error-800'
           }`}
         >
           <div
             className={`w-2 h-2 rounded-full mr-1 transition-all duration-300 ${
               product.stock > 10
-                ? 'bg-success-500'
+                ? 'bg-[#10B981]'
                 : product.stock > 0
-                ? 'bg-warning-500'
-                : 'bg-error-500'
+                ? 'bg-[#f0ad4e]'
+                : 'bg-[#d9534f]'
             }`}
           ></div>
           {product.stock} in stock
         </span>
       </div>
-
-      {/* Product Image */}
-      <div className='relative h-48 overflow-hidden transition-colors duration-300 bg-gray-100 group-hover:bg-gray-50'>
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={product.name}
-            className='object-cover w-full h-full transition-transform duration-500 transform group-hover:scale-110'
-            onError={(e) => {
-              // Si la imagen falla, mostrar el placeholder
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              target.nextElementSibling?.classList.remove('hidden');
-            }}
-          />
-        ) : null}
-
-        {/* Fallback placeholder */}
-        <div
-          className={`w-full h-full flex items-center justify-center ${
-            imageUrl ? 'hidden' : ''
-          }`}
-        >
-          <div className='text-gray-400 transition-colors duration-300 group-hover:text-gray-500'>
-            <Package className='w-16 h-16' />
+      <div className='relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100'>
+        {images.length > 0 ? (
+          <div className='w-full h-full overflow-hidden'>
+            <div
+              className='flex w-full h-full transition-transform duration-700 ease-in-out'
+              style={{ transform: `translateX(-${index * 100}%)` }}
+            >
+              {images.map((src, i) => (
+                <div key={i} className='w-full h-48 shrink-0 relative'>
+                  <img
+                    src={src}
+                    alt={product.name}
+                    loading='lazy'
+                    draggable={false}
+                    className='object-cover w-full h-full select-none'
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.visibility =
+                        'hidden';
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* Overlay on hover */}
-        <div className='absolute inset-0 transition-all duration-300 bg-black bg-opacity-0 group-hover:bg-opacity-10'></div>
+        ) : (
+          <div className='absolute inset-0 flex items-center justify-center'>
+            <div className='text-gray-400'>
+              <Package className='w-16 h-16' />
+            </div>
+          </div>
+        )}
+        <div className='absolute inset-0 transition-all duration-300 bg-black/0 group-hover:bg-black/10' />
       </div>
-
-      {/* Product Info */}
       <div className='p-4 space-y-3'>
-        {/* Category */}
         <div className='flex items-center justify-between'>
-          <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-text-secondary group-hover:text-complement'>
-            {product.category ?? ''}
-          </span>
+          {Array.isArray((product as any).category_names) &&
+          (product as any).category_names.length > 0 ? (
+            <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
+              {(product as any).category_names.join(', ')}
+            </span>
+          ) : product.category_ids && product.category_ids.length > 0 ? (
+            <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
+              {product.category_ids.join(', ')}
+            </span>
+          ) : (
+            <span />
+          )}
           {product.sku && (
-            <span className='text-xs transition-colors duration-300 text-text-secondary group-hover:text-text-primary'>
+            <span className='text-xs transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
               {product.sku}
             </span>
           )}
         </div>
-
-        {/* Product Name */}
-        <h3 className='text-lg font-semibold transition-colors duration-300 text-text-primary group-hover:text-complement line-clamp-2'>
+        <h3 className='text-lg font-semibold transition-colors duration-300 text-black/75 group-hover:text-black line-clamp-2'>
           {product.name}
         </h3>
-
-        {/* Description */}
         {product.description ? (
-          <p className='text-sm transition-colors duration-300 text-text-secondary line-clamp-2 group-hover:text-text-primary'>
+          <p className='text-sm transition-colors duration-300 text-gray-500 line-clamp-2 group-hover:text-gray-500'>
             {product.description}
           </p>
         ) : null}
-
-        {/* Price and Action */}
         <div className='flex items-center justify-between pt-2'>
           <div className='flex flex-col'>
-            <span className='text-2xl font-bold transition-colors duration-300 text-text-primary group-hover:text-complement'>
+            <span className='text-2xl font-bold transition-colors duration-300  text-black group-hover:text-zatobox-500'>
               ${product.price.toFixed(2)}
             </span>
-            <span className='text-xs transition-colors duration-300 text-text-secondary group-hover:text-text-primary'>
+            <span className='text-xs transition-colors duration-300 text-gray-500  group-hover:text-gray-500'>
               {unitLabel}
             </span>
           </div>
-
-          {/* Add to Cart Button */}
-          <button className='px-4 py-2 text-sm font-medium text-white transition-all duration-300 ease-out transform translate-y-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-0 bg-complement hover:bg-complement-600 hover:shadow-xl'>
-            Add
-          </button>
         </div>
       </div>
-
-      {/* Click indicator */}
-      <div className='absolute inset-0 transition-all duration-300 border-2 border-transparent rounded-lg pointer-events-none group-hover:border-complement/20'></div>
+      <div className='absolute inset-0 transition-all duration-300 border-2 border-transparent rounded-lg pointer-events-none group-hover:border-zatobox-500/20'></div>
     </div>
   );
 };

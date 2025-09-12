@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
@@ -22,51 +22,43 @@ class ProductUnity(str, Enum):
     PER_METRO = "Per metro"
 
 
-class ProductCategory(str, Enum):
-    FURNITURE = "Furniture"
-    TEXTILES = "Textiles"
-    LIGHTING = "Lighting"
-    ELECTRONICS = "Electronics"
-    DECORATION = "Decoration"
-    OFFICE = "Office"
-    GAMING = "Gaming"
-
-
 class CreateProductRequest(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     name: str = Field(..., min_length=1)
     price: float = Field(..., gt=0)
     stock: int = Field(..., ge=0)
     unit: ProductUnity = Field(...)
     product_type: ProductType = Field(...)
-    category: str = Field(...)
+    category_ids: list[str] = Field(
+        default_factory=list, description="Lista de UUIDs de categorías"
+    )
 
-    description: Optional[str] = None
-    sku: Optional[str] = Field(None, max_length=255)
-    weight: Optional[float] = Field(None, gt=0)
+    description: str = Field(..., description="Descripción del producto")
+    sku: str = Field(..., max_length=255, description="SKU del producto")
+    weight: Optional[float] = Field(
+        None, gt=0, description="Peso (columna se llama 'weight')"
+    )
     localization: Optional[str] = None
-    min_stock: int = Field(0, ge=0)
-    status: ProductStatus = Field(ProductStatus.ACTIVE)
+    status: ProductStatus = Field(..., description="Estado del producto")
+    min_stock: int = Field(0, ge=0, description="Stock mínimo")
 
-    @validator("sku")
+    @field_validator("sku")
+    @classmethod
     def _normalize_sku(cls, v):
         if v is not None and v.strip() == "":
             return None
         return v
 
-    @validator("category")
-    def _validate_category(cls, v):
-        valid = {c.value for c in ProductCategory}
-        if v not in valid:
-            raise ValueError(f"Invalid category. Allowed: {', '.join(sorted(valid))}")
-        return v
-
 
 class UpdateProductRequest(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
     price: Optional[float] = Field(None, gt=0)
     stock: Optional[int] = Field(None, ge=0)
-    category: Optional[str] = None
+    category_ids: Optional[list[str]] = None
     sku: Optional[str] = Field(None, max_length=255)
     weight: Optional[float] = Field(None, ge=0)
     localization: Optional[str] = None
@@ -75,34 +67,24 @@ class UpdateProductRequest(BaseModel):
     product_type: Optional[ProductType] = None
     unit: Optional[ProductUnity] = None
 
-    @validator("category")
-    def _validate_category_update(cls, v):
-        if v is None:
-            return v
-        valid = {c.value for c in ProductCategory}
-        if v not in valid:
-            raise ValueError(f"Invalid category. Allowed: {', '.join(sorted(valid))}")
-        return v
-
 
 class ProductResponse(BaseModel):
-    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
     name: str
     description: Optional[str]
     price: float
     stock: int
     min_stock: int
-    category: str
+    category_ids: List[str] = []
     images: Optional[List[str]] = []
     status: str
     weight: Optional[float]
     sku: Optional[str]
-    creator_id: Optional[int]
+    creator_id: Optional[str]
     unit: str
     product_type: str
     created_at: datetime
     last_updated: datetime
     localization: Optional[str]
-
-    class Config:
-        from_attributes = True
