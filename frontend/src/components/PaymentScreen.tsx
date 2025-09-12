@@ -80,7 +80,11 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
         }
 
         try {
-          const response = await checkoutCart(cartAmount);
+          const response = await checkoutCart({
+            cartAmount,
+            userId: '',
+            items: []
+          });
           window.location.href = response.url;
         } catch (error) {
           console.error('Error creating checkout:', error);

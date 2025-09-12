@@ -81,7 +81,7 @@ const WebFooter: React.FC = () => {
           <div>
             <h4 className='text-md font-medium mb-4'>Contact</h4>
             <p className='text-sm'>
-              Last updated: {new Date(layout.last_updated).toLocaleDateString()}
+              Last updated: {layout.last_updated ? new Date(layout.last_updated).toLocaleDateString() : 'N/A'}
             </p>
           </div>
         </div>
