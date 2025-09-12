@@ -80,7 +80,7 @@ def list_active_products(
     product_service=Depends(_get_product_service),
 ):
     try:
-        products = product_service.list_products()
+        products = product_service.list_products(current_user["id"])
         active_products = [
             p for p in products if str(p.get("status", "")).lower() == "active"
         ]
@@ -141,7 +141,7 @@ def list_products(
     product_service=Depends(_get_product_service),
 ):
     try:
-        products = product_service.list_products()
+        products = product_service.list_products(current_user["id"])
         return {"success": True, "products": products}
     except Exception as e:
         raise HTTPException(

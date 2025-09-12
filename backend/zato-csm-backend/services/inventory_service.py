@@ -10,9 +10,8 @@ class InventoryService:
         self.supabase = supabase
         self.inventory_repo = InventoryRepository(supabase)
 
-    def get_inventory(self) -> List[Product]:
-        """Obtiene todos los inventories (solo para admin)"""
-        return []
+    def get_inventory(self, user_id: str) -> List[Product]:
+        return self.get_inventory_by_user(user_id)
 
     def get_inventory_by_user(self, user_id: str) -> List[Product]:
         """Obtiene el inventory de un usuario específico"""

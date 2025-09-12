@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { authAPI } from '@/services/api.service';
+import { useAuth } from '@/context/auth-store';
 
 const validationSchema = Yup.object().shape({
   full_name: Yup.string().required('Full name is required'),
@@ -25,6 +26,7 @@ const validationSchema = Yup.object().shape({
 
 const RegisterForm: React.FC = () => {
   const router = useRouter();
+  const { register: registerUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,11 +43,8 @@ const RegisterForm: React.FC = () => {
         phone: values.phone,
       };
 
-      console.log('[RegisterForm] payload', payload);
-      const res = await authAPI.register(payload as any);
-      console.log('[RegisterForm] success', res);
-
-      router.push('/');
+      await registerUser(payload as any, true);
+      router.push('/home');
     } catch (e: any) {
       console.error('[RegisterForm] error', e);
       const msg =
