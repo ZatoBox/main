@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, Printer, ChevronDown } from 'lucide-react';
+import React from "react";
+import { Search, Printer, ChevronDown } from "lucide-react";
 
 interface Props {
   categories: string[];
@@ -21,80 +21,68 @@ const InventoryFilters: React.FC<Props> = ({
   setSearchTerm,
 }) => {
   return (
-    <div className='pb-4 mt-4'>
-      <div className='flex flex-wrap items-center gap-3'>
-        <div className='relative'>
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className='px-4 py-2 pr-8 text-sm border rounded-lg appearance-none bg-[#FFFFFF] border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent text-[#000000]'
-          >
-            <option value='all'>All Categories</option>
-            {categories.slice(1).map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            size={16}
-            className='absolute transform -translate-y-1/2 pointer-events-none right-2 top-1/2 text-zatobox-600'
-          />
-        </div>
+    <div className="pb-4 mt-4">
+  <div className="flex flex-wrap gap-3">
+    {/* Filtros de categoría y estado */}
+    <div className="flex flex-wrap gap-3 w-full lg:w-auto">
+      <div className="relative">
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="px-4 py-2 pr-8 text-sm border rounded-lg appearance-none bg-[#FFFFFF] border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent text-[#000000]"
+        >
+          <option value="all">All Categories</option>
+          {categories.slice(1).map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          size={16}
+          className="absolute transform -translate-y-1/2 pointer-events-none right-2 top-1/2 text-zatobox-600"
+        />
+      </div>
 
-        <div className='flex p-1 bg-[#FFFFFF] rounded-lg border border-[#CBD5E1]'>
+      <div className="flex p-1 bg-[#FFFFFF] rounded-lg border border-[#CBD5E1] flex-wrap gap-1">
+        {['all', 'active', 'inactive'].map((status) => (
           <button
-            onClick={() => setStatusFilter('all')}
+            key={status}
+            onClick={() => setStatusFilter(status)}
             className={`px-3 py-1 rounded-md text-sm transition-colors ${
-              statusFilter === 'all'
+              statusFilter === status
                 ? 'bg-[#F88612] text-[#FFFFFF] shadow-sm'
                 : 'text-[#000000] hover:text-zatobox-900'
             }`}
           >
-            All
+            {status.charAt(0).toUpperCase() + status.slice(1)}
           </button>
-          <button
-            onClick={() => setStatusFilter('active')}
-            className={`px-3 py-1 rounded-md text-sm  transition-colors ${
-              statusFilter === 'active'
-                ? 'bg-[#F88612]  text-[#FFFFFF] shadow-sm'
-                : 'text-[#000000] hover:text-zatobox-900'
-            }`}
-          >
-            Active
-          </button>
-          <button
-            onClick={() => setStatusFilter('inactive')}
-            className={`px-3 py-1 rounded-md text-sm  transition-colors ${
-              statusFilter === 'inactive'
-                ? 'bg-[#F88612]  text-[#FFFFFF] shadow-sm'
-                : 'text-[#000000] hover:text-zatobox-900'
-            }`}
-          >
-            Inactive
-          </button>
-        </div>
-
-        <div className='flex items-center ml-auto space-x-2'>
-          <div className='relative'>
-            <Search
-              size={16}
-              className='absolute transform -translate-y-1/2 left-3 top-1/2 text-zatobox-600'
-            />
-            <input
-              type='text'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder='Search...'
-              className='w-48 py-2 pl-10 pr-4 text-sm border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-[#FFFFFF] text-zatobox-900'
-            />
-          </div>
-          <button className='p-2 transition-colors rounded-lg hover:bg-zatobox-100'>
-            <Printer size={20} className='text-zatobox-600' />
-          </button>
-        </div>
+        ))}
       </div>
     </div>
+
+    {/* Search + Print */}
+    <div className="flex w-full lg:w-auto lg:flex-1 items-center space-x-2 mt-2 lg:mt-0">
+      <div className="relative flex-1 min-w-0">
+        <Search
+          size={16}
+          className="absolute transform -translate-y-1/2 left-3 top-1/2 text-zatobox-600"
+        />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search..."
+          className="w-full py-2 pl-10 pr-4 text-sm border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent bg-[#FFFFFF] text-zatobox-900 min-w-0"
+        />
+      </div>
+      <button className="p-2 transition-colors rounded-lg hover:bg-zatobox-100 flex-shrink-0">
+        <Printer size={20} className="text-zatobox-600" />
+      </button>
+    </div>
+  </div>
+</div>
+
   );
 };
 

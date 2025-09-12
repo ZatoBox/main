@@ -110,7 +110,6 @@ const ProfilePage: React.FC = () => {
 
       <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-          {/* Sidebar */}
           <div className="hidden lg:block">
             <Sidebar
               sections={sections}
@@ -119,7 +118,6 @@ const ProfilePage: React.FC = () => {
             />
           </div>
 
-          {/* Mobile Section Selector */}
           <div className="mb-6 lg:hidden">
             <div className="overflow-hidden border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]">
               {sections.map((s) => (
@@ -138,9 +136,7 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Contenedor unificado con padding y border constante */}
             <div className="p-6 mb-6 border rounded-lg shadow-sm bg-bg-surface border-[#CBD5E1] min-h-[600px]">
               <h2 className="mb-6 text-xl font-semibold text-text-primary">
                 {sections.find((s) => s.id === activeSection)?.name}
