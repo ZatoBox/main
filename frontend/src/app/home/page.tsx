@@ -289,9 +289,7 @@ const HomePage: React.FC<HomePageProps> = ({
       <div className='flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in'>
         <div className='text-center'>
           <div className='w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary animate-pulse-glow'></div>
-          <p className='text-text-secondary animate-slide-in-left'>
-            Loading products...
-          </p>
+          <div className="loader"></div> 
         </div>
       </div>
     );

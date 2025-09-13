@@ -395,12 +395,10 @@ const PluginStorePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className='flex items-center justify-center min-h-screen bg-bg-main'>
-        <div className='text-center'>
-          <div className='w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary'></div>
-          <p className='text-sm sm:text-base text-text-secondary'>
-            Loading Plugin Store...
-          </p>
+     <div className="flex items-center justify-center min-h-screen  bg-bg-main">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
+          <div className="loader"></div>
         </div>
       </div>
     );

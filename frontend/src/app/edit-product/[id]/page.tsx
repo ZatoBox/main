@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { productsAPI, categoriesAPI } from '@/services/api.service';
-import { Product } from '@/types/index';
-import { useAuth } from '@/context/auth-store';
-import EditHeader from '@/components/edit-product/EditHeader';
-import ProductForm from '@/components/edit-product/ProductForm';
-import ImagesUploader from '@/components/edit-product/ImagesUploader';
-import Categorization from '@/components/edit-product/Categorization';
-import InventoryPanel from '@/components/edit-product/InventoryPanel';
-import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
+import React, { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { productsAPI, categoriesAPI } from "@/services/api.service";
+import { Product } from "@/types/index";
+import { useAuth } from "@/context/auth-store";
+import EditHeader from "@/components/edit-product/EditHeader";
+import ProductForm from "@/components/edit-product/ProductForm";
+import ImagesUploader from "@/components/edit-product/ImagesUploader";
+import Categorization from "@/components/edit-product/Categorization";
+import InventoryPanel from "@/components/edit-product/InventoryPanel";
+import DeleteConfirmModal from "@/components/inventory/DeleteConfirmModal";
 
-const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
 const MAX_FILES = 4;
 const MAX_SIZE = 5 * 1024 * 1024;
 
@@ -25,21 +25,21 @@ const EditProductPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    productType: '',
-    name: '',
-    description: '',
-    location: '',
-    weight: '',
-    price: '',
-    inventoryQuantity: '',
-    lowStockAlert: '',
-    sku: '',
+    productType: "",
+    name: "",
+    description: "",
+    location: "",
+    weight: "",
+    price: "",
+    inventoryQuantity: "",
+    lowStockAlert: "",
+    sku: "",
   });
   const [originalProduct, setOriginalProduct] = useState<Product | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [togglingStatus, setTogglingStatus] = useState(false);
-  const [status, setStatus] = useState<'active' | 'inactive' | ''>('');
+  const [status, setStatus] = useState<"active" | "inactive" | "">("");
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -70,8 +70,8 @@ const EditProductPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!id || typeof id !== 'string') {
-      setError('Invalid product id');
+    if (!id || typeof id !== "string") {
+      setError("Invalid product id");
       setLoading(false);
       return;
     }
@@ -86,22 +86,22 @@ const EditProductPage: React.FC = () => {
       const res = await productsAPI.getById(id!);
       const prod = (res as any).product as Product;
       if (!prod) {
-        setError('Product not found');
+        setError("Product not found");
         setLoading(false);
         return;
       }
       setOriginalProduct(prod);
-      setStatus((prod.status as 'active' | 'inactive') ?? '');
+      setStatus((prod.status as "active" | "inactive") ?? "");
       setFormData({
-        productType: prod.product_type ?? '',
-        name: prod.name ?? '',
-        description: prod.description ?? '',
-        location: prod.localization ?? '',
-        weight: prod.weight != null ? String(prod.weight) : '',
-        price: prod.price != null ? String(prod.price) : '',
-        inventoryQuantity: prod.stock != null ? String(prod.stock) : '',
-        lowStockAlert: prod.min_stock != null ? String(prod.min_stock) : '',
-        sku: prod.sku ?? '',
+        productType: prod.product_type ?? "",
+        name: prod.name ?? "",
+        description: prod.description ?? "",
+        location: prod.localization ?? "",
+        weight: prod.weight != null ? String(prod.weight) : "",
+        price: prod.price != null ? String(prod.price) : "",
+        inventoryQuantity: prod.stock != null ? String(prod.stock) : "",
+        lowStockAlert: prod.min_stock != null ? String(prod.min_stock) : "",
+        sku: prod.sku ?? "",
       });
       setSelectedCategories(
         Array.isArray((prod as any).category_ids)
@@ -110,7 +110,7 @@ const EditProductPage: React.FC = () => {
       );
       setExistingImages((prod.images || []).slice(0, MAX_FILES));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading product');
+      setError(err instanceof Error ? err.message : "Error loading product");
     } finally {
       setLoading(false);
     }
@@ -133,27 +133,27 @@ const EditProductPage: React.FC = () => {
     setSaving(true);
     setError(null);
     if (!isAuthenticated) {
-      setError('You must be logged in to update products');
+      setError("You must be logged in to update products");
       setSaving(false);
       return;
     }
 
     if (!formData.name || !formData.price) {
-      setError('Name and price are required');
+      setError("Name and price are required");
       setSaving(false);
       return;
     }
 
     const priceNum = Number(formData.price);
     if (!Number.isFinite(priceNum) || priceNum <= 0) {
-      setError('Price must be greater than 0');
+      setError("Price must be greater than 0");
       setSaving(false);
       return;
     }
 
-    const stockNum = parseInt(formData.inventoryQuantity || '0', 10);
+    const stockNum = parseInt(formData.inventoryQuantity || "0", 10);
     if (!Number.isFinite(stockNum) || Number.isNaN(stockNum) || stockNum < 0) {
-      setError('Inventory quantity must be 0 or more');
+      setError("Inventory quantity must be 0 or more");
       setSaving(false);
       return;
     }
@@ -182,9 +182,9 @@ const EditProductPage: React.FC = () => {
       if (newFiles.length > 0) {
         await uploadNewImages();
       }
-      router.push('/inventory');
+      router.push("/inventory");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error updating product');
+      setError(err instanceof Error ? err.message : "Error updating product");
     } finally {
       setSaving(false);
     }
@@ -198,7 +198,7 @@ const EditProductPage: React.FC = () => {
       setNewFiles([]);
       await fetchProduct();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error uploading images');
+      setError(e instanceof Error ? e.message : "Error uploading images");
     } finally {
       setUploadingImages(false);
     }
@@ -213,9 +213,9 @@ const EditProductPage: React.FC = () => {
     try {
       setIsDeleting(true);
       await productsAPI.delete(id);
-      router.push('/inventory');
+      router.push("/inventory");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error deleting product');
+      setError(err instanceof Error ? err.message : "Error deleting product");
     } finally {
       setIsDeleting(false);
       setDeleteConfirmOpen(false);
@@ -231,11 +231,11 @@ const EditProductPage: React.FC = () => {
     if (!id) return;
     setTogglingStatus(true);
     try {
-      const newStatus = status === 'active' ? 'inactive' : 'active';
+      const newStatus = status === "active" ? "inactive" : "active";
       await productsAPI.update(id, { status: newStatus } as any);
-      setStatus(newStatus as 'active' | 'inactive');
+      setStatus(newStatus as "active" | "inactive");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error toggling status');
+      setError(err instanceof Error ? err.message : "Error toggling status");
     } finally {
       setTogglingStatus(false);
     }
@@ -259,7 +259,7 @@ const EditProductPage: React.FC = () => {
       await productsAPI.deleteImage(id, index);
       setExistingImages((prev) => prev.filter((_, i) => i !== index));
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error deleting image');
+      setError(e instanceof Error ? e.message : "Error deleting image");
     }
   };
   const handleRemoveNew = (index: number) => {
@@ -276,17 +276,24 @@ const EditProductPage: React.FC = () => {
       setNewFiles([]);
       await fetchProduct();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error replacing images');
+      setError(e instanceof Error ? e.message : "Error replacing images");
     }
   };
 
   if (loading)
-    return <div className='min-h-screen  bg-bg-main'>Loading product...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen  bg-bg-main">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
+          <div className="loader"></div>
+        </div>
+      </div>
+    );
 
   return (
-    <div className='min-h-screen  bg-bg-main'>
+    <div className="min-h-screen  bg-bg-main">
       <EditHeader
-        onBack={() => router.push('/inventory')}
+        onBack={() => router.push("/inventory")}
         onDelete={handleDelete}
         onToggleStatus={handleToggleStatus}
         onSave={handleSave}
@@ -295,14 +302,14 @@ const EditProductPage: React.FC = () => {
         togglingStatus={togglingStatus}
       />
 
-      <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+      <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {error && (
-          <div className='p-2 mb-4 text-sm text-white bg-red-600 rounded'>
+          <div className="p-2 mb-4 text-sm text-white bg-red-600 rounded">
             {error}
           </div>
         )}
-        <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
-          <div className='space-y-6'>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <div className="space-y-6">
             <ImagesUploader
               existingImages={existingImages}
               newFiles={newFiles}
@@ -323,7 +330,7 @@ const EditProductPage: React.FC = () => {
             />
           </div>
 
-          <div className='space-y-6'>
+          <div className="space-y-6">
             <InventoryPanel
               formData={formData as any}
               onChange={handleInputChange}
