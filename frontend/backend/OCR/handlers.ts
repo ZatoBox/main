@@ -1,0 +1,112 @@
+import { createGeminiClient } from './client';
+
+const RATE_LIMIT_SECONDS = 300;
+const userLastRequest: Map<string, number> = new Map();
+
+export type OCRResponse = {
+  text: string;
+  confidence?: number;
+  language?: string;
+  products?: Array<Record<string, unknown>>;
+};
+
+export function parseAuthHeader(authHeader: string | null | undefined) {
+  if (!authHeader) return 'anonymous';
+  return authHeader.startsWith('Bearer ')
+    ? authHeader.replace('Bearer ', '')
+    : authHeader;
+}
+
+export const ALLOWED_TYPES = [
+  'image/png',
+  'image/jpg',
+  'image/jpeg',
+  'image/webp',
+  'application/pdf',
+];
+
+export async function processImageFile(params: {
+  file: File;
+  authHeader: string | null | undefined;
+  env: any;
+}): Promise<OCRResponse> {
+  const { file, authHeader, env } = params;
+  const userId = parseAuthHeader(authHeader);
+  const now = Date.now() / 1000;
+  const last = userLastRequest.get(userId) ?? 0;
+  if (now - last < RATE_LIMIT_SECONDS)
+    throw { status: 429, message: 'rate_limited' };
+  userLastRequest.set(userId, now);
+
+  if (!ALLOWED_TYPES.includes(file.type))
+    throw { status: 400, message: 'invalid_type' };
+
+  const apiKey = env.GEMINI_API_KEY;
+  if (!apiKey) throw { status: 500, message: 'GEMINI_API_KEY not configured' };
+
+  const client = createGeminiClient(apiKey);
+
+  const arrayBuffer = await file.arrayBuffer();
+  const uint8 = new Uint8Array(arrayBuffer);
+  const base64Data = Buffer.from(uint8).toString('base64');
+
+  const prompt = env.OCR_PROMPT || '';
+
+  const parts = [
+    { text: prompt },
+    { inlineData: { mimeType: file.type, data: base64Data } },
+  ];
+
+  const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const result = await model.generateContent(parts);
+  const response = result.response;
+
+  let extractedText = response.text();
+
+  extractedText = extractedText.trim();
+  if (extractedText.startsWith('```json'))
+    extractedText = extractedText.slice(7);
+  if (extractedText.endsWith('```')) extractedText = extractedText.slice(0, -3);
+  extractedText = extractedText.trim();
+
+  try {
+    const parsed = JSON.parse(extractedText);
+    let products = null;
+    if (Array.isArray(parsed)) products = parsed;
+    else if (parsed && typeof parsed === 'object') {
+      if ('productos' in parsed) products = (parsed as any).productos;
+      else products = [parsed];
+    }
+    return { text: extractedText, confidence: 0.95, language: 'es', products };
+  } catch (e) {
+    return { text: extractedText, confidence: 0.95, language: 'es' };
+  }
+}
+
+export async function sendBulk(params: {
+  data: any;
+  authHeader: string | null | undefined;
+  env: any;
+}) {
+  const { data, authHeader, env } = params;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (authHeader) {
+    const token = authHeader.startsWith('Bearer ')
+      ? authHeader.replace('Bearer ', '')
+      : authHeader;
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const res = await fetch(`/api/products/bulk`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(data),
+  });
+  const text = await res.text();
+  try {
+    return { status: res.status, ok: res.ok, body: JSON.parse(text) };
+  } catch {
+    return { status: res.status, ok: res.ok, body: text };
+  }
+}
