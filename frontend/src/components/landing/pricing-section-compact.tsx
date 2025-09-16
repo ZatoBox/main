@@ -8,7 +8,7 @@ import { getTranslation } from '@/utils/translations';
 import { useAuth } from '@/context/auth-store';
 import { createCheckout } from '@/services/payments-service';
 
-export function PricingSection() {
+export function PricingSectionCompact() {
   const { language } = useLanguageContext();
   const [isAnnual, setIsAnnual] = useState(true);
   const { user } = useAuth();
@@ -58,18 +58,10 @@ export function PricingSection() {
 
   const handleSubscribe = async () => {
     try {
-      if (process.env.NEXT_PUBLIC_ENABLE_POLAR !== 'true') {
-        window.location.href = '/login';
-        return;
-      }
       const userId = user?.id;
-      if (!userId) {
-        window.location.href = '/login';
-        return;
-      }
       const cycle = isAnnual ? 'annual' : 'monthly';
       const plan = 'starter';
-      const res = await createCheckout(userId, plan, cycle);
+      const res = await createCheckout(userId || '', plan, cycle);
       if (res?.url) {
         window.location.href = res.url;
       }
@@ -78,49 +70,44 @@ export function PricingSection() {
 
   return (
     <section className='flex flex-col items-center justify-start w-full px-5 py-8 my-0 overflow-hidden md:py-14'>
+      <h1 className='mt-2 text-3xl font-bold mb-2'>Upgrade Plan</h1>
       <div className='relative flex flex-col items-center self-stretch justify-center gap-2 py-0'>
         <div className='flex flex-col items-center justify-start gap-4'>
-          <h2 className='text-center text-black text-4xl md:text-5xl font-semibold leading-tight md:leading-[40px]'>
-            {getTranslation(language, 'pricing.title')}
-          </h2>
-          <p className='self-stretch text-sm font-medium leading-tight text-center text-[#404040]'>
-            {getTranslation(language, 'pricing.subtitle')}
-          </p>
-        </div>
-        <div className='pt-4'>
-          <div className='p-0.5 bg-muted rounded-lg outline-1 outline-[#0307120a] outline-offset-[-1px] flex justify-start items-center gap-1 md:mt-0'>
-            <button
-              onClick={() => setIsAnnual(true)}
-              className={`pl-2 pr-1 py-1 flex justify-start items-start gap-2 rounded-md ${
-                isAnnual
-                  ? 'bg-[#F2F2F2] shadow-[0px_1px_1px_-0.5px_rgba(0,0,0,0.08)]'
-                  : ''
-              }`}
-            >
-              <span
-                className={`text-center text-sm font-medium leading-tight ${
-                  isAnnual ? 'text-black' : 'text-[#404040]'
+          <div className='pt-4'>
+            <div className='p-0.5 bg-muted rounded-lg outline-1 outline-[#0307120a] outline-offset-[-1px] flex justify-start items-center gap-1 md:mt-0'>
+              <button
+                onClick={() => setIsAnnual(true)}
+                className={`pl-2 pr-1 py-1 flex justify-start items-start gap-2 rounded-md ${
+                  isAnnual
+                    ? 'bg-[#F2F2F2] shadow-[0px_1px_1px_-0.5px_rgba(0,0,0,0.08)]'
+                    : ''
                 }`}
               >
-                {getTranslation(language, 'pricing.toggle.annual')}
-              </span>
-            </button>
-            <button
-              onClick={() => setIsAnnual(false)}
-              className={`px-2 py-1 flex justify-start items-start rounded-md ${
-                !isAnnual
-                  ? 'bg-[#F2F2F2] shadow-[0px_1px_1px_-0.5px_rgba(0,0,0,0.08)]'
-                  : ''
-              }`}
-            >
-              <span
-                className={`text-center text-sm font-medium leading-tight ${
-                  !isAnnual ? 'text-black' : 'text-[#404040]'
+                <span
+                  className={`text-center text-sm font-medium leading-tight ${
+                    isAnnual ? 'text-black' : 'text-[#404040]'
+                  }`}
+                >
+                  {getTranslation(language, 'pricing.toggle.annual')}
+                </span>
+              </button>
+              <button
+                onClick={() => setIsAnnual(false)}
+                className={`px-2 py-1 flex justify-start items-start rounded-md ${
+                  !isAnnual
+                    ? 'bg-[#F2F2F2] shadow-[0px_1px_1px_-0.5px_rgba(0,0,0,0.08)]'
+                    : ''
                 }`}
               >
-                {getTranslation(language, 'pricing.toggle.monthly')}
-              </span>
-            </button>
+                <span
+                  className={`text-center text-sm font-medium leading-tight ${
+                    !isAnnual ? 'text-black' : 'text-[#404040]'
+                  }`}
+                >
+                  {getTranslation(language, 'pricing.toggle.monthly')}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
