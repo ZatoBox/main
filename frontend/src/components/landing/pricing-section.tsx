@@ -59,12 +59,12 @@ export function PricingSection() {
   const handleSubscribe = async () => {
     try {
       if (process.env.NEXT_PUBLIC_ENABLE_POLAR !== 'true') {
-        window.location.href = '/auth/login';
+        window.location.href = '/login';
         return;
       }
       const userId = user?.id;
       if (!userId) {
-        window.location.href = '/auth/login';
+        window.location.href = '/login';
         return;
       }
       const cycle = isAnnual ? 'annual' : 'monthly';
