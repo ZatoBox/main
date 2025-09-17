@@ -15,8 +15,10 @@ async function getCurrentUser(req: NextRequest) {
     const user = await authService.verifyToken(token);
     const profile = await authService.getProfileUser(String(user.id));
 
-    const polarApiKey =
-      profile.user?.polar_api_key || process.env.POLAR_ACCESS_TOKEN || '';
+    const polarApiKey = profile.user?.polar_api_key || '';
+    if (!polarApiKey) {
+      throw new Error('Missing Polar API key for user');
+    }
 
     return {
       userId: user.id,

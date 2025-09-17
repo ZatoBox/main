@@ -3,26 +3,25 @@ import { decryptAny } from './crypto.utils';
 const BASE_URL = 'https://api.polar.sh/v1';
 
 export const decryptApiKey = (encryptedKey: string): string => {
-  if (!encryptedKey || encryptedKey.trim() === '') {
-    return process.env.POLAR_ACCESS_TOKEN || '';
-  }
-
+  if (!encryptedKey || encryptedKey.trim() === '')
+    throw new Error('Missing Polar API key');
+  if (encryptedKey.includes('polar_oat_')) return encryptedKey;
   const decrypted = decryptAny(encryptedKey);
-  if (!decrypted || decrypted === encryptedKey) {
-    return process.env.POLAR_ACCESS_TOKEN || '';
-  }
-
-  return decrypted;
+  if (
+    decrypted &&
+    typeof decrypted === 'string' &&
+    decrypted.includes('polar_oat_')
+  )
+    return decrypted;
+  throw new Error('Invalid Polar API key');
 };
 
 export const polarAPI = {
   async listProducts(apiKey: string, organizationId?: string): Promise<any[]> {
     const token = decryptApiKey(apiKey);
-    const uuidRegex =
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
     const params = new URLSearchParams();
-    if (organizationId && uuidRegex.test(organizationId)) {
-      params.set('organization_id', organizationId);
+    if (organizationId && organizationId.trim() !== '') {
+      params.set('organization_id', organizationId.trim());
     }
     const url = `${BASE_URL}/products${
       params.toString() ? `?${params.toString()}` : ''
@@ -45,7 +44,7 @@ export const polarAPI = {
       ? data.items
       : [];
     console.log('POLAR listProducts', {
-      hasOrg: !!organizationId && uuidRegex.test(organizationId),
+      hasOrg: !!organizationId,
       count: items.length,
       sample: items[0]?.id || null,
     });
