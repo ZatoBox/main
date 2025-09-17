@@ -7,11 +7,7 @@ import HomeStats from '@/components/home/HomeStats';
 import SalesDrawer from '@/components/SalesDrawer';
 import PaymentScreen from '@/components/PaymentScreen';
 import PaymentSuccessScreen from '@/components/PaymentSuccessScreen';
-import {
-  getActiveProducts,
-  salesAPI,
-  categoriesAPI,
-} from '@/services/api.service';
+import { getActiveProducts, salesAPI } from '@/services/api.service';
 import type { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 
@@ -34,9 +30,6 @@ const HomePage: React.FC<HomePageProps> = ({
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
-    []
-  );
 
   // Shopping cart
   interface CartItem {
@@ -51,41 +44,54 @@ const HomePage: React.FC<HomePageProps> = ({
   // Use local search term (takes priority over external)
   const activeSearchTerm = localSearchTerm || externalSearchTerm;
 
+  const mapPolarProductToProduct = (p: any): Product => {
+    const prices = Array.isArray(p.prices) ? p.prices : [];
+    let price = 0;
+    if (prices.length > 0) {
+      const pr = prices[0] || {};
+      const amt = pr.price_amount ?? pr.priceAmount;
+      const amtType = pr.amount_type ?? pr.amountType;
+      if (typeof amt === 'number') {
+        price = amtType === 'free' ? 0 : amt / 100;
+      }
+    }
+    return {
+      id: String(p.id),
+      name: p.name || 'Unnamed Product',
+      description: p.description || '',
+      price,
+      stock: 1,
+      min_stock: 0,
+      category_ids: [],
+      images: [],
+      status: 'active' as any,
+      weight: 0,
+      sku: String(p.id),
+      creator_id: '',
+      unit: 'Per item' as any,
+      product_type: 'Physical Product' as any,
+      localization: '',
+      created_at: p.created_at || p.createdAt || new Date().toISOString(),
+      last_updated:
+        p.modified_at ||
+        p.modifiedAt ||
+        p.updatedAt ||
+        new Date().toISOString(),
+    } as Product;
+  };
+
   // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
-      if (!isAuthenticated) {
-        setLoading(false);
-        return;
-      }
-
       try {
         setLoading(true);
         const response = await getActiveProducts();
         if (response && response.success && Array.isArray(response.products)) {
-          const availableProducts = response.products.map((product: any) => {
-            return {
-              id: product.id,
-              name: product.name || 'Unnamed Product',
-              description: product.description || '',
-              price: product.prices?.[0]?.price_amount
-                ? product.prices[0].price_amount / 100
-                : 0,
-              stock: 1,
-              min_stock: 0,
-              category_ids: [],
-              images: [],
-              status: 'active' as any,
-              weight: 0,
-              sku: product.id,
-              creator_id: '',
-              unit: 'Per item' as any,
-              product_type: 'Physical Product' as any,
-              localization: '',
-              created_at: product.created_at || new Date().toISOString(),
-              last_updated: product.modified_at || new Date().toISOString(),
-            } as Product;
-          });
+          const rows: any[] = response.products;
+          const filtered = rows.filter(
+            (p: any) => !(p.is_archived ?? p.is_archived)
+          );
+          const availableProducts = filtered.map(mapPolarProductToProduct);
           setProducts(availableProducts);
         } else {
           setProducts([]);
@@ -99,34 +105,11 @@ const HomePage: React.FC<HomePageProps> = ({
     };
 
     fetchProducts();
-  }, [isAuthenticated]);
-
-  // Fetch categories
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const res = await categoriesAPI.list();
-        if ((res as any).success) setCategories((res as any).categories);
-      } catch {}
-    };
-    loadCategories();
   }, []);
 
-  // Map category ids to names
-  const categoryIdMap: Record<string, string> = useMemo(
-    () => Object.fromEntries(categories.map((c) => [c.id, c.name])),
-    [categories]
-  );
-
   const enrichedProducts = useMemo(() => {
-    return products.map((p: any) => {
-      const ids = Array.isArray(p.category_ids) ? p.category_ids : [];
-      const names = ids.map((id: string) => categoryIdMap[id]).filter(Boolean);
-      return { ...p, category_names: names } as Product & {
-        category_names?: string[];
-      };
-    });
-  }, [products, categoryIdMap]);
+    return products;
+  }, [products]);
 
   // Filter products based on search term
   const filteredProducts = useMemo(() => {
@@ -280,29 +263,11 @@ const HomePage: React.FC<HomePageProps> = ({
       const response = await getActiveProducts();
 
       if (response && response.success && Array.isArray(response.products)) {
-        const availableProducts = response.products.map((product: any) => {
-          return {
-            id: product.id,
-            name: product.name || 'Unnamed Product',
-            description: product.description || '',
-            price: product.prices?.[0]?.price_amount
-              ? product.prices[0].price_amount / 100
-              : 0,
-            stock: 1,
-            min_stock: 0,
-            category_ids: [],
-            images: [],
-            status: 'active' as any,
-            weight: 0,
-            sku: product.id,
-            creator_id: '',
-            unit: 'Per item' as any,
-            product_type: 'Physical Product' as any,
-            localization: '',
-            created_at: product.created_at || new Date().toISOString(),
-            last_updated: product.modified_at || new Date().toISOString(),
-          } as Product;
-        });
+        const rows: any[] = response.products;
+        const filtered = rows.filter(
+          (p: any) => !(p.is_archived ?? p.is_archived)
+        );
+        const availableProducts = filtered.map(mapPolarProductToProduct);
         setProducts(availableProducts);
       } else {
         setProducts([]);

@@ -1,12 +1,13 @@
-import { Polar } from '@polar-sh/sdk';
-import { decryptData } from './crypto.utils';
+import { decryptAny } from './crypto.utils';
+
+const BASE_URL = 'https://api.polar.sh/v1';
 
 export const decryptApiKey = (encryptedKey: string): string => {
   if (!encryptedKey || encryptedKey.trim() === '') {
     return process.env.POLAR_ACCESS_TOKEN || '';
   }
 
-  const decrypted = decryptData(encryptedKey);
+  const decrypted = decryptAny(encryptedKey);
   if (!decrypted || decrypted === encryptedKey) {
     return process.env.POLAR_ACCESS_TOKEN || '';
   }
@@ -16,53 +17,84 @@ export const decryptApiKey = (encryptedKey: string): string => {
 
 export const polarAPI = {
   async listProducts(apiKey: string, organizationId?: string): Promise<any[]> {
-    const client = new Polar({
-      accessToken: decryptApiKey(apiKey),
-    });
-
-    const listArgs: any = {};
+    const token = decryptApiKey(apiKey);
     const uuidRegex =
       /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+    const params = new URLSearchParams();
     if (organizationId && uuidRegex.test(organizationId)) {
-      listArgs.organizationId = organizationId;
+      params.set('organization_id', organizationId);
     }
-
-    const result = await client.products.list(listArgs);
-
-    const products: any[] = [];
-    for await (const page of result) {
-      const items = (page as any)?.items ?? page;
-      if (Array.isArray(items)) {
-        products.push(...items);
-      }
+    const url = `${BASE_URL}/products${
+      params.toString() ? `?${params.toString()}` : ''
+    }`;
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Failed to list products');
     }
-    return products;
+    const data: any = await res.json();
+    const items = Array.isArray(data)
+      ? data
+      : Array.isArray(data.items)
+      ? data.items
+      : [];
+    console.log('POLAR listProducts', {
+      hasOrg: !!organizationId && uuidRegex.test(organizationId),
+      count: items.length,
+      sample: items[0]?.id || null,
+    });
+    return items;
   },
 
   async getProduct(apiKey: string, productId: string): Promise<any> {
-    const client = new Polar({
-      accessToken: decryptApiKey(apiKey),
+    const token = decryptApiKey(apiKey);
+    const res = await fetch(`${BASE_URL}/products/${productId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
     });
-
-    const result = await client.products.get({
-      id: productId,
-    });
-    return result;
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Failed to get product');
+    }
+    return res.json();
   },
 
   async createProduct(apiKey: string, productData: any): Promise<any> {
-    const client = new Polar({
-      accessToken: decryptApiKey(apiKey),
-    });
-
-    const result = await client.products.create({
+    const token = decryptApiKey(apiKey);
+    const body = {
       name: productData.name,
       description: productData.description,
-      organizationId: productData.organization_id,
-      recurringInterval: productData.recurringInterval || 'month',
-      prices: productData.prices || [{ amountType: 'free' }],
+      organization_id:
+        productData.organization_id || productData.organizationId,
+      recurring_interval:
+        productData.recurring_interval ||
+        productData.recurringInterval ||
+        'month',
+      prices: productData.prices || [{ amount_type: 'free' }],
+    } as any;
+    const res = await fetch(`${BASE_URL}/products`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
     });
-    return result;
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Failed to create product');
+    }
+    return res.json();
   },
 
   async updateProduct(
@@ -70,36 +102,43 @@ export const polarAPI = {
     productId: string,
     productData: any
   ): Promise<any> {
-    const client = new Polar({
-      accessToken: decryptApiKey(apiKey),
-    });
-
-    const result = await client.products.update({
-      id: productId,
-      productUpdate: {
-        name: productData.name,
-        description: productData.description,
-        prices: productData.prices,
-        isArchived: productData.isArchived,
+    const token = decryptApiKey(apiKey);
+    const body: any = {
+      name: productData.name,
+      description: productData.description,
+      prices: productData.prices,
+      is_archived: productData.is_archived,
+    };
+    const res = await fetch(`${BASE_URL}/products/${productId}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify(body),
     });
-    return result;
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Failed to update product');
+    }
+    return res.json();
   },
 
   async deleteProduct(apiKey: string, productId: string): Promise<void> {
-    const client = new Polar({
-      accessToken: decryptApiKey(apiKey),
+    const token = decryptApiKey(apiKey);
+    const res = await fetch(`${BASE_URL}/products/${productId}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ is_archived: true }),
     });
-
-    try {
-      await client.products.update({
-        id: productId,
-        productUpdate: {
-          isArchived: true,
-        },
-      });
-    } catch (error) {
-      throw new Error('Failed to archive product');
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Failed to archive product');
     }
   },
 };

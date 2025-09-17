@@ -73,7 +73,19 @@ const axiosInstance: AxiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use((cfg) => {
   const token = getAuthToken();
-  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    cfg.headers.Authorization = `Bearer ${token}`;
+  } else if (typeof window !== 'undefined') {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user && user.access_token) {
+          cfg.headers.Authorization = `Bearer ${user.access_token}`;
+        }
+      } catch {}
+    }
+  }
   return cfg;
 });
 
@@ -147,7 +159,10 @@ export const productsAPI = {
   getById: (productId: string): Promise<any> =>
     apiRequest(`/products/?id=${productId}`),
   update: (productId: string, updates: any): Promise<any> =>
-    apiRequest(`/products/?id=${productId}`, { method: 'PUT', data: updates }),
+    apiRequest(`/products/?id=${productId}`, {
+      method: 'PATCH',
+      data: updates,
+    }),
   delete: (productId: string): Promise<any> =>
     apiRequest(`/products/?id=${productId}`, { method: 'DELETE' }),
   list: (organizationId?: string): Promise<any> => {

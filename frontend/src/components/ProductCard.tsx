@@ -27,6 +27,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       });
   };
   const images = getImageUrls();
+  const fallbackImg = '/images/placeholder-product.png';
   const [index, setIndex] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const unitLabel = (product as any).unit_name ?? 'per unit';
@@ -89,14 +90,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
               {images.map((src, i) => (
                 <div key={i} className='w-full h-48 shrink-0 relative'>
                   <img
-                    src={src}
+                    src={src || fallbackImg}
                     alt={product.name}
                     loading='lazy'
                     draggable={false}
                     className='object-cover w-full h-full select-none'
                     onError={(e) => {
-                      (e.target as HTMLImageElement).style.visibility =
-                        'hidden';
+                      (e.target as HTMLImageElement).src = fallbackImg;
                     }}
                   />
                 </div>

@@ -29,6 +29,57 @@ export function decryptData(encryptedData: string): string {
   }
 }
 
+export function decryptAny(encrypted: string): string {
+  if (!encrypted) return '';
+  if (encrypted.startsWith('polar_oat_')) return encrypted;
+  try {
+    const out = decryptData(encrypted);
+    if (out && out.startsWith('polar_oat_')) return out;
+  } catch {}
+  try {
+    const parts = encrypted.split(':');
+    if (parts.length === 2) {
+      const [ivB64, dataB64] = parts;
+      const iv = Buffer.from(ivB64, 'base64');
+      const buf = Buffer.from(dataB64, 'base64');
+      const decipher = crypto.createDecipheriv(
+        ALGORITHM,
+        Buffer.from(MASTER_KEY, 'hex'),
+        iv
+      );
+      let dec = decipher.update(buf, undefined, 'utf8');
+      dec += decipher.final('utf8');
+      if (dec && dec.startsWith('polar_oat_')) return dec;
+    }
+  } catch {}
+  try {
+    const json = JSON.parse(encrypted);
+    const ivStr = json.iv || json.nonce;
+    const dataStr = json.data || json.ciphertext;
+    if (ivStr && dataStr) {
+      const iv = /^[A-Fa-f0-9]+$/.test(ivStr)
+        ? Buffer.from(ivStr, 'hex')
+        : Buffer.from(ivStr, 'base64');
+      const buf = /^[A-Fa-f0-9]+$/.test(dataStr)
+        ? Buffer.from(dataStr, 'hex')
+        : Buffer.from(dataStr, 'base64');
+      const decipher = crypto.createDecipheriv(
+        ALGORITHM,
+        Buffer.from(MASTER_KEY, 'hex'),
+        iv
+      );
+      let dec = decipher.update(buf, undefined, 'utf8');
+      dec += decipher.final('utf8');
+      if (dec && dec.startsWith('polar_oat_')) return dec;
+    }
+  } catch {}
+  try {
+    const b = Buffer.from(encrypted, 'base64').toString('utf8');
+    if (b && b.startsWith('polar_oat_')) return b;
+  } catch {}
+  return encrypted;
+}
+
 export function encryptData(data: string): string {
   try {
     const iv = crypto.randomBytes(16);

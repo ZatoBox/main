@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function PUT(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   try {
     const { polarApiKey } = await getCurrentUser(req);
     const url = new URL(req.url);
@@ -102,14 +102,17 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    await polarAPI.deleteProduct(polarApiKey, productId);
+    const product = await polarAPI.updateProduct(polarApiKey, productId, {
+      is_archived: true,
+    });
     return NextResponse.json({
       success: true,
-      message: 'Product deleted successfully',
+      message: 'Product archived successfully',
+      product,
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: error.message || 'Failed to delete product' },
+      { success: false, message: error.message || 'Failed to archive product' },
       { status: 500 }
     );
   }

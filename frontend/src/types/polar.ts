@@ -14,7 +14,7 @@ export interface PolarProduct {
   id: string;
   name: string;
   description?: string | null;
-  isArchived?: boolean;
+  is_archived?: boolean;
   isRecurring?: boolean;
   organizationId: string;
   prices?: PolarProductPrice[];
@@ -26,7 +26,7 @@ export interface PolarProduct {
 
 export interface PolarProductsListParams {
   organizationId?: string;
-  isArchived?: boolean;
+  is_archived?: boolean;
   isRecurring?: boolean;
   query?: string;
   page?: number;
@@ -53,5 +53,5 @@ export interface PolarProductUpdateBody {
   description?: string | null;
   prices?: PolarProductPrice[];
   benefits?: string[];
-  isArchived?: boolean;
+  is_archived?: boolean;
 }
