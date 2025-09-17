@@ -36,19 +36,71 @@ export class AuthService {
     password: string
   ): Promise<{ user: UserItem; token: string }> {
     if (!email || !password) throw new Error('Email and password are required');
-    const user = await this.repo.findByEmail(email);
-    if (!user) throw new Error('Invalid credentials');
-    try {
-      const hashed = (user as any).password as string | undefined;
-      if (!hashed || !verifyPassword(password, hashed))
+    // Try to find local user row
+    let user = await this.repo.findByEmail(email);
+
+    // If we have a local user with a hashed password, verify locally.
+    if (user && (user as any).password) {
+      try {
+        const hashed = (user as any).password as string;
+        if (!verifyPassword(password, hashed))
+          throw new Error('Invalid credentials');
+        const userData: UserItem = { ...user };
+        delete (userData as any).password;
+        const token = this.createAccessToken({ user_id: user.id });
+        return { user: userData, token };
+      } catch (e) {
         throw new Error('Invalid credentials');
-    } catch (e) {
-      throw new Error('Authentication error');
+      }
     }
-    const userData: UserItem = { ...user };
-    delete (userData as any).password;
-    const token = this.createAccessToken({ user_id: user.id });
-    return { user: userData, token };
+
+    // No local password available (or user missing) — try Supabase Auth fallback.
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey =
+      process.env.SUPABASE_SERVICE_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
+    if (!supabaseUrl || !serviceKey) throw new Error('Authentication error');
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/auth/v1/token?grant_type=password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: serviceKey,
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error('Invalid credentials');
+      const supaUser = data.user;
+      if (!supaUser) throw new Error('Invalid credentials');
+
+      // Ensure a local user row exists; create one without storing the password.
+      user = await this.repo.findByEmail(email);
+      if (!user) {
+        const fullName =
+          supaUser.user_metadata?.full_name ||
+          supaUser.user_metadata?.name ||
+          email;
+        const newId = await this.repo.createUser({
+          full_name: fullName,
+          email,
+          password: null,
+        });
+        user = await this.repo.findByUserId(String(newId));
+      }
+
+      if (!user) throw new Error('Authentication error');
+      const userData: UserItem = { ...user };
+      delete (userData as any).password;
+      const token = this.createAccessToken({ user_id: user.id });
+      return { user: userData, token };
+    } catch (e) {
+      throw new Error('Invalid credentials');
+    }
   }
 
   async register(
