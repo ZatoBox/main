@@ -113,6 +113,16 @@ export class AuthService {
     return { success: true, user };
   }
 
+  async setPolarApiKey(user_id: string, apiKey: string | null) {
+    await this.repo.updateProfile(user_id, { polar_api_key: apiKey });
+    return { success: true };
+  }
+
+  async getPolarApiKey(user_id: string): Promise<string | null> {
+    const key = await this.repo.getDecryptedPolarKey(user_id);
+    return key;
+  }
+
   async uploadProfileImage(
     user_id: string,
     file: File
