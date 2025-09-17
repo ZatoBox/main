@@ -20,6 +20,7 @@ export interface User {
   email: string;
   full_name: string;
   phone?: string;
+  polar_api_key?: string;
   role: RoleUser;
   profile_image?: string;
   created_at?: string;

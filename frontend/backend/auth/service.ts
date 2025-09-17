@@ -36,10 +36,8 @@ export class AuthService {
     password: string
   ): Promise<{ user: UserItem; token: string }> {
     if (!email || !password) throw new Error('Email and password are required');
-    // Try to find local user row
     let user = await this.repo.findByEmail(email);
 
-    // If we have a local user with a hashed password, verify locally.
     if (user && (user as any).password) {
       try {
         const hashed = (user as any).password as string;
@@ -54,7 +52,6 @@ export class AuthService {
       }
     }
 
-    // No local password available (or user missing) — try Supabase Auth fallback.
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const serviceKey =
       process.env.SUPABASE_SERVICE_KEY ||
@@ -78,7 +75,6 @@ export class AuthService {
       const supaUser = data.user;
       if (!supaUser) throw new Error('Invalid credentials');
 
-      // Ensure a local user row exists; create one without storing the password.
       user = await this.repo.findByEmail(email);
       if (!user) {
         const fullName =
@@ -212,5 +208,12 @@ export class AuthService {
     } catch (e: any) {
       throw new Error(String(e?.message ?? e));
     }
+  }
+
+  async deleteUser(
+    user_id: string
+  ): Promise<{ success: true; user: UserItem | null }> {
+    const user = await this.repo.deleteUser(user_id);
+    return { success: true, user };
   }
 }

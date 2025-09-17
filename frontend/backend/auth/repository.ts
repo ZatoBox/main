@@ -98,4 +98,16 @@ export class UserRepository {
       return null;
     }
   }
+
+  async deleteUser(user_id: string): Promise<UserItem | null> {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from(this.table)
+      .delete()
+      .eq('id', user_id)
+      .select()
+      .single();
+    if (error) throw error;
+    return (data as UserItem) || null;
+  }
 }

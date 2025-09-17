@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/profile/Header';
 import Sidebar from '@/components/profile/Sidebar';
 import AvatarUploader from '@/components/profile/AvatarUploader';
-import ProfileForm from '@/components/profile/ProfileForm';
 import { profileAPI, authAPI } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
 
@@ -15,9 +14,12 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<Record<string, any>>({});
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [submitSignal, setSubmitSignal] = useState(0);
+  const [editingFields, setEditingFields] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [editValues, setEditValues] = useState<Record<string, string>>({});
   const { user, initialized, setUser } = useAuth();
 
   const sections = [
@@ -47,7 +49,6 @@ const ProfilePage: React.FC = () => {
           }
         }
       } catch (err) {
-        // non-critical
       } finally {
         if (!canceled) setLoading(false);
       }
@@ -62,26 +63,41 @@ const ProfilePage: React.FC = () => {
     };
   }, [initialized, user, setUser]);
 
-  const handleSave = async (values: Record<string, any>) => {
+  const handleSave = async () => {
     setSaving(true);
     setError(null);
+    setSuccess(null);
     try {
-      const payload: Record<string, unknown> = {
-        full_name: values.full_name,
-        email: values.email,
-        phone: values.phone,
-        address: values.address,
-      };
+      const payload: Record<string, unknown> = {};
+
+      Object.keys(editValues).forEach((field) => {
+        const newValue = editValues[field]?.trim();
+        const oldValue = profileData[field];
+
+        if (newValue !== oldValue) {
+          if (field === 'phone' || field === 'polar_api_key') {
+            payload[field] = newValue || null;
+          } else if (newValue) {
+            payload[field] = newValue;
+          }
+        }
+      });
+
+      if (Object.keys(payload).length === 0) {
+        setSuccess('No changes to save');
+        setTimeout(() => setSuccess(null), 3000);
+        return;
+      }
 
       const res = await profileAPI.update(payload as any);
       if (res && (res as any).user) {
         const updated = (res as any).user;
         setProfileData(updated);
-        try {
-          setUser(updated as any);
-        } catch {
-          // ignore if store setUser fails
-        }
+        setUser(updated as any);
+        setEditingFields({});
+        setEditValues({});
+        setSuccess('Profile updated successfully');
+        setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -90,11 +106,110 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleImageUpdated = async (
+    newImageUrl: string | null,
+    updatedUser?: any
+  ) => {
+    if (updatedUser) {
+      setProfileData(updatedUser);
+      setUser(updatedUser as any);
+    } else {
+      const updated = { ...profileData, profile_image: newImageUrl };
+      setProfileData(updated);
+      setUser(updated as any);
+    }
+    setSuccess('Avatar updated successfully');
+    setTimeout(() => setSuccess(null), 3000);
+  };
+
+  const handleError = (errorMsg: string) => {
+    setError(errorMsg);
+    setTimeout(() => setError(null), 5000);
+  };
+
+  const startEditing = (field: string) => {
+    setEditingFields((prev) => ({ ...prev, [field]: true }));
+    setEditValues((prev) => ({ ...prev, [field]: profileData[field] || '' }));
+  };
+
+  const cancelEditing = (field: string) => {
+    setEditingFields((prev) => ({ ...prev, [field]: false }));
+    setEditValues((prev) => {
+      const newValues = { ...prev };
+      delete newValues[field];
+      return newValues;
+    });
+  };
+
+  const updateEditValue = (field: string, value: string) => {
+    setEditValues((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const hasChanges = Object.keys(editingFields).some(
+    (field) => editingFields[field]
+  );
+
+  const renderField = (field: string, label: string, type: string = 'text') => {
+    const isEditing = editingFields[field];
+    const currentValue = profileData[field] || '';
+    const editValue = editValues[field] || '';
+
+    return (
+      <div className='p-4 border rounded-lg bg-[#FFFFFF] border-[#CBD5E1] hover:border-[#F6DE91] transition-colors'>
+        <div className='flex items-center justify-between mb-2'>
+          <label className='text-sm font-medium text-[#000000]'>{label}</label>
+          {!isEditing && (
+            <button
+              onClick={() => startEditing(field)}
+              className='text-sm text-[#A94D14] hover:text-[#8A3D16] font-medium transition-colors'
+            >
+              Edit
+            </button>
+          )}
+        </div>
+
+        {isEditing ? (
+          <div className='space-y-3'>
+            <input
+              type={type}
+              value={editValue}
+              onChange={(e) => updateEditValue(field, e.target.value)}
+              className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#F6DE91] focus:border-[#A94D14] bg-[#FFFFFF] text-[#000000]'
+              placeholder={`Enter ${label.toLowerCase()}`}
+            />
+            <div className='flex space-x-2'>
+              <button
+                onClick={() => cancelEditing(field)}
+                className='px-3 py-1 text-sm text-[#888888] hover:text-[#000000] transition-colors'
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className='text-[#000000]'>
+            {field === 'polar_api_key' ? (
+              currentValue ? (
+                '*******'
+              ) : (
+                <span className='text-[#888888] italic'>Not set</span>
+              )
+            ) : (
+              currentValue || (
+                <span className='text-[#888888] italic'>Not set</span>
+              )
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className='min-h-screen bg-bg-main'>
       <Header
         onBack={() => router.push('/')}
-        onSave={() => setSubmitSignal((s) => s + 1)}
+        onSave={hasChanges ? () => handleSave() : () => {}}
         saving={saving}
       />
 
@@ -132,26 +247,64 @@ const ProfilePage: React.FC = () => {
                 {sections.find((s) => s.id === activeSection)?.name}
               </h2>
 
+              {error && (
+                <div className='p-4 mb-4 text-red-700 bg-red-100 border border-red-300 rounded-lg'>
+                  {error}
+                </div>
+              )}
+
+              {success && (
+                <div className='p-4 mb-4 text-green-700 bg-green-100 border border-green-300 rounded-lg'>
+                  {success}
+                </div>
+              )}
+
               {activeSection === 'profile' ? (
                 <div className='flex flex-col gap-6'>
                   <div className='flex flex-col items-start space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-6'>
                     <AvatarUploader
-                      imageUrl={profileData.image || null}
-                      onChange={setAvatarFile}
+                      imageUrl={profileData.profile_image || null}
+                      onImageUpdated={handleImageUpdated}
+                      onError={handleError}
                     />
                     <div className='flex-1'>
                       <h2 className='text-xl font-bold text-text-primary'>
-                        {profileData.full_name}
+                        {profileData.full_name || 'User'}
                       </h2>
-                      <p className='text-text-secondary'>{profileData.email}</p>
+                      <p className='text-text-secondary'>
+                        {profileData.email || ''}
+                      </p>
                     </div>
                   </div>
 
-                  <ProfileForm
-                    initialValues={profileData}
-                    onSubmit={handleSave}
-                    submitSignal={submitSignal}
-                  />
+                  <div className='space-y-4'>
+                    <h3 className='text-lg font-semibold text-[#000000] mb-4'>
+                      Profile Information
+                    </h3>
+
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                      {renderField('full_name', 'Full Name')}
+                      {renderField('email', 'Email', 'email')}
+                      {renderField('phone', 'Phone')}
+                      {renderField(
+                        'polar_api_key',
+                        'Polar API Key',
+                        'password'
+                      )}
+                    </div>
+
+                    {hasChanges && (
+                      <div className='flex justify-end pt-4 border-t'>
+                        <button
+                          onClick={handleSave}
+                          disabled={saving}
+                          className='px-6 py-2 bg-[#A94D14] text-white rounded-lg hover:bg-[#8A3D16] disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                        >
+                          {saving ? 'Saving...' : 'Save Changes'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className='text-sm text-text-secondary min-h-[150px]'>

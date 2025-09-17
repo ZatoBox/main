@@ -110,24 +110,27 @@ export const authAPI = {
   getAllUsers: (): Promise<User[]> => apiRequest('/auth/users'),
   uploadProfileImage: (
     file: File
-  ): Promise<{ success: boolean; message: string; image_url?: string }> => {
+  ): Promise<{ success: boolean; user?: any; message?: string }> => {
     const formData = new FormData();
     formData.append('file', file);
-    return apiRequest('/auth/upload-profile-image', {
+    return apiRequest('/profile/image', {
       method: 'POST',
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  deleteProfileImage: (): Promise<{ success: boolean; message: string }> =>
-    apiRequest('/auth/delete-profile-image', { method: 'DELETE' }),
+  deleteProfileImage: (): Promise<{
+    success: boolean;
+    user?: any;
+    message?: string;
+  }> => apiRequest('/profile/image', { method: 'DELETE' }),
   updateProfileImage: (
     file: File
-  ): Promise<{ success: boolean; message: string; image_url?: string }> => {
+  ): Promise<{ success: boolean; user?: any; message?: string }> => {
     const formData = new FormData();
     formData.append('file', file);
-    return apiRequest('/auth/update-profile-image', {
-      method: 'PUT',
+    return apiRequest('/profile/image', {
+      method: 'PATCH',
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -283,12 +286,14 @@ export const profileAPI = {
   update: (
     profileData: Partial<User>
   ): Promise<{ success: boolean; message: string; user: User }> =>
-    apiRequest('/profile', { method: 'PUT', data: profileData }),
+    apiRequest('/profile', { method: 'PATCH', data: profileData }),
   changePassword: (passwordData: {
     oldPassword: string;
     newPassword: string;
   }): Promise<{ success: boolean; message: string }> =>
     apiRequest('/profile/password', { method: 'PUT', data: passwordData }),
+  deleteUser: (): Promise<{ success: boolean; user?: User }> =>
+    apiRequest('/profile', { method: 'DELETE' }),
 };
 
 /// Layouts

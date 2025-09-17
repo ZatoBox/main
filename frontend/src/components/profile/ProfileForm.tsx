@@ -18,8 +18,10 @@ type Props = {
 };
 
 const schema = Yup.object().shape({
-  full_name: Yup.string().required('Full name is required'),
-  email: Yup.string().email('Invalid email').required('Email is required'),
+  full_name: Yup.string(),
+  email: Yup.string().email('Invalid email'),
+  phone: Yup.string(),
+  address: Yup.string(),
 });
 
 const ProfileForm: React.FC<Props> = ({
@@ -100,8 +102,6 @@ const ProfileForm: React.FC<Props> = ({
                 </div>
               </div>
             </div>
-
-            {/* two-factor removed per user request */}
           </Form>
         );
       }}
