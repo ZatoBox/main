@@ -65,8 +65,25 @@ const HomePage: React.FC<HomePageProps> = ({
         if (response && response.success && Array.isArray(response.products)) {
           const availableProducts = response.products.map((product: any) => {
             return {
-              ...product,
-              stock: Number(product.stock ?? 0),
+              id: product.id,
+              name: product.name || 'Unnamed Product',
+              description: product.description || '',
+              price: product.prices?.[0]?.price_amount
+                ? product.prices[0].price_amount / 100
+                : 0,
+              stock: 1,
+              min_stock: 0,
+              category_ids: [],
+              images: [],
+              status: 'active' as any,
+              weight: 0,
+              sku: product.id,
+              creator_id: '',
+              unit: 'Per item' as any,
+              product_type: 'Physical Product' as any,
+              localization: '',
+              created_at: product.created_at || new Date().toISOString(),
+              last_updated: product.modified_at || new Date().toISOString(),
             } as Product;
           });
           setProducts(availableProducts);
@@ -265,8 +282,25 @@ const HomePage: React.FC<HomePageProps> = ({
       if (response && response.success && Array.isArray(response.products)) {
         const availableProducts = response.products.map((product: any) => {
           return {
-            ...product,
-            stock: Number(product.stock ?? 0),
+            id: product.id,
+            name: product.name || 'Unnamed Product',
+            description: product.description || '',
+            price: product.prices?.[0]?.price_amount
+              ? product.prices[0].price_amount / 100
+              : 0,
+            stock: 1,
+            min_stock: 0,
+            category_ids: [],
+            images: [],
+            status: 'active' as any,
+            weight: 0,
+            sku: product.id,
+            creator_id: '',
+            unit: 'Per item' as any,
+            product_type: 'Physical Product' as any,
+            localization: '',
+            created_at: product.created_at || new Date().toISOString(),
+            last_updated: product.modified_at || new Date().toISOString(),
           } as Product;
         });
         setProducts(availableProducts);

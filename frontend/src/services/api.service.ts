@@ -139,65 +139,28 @@ export const authAPI = {
 
 /// Products
 export const productsAPI = {
-  create: (productData: CreateProductRequest): Promise<ProductResponse> =>
-    apiRequest('/products/', { method: 'POST', data: productData }),
-  createBulk: (
-    productsData: CreateProductRequest[]
-  ): Promise<ProductResponse[]> =>
-    apiRequest('/products/bulk', { method: 'POST', data: productsData }),
-  getById: (
-    productId: string
-  ): Promise<{ success: boolean; message: string; product: Product }> =>
-    apiRequest(`/products/${productId}`),
-  update: (
-    productId: string,
-    updates: UpdateProductRequest
-  ): Promise<{ success: boolean; message: string; product: Product }> =>
-    apiRequest(`/products/${productId}`, { method: 'PUT', data: updates }),
-  delete: (
-    productId: string
-  ): Promise<{ success: boolean; message: string; product: Product }> =>
-    apiRequest(`/products/${productId}`, { method: 'DELETE' }),
-  list: (): Promise<ProductsResponse> => apiRequest('/products/'),
-  addImages: (
-    productId: string,
-    images: File[]
-  ): Promise<{ success: boolean; message: string; product: Product }> => {
-    const formData = new FormData();
-    images.forEach((image) => formData.append('images', image));
-    return apiRequest(`/products/${productId}/images`, {
+  create: (productData: any, organizationId?: string): Promise<any> =>
+    apiRequest('/products/', {
       method: 'POST',
-      data: formData,
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
-  getImages: (
-    productId: string
-  ): Promise<{ success: boolean; images: string[] }> =>
-    apiRequest(`/products/${productId}/images`),
-  updateImages: (
-    productId: string,
-    images: File[]
-  ): Promise<{ success: boolean; message: string; product: Product }> => {
-    const formData = new FormData();
-    images.forEach((image) => formData.append('images', image));
-    return apiRequest(`/products/${productId}/images`, {
-      method: 'PUT',
-      data: formData,
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
-  deleteImage: (
-    productId: string,
-    imageIndex: number
-  ): Promise<{ success: boolean; message: string; product: Product }> =>
-    apiRequest(`/products/${productId}/images/${imageIndex}`, {
-      method: 'DELETE',
+      data: { ...productData, organization_id: organizationId },
     }),
+  getById: (productId: string): Promise<any> =>
+    apiRequest(`/products/?id=${productId}`),
+  update: (productId: string, updates: any): Promise<any> =>
+    apiRequest(`/products/?id=${productId}`, { method: 'PUT', data: updates }),
+  delete: (productId: string): Promise<any> =>
+    apiRequest(`/products/?id=${productId}`, { method: 'DELETE' }),
+  list: (organizationId?: string): Promise<any> => {
+    const params = organizationId ? `?organization_id=${organizationId}` : '';
+    return apiRequest(`/products/${params}`);
+  },
 };
 
-export const getActiveProducts = async (): Promise<ProductsResponse> => {
-  return apiRequest('/products/active');
+export const getActiveProducts = async (
+  organizationId?: string
+): Promise<any> => {
+  const params = organizationId ? `?organization_id=${organizationId}` : '';
+  return apiRequest(`/products/${params}`);
 };
 
 export const getAllProducts = getActiveProducts;
