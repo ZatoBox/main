@@ -46,9 +46,7 @@ export class UserRepository {
       phone: payload.phone || null,
       role: payload.role || 'user',
       profile_image: payload.profile_image || null,
-      polar_api_key: payload.polar_api_key
-        ? encryptString(String(payload.polar_api_key))
-        : null,
+      polar_api_key: payload.polar_api_key || null,
       created_at: now,
       last_updated: now,
     };
@@ -69,9 +67,7 @@ export class UserRepository {
     const now = getCurrentTimeWithTimezone('UTC');
     updates.last_updated = now;
     if (typeof updates.polar_api_key !== 'undefined') {
-      updates.polar_api_key = updates.polar_api_key
-        ? encryptString(String(updates.polar_api_key))
-        : null;
+      updates.polar_api_key = updates.polar_api_key || null;
     }
     const { data, error } = await supabase
       .from(this.table)
@@ -92,11 +88,7 @@ export class UserRepository {
       .limit(1)
       .single();
     if (!data || !data.polar_api_key) return null;
-    try {
-      return decryptString(data.polar_api_key as string);
-    } catch {
-      return null;
-    }
+    return data.polar_api_key as string;
   }
 
   async deleteUser(user_id: string): Promise<UserItem | null> {

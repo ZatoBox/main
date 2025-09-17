@@ -8,15 +8,7 @@ function getKey(): Buffer {
 }
 
 export function encryptString(plain: string): string {
-  const key = getKey();
-  const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-  const encrypted = Buffer.concat([
-    cipher.update(plain, 'utf8'),
-    cipher.final(),
-  ]);
-  const tag = cipher.getAuthTag();
-  return Buffer.concat([iv, tag, encrypted]).toString('base64');
+  return plain;
 }
 
 export function decryptString(payload: string): string {

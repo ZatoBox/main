@@ -1,19 +1,8 @@
-import { decryptAny } from './crypto.utils';
-
 const BASE_URL = 'https://api.polar.sh/v1';
 
-export const decryptApiKey = (encryptedKey: string): string => {
-  if (!encryptedKey || encryptedKey.trim() === '')
-    throw new Error('Missing Polar API key');
-  if (encryptedKey.includes('polar_oat_')) return encryptedKey;
-  const decrypted = decryptAny(encryptedKey);
-  if (
-    decrypted &&
-    typeof decrypted === 'string' &&
-    decrypted.includes('polar_oat_')
-  )
-    return decrypted;
-  throw new Error('Invalid Polar API key');
+export const decryptApiKey = (rawKey: string): string => {
+  if (!rawKey || rawKey.trim() === '') throw new Error('Missing Polar API key');
+  return rawKey;
 };
 
 export const polarAPI = {
