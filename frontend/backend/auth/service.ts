@@ -7,7 +7,7 @@ import { uploadProfileImage } from '@/utils/cloudinary';
 const SECRET_KEY = process.env.SECRET_KEY;
 const ALGORITHM = 'HS256';
 const ACCESS_TOKEN_EXPIRE_MINUTES = Number(
-  process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 60
+  process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 60 * 24 * 7
 );
 
 export class AuthService {
@@ -33,7 +33,8 @@ export class AuthService {
 
   async login(
     email: string,
-    password: string
+    password: string,
+    expiresMinutes?: number
   ): Promise<{ user: UserItem; token: string }> {
     if (!email || !password) throw new Error('Email and password are required');
     let user = await this.repo.findByEmail(email);
@@ -45,7 +46,10 @@ export class AuthService {
           throw new Error('Invalid credentials');
         const userData: UserItem = { ...user };
         delete (userData as any).password;
-        const token = this.createAccessToken({ user_id: user.id });
+        const token = this.createAccessToken(
+          { user_id: user.id },
+          expiresMinutes
+        );
         return { user: userData, token };
       } catch (e) {
         throw new Error('Invalid credentials');
@@ -92,7 +96,10 @@ export class AuthService {
       if (!user) throw new Error('Authentication error');
       const userData: UserItem = { ...user };
       delete (userData as any).password;
-      const token = this.createAccessToken({ user_id: user.id });
+      const token = this.createAccessToken(
+        { user_id: user.id },
+        expiresMinutes
+      );
       return { user: userData, token };
     } catch (e) {
       throw new Error('Invalid credentials');
@@ -103,7 +110,8 @@ export class AuthService {
     full_name: string,
     email: string,
     password: string,
-    phone?: string
+    phone?: string,
+    expiresMinutes?: number
   ): Promise<{ user: UserItem; token: string }> {
     if (!email || !password || !full_name)
       throw new Error('Email, password and fullname are required');
@@ -116,7 +124,7 @@ export class AuthService {
       password: hashed,
       phone,
     });
-    return this.login(email, password);
+    return this.login(email, password, expiresMinutes);
   }
 
   logout(token: string) {
