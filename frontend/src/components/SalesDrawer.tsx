@@ -68,9 +68,9 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
       <div className='flex-1 p-4 overflow-y-auto'>
         {cartItems.length > 0 ? (
           <div className='space-y-4 animate-stagger'>
-            {cartItems.map((item) => (
+            {cartItems.map((item, index) => (
               <div
-                key={item.id}
+                key={`cart-item-${index}-${item.id || 'unknown'}`}
                 className='p-4 bg-white border rounded-lg shadow-sm border-[#CBD5E1] hover-lift'
               >
                 <div className='flex items-center justify-between mb-2'>
