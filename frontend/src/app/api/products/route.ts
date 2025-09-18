@@ -24,6 +24,7 @@ async function getCurrentUser(req: NextRequest) {
       userId: user.id,
       userEmail: user.email,
       polarApiKey: polarApiKey,
+      polarOrganizationId: profile.user?.polar_organization_id || '',
     };
   } catch (error) {
     throw new Error('Invalid authentication');
@@ -54,11 +55,80 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { polarApiKey } = await getCurrentUser(req);
-    const body: any = await req.json();
+    const { polarApiKey, polarOrganizationId } = await getCurrentUser(req);
+    const contentType = req.headers.get('content-type') || '';
 
-    const product = await polarAPI.createProduct(polarApiKey, body);
-    return NextResponse.json({ success: true, product });
+    if (contentType.includes('multipart/form-data')) {
+      const form = await req.formData();
+      const name = String(form.get('name') || '');
+      const description = String(form.get('description') || '');
+      const organizationId = String(polarOrganizationId || '');
+      const billing = String(form.get('billing_interval') || 'once');
+      const priceStr = String(form.get('price') || '0');
+      const stockStr = String(form.get('stock') || '0');
+      const file = form.get('image') as File | null;
+
+      if (!name) {
+        return NextResponse.json(
+          { success: false, message: 'name is required' },
+          { status: 400 }
+        );
+      }
+
+      if (file && file.size > 0) {
+        try {
+          await polarAPI.uploadFile(
+            polarApiKey,
+            file,
+            organizationId,
+            'product_media'
+          );
+        } catch {}
+      }
+
+      const priceAmount = Math.round(Number(priceStr) * 100);
+      const isOnce = billing === 'once';
+      const prices = [
+        {
+          amount_type: 'fixed',
+          price_currency: 'usd',
+          price_amount: priceAmount,
+          type: isOnce ? 'one_time' : 'recurring',
+          recurring_interval: isOnce ? undefined : billing,
+          legacy: false,
+          is_archived: false,
+        },
+      ];
+
+      const product = await polarAPI.createProduct(polarApiKey, {
+        name,
+        description: description || undefined,
+        recurring_interval: isOnce ? null : billing,
+        prices,
+        metadata: { quantity: Number(stockStr || '0') },
+      });
+      return NextResponse.json({ success: true, product });
+    } else {
+      const body: any = await req.json();
+      if (!body.name) {
+        return NextResponse.json(
+          { success: false, message: 'name is required' },
+          { status: 400 }
+        );
+      }
+      const prices = Array.isArray(body.prices) ? body.prices : [];
+      const product = await polarAPI.createProduct(polarApiKey, {
+        name: body.name,
+        description: body.description,
+        recurring_interval:
+          typeof body.recurring_interval === 'string'
+            ? body.recurring_interval
+            : null,
+        prices,
+        metadata: body.metadata || {},
+      });
+      return NextResponse.json({ success: true, product });
+    }
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: error.message || 'Failed to create product' },

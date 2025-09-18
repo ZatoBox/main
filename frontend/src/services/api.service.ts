@@ -151,11 +151,40 @@ export const authAPI = {
 
 /// Products
 export const productsAPI = {
-  create: (productData: any, organizationId?: string): Promise<any> =>
-    apiRequest('/products/', {
+  create: (productData: any, organizationId?: string): Promise<any> => {
+    if (productData && productData.images && productData.images.length > 0) {
+      const form = new FormData();
+      form.append('name', productData.name);
+      if (productData.description)
+        form.append('description', productData.description);
+      form.append(
+        'billing_interval',
+        productData.billing_interval || productData.recurring_interval || 'once'
+      );
+      form.append(
+        'price',
+        String(
+          productData.price ||
+            (productData.prices?.[0]?.price_amount || 0) / 100
+        )
+      );
+      form.append(
+        'stock',
+        String(productData.metadata?.quantity || productData.stock || 0)
+      );
+      const img = productData.images[0];
+      form.append('image', img);
+      return apiRequest('/products/', {
+        method: 'POST',
+        data: form,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    }
+    return apiRequest('/products/', {
       method: 'POST',
-      data: { ...productData, organization_id: organizationId },
-    }),
+      data: { ...productData },
+    });
+  },
   getById: (productId: string): Promise<any> =>
     apiRequest(`/products/?id=${productId}`),
   update: (productId: string, updates: any): Promise<any> =>
@@ -258,7 +287,6 @@ export const salesAPI = {
   getById: (saleId: string): Promise<Sale> => apiRequest(`/sales/${saleId}`),
   getHistory: (): Promise<Sale[]> => apiRequest('/sales/'),
 };
-
 export const profileAPI = {
   get: (): Promise<{ success: boolean; user: User }> => apiRequest('/profile'),
   update: (

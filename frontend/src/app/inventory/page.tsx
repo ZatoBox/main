@@ -3,7 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Package } from 'lucide-react';
-import { productsAPI, categoriesAPI } from '@/services/api.service';
+import {
+  productsAPI,
+  categoriesAPI,
+  getActiveProducts,
+} from '@/services/api.service';
 import { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import InventoryHeader from '@/components/inventory/InventoryHeader';
@@ -27,6 +31,52 @@ const InventoryPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const mapPolarProductToProduct = (p: any): Product => {
+    const prices = Array.isArray(p.prices) ? p.prices : [];
+    let price = 0;
+    if (prices.length > 0) {
+      const pr = prices[0] || {};
+      const amt = pr.price_amount ?? pr.priceAmount;
+      const amtType = pr.amount_type ?? pr.amountType;
+      if (typeof amt === 'number') {
+        price = amtType === 'free' ? 0 : amt / 100;
+      }
+    }
+    const imageUrls = Array.isArray(p.medias)
+      ? p.medias
+          .filter(
+            (m: any) =>
+              m &&
+              typeof m.public_url === 'string' &&
+              m.mime_type &&
+              m.mime_type.startsWith('image/')
+          )
+          .map((m: any) => m.public_url)
+      : [];
+    return {
+      id: String(p.id),
+      name: p.name || 'Unnamed Product',
+      description: p.description || '',
+      price,
+      stock: 1,
+      min_stock: 0,
+      category_ids: [],
+      images: imageUrls,
+      status: 'active' as any,
+      weight: 0,
+      sku: String(p.id),
+      creator_id: '',
+      unit: 'Per item' as any,
+      product_type: 'Physical Product' as any,
+      localization: '',
+      created_at: p.created_at || p.createdAt || new Date().toISOString(),
+      last_updated:
+        p.modified_at ||
+        p.modifiedAt ||
+        p.updatedAt ||
+        new Date().toISOString(),
+    } as Product;
+  };
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -42,15 +92,21 @@ const InventoryPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const response = await productsAPI.list();
-        if (!response || !response.products) {
+        const response = await getActiveProducts();
+        if (response && response.success && Array.isArray(response.products)) {
+          const rows: any[] = response.products;
+          const filtered = rows.filter(
+            (p: any) => !(p.is_archived ?? p.is_archived)
+          );
+          const availableProducts = filtered.map(mapPolarProductToProduct);
+          setInventoryItems(availableProducts);
+          setError(null);
+        } else {
+          setInventoryItems([]);
           setError('Error loading inventory');
-          return;
         }
-
-        setInventoryItems(response.products);
-        setError(null);
       } catch (err) {
+        setInventoryItems([]);
         setError('Error loading inventory');
       } finally {
         setLoading(false);

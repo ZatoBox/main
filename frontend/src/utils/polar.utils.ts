@@ -64,17 +64,16 @@ export const polarAPI = {
 
   async createProduct(apiKey: string, productData: any): Promise<any> {
     const token = decryptApiKey(apiKey);
-    const body = {
+    const body: any = {
       name: productData.name,
       description: productData.description,
-      organization_id:
-        productData.organization_id || productData.organizationId,
       recurring_interval:
-        productData.recurring_interval ||
-        productData.recurringInterval ||
-        'month',
-      prices: productData.prices || [{ amount_type: 'free' }],
-    } as any;
+        typeof productData.recurring_interval === 'undefined'
+          ? null
+          : productData.recurring_interval,
+      prices: Array.isArray(productData.prices) ? productData.prices : [],
+      metadata: productData.metadata || undefined,
+    };
     const res = await fetch(`${BASE_URL}/products`, {
       method: 'POST',
       headers: {
@@ -102,6 +101,7 @@ export const polarAPI = {
       description: productData.description,
       prices: productData.prices,
       is_archived: productData.is_archived,
+      metadata: productData.metadata,
     };
     const res = await fetch(`${BASE_URL}/products/${productId}`, {
       method: 'PATCH',
@@ -134,5 +134,61 @@ export const polarAPI = {
       const text = await res.text();
       throw new Error(text || 'Failed to archive product');
     }
+  },
+
+  async uploadFile(
+    apiKey: string,
+    file: File,
+    organizationId: string,
+    service: string = 'product_media'
+  ): Promise<any> {
+    const token = decryptApiKey(apiKey);
+    const initRes = await fetch(`${BASE_URL}/files`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: file.name,
+        mime_type: (file as any).type || 'application/octet-stream',
+        size: (file as any).size || 0,
+        organization_id: organizationId,
+        service,
+      }),
+    });
+    if (!initRes.ok) {
+      const text = await initRes.text();
+      throw new Error(text || 'Failed to initialize file upload');
+    }
+    const info = await initRes.json();
+    if (info.upload_url) {
+      const putRes = await fetch(info.upload_url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': (file as any).type || 'application/octet-stream',
+        },
+        body: file as any,
+      });
+      if (!putRes.ok) {
+        const text = await putRes.text();
+        throw new Error(text || 'Failed to upload file');
+      }
+      const confirmRes = await fetch(`${BASE_URL}/files/${info.id}/uploaded`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      });
+      if (!confirmRes.ok) {
+        const text = await confirmRes.text();
+        throw new Error(text || 'Failed to confirm upload');
+      }
+      const confirmed = await confirmRes.json();
+      return confirmed || info;
+    }
+    return info;
   },
 };
