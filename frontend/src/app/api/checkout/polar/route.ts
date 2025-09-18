@@ -31,7 +31,7 @@ async function getCurrentUser(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { polarApiKey } = await getCurrentUser(req);
+    const { polarApiKey, polarOrganizationId } = await getCurrentUser(req);
     const { userId, items, successUrl, metadata } = await req.json();
 
     if (!userId || !items || !Array.isArray(items) || items.length === 0) {
@@ -41,19 +41,62 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const totalPrice = items.reduce((sum: number, item: any) => {
+      const itemPrice = item.productData?.prices?.[0]?.price_amount || 0;
+      return sum + itemPrice * item.quantity;
+    }, 0);
+
+    const cartDescription = items
+      .map(
+        (item: any) =>
+          `${item.productData?.name || 'Producto'} (x${item.quantity})`
+      )
+      .join(', ');
+
+    const allImages = items.reduce((images: any[], item: any) => {
+      if (item.productData?.medias) {
+        images.push(...item.productData.medias);
+      }
+      return images;
+    }, []);
+
+    const combinedMetadata = {
+      user_id: userId,
+      cart_total: totalPrice.toString(),
+      item_count: items.length.toString(),
+      items: JSON.stringify(
+        items.map((item: any) => ({
+          name: item.productData?.name,
+          quantity: item.quantity,
+          price: item.productData?.prices?.[0]?.price_amount,
+          metadata: item.productData?.metadata,
+        }))
+      ),
+      ...metadata,
+    };
+
+    const cartProduct = await polarAPI.createProduct(polarApiKey, {
+      name: `Order #${Math.floor(Math.random() * 1000000)}`,
+      description: `Products: ${cartDescription}`,
+      prices: [
+        {
+          amount_type: 'fixed',
+          price_amount: totalPrice,
+          price_currency: 'usd',
+        },
+      ],
+      metadata: combinedMetadata,
+      medias: allImages.slice(0, 5),
+    });
+
     const checkoutData = {
-      products: items.map((item: any) => item.polarProductId),
+      product_id: cartProduct.id,
       success_url:
         successUrl ||
-        `${process.env.NEXT_PUBLIC_URL}/success`,
+        `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/success`,
       metadata: {
         user_id: userId,
-        cart_items: JSON.stringify(
-          items.map((item: any) => ({
-            product_id: item.polarProductId,
-            quantity: item.quantity,
-          }))
-        ),
+        cart_product_id: cartProduct.id,
         ...metadata,
       },
     };
@@ -79,6 +122,7 @@ export async function POST(req: NextRequest) {
       success: true,
       checkout_url: checkoutResponse.url,
       checkout_id: checkoutResponse.id,
+      cart_product_id: cartProduct.id,
     });
   } catch (error: any) {
     console.error('Polar checkout error:', error);
