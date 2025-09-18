@@ -43,7 +43,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: true, product });
     } else {
       const products = await polarAPI.listProducts(polarApiKey, organizationId);
-      return NextResponse.json({ success: true, products });
+      const filteredProducts = products.filter(
+        (product) => !product.name || !product.name.startsWith('Order #')
+      );
+      return NextResponse.json({ success: true, products: filteredProducts });
     }
   } catch (error: any) {
     return NextResponse.json(
