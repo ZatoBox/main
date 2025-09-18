@@ -47,6 +47,7 @@ export class UserRepository {
       role: payload.role || 'user',
       profile_image: payload.profile_image || null,
       polar_api_key: payload.polar_api_key || null,
+      polar_organization_id: payload.polar_organization_id || null,
       created_at: now,
       last_updated: now,
     };
@@ -68,6 +69,9 @@ export class UserRepository {
     updates.last_updated = now;
     if (typeof updates.polar_api_key !== 'undefined') {
       updates.polar_api_key = updates.polar_api_key || null;
+    }
+    if (typeof updates.polar_organization_id !== 'undefined') {
+      updates.polar_organization_id = updates.polar_organization_id || null;
     }
     const { data, error } = await supabase
       .from(this.table)

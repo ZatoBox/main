@@ -75,7 +75,11 @@ const ProfilePage: React.FC = () => {
         const oldValue = profileData[field];
 
         if (newValue !== oldValue) {
-          if (field === 'phone' || field === 'polar_api_key') {
+          if (
+            field === 'phone' ||
+            field === 'polar_api_key' ||
+            field === 'polar_organization_id'
+          ) {
             payload[field] = newValue || null;
           } else if (newValue) {
             payload[field] = newValue;
@@ -290,6 +294,10 @@ const ProfilePage: React.FC = () => {
                         'polar_api_key',
                         'Polar API Key',
                         'password'
+                      )}
+                      {renderField(
+                        'polar_organization_id',
+                        'Polar Organization ID'
                       )}
                     </div>
 

@@ -21,6 +21,7 @@ export interface User {
   full_name: string;
   phone?: string;
   polar_api_key?: string;
+  polar_organization_id?: string;
   role: RoleUser;
   profile_image?: string;
   created_at?: string;
