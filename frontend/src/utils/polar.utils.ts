@@ -9,9 +9,13 @@ export const polarAPI = {
   async listProducts(apiKey: string, organizationId?: string): Promise<any[]> {
     const token = decryptApiKey(apiKey);
     const params = new URLSearchParams();
+
+    params.set('expand', 'medias,prices,benefits');
+
     if (organizationId && organizationId.trim() !== '') {
       params.set('organization_id', organizationId.trim());
     }
+
     const url = `${BASE_URL}/products${
       params.toString() ? `?${params.toString()}` : ''
     }`;
@@ -32,28 +36,30 @@ export const polarAPI = {
       : Array.isArray(data.items)
       ? data.items
       : [];
-    console.log('POLAR listProducts', {
-      hasOrg: !!organizationId,
-      count: items.length,
-      sample: items[0]?.id || null,
-    });
     return items;
   },
 
   async getProduct(apiKey: string, productId: string): Promise<any> {
     const token = decryptApiKey(apiKey);
-    const res = await fetch(`${BASE_URL}/products/${productId}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const params = new URLSearchParams();
+    params.set('include', 'medias,prices,benefits');
+
+    const res = await fetch(
+      `${BASE_URL}/products/${productId}?${params.toString()}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      }
+    );
     if (!res.ok) {
       const text = await res.text();
       throw new Error(text || 'Failed to get product');
     }
-    return res.json();
+    const product = await res.json();
+    return product;
   },
 
   async createProduct(apiKey: string, productData: any): Promise<any> {

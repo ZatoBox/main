@@ -55,6 +55,17 @@ const HomePage: React.FC<HomePageProps> = ({
         price = amtType === 'free' ? 0 : amt / 100;
       }
     }
+    const imageUrls = Array.isArray(p.medias)
+      ? p.medias
+          .filter(
+            (m: any) =>
+              m &&
+              typeof m.public_url === 'string' &&
+              m.mime_type &&
+              m.mime_type.startsWith('image/')
+          )
+          .map((m: any) => m.public_url)
+      : [];
     return {
       id: String(p.id),
       name: p.name || 'Unnamed Product',
@@ -63,7 +74,7 @@ const HomePage: React.FC<HomePageProps> = ({
       stock: 1,
       min_stock: 0,
       category_ids: [],
-      images: [],
+      images: imageUrls,
       status: 'active' as any,
       weight: 0,
       sku: String(p.id),
@@ -261,7 +272,6 @@ const HomePage: React.FC<HomePageProps> = ({
       setLoading(true);
       setError(null);
       const response = await getActiveProducts();
-
       if (response && response.success && Array.isArray(response.products)) {
         const rows: any[] = response.products;
         const filtered = rows.filter(
