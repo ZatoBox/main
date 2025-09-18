@@ -50,6 +50,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         ? `${primaryPrice.price_amount / 100} ${primaryPrice.price_currency}`
         : 'Free';
 
+      const stock = product.metadata?.quantity || 0;
+
       return {
         name: product.name,
         description: product.description,
@@ -57,7 +59,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         unit: primaryPrice?.recurring_interval
           ? `per ${primaryPrice.recurring_interval}`
           : 'one-time',
-        stock: null,
+        stock: stock,
         sku: product.id.slice(-8),
         categoryNames: [],
         isArchived: product.is_archived,

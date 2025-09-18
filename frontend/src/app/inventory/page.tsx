@@ -58,7 +58,7 @@ const InventoryPage: React.FC = () => {
       name: p.name || 'Unnamed Product',
       description: p.description || '',
       price,
-      stock: 1,
+      stock: p.metadata?.quantity || 0,
       min_stock: 0,
       category_ids: [],
       images: imageUrls,
