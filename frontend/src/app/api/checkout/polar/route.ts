@@ -41,13 +41,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const productPrices = items.map((item: any) => ({
-      product_price_id: item.priceId,
-      quantity: item.quantity,
-    }));
-
     const checkoutData = {
-      product_prices: productPrices,
+      products: items.map((item: any) => item.polarProductId),
       success_url:
         successUrl ||
         `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/success`,
@@ -57,7 +52,6 @@ export async function POST(req: NextRequest) {
           items.map((item: any) => ({
             product_id: item.polarProductId,
             quantity: item.quantity,
-            price_id: item.priceId,
           }))
         ),
         ...metadata,
