@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       products: items.map((item: any) => item.polarProductId),
       success_url:
         successUrl ||
-        `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/success`,
+        `${process.env.NEXT_PUBLIC_URL}/success`,
       metadata: {
         user_id: userId,
         cart_items: JSON.stringify(
