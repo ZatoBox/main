@@ -70,8 +70,16 @@ const HomePage: React.FC<HomePageProps> = ({
           )
           .map((m: any) => m.public_url)
       : [];
+    const baseId = String(p.id ?? '');
+    const safeName =
+      typeof p.name === 'string'
+        ? p.name.trim().replace(/\s+/g, '_').toLowerCase()
+        : '';
+    const stableId = safeName
+      ? `polar_${baseId}_${safeName}`
+      : `polar_${baseId}`;
     const product = {
-      id: String(p.id),
+      id: stableId,
       name: p.name || 'Unnamed Product',
       description: p.description || '',
       price,
@@ -96,6 +104,7 @@ const HomePage: React.FC<HomePageProps> = ({
     (product as any).prices = prices;
     (product as any).recurring_interval = p.recurring_interval;
     (product as any).metadata = p.metadata;
+    (product as any).polar_id = p.id;
     return product;
   };
 
@@ -147,7 +156,8 @@ const HomePage: React.FC<HomePageProps> = ({
     setSelectedProduct(product);
     setIsDrawerOpen(true);
     setCartItems((prevCart) => {
-      const pid = String(product.id);
+      const pid = String(product.id); // stable local id for UI/cart identity
+      const polarProductId = (product as any).polar_id || String(product.id); // original Polar ID for API calls
       const existing = prevCart.find((item) => item.id === pid);
       if (existing) {
         return prevCart.map((item) =>
@@ -161,7 +171,7 @@ const HomePage: React.FC<HomePageProps> = ({
           ...prevCart,
           {
             id: pid,
-            polarProductId: pid,
+            polarProductId,
             name: product.name,
             price: product.price,
             priceId: primaryPrice?.id || '',

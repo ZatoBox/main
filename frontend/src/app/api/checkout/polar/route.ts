@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
           name: item.productData?.name,
           quantity: item.quantity,
           price: item.productData?.prices?.[0]?.price_amount,
+          polarProductId: item.polarProductId,
           metadata: item.productData?.metadata,
         }))
       ),
