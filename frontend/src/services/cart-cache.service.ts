@@ -1,10 +1,13 @@
 interface CartItem {
   id: string;
+  polarProductId: string;
   name: string;
-  price: number;
-  quantity: number;
   description?: string;
-  metadata?: Record<string, any>;
+  price: number;
+  priceId: string;
+  quantity: number;
+  recurring_interval?: string | null;
+  productData: any;
 }
 
 interface CartData {

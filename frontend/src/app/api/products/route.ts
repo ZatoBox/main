@@ -1,113 +1,164 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ProductService } from '@/../backend/back/product/service';
-import { uploadMultipleImagesFromFiles } from '@/utils/cloudinary';
+import { polarAPI } from '@/utils/polar.utils';
+import { AuthService } from '@/../backend/auth/service';
 
-const service = new ProductService();
+async function getCurrentUser(req: NextRequest) {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new Error('Missing authentication token');
+  }
 
-export async function POST(req: NextRequest) {
+  const token = authHeader.split(' ')[1];
+  const authService = new AuthService();
+
   try {
-    const url = new URL(req.url);
-    const pathname = url.pathname.replace('/api/products', '') || '/';
-    if (pathname === '/' || pathname === '') {
-      const body = await req.json();
-      const userId = req.headers.get('x-user-id') || '';
-      const product = await service.createProduct(body, userId);
-      return NextResponse.json({ success: true, product });
+    const user = await authService.verifyToken(token);
+    const profile = await authService.getProfileUser(String(user.id));
+
+    const polarApiKey = profile.user?.polar_api_key || '';
+    if (!polarApiKey) {
+      throw new Error('Missing Polar API key for user');
     }
-    if (pathname === '/bulk') {
-      const body = await req.json();
-      const userId = req.headers.get('x-user-id') || '';
-      const results: any[] = [];
-      for (let i = 0; i < body.length; i++) {
-        try {
-          const p = await service.createProduct(body[i], userId);
-          results.push(p);
-        } catch (e: any) {
-          const errStr = String(e?.message ?? e);
-          if (
-            errStr.includes('duplicate') ||
-            errStr.includes('duplicate key')
-          ) {
-            try {
-              const modified = {
-                ...body[i],
-                sku: `${body[i].sku || 'sku'}_${i + 1}`,
-              };
-              const p2 = await service.createProduct(modified, userId);
-              results.push(p2);
-            } catch (e2) {
-              continue;
-            }
-          } else {
-            continue;
-          }
-        }
-      }
-      return NextResponse.json(results);
-    }
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  } catch (err: any) {
-    return NextResponse.json(
-      { success: false, message: String(err?.message ?? err) },
-      { status: 500 }
-    );
+
+    return {
+      userId: user.id,
+      userEmail: user.email,
+      polarApiKey: polarApiKey,
+      polarOrganizationId: profile.user?.polar_organization_id || '',
+    };
+  } catch (error) {
+    throw new Error('Invalid authentication');
   }
 }
 
 export async function GET(req: NextRequest) {
   try {
+    const { polarApiKey } = await getCurrentUser(req);
     const url = new URL(req.url);
-    const pathname = url.pathname.replace('/api/products', '') || '/';
-    if (pathname === '/' || pathname === '') {
-      const userId = req.headers.get('x-user-id') || '';
-      const products = await service.listProducts(userId);
-      return NextResponse.json({ success: true, products });
-    }
-    const parts = pathname.split('/').filter(Boolean);
-    if (parts[0] === 'active') {
-      const userId = req.headers.get('x-user-id') || '';
-      const products = await service.listProducts(userId);
-      const active = products.filter(
-        (p) => String(p.status || '').toLowerCase() === 'active'
+    const productId = url.searchParams.get('id');
+    const organizationId = url.searchParams.get('organization_id') || undefined;
+
+    if (productId) {
+      const product = await polarAPI.getProduct(polarApiKey, productId);
+      return NextResponse.json({ success: true, product });
+    } else {
+      const products = await polarAPI.listProducts(polarApiKey, organizationId);
+      const filteredProducts = products.filter(
+        (product) => !product.name || !product.name.startsWith('Order #')
       );
-      return NextResponse.json({ success: true, products: active });
+      return NextResponse.json({ success: true, products: filteredProducts });
     }
-    if (parts[0]) {
-      const product = await service.getProduct(parts[0]);
-      return NextResponse.json({
-        success: true,
-        message: 'Product found',
-        product,
-      });
-    }
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  } catch (err: any) {
+  } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: String(err?.message ?? err) },
+      { success: false, message: error.message || 'Failed to fetch products' },
       { status: 500 }
     );
   }
 }
 
-export async function PUT(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const pathname = url.pathname.replace('/api/products', '') || '/';
-    const parts = pathname.split('/').filter(Boolean);
-    if (parts[0]) {
-      const body = await req.json();
-      const userTimezone = req.headers.get('x-user-timezone') || 'UTC';
-      const updated = await service.updateProduct(parts[0], body, userTimezone);
-      return NextResponse.json({
-        success: true,
-        message: 'Product updated successfully',
-        product: updated,
+    const { polarApiKey, polarOrganizationId } = await getCurrentUser(req);
+    const contentType = req.headers.get('content-type') || '';
+
+    if (contentType.includes('multipart/form-data')) {
+      const form = await req.formData();
+      const name = String(form.get('name') || '');
+      const description = String(form.get('description') || '');
+      const organizationId = String(polarOrganizationId || '');
+      const billing = String(form.get('billing_interval') || 'once');
+      const priceStr = String(form.get('price') || '0');
+      const stockStr = String(form.get('stock') || '0');
+      const file = form.get('image') as File | null;
+
+      if (!name) {
+        return NextResponse.json(
+          { success: false, message: 'name is required' },
+          { status: 400 }
+        );
+      }
+
+      if (file && file.size > 0) {
+        try {
+          await polarAPI.uploadFile(
+            polarApiKey,
+            file,
+            organizationId,
+            'product_media'
+          );
+        } catch {}
+      }
+
+      const priceAmount = Math.round(Number(priceStr) * 100);
+      const isOnce = billing === 'once';
+      const prices = [
+        {
+          amount_type: 'fixed',
+          price_currency: 'usd',
+          price_amount: priceAmount,
+          type: isOnce ? 'one_time' : 'recurring',
+          recurring_interval: isOnce ? undefined : billing,
+          legacy: false,
+          is_archived: false,
+        },
+      ];
+
+      const product = await polarAPI.createProduct(polarApiKey, {
+        name,
+        description: description || undefined,
+        recurring_interval: isOnce ? null : billing,
+        prices,
+        metadata: { quantity: Number(stockStr || '0') },
       });
+      return NextResponse.json({ success: true, product });
+    } else {
+      const body: any = await req.json();
+      if (!body.name) {
+        return NextResponse.json(
+          { success: false, message: 'name is required' },
+          { status: 400 }
+        );
+      }
+      const prices = Array.isArray(body.prices) ? body.prices : [];
+      const product = await polarAPI.createProduct(polarApiKey, {
+        name: body.name,
+        description: body.description,
+        recurring_interval:
+          typeof body.recurring_interval === 'string'
+            ? body.recurring_interval
+            : null,
+        prices,
+        metadata: body.metadata || {},
+      });
+      return NextResponse.json({ success: true, product });
     }
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  } catch (err: any) {
+  } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: String(err?.message ?? err) },
+      { success: false, message: error.message || 'Failed to create product' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const { polarApiKey } = await getCurrentUser(req);
+    const url = new URL(req.url);
+    const productId = url.searchParams.get('id');
+
+    if (!productId) {
+      return NextResponse.json(
+        { success: false, message: 'Product ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const body: any = await req.json();
+    const product = await polarAPI.updateProduct(polarApiKey, productId, body);
+    return NextResponse.json({ success: true, product });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, message: error.message || 'Failed to update product' },
       { status: 500 }
     );
   }
@@ -115,50 +166,28 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const { polarApiKey } = await getCurrentUser(req);
     const url = new URL(req.url);
-    const pathname = url.pathname.replace('/api/products', '') || '/';
-    const parts = pathname.split('/').filter(Boolean);
-    if (parts[0]) {
-      const deleted = await service.deleteProduct(parts[0]);
-      return NextResponse.json({
-        success: true,
-        message: 'Product deleted successfully',
-        product: deleted,
-      });
-    }
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  } catch (err: any) {
-    return NextResponse.json(
-      { success: false, message: String(err?.message ?? err) },
-      { status: 500 }
-    );
-  }
-}
+    const productId = url.searchParams.get('id');
 
-export async function POST_images(req: NextRequest) {
-  try {
-    const contentType = req.headers.get('content-type') || '';
-    if (!contentType.includes('multipart/form-data')) {
+    if (!productId) {
       return NextResponse.json(
-        { success: false, message: 'Invalid content type' },
+        { success: false, message: 'Product ID is required' },
         { status: 400 }
       );
     }
-    const form = await req.formData();
-    const files: File[] = [];
-    for (const [key, value] of form.entries()) {
-      if (value instanceof File) files.push(value as File);
-    }
-    if (files.length === 0)
-      return NextResponse.json(
-        { success: false, message: 'No files provided' },
-        { status: 400 }
-      );
-    const urls = await uploadMultipleImagesFromFiles(files);
-    return NextResponse.json({ success: true, urls });
-  } catch (err: any) {
+
+    const product = await polarAPI.updateProduct(polarApiKey, productId, {
+      is_archived: true,
+    });
+    return NextResponse.json({
+      success: true,
+      message: 'Product archived successfully',
+      product,
+    });
+  } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: String(err?.message ?? err) },
+      { success: false, message: error.message || 'Failed to archive product' },
       { status: 500 }
     );
   }

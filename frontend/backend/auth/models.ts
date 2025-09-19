@@ -8,6 +8,8 @@ export interface UserItem {
   role?: RoleUser;
   phone?: string | null;
   profile_image?: string | null;
+  polar_api_key?: string | null;
+  polar_organization_id?: string | null;
 }
 
 export interface LoginRequest {

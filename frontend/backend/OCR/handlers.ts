@@ -77,6 +77,7 @@ export async function processImageFile(params: {
       if ('productos' in parsed) products = (parsed as any).productos;
       else products = [parsed];
     }
+
     return { text: extractedText, confidence: 0.95, language: 'es', products };
   } catch (e) {
     return { text: extractedText, confidence: 0.95, language: 'es' };

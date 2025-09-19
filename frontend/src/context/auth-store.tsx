@@ -20,16 +20,13 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   initialized: boolean;
-  login: (email: string, password: string, remember?: boolean) => Promise<void>;
-  register: (
-    data: {
-      full_name: string;
-      email: string;
-      password: string;
-      phone?: string;
-    },
-    remember?: boolean
-  ) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (data: {
+    full_name: string;
+    email: string;
+    password: string;
+    phone?: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
   loadFromCookies: () => Promise<void>;
   setUser: (user: User | null) => void;
@@ -79,16 +76,14 @@ export const useAuthStore = create<AuthState>((set, get) => {
         }
       }
     },
-    login: async (email, password, remember = false) => {
+    login: async (email, password) => {
       set({ loading: true, error: null });
       try {
         const res = await authAPI.login({ email, password });
         if (!res.token) throw new Error('Token no recibido');
-        setAuthToken(res.token, remember);
+        setAuthToken(res.token);
         if (res.user) {
-          setCookie(USER_COOKIE, JSON.stringify(res.user), {
-            expires: remember ? 30 : 7,
-          });
+          setCookie(USER_COOKIE, JSON.stringify(res.user), { expires: 7 });
         }
         set({ token: res.token, user: res.user || null, loading: false });
       } catch (e: any) {
@@ -99,16 +94,14 @@ export const useAuthStore = create<AuthState>((set, get) => {
         throw e;
       }
     },
-    register: async (data, remember = false) => {
+    register: async (data) => {
       set({ loading: true, error: null });
       try {
         const res = await authAPI.register(data);
         if (!res.token) throw new Error('Token no recibido');
-        setAuthToken(res.token, remember);
+        setAuthToken(res.token);
         if (res.user) {
-          setCookie(USER_COOKIE, JSON.stringify(res.user), {
-            expires: remember ? 30 : 7,
-          });
+          setCookie(USER_COOKIE, JSON.stringify(res.user), { expires: 7 });
         }
         set({ token: res.token, user: res.user || null, loading: false });
       } catch (e: any) {

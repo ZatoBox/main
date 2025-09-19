@@ -7,7 +7,7 @@ import { uploadProfileImage } from '@/utils/cloudinary';
 const SECRET_KEY = process.env.SECRET_KEY;
 const ALGORITHM = 'HS256';
 const ACCESS_TOKEN_EXPIRE_MINUTES = Number(
-  process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 60
+  process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 60 * 24 * 7
 );
 
 export class AuthService {
@@ -33,29 +33,85 @@ export class AuthService {
 
   async login(
     email: string,
-    password: string
+    password: string,
+    expiresMinutes?: number
   ): Promise<{ user: UserItem; token: string }> {
     if (!email || !password) throw new Error('Email and password are required');
-    const user = await this.repo.findByEmail(email);
-    if (!user) throw new Error('Invalid credentials');
-    try {
-      const hashed = (user as any).password as string | undefined;
-      if (!hashed || !verifyPassword(password, hashed))
+    let user = await this.repo.findByEmail(email);
+
+    if (user && (user as any).password) {
+      try {
+        const hashed = (user as any).password as string;
+        if (!verifyPassword(password, hashed))
+          throw new Error('Invalid credentials');
+        const userData: UserItem = { ...user };
+        delete (userData as any).password;
+        const token = this.createAccessToken(
+          { user_id: user.id },
+          expiresMinutes
+        );
+        return { user: userData, token };
+      } catch (e) {
         throw new Error('Invalid credentials');
-    } catch (e) {
-      throw new Error('Authentication error');
+      }
     }
-    const userData: UserItem = { ...user };
-    delete (userData as any).password;
-    const token = this.createAccessToken({ user_id: user.id });
-    return { user: userData, token };
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey =
+      process.env.SUPABASE_SERVICE_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
+    if (!supabaseUrl || !serviceKey) throw new Error('Authentication error');
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/auth/v1/token?grant_type=password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: serviceKey,
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error('Invalid credentials');
+      const supaUser = data.user;
+      if (!supaUser) throw new Error('Invalid credentials');
+
+      user = await this.repo.findByEmail(email);
+      if (!user) {
+        const fullName =
+          supaUser.user_metadata?.full_name ||
+          supaUser.user_metadata?.name ||
+          email;
+        const newId = await this.repo.createUser({
+          full_name: fullName,
+          email,
+          password: null,
+        });
+        user = await this.repo.findByUserId(String(newId));
+      }
+
+      if (!user) throw new Error('Authentication error');
+      const userData: UserItem = { ...user };
+      delete (userData as any).password;
+      const token = this.createAccessToken(
+        { user_id: user.id },
+        expiresMinutes
+      );
+      return { user: userData, token };
+    } catch (e) {
+      throw new Error('Invalid credentials');
+    }
   }
 
   async register(
     full_name: string,
     email: string,
     password: string,
-    phone?: string
+    phone?: string,
+    expiresMinutes?: number
   ): Promise<{ user: UserItem; token: string }> {
     if (!email || !password || !full_name)
       throw new Error('Email, password and fullname are required');
@@ -68,7 +124,7 @@ export class AuthService {
       password: hashed,
       phone,
     });
-    return this.login(email, password);
+    return this.login(email, password, expiresMinutes);
   }
 
   logout(token: string) {
@@ -113,6 +169,16 @@ export class AuthService {
     return { success: true, user };
   }
 
+  async setPolarApiKey(user_id: string, apiKey: string | null) {
+    await this.repo.updateProfile(user_id, { polar_api_key: apiKey });
+    return { success: true };
+  }
+
+  async getPolarApiKey(user_id: string): Promise<string | null> {
+    const key = await this.repo.getDecryptedPolarKey(user_id);
+    return key;
+  }
+
   async uploadProfileImage(
     user_id: string,
     file: File
@@ -150,5 +216,12 @@ export class AuthService {
     } catch (e: any) {
       throw new Error(String(e?.message ?? e));
     }
+  }
+
+  async deleteUser(
+    user_id: string
+  ): Promise<{ success: true; user: UserItem | null }> {
+    const user = await this.repo.deleteUser(user_id);
+    return { success: true, user };
   }
 }

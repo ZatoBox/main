@@ -165,6 +165,13 @@ const SideMenu: React.FC = () => {
       description: 'Browse modules',
       alwaysVisible: true,
     },
+    {
+      name: 'Profile',
+      icon: User,
+      path: '/profile',
+      description: 'Manage account',
+      alwaysVisible: true,
+    },
   ];
 
   const handleNavigation = (path: string) => {

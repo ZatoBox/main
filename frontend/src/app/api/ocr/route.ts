@@ -7,19 +7,16 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const url = new URL(req.url);
-  const pathname = url.pathname.replace('/api/ocr', '') || '/ocr';
-
-  if (pathname === '/' || pathname === '')
-    return NextResponse.json({ message: 'ZatoBox OCR API with Gemini' });
+  const pathname = url.pathname.replace('/api/ocr', '') || '/';
 
   try {
-    if (pathname === '/ocr') {
+    if (pathname === '/' || pathname === '' || pathname === '/ocr') {
       const contentType = req.headers.get('content-type') || '';
-      if (!contentType.includes('multipart/form-data'))
-        return NextResponse.json(
-          { detail: 'Content-Type should be multipart/form-data' },
-          { status: 400 }
-        );
+
+      if (!contentType.includes('multipart/form-data')) {
+        return NextResponse.json({ message: 'ZatoBox OCR API with Gemini' });
+      }
+
       const form = await req.formData();
       const file = form.get('file') as File | null;
       if (!file)

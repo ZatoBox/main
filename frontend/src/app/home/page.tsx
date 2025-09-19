@@ -5,14 +5,9 @@ import HomeHeader from '@/components/home/HomeHeader';
 import ProductGrid from '@/components/home/ProductGrid';
 import HomeStats from '@/components/home/HomeStats';
 import SalesDrawer from '@/components/SalesDrawer';
-import PaymentScreen from '@/components/PaymentScreen';
-import PaymentSuccessScreen from '@/components/PaymentSuccessScreen';
-import {
-  getActiveProducts,
-  salesAPI,
-  categoriesAPI,
-} from '@/services/api.service';
+import { getActiveProducts, salesAPI } from '@/services/api.service';
 import type { Product } from '@/types/index';
+import { PolarProduct } from '@/types/polar';
 import { useAuth } from '@/context/auth-store';
 
 interface HomePageProps {
@@ -23,6 +18,7 @@ interface HomePageProps {
 const HomePage: React.FC<HomePageProps> = ({
   searchTerm: externalSearchTerm = '',
 }) => {
+  const { user } = useAuth();
   const { isAuthenticated } = useAuth();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
@@ -34,41 +30,87 @@ const HomePage: React.FC<HomePageProps> = ({
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
-    []
-  );
 
   // Shopping cart
   interface CartItem {
     id: string;
+    polarProductId: string;
     name: string;
     price: number;
+    priceId: string;
     stock: number;
     quantity: number;
+    recurring_interval?: string | null;
+    productData: any;
   }
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   // Use local search term (takes priority over external)
   const activeSearchTerm = localSearchTerm || externalSearchTerm;
 
+  const mapPolarProductToProduct = (p: any): Product => {
+    const prices = Array.isArray(p.prices) ? p.prices : [];
+    let price = 0;
+    if (prices.length > 0) {
+      const pr = prices[0] || {};
+      const amt = pr.price_amount ?? pr.priceAmount;
+      const amtType = pr.amount_type ?? pr.amountType;
+      if (typeof amt === 'number') {
+        price = amtType === 'free' ? 0 : amt / 100;
+      }
+    }
+    const imageUrls = Array.isArray(p.medias)
+      ? p.medias
+          .filter(
+            (m: any) =>
+              m &&
+              typeof m.public_url === 'string' &&
+              m.mime_type &&
+              m.mime_type.startsWith('image/')
+          )
+          .map((m: any) => m.public_url)
+      : [];
+    const product = {
+      id: String(p.id),
+      name: p.name || 'Unnamed Product',
+      description: p.description || '',
+      price,
+      stock: p.metadata?.quantity || 0,
+      min_stock: 0,
+      category_ids: [],
+      images: imageUrls,
+      status: 'active' as any,
+      weight: 0,
+      sku: String(p.id),
+      creator_id: '',
+      unit: 'Per item' as any,
+      product_type: 'Physical Product' as any,
+      localization: '',
+      created_at: p.created_at || p.createdAt || new Date().toISOString(),
+      last_updated:
+        p.modified_at ||
+        p.modifiedAt ||
+        p.updatedAt ||
+        new Date().toISOString(),
+    } as Product;
+    (product as any).prices = prices;
+    (product as any).recurring_interval = p.recurring_interval;
+    (product as any).metadata = p.metadata;
+    return product;
+  };
+
   // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
-      if (!isAuthenticated) {
-        setLoading(false);
-        return;
-      }
-
       try {
         setLoading(true);
         const response = await getActiveProducts();
         if (response && response.success && Array.isArray(response.products)) {
-          const availableProducts = response.products.map((product: any) => {
-            return {
-              ...product,
-              stock: Number(product.stock ?? 0),
-            } as Product;
-          });
+          const rows: any[] = response.products;
+          const filtered = rows.filter(
+            (p: any) => !(p.is_archived ?? p.is_archived)
+          );
+          const availableProducts = filtered.map(mapPolarProductToProduct);
           setProducts(availableProducts);
         } else {
           setProducts([]);
@@ -82,34 +124,11 @@ const HomePage: React.FC<HomePageProps> = ({
     };
 
     fetchProducts();
-  }, [isAuthenticated]);
-
-  // Fetch categories
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const res = await categoriesAPI.list();
-        if ((res as any).success) setCategories((res as any).categories);
-      } catch {}
-    };
-    loadCategories();
   }, []);
 
-  // Map category ids to names
-  const categoryIdMap: Record<string, string> = useMemo(
-    () => Object.fromEntries(categories.map((c) => [c.id, c.name])),
-    [categories]
-  );
-
   const enrichedProducts = useMemo(() => {
-    return products.map((p: any) => {
-      const ids = Array.isArray(p.category_ids) ? p.category_ids : [];
-      const names = ids.map((id: string) => categoryIdMap[id]).filter(Boolean);
-      return { ...p, category_names: names } as Product & {
-        category_names?: string[];
-      };
-    });
-  }, [products, categoryIdMap]);
+    return products;
+  }, [products]);
 
   // Filter products based on search term
   const filteredProducts = useMemo(() => {
@@ -123,28 +142,33 @@ const HomePage: React.FC<HomePageProps> = ({
   }, [activeSearchTerm, enrichedProducts]);
 
   // When clicking on a product, add it to cart
-  const handleProductClick = (product: Product) => {
+  const handleProductClick = (productUntyped: Product | PolarProduct) => {
+    const product = productUntyped as Product;
     setSelectedProduct(product);
     setIsDrawerOpen(true);
     setCartItems((prevCart) => {
       const pid = String(product.id);
       const existing = prevCart.find((item) => item.id === pid);
       if (existing) {
-        // Add quantity, respecting stock
         return prevCart.map((item) =>
           item.id === pid
             ? { ...item, quantity: Math.min(item.quantity + 1, product.stock) }
             : item
         );
       } else {
+        const primaryPrice = (product as any).prices?.[0];
         return [
           ...prevCart,
           {
             id: pid,
+            polarProductId: pid,
             name: product.name,
             price: product.price,
+            priceId: primaryPrice?.id || '',
             stock: product.stock,
             quantity: 1,
+            recurring_interval: (product as any).recurring_interval || null,
+            productData: product,
           },
         ];
       }
@@ -155,73 +179,40 @@ const HomePage: React.FC<HomePageProps> = ({
     setIsDrawerOpen(false);
   };
 
-  const handleNavigateToPayment = (total: number) => {
-    setPaymentTotal(total);
-    setIsPaymentOpen(true);
-  };
+  const handleNavigateToPayment = async (total: number) => {
+    if (!user?.id) {
+      alert('Please log in to checkout');
+      return;
+    }
 
-  const handleBackFromPayment = () => {
-    setIsPaymentOpen(false);
-  };
-
-  const handlePaymentSuccess = async (method: string) => {
     try {
-      // Prepare sale data
-      const saleData: any = {
+      const { checkoutPolarCart } = await import('@/services/payments-service');
+
+      const cartData = {
+        userId: user.id,
         items: cartItems.map((item) => ({
-          product_id: item.id,
+          polarProductId: item.polarProductId,
+          priceId: item.priceId,
           quantity: item.quantity,
-          price: item.price,
+          productData: item.productData,
         })),
-        total: paymentTotal,
-        payment_method: method,
+        successUrl: `${window.location.origin}/success`,
+        metadata: {
+          total_amount: total.toString(),
+        },
       };
 
-      // Send sale to backend
-      const saleResponse: any = await salesAPI.create(saleData);
+      const response = await checkoutPolarCart(cartData);
 
-      if (saleResponse && saleResponse.success) {
-        console.log('Sale created successfully:', saleResponse);
-
-        // Update local inventory immediately
-        setProducts((prevProducts) =>
-          prevProducts.map((product) => {
-            const pid = String(product.id);
-            const cartItem = cartItems.find((item) => item.id === pid);
-            if (cartItem) {
-              return {
-                ...product,
-                stock: Math.max(0, product.stock - cartItem.quantity),
-              };
-            }
-            return product;
-          })
-        );
-
-        // Show success message
-        setPaymentMethod(method);
-        setIsPaymentOpen(false);
-        setIsSuccessOpen(true);
+      if (response.success && response.checkout_url) {
+        window.location.href = response.checkout_url;
       } else {
-        console.error('Error creating sale:', saleResponse);
-        alert('Error processing sale. Please try again.');
+        throw new Error(response.message || 'Failed to create checkout');
       }
     } catch (error) {
-      console.error('Error processing sale:', error);
-      alert('Error processing sale. Please try again.');
+      console.error('Checkout error:', error);
+      alert('Failed to create checkout. Please try again.');
     }
-  };
-
-  const handleNewOrder = () => {
-    // Reset all states to start fresh
-    setIsSuccessOpen(false);
-    setIsDrawerOpen(false);
-    setIsPaymentOpen(false);
-    setSelectedProduct(null);
-    setPaymentTotal(0);
-    setPaymentMethod('');
-    // Reset cart items to initial state
-    setCartItems([]);
   };
 
   const handleLocalSearchChange = (value: string) => {
@@ -234,11 +225,18 @@ const HomePage: React.FC<HomePageProps> = ({
     change: number
   ) => {
     setCartItems((prev) => {
-      const updatedItems = prev.map((item) =>
-        item.id === String(productId)
-          ? { ...item, quantity: Math.max(0, item.quantity + change) }
-          : item
-      );
+      const updatedItems = prev.map((item) => {
+        if (item.id === String(productId)) {
+          const actualStock =
+            item.productData?.metadata?.quantity || item.stock;
+          const newQuantity = Math.max(
+            0,
+            Math.min(item.quantity + change, actualStock)
+          );
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      });
       return updatedItems.filter((item) => item.quantity > 0);
     });
   };
@@ -261,14 +259,12 @@ const HomePage: React.FC<HomePageProps> = ({
       setLoading(true);
       setError(null);
       const response = await getActiveProducts();
-
       if (response && response.success && Array.isArray(response.products)) {
-        const availableProducts = response.products.map((product: any) => {
-          return {
-            ...product,
-            stock: Number(product.stock ?? 0),
-          } as Product;
-        });
+        const rows: any[] = response.products;
+        const filtered = rows.filter(
+          (p: any) => !(p.is_archived ?? p.is_archived)
+        );
+        const availableProducts = filtered.map(mapPolarProductToProduct);
         setProducts(availableProducts);
       } else {
         setProducts([]);
@@ -365,28 +361,13 @@ const HomePage: React.FC<HomePageProps> = ({
       </div>
 
       <SalesDrawer
-        isOpen={isDrawerOpen && !isPaymentOpen && !isSuccessOpen}
+        isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
         onNavigateToPayment={handleNavigateToPayment}
-        cartItems={cartItems.map((ci) => ({ ...ci, id: Number(ci.id) })) as any}
+        cartItems={cartItems as any}
         updateCartItemQuantity={updateCartItemQuantity}
         removeCartItem={removeFromCart}
         clearCart={clearCart}
-      />
-
-      <PaymentScreen
-        isOpen={isPaymentOpen}
-        onBack={handleBackFromPayment}
-        onPaymentSuccess={handlePaymentSuccess}
-        cartAmount={paymentTotal}
-      />
-
-      <PaymentSuccessScreen
-        isOpen={isSuccessOpen}
-        onNewOrder={handleNewOrder}
-        paymentMethod={paymentMethod}
-        total={paymentTotal}
-        items={cartItems.map((ci) => ({ ...ci, id: Number(ci.id) })) as any}
       />
     </>
   );

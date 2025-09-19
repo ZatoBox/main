@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import type { UserItem } from './models';
+import { encryptString, decryptString } from '@/utils/crypto';
 import { getCurrentTimeWithTimezone } from '@/utils/timezone';
 
 export class UserRepository {
@@ -45,6 +46,8 @@ export class UserRepository {
       phone: payload.phone || null,
       role: payload.role || 'user',
       profile_image: payload.profile_image || null,
+      polar_api_key: payload.polar_api_key || null,
+      polar_organization_id: payload.polar_organization_id || null,
       created_at: now,
       last_updated: now,
     };
@@ -64,6 +67,12 @@ export class UserRepository {
     const supabase = await createClient();
     const now = getCurrentTimeWithTimezone('UTC');
     updates.last_updated = now;
+    if (typeof updates.polar_api_key !== 'undefined') {
+      updates.polar_api_key = updates.polar_api_key || null;
+    }
+    if (typeof updates.polar_organization_id !== 'undefined') {
+      updates.polar_organization_id = updates.polar_organization_id || null;
+    }
     const { data, error } = await supabase
       .from(this.table)
       .update(updates)
@@ -72,5 +81,29 @@ export class UserRepository {
       .single();
     if (error) throw error;
     return data as UserItem;
+  }
+
+  async getDecryptedPolarKey(user_id: string): Promise<string | null> {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from(this.table)
+      .select('polar_api_key')
+      .eq('id', user_id)
+      .limit(1)
+      .single();
+    if (!data || !data.polar_api_key) return null;
+    return data.polar_api_key as string;
+  }
+
+  async deleteUser(user_id: string): Promise<UserItem | null> {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from(this.table)
+      .delete()
+      .eq('id', user_id)
+      .select()
+      .single();
+    if (error) throw error;
+    return (data as UserItem) || null;
   }
 }

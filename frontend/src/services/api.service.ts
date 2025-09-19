@@ -32,24 +32,19 @@ import type {
 } from '@/types';
 import { getAuthToken as getCookieAuthToken } from '@/services/cookies.service';
 
-const apiEnv = process.env.NEXT_PUBLIC_API_URL;
-const ocrEnv = process.env.NEXT_PUBLIC_OCR_API_URL;
 const appName = process.env.NEXT_PUBLIC_APP_NAME;
 const appVersion = process.env.NEXT_PUBLIC_APP_VERSION;
 const ocrMaxFileSize = process.env.NEXT_PUBLIC_OCR_MAX_FILE_SIZE;
 const ocrSupportedFormats = process.env.NEXT_PUBLIC_OCR_SUPPORTED_FORMATS;
 
-if (!apiEnv) throw new Error('Missing NEXT_PUBLIC_API_URL');
-if (!ocrEnv) throw new Error('Missing NEXT_PUBLIC_OCR_API_URL');
 if (!appName) throw new Error('Missing NEXT_PUBLIC_APP_NAME');
 if (!appVersion) throw new Error('Missing NEXT_PUBLIC_APP_VERSION');
 if (!ocrMaxFileSize) throw new Error('Missing NEXT_PUBLIC_OCR_MAX_FILE_SIZE');
 if (!ocrSupportedFormats)
   throw new Error('Missing NEXT_PUBLIC_OCR_SUPPORTED_FORMATS');
 
-const API_BASE_URL: string = apiEnv;
-const OCR_API_BASE_URL_RAW: string = ocrEnv;
-const OCR_API_BASE_URL: string = OCR_API_BASE_URL_RAW.replace(/\/+$/g, '');
+const API_BASE_URL: string = '';
+const OCR_API_BASE_URL: string = '/api/ocr';
 
 export const API_CONFIG = {
   BASE_URL: API_BASE_URL,
@@ -71,14 +66,26 @@ const getAuthToken = (): string | undefined => {
 };
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: '/api',
   timeout: API_CONFIG.TIMEOUT,
   headers: { 'Content-Type': 'application/json' },
 });
 
 axiosInstance.interceptors.request.use((cfg) => {
   const token = getAuthToken();
-  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    cfg.headers.Authorization = `Bearer ${token}`;
+  } else if (typeof window !== 'undefined') {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user && user.access_token) {
+          cfg.headers.Authorization = `Bearer ${user.access_token}`;
+        }
+      } catch {}
+    }
+  }
   return cfg;
 });
 
@@ -106,33 +113,36 @@ const apiRequest = async <T>(
 /// Auth
 export const authAPI = {
   login: (credentials: LoginRequest): Promise<AuthResponse> =>
-    apiRequest('/api/auth/login', { method: 'POST', data: credentials }),
+    apiRequest('/auth/login', { method: 'POST', data: credentials }),
   register: (userData: RegisterRequest): Promise<AuthResponse> =>
-    apiRequest('/api/auth/register', { method: 'POST', data: userData }),
-  getCurrentUser: (): Promise<User> => apiRequest('/api/auth/me'),
+    apiRequest('/auth/register', { method: 'POST', data: userData }),
+  getCurrentUser: (): Promise<User> => apiRequest('/auth/me'),
   getUserById: (userId: string): Promise<User> =>
-    apiRequest(`/api/auth/users/${userId}`),
-  getAllUsers: (): Promise<User[]> => apiRequest('/api/auth/users'),
+    apiRequest(`/auth/users/${userId}`),
+  getAllUsers: (): Promise<User[]> => apiRequest('/auth/users'),
   uploadProfileImage: (
     file: File
-  ): Promise<{ success: boolean; message: string; image_url?: string }> => {
+  ): Promise<{ success: boolean; user?: any; message?: string }> => {
     const formData = new FormData();
     formData.append('file', file);
-    return apiRequest('/api/auth/upload-profile-image', {
+    return apiRequest('/profile/image', {
       method: 'POST',
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  deleteProfileImage: (): Promise<{ success: boolean; message: string }> =>
-    apiRequest('/api/auth/delete-profile-image', { method: 'DELETE' }),
+  deleteProfileImage: (): Promise<{
+    success: boolean;
+    user?: any;
+    message?: string;
+  }> => apiRequest('/profile/image', { method: 'DELETE' }),
   updateProfileImage: (
     file: File
-  ): Promise<{ success: boolean; message: string; image_url?: string }> => {
+  ): Promise<{ success: boolean; user?: any; message?: string }> => {
     const formData = new FormData();
     formData.append('file', file);
-    return apiRequest('/api/auth/update-profile-image', {
-      method: 'PUT',
+    return apiRequest('/profile/image', {
+      method: 'PATCH',
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -141,80 +151,80 @@ export const authAPI = {
 
 /// Products
 export const productsAPI = {
-  create: (productData: CreateProductRequest): Promise<ProductResponse> =>
-    apiRequest('/api/products/', { method: 'POST', data: productData }),
-  createBulk: (
-    productsData: CreateProductRequest[]
-  ): Promise<ProductResponse[]> =>
-    apiRequest('/api/products/bulk', { method: 'POST', data: productsData }),
-  getById: (
-    productId: string
-  ): Promise<{ success: boolean; message: string; product: Product }> =>
-    apiRequest(`/api/products/${productId}`),
-  update: (
-    productId: string,
-    updates: UpdateProductRequest
-  ): Promise<{ success: boolean; message: string; product: Product }> =>
-    apiRequest(`/api/products/${productId}`, { method: 'PUT', data: updates }),
-  delete: (
-    productId: string
-  ): Promise<{ success: boolean; message: string; product: Product }> =>
-    apiRequest(`/api/products/${productId}`, { method: 'DELETE' }),
-  list: (): Promise<ProductsResponse> => apiRequest('/api/products/'),
-  addImages: (
-    productId: string,
-    images: File[]
-  ): Promise<{ success: boolean; message: string; product: Product }> => {
-    const formData = new FormData();
-    images.forEach((image) => formData.append('images', image));
-    return apiRequest(`/api/products/${productId}/images`, {
+  create: (productData: any, organizationId?: string): Promise<any> => {
+    if (productData && productData.images && productData.images.length > 0) {
+      const form = new FormData();
+      form.append('name', productData.name);
+      if (productData.description)
+        form.append('description', productData.description);
+      form.append(
+        'billing_interval',
+        productData.billing_interval || productData.recurring_interval || 'once'
+      );
+      form.append(
+        'price',
+        String(
+          productData.price ||
+            (productData.prices?.[0]?.price_amount || 0) / 100
+        )
+      );
+      form.append(
+        'stock',
+        String(productData.metadata?.quantity || productData.stock || 0)
+      );
+      const img = productData.images[0];
+      form.append('image', img);
+      return apiRequest('/products/', {
+        method: 'POST',
+        data: form,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    }
+    return apiRequest('/products/', {
       method: 'POST',
-      data: formData,
-      headers: { 'Content-Type': 'multipart/form-data' },
+      data: { ...productData },
     });
   },
-  getImages: (
-    productId: string
-  ): Promise<{ success: boolean; images: string[] }> =>
-    apiRequest(`/api/products/${productId}/images`),
-  updateImages: (
-    productId: string,
-    images: File[]
-  ): Promise<{ success: boolean; message: string; product: Product }> => {
-    const formData = new FormData();
-    images.forEach((image) => formData.append('images', image));
-    return apiRequest(`/api/products/${productId}/images`, {
-      method: 'PUT',
-      data: formData,
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
-  deleteImage: (
-    productId: string,
-    imageIndex: number
-  ): Promise<{ success: boolean; message: string; product: Product }> =>
-    apiRequest(`/api/products/${productId}/images/${imageIndex}`, {
-      method: 'DELETE',
+  createBulk: (products: any[]): Promise<any> =>
+    apiRequest('/products/bulk', {
+      method: 'POST',
+      data: { products },
     }),
+  getById: (productId: string): Promise<any> =>
+    apiRequest(`/products/?id=${productId}`),
+  update: (productId: string, updates: any): Promise<any> =>
+    apiRequest(`/products/?id=${productId}`, {
+      method: 'PATCH',
+      data: updates,
+    }),
+  delete: (productId: string): Promise<any> =>
+    apiRequest(`/products/?id=${productId}`, { method: 'DELETE' }),
+  list: (organizationId?: string): Promise<any> => {
+    const params = organizationId ? `?organization_id=${organizationId}` : '';
+    return apiRequest(`/products/${params}`);
+  },
 };
 
-export const getActiveProducts = async (): Promise<ProductsResponse> => {
-  return apiRequest('/api/products/active');
+export const getActiveProducts = async (
+  organizationId?: string
+): Promise<any> => {
+  const params = organizationId ? `?organization_id=${organizationId}` : '';
+  return apiRequest(`/products/${params}`);
 };
 
 export const getAllProducts = getActiveProducts;
 
 /// Inventory
 export const inventoryAPI = {
-  get: (): Promise<InventoryResponse> => apiRequest('/api/inventory'),
-  getUser: (): Promise<InventoryResponse> => apiRequest('/api/inventory/user'),
+  get: (): Promise<InventoryResponse> => apiRequest('/inventory'),
+  getUser: (): Promise<InventoryResponse> => apiRequest('/inventory/user'),
   getSummary: (): Promise<{ success: boolean; summary: InventorySummary }> =>
-    apiRequest('/api/inventory/summary'),
+    apiRequest('/inventory/summary'),
   getLowStock: (
     threshold?: number
   ): Promise<{ success: boolean; low_stock_products: InventoryProduct[] }> =>
     apiRequest(
-      `/api/inventory/low-stock${
+      `/inventory/low-stock${
         threshold !== undefined ? `?threshold=${threshold}` : ''
       }`
     ),
@@ -224,7 +234,7 @@ export const inventoryAPI = {
     success: boolean;
     message?: string;
     product?: InventoryProduct;
-  }> => apiRequest(`/api/inventory/${productId}`),
+  }> => apiRequest(`/inventory/${productId}`),
 };
 
 const ocrAxios: AxiosInstance = axios.create({
@@ -264,7 +274,7 @@ export const ocrAPI = {
   process: (file: File): Promise<OCRResponse> => {
     const formData = new FormData();
     formData.append('file', file);
-    return ocrRequest('/ocr', {
+    return ocrRequest('/', {
       method: 'POST',
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -278,48 +288,47 @@ export const ocrAPI = {
 /// Sales
 export const salesAPI = {
   create: (saleData: CreateSaleRequest): Promise<Sale> =>
-    apiRequest('/api/sales/', { method: 'POST', data: saleData }),
-  getById: (saleId: string): Promise<Sale> =>
-    apiRequest(`/api/sales/${saleId}`),
-  getHistory: (): Promise<Sale[]> => apiRequest('/api/sales/'),
+    apiRequest('/sales/', { method: 'POST', data: saleData }),
+  getById: (saleId: string): Promise<Sale> => apiRequest(`/sales/${saleId}`),
+  getHistory: (): Promise<Sale[]> => apiRequest('/sales/'),
 };
-
 export const profileAPI = {
-  get: (): Promise<{ success: boolean; user: User }> =>
-    apiRequest('/api/profile'),
+  get: (): Promise<{ success: boolean; user: User }> => apiRequest('/profile'),
   update: (
     profileData: Partial<User>
   ): Promise<{ success: boolean; message: string; user: User }> =>
-    apiRequest('/api/profile', { method: 'PUT', data: profileData }),
+    apiRequest('/profile', { method: 'PATCH', data: profileData }),
   changePassword: (passwordData: {
     oldPassword: string;
     newPassword: string;
   }): Promise<{ success: boolean; message: string }> =>
-    apiRequest('/api/profile/password', { method: 'PUT', data: passwordData }),
+    apiRequest('/profile/password', { method: 'PUT', data: passwordData }),
+  deleteUser: (): Promise<{ success: boolean; user?: User }> =>
+    apiRequest('/profile', { method: 'DELETE' }),
 };
 
 /// Layouts
 export const layoutsAPI = {
   create: (layoutData: CreateLayoutRequest): Promise<LayoutResponse> =>
-    apiRequest('/api/layouts/', { method: 'POST', data: layoutData }),
+    apiRequest('/layouts/', { method: 'POST', data: layoutData }),
   getBySlug: (layoutSlug: string): Promise<LayoutResponse> =>
-    apiRequest(`/api/layouts/${layoutSlug}`),
+    apiRequest(`/layouts/${layoutSlug}`),
   update: (
     layoutSlug: string,
     updates: UpdateLayoutRequest
   ): Promise<LayoutResponse> =>
-    apiRequest(`/api/layouts/${layoutSlug}`, { method: 'PUT', data: updates }),
+    apiRequest(`/layouts/${layoutSlug}`, { method: 'PUT', data: updates }),
   delete: (layoutSlug: string): Promise<LayoutResponse> =>
-    apiRequest(`/api/layouts/${layoutSlug}`, { method: 'DELETE' }),
-  list: (): Promise<LayoutsResponse> => apiRequest('/api/layouts/'),
+    apiRequest(`/layouts/${layoutSlug}`, { method: 'DELETE' }),
+  list: (): Promise<LayoutsResponse> => apiRequest('/layouts/'),
   listByOwner: (ownerId: string): Promise<LayoutsResponse> =>
-    apiRequest(`/api/layouts/owner/${ownerId}`),
+    apiRequest(`/layouts/owner/${ownerId}`),
   listByInventory: (inventoryId: string): Promise<LayoutsResponse> =>
-    apiRequest(`/api/layouts/inventory/${inventoryId}`),
+    apiRequest(`/layouts/inventory/${inventoryId}`),
 };
 
 export const categoriesAPI = {
-  list: (): Promise<CategoriesResponse> => apiRequest('/api/categories/'),
+  list: (): Promise<CategoriesResponse> => apiRequest('/categories/'),
   getById: (id: string): Promise<{ success: boolean; category: Category }> =>
-    apiRequest(`/api/categories/${id}`),
+    apiRequest(`/categories/${id}`),
 };
