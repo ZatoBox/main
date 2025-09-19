@@ -135,13 +135,6 @@ const SideMenu: React.FC = () => {
       alwaysVisible: true,
     },
     {
-      name: 'Profile',
-      icon: User,
-      path: '/profile',
-      description: 'Manage account',
-      alwaysVisible: true,
-    },
-    {
       name: 'Smart Inventory',
       icon: Brain,
       path: '/smart-inventory',
@@ -170,6 +163,13 @@ const SideMenu: React.FC = () => {
       icon: Store,
       path: '/plugin-store',
       description: 'Browse modules',
+      alwaysVisible: true,
+    },
+    {
+      name: 'Profile',
+      icon: User,
+      path: '/profile',
+      description: 'Manage account',
       alwaysVisible: true,
     },
   ];

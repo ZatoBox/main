@@ -65,7 +65,7 @@ const AvatarUploader: React.FC<Props> = ({
   return (
     <div className='flex items-center space-x-4'>
       <div className='relative'>
-        <div className='flex items-center justify-center w-20 h-20 rounded-full bg-[#E28E18]'>
+        <div className='flex items-center justify-center w-32 h-32 rounded-full bg-[#E28E18]'>
           {uploading ? (
             <div className='flex items-center justify-center w-8 h-8'>
               <div className='w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
@@ -74,7 +74,7 @@ const AvatarUploader: React.FC<Props> = ({
             <img
               src={imageUrl}
               alt='avatar'
-              className='object-cover w-20 h-20 rounded-full'
+              className='object-cover w-32 h-32 rounded-full'
             />
           ) : (
             <svg
