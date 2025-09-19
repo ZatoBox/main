@@ -11,6 +11,8 @@ export const polarAPI = {
     const params = new URLSearchParams();
 
     params.set('expand', 'medias,prices,benefits');
+    params.set('limit', '100');
+    params.set('is_archived', 'false');
 
     if (organizationId && organizationId.trim() !== '') {
       params.set('organization_id', organizationId.trim());

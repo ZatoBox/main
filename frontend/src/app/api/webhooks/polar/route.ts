@@ -146,12 +146,17 @@ async function handleCheckoutEvent(
 
       if (userId) {
         await updateProductStock(userId, eventData);
+        await deleteCartProduct(userId, eventData);
       }
     } else if (status === 'failed') {
       console.log(
         `Checkout failed${userId ? ` for user ${userId}` : ''}:`,
         eventData.id
       );
+
+      if (userId) {
+        await deleteCartProduct(userId, eventData);
+      }
     }
   }
 }
@@ -188,6 +193,56 @@ async function handleOrderEvent(
         console.error('Failed to update user profile:', error);
       }
     }
+  }
+}
+
+async function deleteCartProduct(userId: string, checkoutData: any) {
+  try {
+    const authService = new AuthService();
+    const profile = await authService.getProfileUser(userId);
+    const polarApiKey = profile.user?.polar_api_key;
+
+    if (!polarApiKey) {
+      console.error('No Polar API key found for user:', userId);
+      return;
+    }
+
+    console.log(
+      'Checkout data structure for product deletion:',
+      JSON.stringify(
+        {
+          id: checkoutData.id,
+          metadata: checkoutData.metadata,
+          product: checkoutData.product?.id,
+          productMetadata: checkoutData.product?.metadata,
+        },
+        null,
+        2
+      )
+    );
+
+    // Obtener el ID del producto temporal del carrito desde los metadatos del checkout
+    const cartProductId =
+      checkoutData.metadata?.cart_product_id ||
+      checkoutData.product?.id ||
+      checkoutData.product?.metadata?.cart_product_id;
+
+    if (cartProductId) {
+      try {
+        // Eliminar el producto temporal del carrito
+        await polarAPI.deleteProduct(polarApiKey, cartProductId);
+        console.log(`Deleted temporary cart product: ${cartProductId}`);
+      } catch (error) {
+        console.error(
+          `Failed to delete temporary cart product ${cartProductId}:`,
+          error
+        );
+      }
+    } else {
+      console.log('No cart product ID found in checkout metadata');
+    }
+  } catch (error) {
+    console.error('Error deleting cart product:', error);
   }
 }
 
