@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, ArrowLeft } from 'lucide-react';
 
-const SuccessPage: React.FC = () => {
+const SuccessContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [checkoutId, setCheckoutId] = useState<string | null>(null);
@@ -54,6 +54,26 @@ const SuccessPage: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const SuccessPage: React.FC = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className='min-h-screen bg-bg-main flex items-center justify-center p-4'>
+          <div className='max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center'>
+            <div className='mb-6'>
+              <div className='w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 animate-pulse'></div>
+              <div className='h-8 bg-gray-200 rounded mx-auto mb-2 animate-pulse'></div>
+              <div className='h-4 bg-gray-200 rounded mx-auto animate-pulse'></div>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <SuccessContent />
+    </Suspense>
   );
 };
 

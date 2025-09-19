@@ -7,6 +7,7 @@ import HomeStats from '@/components/home/HomeStats';
 import SalesDrawer from '@/components/SalesDrawer';
 import { getActiveProducts, salesAPI } from '@/services/api.service';
 import type { Product } from '@/types/index';
+import { PolarProduct } from '@/types/polar';
 import { useAuth } from '@/context/auth-store';
 
 interface HomePageProps {
@@ -141,7 +142,8 @@ const HomePage: React.FC<HomePageProps> = ({
   }, [activeSearchTerm, enrichedProducts]);
 
   // When clicking on a product, add it to cart
-  const handleProductClick = (product: Product) => {
+  const handleProductClick = (productUntyped: Product | PolarProduct) => {
+    const product = productUntyped as Product;
     setSelectedProduct(product);
     setIsDrawerOpen(true);
     setCartItems((prevCart) => {

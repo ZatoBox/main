@@ -20,29 +20,6 @@ const NewProductPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
 
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
-    []
-  );
-  const [loadingCategories, setLoadingCategories] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      setLoadingCategories(true);
-      try {
-        const res = await categoriesAPI.list();
-        if (active && res.success) setCategories(res.categories);
-      } catch {
-      } finally {
-        if (active) setLoadingCategories(false);
-      }
-    };
-    load();
-    return () => {
-      active = false;
-    };
-  }, []);
-
   const billingOptions = [
     { label: 'One-time', value: 'once' },
     { label: 'Monthly', value: 'month' },
