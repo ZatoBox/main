@@ -70,7 +70,7 @@ const OCRResultPage: React.FC = () => {
     setIsAddingToInventory(true);
     setError('');
     try {
-      const toCreate: CreateProductRequest[] = (result.line_items || [])
+      const polarProducts = (result.line_items || [])
         .map((it) => {
           const name =
             (it.name || it.description || '').trim().substring(0, 50) ||
@@ -83,42 +83,35 @@ const OCRResultPage: React.FC = () => {
             parseFloat(String(it.unit_price).replace(/[^\d.-]/g, '')) || 0;
           const stock =
             parseInt(String(it.quantity).replace(/[^\d]/g, '')) || 1;
-          const sku =
-            (it as any).sku && String((it as any).sku).trim().length >= 3
-              ? String((it as any).sku)
-                  .trim()
-                  .substring(0, 32)
-              : Array.from(
-                  { length: 8 },
-                  () =>
-                    'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[
-                      Math.floor(Math.random() * 32)
-                    ]
-                ).join('');
+          const priceInCents = Math.round(price * 100);
+
           return {
             name,
             description,
-            price,
-            stock,
-            unit: ProductUnity.PER_ITEM,
-            product_type: ProductType.PHYSICAL_PRODUCT,
-            category_id: undefined,
-            sku,
-            weight: undefined,
-            localization: undefined,
-            status: ProductStatus.ACTIVE,
-            min_stock: 0,
-          } as CreateProductRequest;
+            prices: [
+              {
+                amount_type: 'fixed',
+                price_currency: 'usd',
+                price_amount: priceInCents,
+              },
+            ],
+            metadata: {
+              quantity: stock,
+              category: 'General',
+              subcategory: 'OCR Import',
+              tags: 'ocr,imported',
+            },
+          };
         })
-        .filter((p) => p.name && p.price >= 0);
+        .filter((p) => p.name && p.prices[0].price_amount >= 0);
 
-      if (toCreate.length === 0) {
+      if (polarProducts.length === 0) {
         setError('No valid products to create');
         setIsAddingToInventory(false);
         return;
       }
 
-      await productsAPI.createBulk(toCreate);
+      await productsAPI.createBulk(polarProducts);
       router.push('/inventory');
     } catch (err: any) {
       setError(err.message || 'Error adding products');

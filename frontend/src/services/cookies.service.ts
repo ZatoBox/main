@@ -13,11 +13,8 @@ const defaultOptions = (): CookieOptions => {
   };
 };
 
-export function setAuthToken(token: string, remember = false) {
+export function setAuthToken(token: string) {
   const opts = defaultOptions();
-  if (remember) {
-    opts.expires = 30;
-  }
   Cookies.set(TOKEN_KEY, token, opts as Cookies.CookieAttributes);
 }
 

@@ -43,8 +43,8 @@ const RegisterForm: React.FC = () => {
         phone: values.phone,
       };
 
-      await registerUser(payload as any, true);
-      router.push('/home');
+      await registerUser(payload as any);
+      router.push('/upgrade');
     } catch (e: any) {
       console.error('[RegisterForm] error', e);
       const msg =

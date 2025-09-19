@@ -12,6 +12,8 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
     '/',
     '/login',
     '/register',
+    '/upgrade',
+    '/landing',
     '/auth/login',
     '/auth/register',
   ];

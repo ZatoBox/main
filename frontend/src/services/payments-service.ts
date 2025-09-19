@@ -18,14 +18,17 @@ export const createCheckout = async (
   return response.data;
 };
 
-export const checkoutCart = async (cartData: {
-  cartAmount: number;
+export const checkoutPolarCart = async (cartData: {
   userId: string;
-  items: any[];
-  billingInfo?: any;
-  shippingInfo?: any;
+  items: Array<{
+    polarProductId: string;
+    priceId: string;
+    quantity: number;
+    productData: any;
+  }>;
+  successUrl?: string;
   metadata?: any;
 }) => {
-  const response = await axios.post('/api/checkout', cartData);
+  const response = await axios.post('/api/checkout/polar', cartData);
   return response.data;
 };

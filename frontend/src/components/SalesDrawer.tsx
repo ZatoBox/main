@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+'use client';
+
+import React from 'react';
 import { X, Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 
 interface SalesItem {
-  id: number;
+  id: string | number;
+  polarProductId: string;
   name: string;
   quantity: number;
   price: number;
+  priceId: string;
   stock: number;
+  recurring_interval?: string | null;
+  productData: any;
 }
 
 interface SalesDrawerProps {
@@ -14,8 +20,8 @@ interface SalesDrawerProps {
   onClose: () => void;
   onNavigateToPayment: (total: number) => void;
   cartItems: SalesItem[];
-  updateCartItemQuantity: (id: number, change: number) => void;
-  removeCartItem: (id: number) => void;
+  updateCartItemQuantity: (id: string | number, change: number) => void;
+  removeCartItem: (id: string | number) => void;
   clearCart: () => void;
 }
 
@@ -68,15 +74,22 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
       <div className='flex-1 p-4 overflow-y-auto'>
         {cartItems.length > 0 ? (
           <div className='space-y-4 animate-stagger'>
-            {cartItems.map((item) => (
+            {cartItems.map((item, index) => (
               <div
-                key={item.id}
+                key={`cart-item-${index}-${item.id || 'unknown'}`}
                 className='p-4 bg-white border rounded-lg shadow-sm border-[#CBD5E1] hover-lift'
               >
                 <div className='flex items-center justify-between mb-2'>
-                  <h3 className='font-medium text-black text-glow'>
-                    {item.name}
-                  </h3>
+                  <div>
+                    <h3 className='font-medium text-black text-glow'>
+                      {item.name}
+                    </h3>
+                    {item.recurring_interval && (
+                      <span className='text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full'>
+                        {item.recurring_interval}ly
+                      </span>
+                    )}
+                  </div>
                   <button
                     onClick={() => removeCartItem(item.id)}
                     className='transition-colors duration-300 text-error hover:text-error-600 icon-bounce'
@@ -99,7 +112,10 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                     </span>
                     <button
                       onClick={() => updateCartItemQuantity(item.id, 1)}
-                      disabled={item.quantity >= item.stock}
+                      disabled={
+                        item.quantity >=
+                        (item.productData?.metadata?.quantity || item.stock)
+                      }
                       className='flex items-center justify-center w-8 h-8 transition-all duration-300 bg-gray-100 rounded-full hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110'
                     >
                       <Plus size={14} />
@@ -111,6 +127,10 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                     </div>
                     <div className='text-sm text-gray-500'>
                       ${item.price.toFixed(2)} each
+                    </div>
+                    <div className='text-xs text-gray-400'>
+                      Stock:{' '}
+                      {item.productData?.metadata?.quantity || item.stock}
                     </div>
                   </div>
                 </div>

@@ -28,7 +28,7 @@ const LoginForm: React.FC = () => {
   }) => {
     setError('');
     try {
-      await login(values.email, values.password, values.remember);
+      await login(values.email, values.password);
       router.push('/home');
     } catch (err: any) {
       setError(err?.message || 'Error logging in');

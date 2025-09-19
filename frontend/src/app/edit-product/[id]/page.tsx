@@ -1,16 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { productsAPI, categoriesAPI } from '@/services/api.service';
-import { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
-import EditHeader from '@/components/edit-product/EditHeader';
-import ProductForm from '@/components/edit-product/ProductForm';
-import ImagesUploader from '@/components/edit-product/ImagesUploader';
-import Categorization from '@/components/edit-product/Categorization';
-import InventoryPanel from '@/components/edit-product/InventoryPanel';
-import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+import { FaRegFolder } from 'react-icons/fa6';
+import { IoMdArrowRoundBack } from 'react-icons/io';
+import ImagesUploader from '@/components/new-product/ImagesUploader';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 const MAX_FILES = 4;
@@ -19,32 +17,15 @@ const MAX_SIZE = 5 * 1024 * 1024;
 const EditProductPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const id = (params as any)?.id as string | undefined;
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    productType: '',
-    name: '',
-    description: '',
-    location: '',
-    weight: '',
-    price: '',
-    inventoryQuantity: '',
-    lowStockAlert: '',
-    sku: '',
-  });
-  const [originalProduct, setOriginalProduct] = useState<Product | null>(null);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-  const [togglingStatus, setTogglingStatus] = useState(false);
-  const [status, setStatus] = useState<'active' | 'inactive' | ''>('');
+  const [error, setError] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
-  const [newFiles, setNewFiles] = useState<File[]>([]);
-  const [uploadingImages, setUploadingImages] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [productData, setProductData] = useState<any>(null);
 
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
     []
@@ -57,8 +38,8 @@ const EditProductPage: React.FC = () => {
       setLoadingCategories(true);
       try {
         const res = await categoriesAPI.list();
-        if (active && (res as any).success)
-          setCategories((res as any).categories);
+        if (active && res.success) setCategories(res.categories);
+      } catch {
       } finally {
         if (active) setLoadingCategories(false);
       }
@@ -70,13 +51,12 @@ const EditProductPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!id || typeof id !== 'string') {
-      setError('Invalid product id');
+    if (!id) {
+      setError('Product ID is required');
       setLoading(false);
       return;
     }
     fetchProduct();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchProduct = async () => {
@@ -84,31 +64,19 @@ const EditProductPage: React.FC = () => {
     setError(null);
     try {
       const res = await productsAPI.getById(id!);
-      const prod = (res as any).product as Product;
-      if (!prod) {
+      if (res && res.success && res.product) {
+        const product = res.product;
+        setProductData(product);
+        setExistingImages(
+          product.medias
+            ?.filter(
+              (m: any) => m.public_url && m.mime_type?.startsWith('image/')
+            )
+            .map((m: any) => m.public_url) || []
+        );
+      } else {
         setError('Product not found');
-        setLoading(false);
-        return;
       }
-      setOriginalProduct(prod);
-      setStatus((prod.status as 'active' | 'inactive') ?? '');
-      setFormData({
-        productType: prod.product_type ?? '',
-        name: prod.name ?? '',
-        description: prod.description ?? '',
-        location: prod.localization ?? '',
-        weight: prod.weight != null ? String(prod.weight) : '',
-        price: prod.price != null ? String(prod.price) : '',
-        inventoryQuantity: prod.stock != null ? String(prod.stock) : '',
-        lowStockAlert: prod.min_stock != null ? String(prod.min_stock) : '',
-        sku: prod.sku ?? '',
-      });
-      setSelectedCategories(
-        Array.isArray((prod as any).category_ids)
-          ? (prod as any).category_ids
-          : []
-      );
-      setExistingImages((prod.images || []).slice(0, MAX_FILES));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error loading product');
     } finally {
@@ -116,227 +84,310 @@ const EditProductPage: React.FC = () => {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const billingOptions = [
+    { label: 'One-time', value: 'once' },
+    { label: 'Monthly', value: 'month' },
+    { label: 'Yearly', value: 'year' },
+  ];
+
+  const handleAddFiles = (f: FileList | null) => {
+    if (!f) return;
+    let current = [...files];
+    for (const file of Array.from(f)) {
+      if (current.length >= MAX_FILES) break;
+      if (!ALLOWED_TYPES.includes(file.type)) continue;
+      if (file.size > MAX_SIZE) continue;
+      current.push(file);
+    }
+    setFiles(current.slice(0, MAX_FILES));
   };
 
-  const handleCategoryToggle = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
+  const handleRemoveFile = (index: number) =>
+    setFiles((prev) => prev.filter((_, i) => i !== index));
 
-  const handleSave = async () => {
-    if (!id) return;
+  const onSubmit = async (values: any) => {
     setSaving(true);
     setError(null);
     if (!isAuthenticated) {
-      setError('You must be logged in to update products');
+      setError('You must log in to update products');
       setSaving(false);
       return;
     }
 
-    if (!formData.name || !formData.price) {
-      setError('Name and price are required');
-      setSaving(false);
-      return;
-    }
-
-    const priceNum = Number(formData.price);
-    if (!Number.isFinite(priceNum) || priceNum <= 0) {
-      setError('Price must be greater than 0');
-      setSaving(false);
-      return;
-    }
-
-    const stockNum = parseInt(formData.inventoryQuantity || '0', 10);
-    if (!Number.isFinite(stockNum) || Number.isNaN(stockNum) || stockNum < 0) {
-      setError('Inventory quantity must be 0 or more');
-      setSaving(false);
-      return;
-    }
     try {
+      const prices = [
+        {
+          amount_type: 'fixed',
+          price_currency: 'usd',
+          price_amount: Math.round(Number(values.price) * 100),
+          type: values.billingInterval === 'once' ? 'one_time' : 'recurring',
+          recurring_interval:
+            values.billingInterval === 'once'
+              ? undefined
+              : values.billingInterval,
+          legacy: false,
+          is_archived: false,
+        },
+      ];
+
+      const metadata: any = { quantity: Number(values.stock || 0) };
+      if (values.category && String(values.category).trim() !== '')
+        metadata.category = String(values.category).trim();
+      if (values.subcategory && String(values.subcategory).trim() !== '')
+        metadata.subcategory = String(values.subcategory).trim();
+      if (values.tags && String(values.tags).trim() !== '') {
+        const arr = String(values.tags)
+          .split(',')
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0);
+        if (arr.length > 0) metadata.tags = arr.join(',');
+      }
+
       const payload: Record<string, unknown> = {
-        name: formData.name,
-        description: formData.description || null,
-        price: priceNum,
-        stock: stockNum,
-        product_type: formData.productType || undefined,
-        weight: formData.weight ? Number(formData.weight) : undefined,
-        sku: formData.sku || undefined,
-        min_stock: formData.lowStockAlert
-          ? Number(formData.lowStockAlert)
-          : undefined,
-        category_ids:
-          selectedCategories.length > 0 ? selectedCategories : undefined,
+        name: values.name,
+        description:
+          values.description && values.description.trim() !== ''
+            ? values.description
+            : undefined,
+        recurring_interval:
+          values.billingInterval === 'once' ? null : values.billingInterval,
+        prices,
+        metadata,
       };
 
-      // eliminar claves undefined para no provocar 422
-      Object.keys(payload).forEach((k) => {
-        if (payload[k] === undefined) delete payload[k];
-      });
-
-      await productsAPI.update(id, payload as any);
-      if (newFiles.length > 0) {
-        await uploadNewImages();
-      }
+      await productsAPI.update(id!, payload as any);
       router.push('/inventory');
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error updating product');
     } finally {
       setSaving(false);
     }
   };
 
-  const uploadNewImages = async () => {
-    if (!id || newFiles.length === 0) return;
-    setUploadingImages(true);
-    try {
-      await productsAPI.addImages(id, newFiles);
-      setNewFiles([]);
-      await fetchProduct();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error uploading images');
-    } finally {
-      setUploadingImages(false);
-    }
-  };
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required('Name is required'),
+    price: Yup.number()
+      .typeError('Price must be a number')
+      .positive('Price must be greater than 0')
+      .required('Price is required'),
+    stock: Yup.number()
+      .typeError('Stock must be a number')
+      .integer('Stock must be an integer')
+      .min(0, 'Stock must be 0 or more')
+      .required('Stock is required'),
+    billingInterval: Yup.string()
+      .oneOf(['once', 'month', 'year'])
+      .required('Billing interval is required'),
+  });
 
-  const handleDelete = () => {
-    setDeleteConfirmOpen(true);
-  };
+  if (loading) {
+    return <div className='min-h-screen bg-bg-main'>Loading product...</div>;
+  }
 
-  const handleDeleteConfirm = async () => {
-    if (!id) return;
-    try {
-      setIsDeleting(true);
-      await productsAPI.delete(id);
-      router.push('/inventory');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error deleting product');
-    } finally {
-      setIsDeleting(false);
-      setDeleteConfirmOpen(false);
-    }
-  };
+  if (!productData) {
+    return <div className='min-h-screen bg-bg-main'>Product not found</div>;
+  }
 
-  const handleDeleteCancel = () => {
-    setDeleteConfirmOpen(false);
-    setIsDeleting(false);
-  };
+  const primaryPrice = productData.prices?.[0];
+  const currentPrice = primaryPrice ? primaryPrice.price_amount / 100 : 0;
+  const currentInterval = productData.recurring_interval || 'once';
+  const currentStock = productData.metadata?.quantity || 0;
+  const currentCategory = productData.metadata?.category || '';
+  const currentSubcategory = productData.metadata?.subcategory || '';
+  const currentTags = productData.metadata?.tags || '';
 
-  const handleToggleStatus = async () => {
-    if (!id) return;
-    setTogglingStatus(true);
-    try {
-      const newStatus = status === 'active' ? 'inactive' : 'active';
-      await productsAPI.update(id, { status: newStatus } as any);
-      setStatus(newStatus as 'active' | 'inactive');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error toggling status');
-    } finally {
-      setTogglingStatus(false);
-    }
-  };
-
-  const handleAddFiles = (files: FileList | null) => {
-    if (!files) return;
-    let current = [...newFiles];
-    for (const f of Array.from(files)) {
-      const total = existingImages.length + current.length;
-      if (total >= MAX_FILES) break;
-      if (!ALLOWED_TYPES.includes(f.type)) continue;
-      if (f.size > MAX_SIZE) continue;
-      current.push(f);
-    }
-    setNewFiles(current.slice(0, MAX_FILES - existingImages.length));
-  };
-  const handleRemoveExisting = async (index: number) => {
-    if (!id) return;
-    try {
-      await productsAPI.deleteImage(id, index);
-      setExistingImages((prev) => prev.filter((_, i) => i !== index));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error deleting image');
-    }
-  };
-  const handleRemoveNew = (index: number) => {
-    setNewFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-  const handleReplaceAll = async (files: FileList | null) => {
-    if (!id || !files) return;
-    try {
-      const valid = Array.from(files)
-        .filter((f) => ALLOWED_TYPES.includes(f.type) && f.size <= MAX_SIZE)
-        .slice(0, MAX_FILES);
-      if (valid.length === 0) return;
-      await productsAPI.updateImages(id, valid as any);
-      setNewFiles([]);
-      await fetchProduct();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error replacing images');
-    }
-  };
-
-  if (loading)
-    return <div className='min-h-screen  bg-bg-main'>Loading product...</div>;
+  const initialValues = {
+    name: productData.name || '',
+    description: productData.description || '',
+    price: String(currentPrice),
+    stock: String(currentStock),
+    billingInterval: currentInterval,
+    category: currentCategory,
+    subcategory: currentSubcategory,
+    tags: currentTags,
+  } as any;
 
   return (
-    <div className='min-h-screen  bg-bg-main'>
-      <EditHeader
-        onBack={() => router.push('/inventory')}
-        onDelete={handleDelete}
-        onToggleStatus={handleToggleStatus}
-        onSave={handleSave}
-        status={status}
-        saving={saving || uploadingImages}
-        togglingStatus={togglingStatus}
-      />
-
-      <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
-        {error && (
-          <div className='p-2 mb-4 text-sm text-white bg-red-600 rounded'>
-            {error}
-          </div>
+    <div className='min-h-screen bg-bg-main'>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={onSubmit}
+      >
+        {(formik) => (
+          <>
+            <div className='flex flex-col sm:flex-row items-center justify-between h-auto sm:h-16 px-4 sm:px-6 py-4 sm:py-0 border-b border-[#CBD5E1] bg-white gap-4 sm:gap-0'>
+              <div className='flex items-center w-full sm:w-auto gap-2'>
+                <button
+                  onClick={() => router.push('/inventory')}
+                  className='p-2 transition-colors rounded-full hover:bg-gray-50 flex-shrink-0'
+                >
+                  <IoMdArrowRoundBack className='w-6 h-6 text-[#F88612]' />
+                </button>
+                <h1 className='text-xl font-semibold text-[#F88612] ml-2 sm:ml-4 md:ml-0'>
+                  Edit Product
+                </h1>
+              </div>
+              <div className='flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto'>
+                <div className='w-full sm:w-[158px] h-[40px] flex items-center justify-center bg-white rounded-lg border border-[#CBD5E1] gap-2'>
+                  <span className='text-black font-medium'>Status:</span>
+                  <span className='text-[#F88612] font-medium'>Active</span>
+                </div>
+                {error && <div className='text-sm text-red-500'>{error}</div>}
+                <button
+                  type='button'
+                  onClick={() => formik.handleSubmit()}
+                  disabled={saving}
+                  className={`bg-[#F88612] hover:bg-[#D9740F] text-white font-semibold rounded-lg transition-colors flex items-center justify-center space-x-1 w-full sm:w-[82px] h-[40px] ${
+                    saving ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {saving ? (
+                    <div className='w-4 h-4 border-b-2 border-white rounded-full animate-spin'></div>
+                  ) : (
+                    <>
+                      <FaRegFolder className='w-4 h-4 self-center' />
+                      <span>Save</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+              <Form>
+                <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
+                  <div className='space-y-6'>
+                    <ImagesUploader
+                      files={files}
+                      onAddFiles={handleAddFiles}
+                      onRemove={handleRemoveFile}
+                    />
+                    <div className='p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]'>
+                      <div className='space-y-4'>
+                        <div>
+                          <label className='block mb-2 text-sm font-medium text-black'>
+                            Description
+                          </label>
+                          <textarea
+                            name='description'
+                            value={formik.values.description}
+                            onChange={formik.handleChange}
+                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                          />
+                        </div>
+                        <div>
+                          <label className='block mb-2 text-sm font-medium text-black'>
+                            Category
+                          </label>
+                          <input
+                            name='category'
+                            value={formik.values.category}
+                            onChange={formik.handleChange}
+                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                          />
+                        </div>
+                        <div>
+                          <label className='block mb-2 text-sm font-medium text-black'>
+                            Subcategory
+                          </label>
+                          <input
+                            name='subcategory'
+                            value={formik.values.subcategory}
+                            onChange={formik.handleChange}
+                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                          />
+                        </div>
+                        <div>
+                          <label className='block mb-2 text-sm font-medium text-black'>
+                            Tags (comma separated)
+                          </label>
+                          <input
+                            name='tags'
+                            value={formik.values.tags}
+                            onChange={formik.handleChange}
+                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='space-y-6'>
+                    <div className='p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]'>
+                      <div className='space-y-4'>
+                        <div>
+                          <label className='block mb-2 text-sm font-medium text-black'>
+                            Name *
+                          </label>
+                          <input
+                            name='name'
+                            value={formik.values.name}
+                            onChange={formik.handleChange}
+                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                          />
+                          <div className='mt-1 text-xs text-red-500'>
+                            {formik.errors.name as any}
+                          </div>
+                        </div>
+                        <div>
+                          <label className='block mb-2 text-sm font-medium text-black'>
+                            Billing *
+                          </label>
+                          <select
+                            name='billingInterval'
+                            value={formik.values.billingInterval}
+                            onChange={formik.handleChange}
+                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                          >
+                            {billingOptions.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                          <div className='mt-1 text-xs text-red-500'>
+                            {formik.errors.billingInterval as any}
+                          </div>
+                        </div>
+                        <div>
+                          <label className='block mb-2 text-sm font-medium text-black'>
+                            Price *
+                          </label>
+                          <input
+                            name='price'
+                            type='number'
+                            step='0.01'
+                            value={formik.values.price}
+                            onChange={formik.handleChange}
+                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                          />
+                          <div className='mt-1 text-xs text-red-500'>
+                            {formik.errors.price as any}
+                          </div>
+                        </div>
+                        <div>
+                          <label className='block mb-2 text-sm font-medium text-black'>
+                            Stock *
+                          </label>
+                          <input
+                            name='stock'
+                            type='number'
+                            value={formik.values.stock}
+                            onChange={formik.handleChange}
+                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                          />
+                          <div className='mt-1 text-xs text-red-500'>
+                            {formik.errors.stock as any}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Form>
+            </div>
+          </>
         )}
-        <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
-          <div className='space-y-6'>
-            <ImagesUploader
-              existingImages={existingImages}
-              newFiles={newFiles}
-              onAddFiles={handleAddFiles}
-              onRemoveExisting={handleRemoveExisting}
-              onRemoveNew={handleRemoveNew}
-              onReplaceAll={handleReplaceAll}
-            />
-            <ProductForm
-              formData={formData as any}
-              onChange={handleInputChange}
-            />
-            <Categorization
-              categories={categories}
-              selectedCategories={selectedCategories}
-              onToggle={handleCategoryToggle}
-              loading={loadingCategories}
-            />
-          </div>
-
-          <div className='space-y-6'>
-            <InventoryPanel
-              formData={formData as any}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
-      </div>
-      <DeleteConfirmModal
-        open={deleteConfirmOpen}
-        onCancel={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        loading={isDeleting}
-      />
+      </Formik>
     </div>
   );
 };

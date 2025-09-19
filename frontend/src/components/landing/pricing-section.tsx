@@ -59,12 +59,12 @@ export function PricingSection() {
   const handleSubscribe = async () => {
     try {
       if (process.env.NEXT_PUBLIC_ENABLE_POLAR !== 'true') {
-        window.location.href = '/auth/login';
+        window.location.href = '/login';
         return;
       }
       const userId = user?.id;
       if (!userId) {
-        window.location.href = '/auth/login';
+        window.location.href = '/login';
         return;
       }
       const cycle = isAnnual ? 'annual' : 'monthly';
@@ -125,185 +125,222 @@ export function PricingSection() {
         </div>
       </div>
       <div className='self-stretch px-5 flex flex-col md:flex-row justify-start items-start gap-4 md:gap-6 mt-6 max-w-[1100px] mx-auto'>
-        {pricingPlans.map((plan) => (
-          <div
-            key={plan.name}
-            className={`flex-1 p-4 overflow-hidden rounded-xl flex flex-col justify-start items-start gap-6 h-full min-h-[600px] ${
-              plan.popular
-                ? 'bg-[#FF9D14] shadow-[0px_4px_8px_-2px_rgba(0,0,0,0.10)]'
-                : 'bg-transparent'
-            }`}
-            style={
-              plan.popular
-                ? {}
-                : {
-                    outline: '1px solid rgba(128, 128, 128, 0.12)',
-                    outlineOffset: '-1px',
-                  }
-            }
-          >
-            <div className='flex flex-col items-start self-stretch justify-between h-full gap-6'>
-              <div className='flex flex-col items-start self-stretch justify-start gap-8'>
-                <div
-                  className={`w-full h-5 text-sm font-medium leading-tight ${
-                    plan.popular ? 'text-white' : 'text-black'
-                  }`}
-                >
-                  {plan.name}
-                  {plan.popular && (
-                    <div className='ml-2 px-2 overflow-hidden rounded-full justify-center items-center gap-2.5 inline-flex mt-0 py-0.5 bg-gradient-to-b from-white/30 to-[#FFC44D]'>
-                      <div className='text-xs font-normal leading-tight text-center break-words text-white'>
-                        {getTranslation(language, 'pricing.popular')}
+        {pricingPlans.map((plan) => {
+          const parseNumber = (s: string) => {
+            const n = Number(String(s).replace(/[^0-9.]/g, ''));
+            return Number.isFinite(n) ? n : 0;
+          };
+          const monthlyFromAnnual = plan.annualPrice
+            ? `$${Math.floor(parseNumber(plan.annualPrice) / 12)}`
+            : plan.monthlyPrice;
+          const displayMainPrice =
+            isAnnual && plan.annualPrice ? plan.annualPrice : plan.monthlyPrice;
+          const displaySecondaryPrice =
+            isAnnual && plan.annualPrice
+              ? `${Math.floor(parseNumber(plan.annualPrice) / 12)}/mes`
+              : '';
+          return (
+            <div
+              key={plan.name}
+              className={`flex-1 p-4 overflow-hidden rounded-xl flex flex-col justify-start items-start gap-6 h-full min-h-[600px] ${
+                plan.popular
+                  ? 'bg-[#FF9D14] shadow-[0px_4px_8px_-2px_rgba(0,0,0,0.10)]'
+                  : 'bg-transparent'
+              }`}
+              style={
+                plan.popular
+                  ? {}
+                  : {
+                      outline: '1px solid rgba(128, 128, 128, 0.12)',
+                      outlineOffset: '-1px',
+                    }
+              }
+            >
+              <div className='flex flex-col items-start self-stretch justify-between h-full gap-6'>
+                <div className='flex flex-col items-start self-stretch justify-start gap-8'>
+                  <div
+                    className={`w-full h-5 text-sm font-medium leading-tight ${
+                      plan.popular ? 'text-white' : 'text-black'
+                    }`}
+                  >
+                    {plan.name}
+                    {plan.popular && (
+                      <div className='ml-2 px-2 overflow-hidden rounded-full justify-center items-center gap-2.5 inline-flex mt-0 py-0.5 bg-gradient-to-b from-white/30 to-[#FFC44D]'>
+                        <div className='text-xs font-normal leading-tight text-center break-words text-white'>
+                          {getTranslation(language, 'pricing.popular')}
+                        </div>
                       </div>
+                    )}
+                  </div>
+                  <div className='flex flex-col items-start self-stretch justify-start gap-1'>
+                    {(plan.monthlyPrice || plan.annualPrice) && (
+                      <div className='flex justify-start items-center gap-1.5'>
+                        <div className='flex flex-col items-start'>
+                          <div
+                            className={`relative h-10 flex items-center text-3xl font-medium leading-10 ${
+                              plan.popular ? 'text-white' : 'text-black'
+                            }`}
+                          >
+                            <span className='invisible'>
+                              {displayMainPrice}
+                            </span>
+                            <span
+                              className='absolute inset-0 flex items-center transition-all duration-500'
+                              style={{
+                                opacity: isAnnual ? 1 : 0,
+                                transform: `scale(${isAnnual ? 1 : 0.8})`,
+                                filter: `blur(${isAnnual ? 0 : 4}px)`,
+                              }}
+                              aria-hidden={!isAnnual}
+                            >
+                              {displayMainPrice}
+                            </span>
+                            <span
+                              className='absolute inset-0 flex items-center transition-all duration-500'
+                              style={{
+                                opacity: !isAnnual ? 1 : 0,
+                                transform: `scale(${!isAnnual ? 1 : 0.8})`,
+                                filter: `blur(${!isAnnual ? 0 : 4}px)`,
+                              }}
+                              aria-hidden={isAnnual}
+                            >
+                              {plan.monthlyPrice}
+                            </span>
+                          </div>
+                          {displaySecondaryPrice ? (
+                            <div
+                              className={`text-sm mt-1 ${
+                                plan.popular ? 'text-white/70' : 'text-black/70'
+                              }`}
+                            >
+                              {displaySecondaryPrice}
+                            </div>
+                          ) : null}
+                        </div>
+                        {!isAnnual && (
+                          <div
+                            className={`text-center text-sm font-medium leading-tight ${
+                              plan.popular ? 'text-white' : 'text-black'
+                            }`}
+                          >
+                            {plan.name ===
+                            getTranslation(
+                              language,
+                              'pricing.plans.tester.name'
+                            )
+                              ? getTranslation(
+                                  language,
+                                  'pricing.period.tester'
+                                )
+                              : getTranslation(
+                                  language,
+                                  'pricing.period.other'
+                                )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div
+                      className={`self-stretch text-sm font-medium leading-tight ${
+                        plan.popular ? 'text-white/70' : 'text-black/70'
+                      }`}
+                    >
+                      {plan.description}
                     </div>
-                  )}
+                  </div>
                 </div>
-                <div className='flex flex-col items-start self-stretch justify-start gap-1'>
-                  {(plan.monthlyPrice || plan.annualPrice) && (
-                    <div className='flex justify-start items-center gap-1.5'>
-                      <div
-                        className={`relative h-10 flex items-center text-3xl font-medium leading-10 ${
-                          plan.popular ? 'text-white' : 'text-black'
-                        }`}
-                      >
-                        <span className='invisible'>
-                          {isAnnual ? plan.annualPrice : plan.monthlyPrice}
-                        </span>
-                        <span
-                          className='absolute inset-0 flex items-center transition-all duration-500'
-                          style={{
-                            opacity: isAnnual ? 1 : 0,
-                            transform: `scale(${isAnnual ? 1 : 0.8})`,
-                            filter: `blur(${isAnnual ? 0 : 4}px)`,
-                          }}
-                          aria-hidden={!isAnnual}
-                        >
-                          {plan.annualPrice}
-                        </span>
-                        <span
-                          className='absolute inset-0 flex items-center transition-all duration-500'
-                          style={{
-                            opacity: !isAnnual ? 1 : 0,
-                            transform: `scale(${!isAnnual ? 1 : 0.8})`,
-                            filter: `blur(${!isAnnual ? 0 : 4}px)`,
-                          }}
-                          aria-hidden={isAnnual}
-                        >
-                          {plan.monthlyPrice}
-                        </span>
-                      </div>
-                      <div
-                        className={`text-center text-sm font-medium leading-tight ${
-                          plan.popular ? 'text-white' : 'text-black'
-                        }`}
-                      >
-                        {plan.name ===
-                        getTranslation(language, 'pricing.plans.tester.name')
-                          ? getTranslation(language, 'pricing.period.tester')
-                          : getTranslation(language, 'pricing.period.other')}
-                      </div>
-                    </div>
-                  )}
+
+                <div className='flex flex-col items-start self-stretch justify-start gap-4'>
                   <div
                     className={`self-stretch text-sm font-medium leading-tight ${
                       plan.popular ? 'text-white/70' : 'text-black/70'
                     }`}
                   >
-                    {plan.description}
+                    {plan.name ===
+                    getTranslation(language, 'pricing.plans.tester.name')
+                      ? getTranslation(language, 'pricing.includes')
+                      : plan.name}
                   </div>
-                </div>
-              </div>
-
-              <div className='flex flex-col items-start self-stretch justify-start gap-4'>
-                <div
-                  className={`self-stretch text-sm font-medium leading-tight ${
-                    plan.popular ? 'text-white/70' : 'text-black/70'
-                  }`}
-                >
-                  {plan.name ===
-                  getTranslation(language, 'pricing.plans.tester.name')
-                    ? getTranslation(language, 'pricing.includes')
-                    : plan.name}
-                </div>
-                <div className='flex flex-col items-start self-stretch justify-start gap-3'>
-                  {plan.features.map((feature: string) => (
-                    <div
-                      key={feature}
-                      className='flex items-center self-stretch justify-start gap-2'
-                    >
-                      <div className='flex items-center justify-center w-4 h-4'>
-                        <Check
-                          className={`w-full h-full ${
+                  <div className='flex flex-col items-start self-stretch justify-start gap-3'>
+                    {plan.features.map((feature: string) => (
+                      <div
+                        key={feature}
+                        className='flex items-center self-stretch justify-start gap-2'
+                      >
+                        <div className='flex items-center justify-center w-4 h-4'>
+                          <Check
+                            className={`w-full h-full ${
+                              plan.popular ? 'text-white' : 'text-black'
+                            }`}
+                            strokeWidth={2}
+                          />
+                        </div>
+                        <div
+                          className={`leading-tight font-normal text-sm text-left ${
                             plan.popular ? 'text-white' : 'text-black'
                           }`}
-                          strokeWidth={2}
-                        />
+                        >
+                          {feature}
+                        </div>
                       </div>
-                      <div
-                        className={`leading-tight font-normal text-sm text-left ${
-                          plan.popular ? 'text-white' : 'text-black'
+                    ))}
+                  </div>
+                </div>
+
+                {plan.name ===
+                getTranslation(language, 'pricing.plans.starter.name') ? (
+                  <Button
+                    onClick={handleSubscribe}
+                    className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
+                  >
+                    <div className='px-1.5 flex justify-center items-center gap-2'>
+                      <span
+                        className={`text-center text-sm font-medium leading-tight ${
+                          plan.name ===
+                          getTranslation(language, 'pricing.plans.tester.name')
+                            ? 'text-gray-800'
+                            : plan.name ===
+                              getTranslation(
+                                language,
+                                'pricing.plans.starter.name'
+                              )
+                            ? 'text-orange-500'
+                            : 'text-black'
                         }`}
                       >
-                        {feature}
-                      </div>
+                        {plan.buttonText}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSubscribe}
+                    className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
+                  >
+                    <div className='px-1.5 flex justify-center items-center gap-2'>
+                      <span
+                        className={`text-center text-sm font-medium leading-tight ${
+                          plan.name ===
+                          getTranslation(language, 'pricing.plans.tester.name')
+                            ? 'text-gray-800'
+                            : plan.name ===
+                              getTranslation(
+                                language,
+                                'pricing.plans.starter.name'
+                              )
+                            ? 'text-orange-500'
+                            : 'text-black'
+                        }`}
+                      >
+                        {plan.buttonText}
+                      </span>
+                    </div>
+                  </Button>
+                )}
               </div>
-
-              {plan.name ===
-              getTranslation(language, 'pricing.plans.starter.name') ? (
-                <Button
-                  onClick={handleSubscribe}
-                  className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
-                >
-                  <div className='px-1.5 flex justify-center items-center gap-2'>
-                    <span
-                      className={`text-center text-sm font-medium leading-tight ${
-                        plan.name ===
-                        getTranslation(language, 'pricing.plans.tester.name')
-                          ? 'text-gray-800'
-                          : plan.name ===
-                            getTranslation(
-                              language,
-                              'pricing.plans.starter.name'
-                            )
-                          ? 'text-orange-500'
-                          : 'text-black'
-                      }`}
-                    >
-                      {plan.buttonText}
-                    </span>
-                  </div>
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleSubscribe}
-                  className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
-                >
-                  <div className='px-1.5 flex justify-center items-center gap-2'>
-                    <span
-                      className={`text-center text-sm font-medium leading-tight ${
-                        plan.name ===
-                        getTranslation(language, 'pricing.plans.tester.name')
-                          ? 'text-gray-800'
-                          : plan.name ===
-                            getTranslation(
-                              language,
-                              'pricing.plans.starter.name'
-                            )
-                          ? 'text-orange-500'
-                          : 'text-black'
-                      }`}
-                    >
-                      {plan.buttonText}
-                    </span>
-                  </div>
-                </Button>
-              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

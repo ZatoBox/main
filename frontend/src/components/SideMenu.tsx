@@ -8,6 +8,7 @@ import {
   Plus,
   Archive,
   Brain,
+  Sparkles,
   LogOut,
   User,
   Menu,
@@ -164,6 +165,13 @@ const SideMenu: React.FC = () => {
       description: 'Browse modules',
       alwaysVisible: true,
     },
+    {
+      name: 'Profile',
+      icon: User,
+      path: '/profile',
+      description: 'Manage account',
+      alwaysVisible: true,
+    },
   ];
 
   const handleNavigation = (path: string) => {
@@ -311,7 +319,18 @@ const SideMenu: React.FC = () => {
           {renderMenuItems(menuItems)}
         </nav>
 
-        {/* User Info */}
+        <div className='px-4 py-2'>
+          <div className='mb-2 flex justify-center'>
+            <button
+              onClick={() => router.push('/upgrade')}
+              className='w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]'
+            >
+              <Sparkles size={16} className='text-current' />
+              <span className='font-medium'>Upgrade</span>
+            </button>
+          </div>
+        </div>
+
         <div className='px-4 py-4 border-t border-[#CBD5E1]'>
           <div className='flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50'>
             <div className='flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]'>
@@ -351,7 +370,18 @@ const SideMenu: React.FC = () => {
           {renderMenuItems(menuItems)}
         </nav>
 
-        {/* User Info with Hover Animation */}
+        <div className='px-4 py-2'>
+          <div className='mb-2 flex justify-center'>
+            <button
+              onClick={() => router.push('/upgrade')}
+              className='w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]'
+            >
+              <Sparkles size={16} className='text-current' />
+              <span className='font-medium'>Upgrade</span>
+            </button>
+          </div>
+        </div>
+
         <div className='px-4 py-4 border-t border-[#CBD5E1]'>
           <div
             ref={userInfoRef}
