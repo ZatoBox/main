@@ -28,7 +28,7 @@ const ImagesUploader: React.FC<Props> = ({
         Product Images
       </label>
       <div className='mb-4'>
-        <label className='block w-full p-8 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-[#CBD5E1] hover:border-gray-400'>
+        <label className='relative block w-full p-8 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-[#CBD5E1] hover:border-gray-400'>
           <input
             type='file'
             accept='image/*'
@@ -39,6 +39,9 @@ const ImagesUploader: React.FC<Props> = ({
           <Upload size={48} className='mx-auto mb-4 text-[#88888888]' />
           <p className='mb-2 text-[#88888888]'>Drag and drop images here</p>
           <p className='text-sm text-[#88888888]'>or click to select files</p>
+          <div className='absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center pointer-events-none'>
+            <span className='text-lg font-semibold text-gray-700'>Fixing</span>
+          </div>
         </label>
       </div>
 

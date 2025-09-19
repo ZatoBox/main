@@ -32,7 +32,7 @@ const ImagesUploader: React.FC<Props> = ({ files, onAddFiles, onRemove }) => {
         Product Images
       </label>
       <div
-        className={`border-2 border-dashed border-[#CBD5E1] rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer ${
+        className={`relative border-2 border-dashed border-[#CBD5E1] rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer ${
           dragActive ? 'border-[#CBD5E1]' : ''
         }`}
         onDragEnter={handleDrag}
@@ -67,6 +67,9 @@ const ImagesUploader: React.FC<Props> = ({ files, onAddFiles, onRemove }) => {
           <p className='mb-2 text-[#88888888]'>Drag and drop images here</p>
           <p className='text-sm text-[#88888888]'>or click to select files</p>
         </label>
+        <div className='absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center pointer-events-none'>
+          <span className='text-lg font-semibold text-gray-700'>Fixing</span>
+        </div>
       </div>
 
       {files.length > 0 && (
