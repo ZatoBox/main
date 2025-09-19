@@ -185,6 +185,11 @@ export const productsAPI = {
       data: { ...productData },
     });
   },
+  createBulk: (products: any[]): Promise<any> =>
+    apiRequest('/products/bulk', {
+      method: 'POST',
+      data: { products },
+    }),
   getById: (productId: string): Promise<any> =>
     apiRequest(`/products/?id=${productId}`),
   update: (productId: string, updates: any): Promise<any> =>
@@ -269,7 +274,7 @@ export const ocrAPI = {
   process: (file: File): Promise<OCRResponse> => {
     const formData = new FormData();
     formData.append('file', file);
-    return ocrRequest('/ocr', {
+    return ocrRequest('/', {
       method: 'POST',
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
