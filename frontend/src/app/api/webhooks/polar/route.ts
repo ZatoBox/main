@@ -211,9 +211,9 @@ async function updateProductStock(userId: string, checkoutData: any) {
     const cartItems = JSON.parse(product.metadata.items || '[]');
 
     for (const item of cartItems) {
-      if (!item.metadata || !item.metadata.product_id) continue;
+      if (!item.polarProductId) continue;
 
-      const productId = item.metadata.product_id;
+      const productId = item.polarProductId;
       const quantityPurchased = item.quantity || 1;
 
       try {
