@@ -17,7 +17,32 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
     '/auth/login',
     '/auth/register',
   ];
-  const showSidebar = !noSidebarPaths.includes(pathname || '/');
+  const existingPaths = [
+    '/',
+    '/auth/callback',
+    '/auth/login',
+    '/auth/register',
+    '/failure',
+    '/home',
+    '/inventory',
+    '/landing',
+    '/new-product',
+    '/ocr-result',
+    '/plugin-store',
+    '/polar-products',
+    '/profile',
+    '/smart-inventory',
+    '/success',
+    '/swagger',
+    '/upgrade',
+  ];
+  const isExisting = (path: string) => {
+    if (existingPaths.includes(path)) return true;
+    if (path.startsWith('/edit-product/')) return true;
+    if (path.startsWith('/link/')) return true;
+    return false;
+  };
+  const showSidebar = isExisting(pathname || '/') && !noSidebarPaths.includes(pathname || '/');
 
   return (
     <div className='flex min-h-screen w-full overflow-x-hidden'>
