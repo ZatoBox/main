@@ -26,11 +26,7 @@ export function CTASection() {
             {getTranslation(language, 'cta.subtitle')}
           </p>
         </div>
-        <Link
-          href='https://zatobox.io/login'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
+        <Link href='login'>
           <Button
             className='px-[30px] py-2 bg-[#F2F2F2] text-black text-base font-medium leading-6 rounded-[99px] shadow-[0px_0px_0px_4px_rgba(255,255,255,0.13)] hover:bg-orange-200 transition-all duration-200'
             size='lg'

@@ -36,7 +36,7 @@ export function HeroSection() {
         </p>
       </div>
 
-      <Link href="https://zatobox.io/login">
+      <Link href="/login">
         <Button className="relative z-10 bg-zatobox-500 text-white hover:opacity-90 px-8 py-3 rounded-full font-medium text-base shadow-lg ring-1 ring-white/10">
           {getTranslation(language, "hero.cta")}
         </Button>
