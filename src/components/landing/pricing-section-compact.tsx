@@ -313,7 +313,10 @@ export function PricingSectionCompact() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={handleSubscribe}
+                    onClick={() =>
+                      (window.location.href =
+                        'https://calendar.app.google/NGSt7EKkqBGnGGPh7')
+                    }
                     className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
                   >
                     <div className="px-1.5 flex justify-center items-center gap-2">

@@ -279,4 +279,14 @@ export class AuthService {
     });
     return { success: true, user: updated };
   }
+
+  async promoteEmailToPremium(
+    email: string,
+    months: number = 1
+  ): Promise<{ success: true; user: UserItem } | { success: false }> {
+    const user = await this.repo.findByEmail(email);
+    if (!user) return { success: false };
+    const res = await this.promoteToPremium(String(user.id), months);
+    return res;
+  }
 }
