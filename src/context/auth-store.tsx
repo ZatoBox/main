@@ -24,7 +24,7 @@ interface AuthState {
   register: (data: {
     full_name: string;
     email: string;
-    password: string;
+    password?: string;
     phone?: string;
   }) => Promise<void>;
   logout: () => Promise<void>;

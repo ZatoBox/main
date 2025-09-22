@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const msg = String(err?.message ?? err);
     const status = /restringido|restricted|premium|admin/i.test(msg)
       ? 403
-      : 500;
+      : 401;
     return NextResponse.json({ success: false, message: msg }, { status });
   }
 }

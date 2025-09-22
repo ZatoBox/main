@@ -40,6 +40,14 @@ export class AuthService {
     if (!email || !password) throw new Error('Email and password are required');
     let user = await this.repo.findByEmail(email);
 
+    if (user) {
+      try {
+        this.ensureLoginAllowed(user as UserItem);
+      } catch (e: any) {
+        throw new Error(String(e?.message ?? e));
+      }
+    }
+
     if (user && (user as any).password) {
       try {
         const hashed = (user as any).password as string;
@@ -53,7 +61,11 @@ export class AuthService {
           expiresMinutes
         );
         return { user: userData, token };
-      } catch (e) {
+      } catch (e: any) {
+        const msg = String(e?.message ?? e);
+        if (/Acceso restringido|restricted|premium|admin/i.test(msg)) {
+          throw new Error(msg);
+        }
         throw new Error('Invalid credentials');
       }
     }
@@ -90,7 +102,6 @@ export class AuthService {
         const newId = await this.repo.createUser({
           full_name: fullName,
           email,
-          password: null,
         });
         user = await this.repo.findByUserId(String(newId));
       }
@@ -104,7 +115,11 @@ export class AuthService {
         expiresMinutes
       );
       return { user: userData, token };
-    } catch (e) {
+    } catch (e: any) {
+      const msg = String(e?.message ?? e);
+      if (/Acceso restringido|restricted|premium|admin/i.test(msg)) {
+        throw new Error(msg);
+      }
       throw new Error('Invalid credentials');
     }
   }
@@ -116,15 +131,13 @@ export class AuthService {
     phone?: string,
     expiresMinutes?: number
   ): Promise<{ user: UserItem; token: string }> {
-    if (!email || !password || !full_name)
-      throw new Error('Email, password and fullname are required');
+    if (!email || !full_name)
+      throw new Error('Email and fullname are required');
     const existing = await this.repo.findByEmail(email);
     if (existing) throw new Error('Email already exists');
-    const hashed = hashPassword(password);
     const user_id = await this.repo.createUser({
       full_name,
       email,
-      password: hashed,
       phone,
     });
     const user = await this.repo.findByUserId(String(user_id));
@@ -240,7 +253,9 @@ export class AuthService {
       const until = user.premium_up_to ? Date.parse(user.premium_up_to) : NaN;
       if (!isNaN(until) && until > Date.now()) return;
     }
-    throw new Error('Acceso restringido a usuarios premium o admin');
+    throw new Error(
+      'Acceso restringido. Requiere plan Premium o Admin. Ve a /upgrade para mejorar tu plan.'
+    );
   }
 
   async promoteToPremium(
