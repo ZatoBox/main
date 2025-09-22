@@ -3,7 +3,7 @@ import { api } from '@/utils/polar/polar';
 
 export async function POST(request: NextRequest) {
   try {
-    const { plan, cycle } = await request.json();
+    const { plan, cycle, userId } = await request.json();
 
     const productId =
       cycle === 'monthly'
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const checkout = await api.checkouts.create({
       products: [productId!],
       successUrl: `${process.env.NEXT_PUBLIC_URL}/confirmation?checkout_id={CHECKOUT_ID}&type=subscription&plan=${plan}&cycle=${cycle}`,
-      metadata: { plan, cycle, type: 'subscription' },
+      metadata: { plan, cycle, type: 'subscription', user_id: userId },
     });
 
     return NextResponse.json({ url: checkout.url });

@@ -77,18 +77,18 @@ export function PricingSection() {
   };
 
   return (
-    <section className='flex flex-col items-center justify-start w-full px-5 py-8 my-0 overflow-hidden md:py-14'>
-      <div className='relative flex flex-col items-center self-stretch justify-center gap-2 py-0'>
-        <div className='flex flex-col items-center justify-start gap-4'>
-          <h2 className='text-center text-black text-4xl md:text-5xl font-semibold leading-tight md:leading-[40px]'>
+    <section className="flex flex-col items-center justify-start w-full px-5 py-8 my-0 overflow-hidden md:py-14">
+      <div className="relative flex flex-col items-center self-stretch justify-center gap-2 py-0">
+        <div className="flex flex-col items-center justify-start gap-4">
+          <h2 className="text-center text-black text-4xl md:text-5xl font-semibold leading-tight md:leading-[40px]">
             {getTranslation(language, 'pricing.title')}
           </h2>
-          <p className='self-stretch text-sm font-medium leading-tight text-center text-[#404040]'>
+          <p className="self-stretch text-sm font-medium leading-tight text-center text-[#404040]">
             {getTranslation(language, 'pricing.subtitle')}
           </p>
         </div>
-        <div className='pt-4'>
-          <div className='p-0.5 bg-muted rounded-lg outline-1 outline-[#0307120a] outline-offset-[-1px] flex justify-start items-center gap-1 md:mt-0'>
+        <div className="pt-4">
+          <div className="p-0.5 bg-muted rounded-lg outline-1 outline-[#0307120a] outline-offset-[-1px] flex justify-start items-center gap-1 md:mt-0">
             <button
               onClick={() => setIsAnnual(true)}
               className={`pl-2 pr-1 py-1 flex justify-start items-start gap-2 rounded-md ${
@@ -124,7 +124,7 @@ export function PricingSection() {
           </div>
         </div>
       </div>
-      <div className='self-stretch px-5 flex flex-col md:flex-row justify-start items-start gap-4 md:gap-6 mt-6 max-w-[1100px] mx-auto'>
+      <div className="self-stretch px-5 flex flex-col md:flex-row justify-start items-start gap-4 md:gap-6 mt-6 max-w-[1100px] mx-auto">
         {pricingPlans.map((plan) => {
           const parseNumber = (s: string) => {
             const n = Number(String(s).replace(/[^0-9.]/g, ''));
@@ -156,8 +156,8 @@ export function PricingSection() {
                     }
               }
             >
-              <div className='flex flex-col items-start self-stretch justify-between h-full gap-6'>
-                <div className='flex flex-col items-start self-stretch justify-start gap-8'>
+              <div className="flex flex-col items-start self-stretch justify-between h-full gap-6">
+                <div className="flex flex-col items-start self-stretch justify-start gap-8">
                   <div
                     className={`w-full h-5 text-sm font-medium leading-tight ${
                       plan.popular ? 'text-white' : 'text-black'
@@ -165,27 +165,27 @@ export function PricingSection() {
                   >
                     {plan.name}
                     {plan.popular && (
-                      <div className='ml-2 px-2 overflow-hidden rounded-full justify-center items-center gap-2.5 inline-flex mt-0 py-0.5 bg-gradient-to-b from-white/30 to-[#FFC44D]'>
-                        <div className='text-xs font-normal leading-tight text-center break-words text-white'>
+                      <div className="ml-2 px-2 overflow-hidden rounded-full justify-center items-center gap-2.5 inline-flex mt-0 py-0.5 bg-gradient-to-b from-white/30 to-[#FFC44D]">
+                        <div className="text-xs font-normal leading-tight text-center break-words text-white">
                           {getTranslation(language, 'pricing.popular')}
                         </div>
                       </div>
                     )}
                   </div>
-                  <div className='flex flex-col items-start self-stretch justify-start gap-1'>
+                  <div className="flex flex-col items-start self-stretch justify-start gap-1">
                     {(plan.monthlyPrice || plan.annualPrice) && (
-                      <div className='flex justify-start items-center gap-1.5'>
-                        <div className='flex flex-col items-start'>
+                      <div className="flex justify-start items-center gap-1.5">
+                        <div className="flex flex-col items-start">
                           <div
                             className={`relative h-10 flex items-center text-3xl font-medium leading-10 ${
                               plan.popular ? 'text-white' : 'text-black'
                             }`}
                           >
-                            <span className='invisible'>
+                            <span className="invisible">
                               {displayMainPrice}
                             </span>
                             <span
-                              className='absolute inset-0 flex items-center transition-all duration-500'
+                              className="absolute inset-0 flex items-center transition-all duration-500"
                               style={{
                                 opacity: isAnnual ? 1 : 0,
                                 transform: `scale(${isAnnual ? 1 : 0.8})`,
@@ -196,7 +196,7 @@ export function PricingSection() {
                               {displayMainPrice}
                             </span>
                             <span
-                              className='absolute inset-0 flex items-center transition-all duration-500'
+                              className="absolute inset-0 flex items-center transition-all duration-500"
                               style={{
                                 opacity: !isAnnual ? 1 : 0,
                                 transform: `scale(${!isAnnual ? 1 : 0.8})`,
@@ -250,7 +250,7 @@ export function PricingSection() {
                   </div>
                 </div>
 
-                <div className='flex flex-col items-start self-stretch justify-start gap-4'>
+                <div className="flex flex-col items-start self-stretch justify-start gap-4">
                   <div
                     className={`self-stretch text-sm font-medium leading-tight ${
                       plan.popular ? 'text-white/70' : 'text-black/70'
@@ -261,13 +261,13 @@ export function PricingSection() {
                       ? getTranslation(language, 'pricing.includes')
                       : plan.name}
                   </div>
-                  <div className='flex flex-col items-start self-stretch justify-start gap-3'>
+                  <div className="flex flex-col items-start self-stretch justify-start gap-3">
                     {plan.features.map((feature: string) => (
                       <div
                         key={feature}
-                        className='flex items-center self-stretch justify-start gap-2'
+                        className="flex items-center self-stretch justify-start gap-2"
                       >
-                        <div className='flex items-center justify-center w-4 h-4'>
+                        <div className="flex items-center justify-center w-4 h-4">
                           <Check
                             className={`w-full h-full ${
                               plan.popular ? 'text-white' : 'text-black'
@@ -293,7 +293,7 @@ export function PricingSection() {
                     onClick={handleSubscribe}
                     className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
                   >
-                    <div className='px-1.5 flex justify-center items-center gap-2'>
+                    <div className="px-1.5 flex justify-center items-center gap-2">
                       <span
                         className={`text-center text-sm font-medium leading-tight ${
                           plan.name ===
@@ -314,10 +314,13 @@ export function PricingSection() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={handleSubscribe}
+                    onClick={() =>
+                      (window.location.href =
+                        'https://calendar.app.google/NGSt7EKkqBGnGGPh7')
+                    }
                     className={`self-stretch px-5 py-2 rounded-[40px] flex justify-center items-center ${plan.buttonClass}`}
                   >
-                    <div className='px-1.5 flex justify-center items-center gap-2'>
+                    <div className="px-1.5 flex justify-center items-center gap-2">
                       <span
                         className={`text-center text-sm font-medium leading-tight ${
                           plan.name ===

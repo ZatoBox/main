@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = new Set(['/', '/login', '/register']);
+const PUBLIC_PATHS = new Set(['/', '/login', '/register', '/upgrade']);
 const TOKEN_COOKIE = 'zatobox_token';
 
 function isPublic(pathname: string) {
@@ -21,6 +21,19 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   const token = request.cookies.get(TOKEN_COOKIE)?.value;
+  const userRaw = request.cookies.get('zatobox_user')?.value;
+  let role: string | undefined;
+  let premiumUntil: number | undefined;
+  if (userRaw) {
+    try {
+      const u = JSON.parse(userRaw);
+      role = u?.role;
+      if (u?.premium_up_to) {
+        const t = Date.parse(u.premium_up_to);
+        if (!Number.isNaN(t)) premiumUntil = t;
+      }
+    } catch {}
+  }
   const publicRoute = isPublic(pathname);
   if (!publicRoute && !token) {
     const url = request.nextUrl.clone();
@@ -28,9 +41,26 @@ export function middleware(request: NextRequest) {
     url.searchParams.set('next', pathname + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
+  if (!publicRoute && token) {
+    const isAdmin = role === 'admin';
+    const isPremium =
+      role === 'premium' &&
+      typeof premiumUntil === 'number' &&
+      premiumUntil > Date.now();
+    if (!isAdmin && !isPremium && pathname !== '/upgrade') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/upgrade';
+      return NextResponse.redirect(url);
+    }
+  }
   if (token && (pathname === '/login' || pathname === '/register')) {
     const url = request.nextUrl.clone();
-    url.pathname = '/home';
+    const isAdmin = role === 'admin';
+    const isPremium =
+      role === 'premium' &&
+      typeof premiumUntil === 'number' &&
+      premiumUntil > Date.now();
+    url.pathname = isAdmin || isPremium ? '/home' : '/upgrade';
     return NextResponse.redirect(url);
   }
   return NextResponse.next();
