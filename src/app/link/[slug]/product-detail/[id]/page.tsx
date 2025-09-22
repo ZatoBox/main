@@ -8,6 +8,7 @@ import { layoutAPI } from '@/services/api.service';
 import Link from 'next/link';
 import ProductImageGallery from '@/components/web-layout/product-detail/ProductImageGallery';
 import ProductInfo from '@/components/web-layout/product-detail/ProductInfo';
+import { mapPolarProductToProduct } from '@/utils/polar.utils';
 
 export default function ProductLinkPage() {
   const params = useParams();
@@ -32,8 +33,13 @@ export default function ProductLinkPage() {
 
           try {
             const productsResponse = await productsAPI.getById(productId);
-            if (productsResponse.success) {
-              setProduct(productsResponse.product);
+            if (productsResponse.success && productsResponse.product) {
+              const mapped = mapPolarProductToProduct(
+                productsResponse.product
+              ) as Product;
+              setProduct(mapped);
+            } else {
+              setProduct(null);
             }
           } catch (productError) {
             console.warn('Could not load product:', productError);

@@ -10,6 +10,7 @@ import { layoutAPI } from '@/services/api.service';
 import { getActiveProducts } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
 import type { Layout, Product } from '@/types';
+import { mapPolarProductToProduct } from '@/utils/polar.utils';
 import WebShoppingList from '@/components/web-layout/WebShoppingList';
 
 export default function ZatoLinkPage() {
@@ -50,8 +51,20 @@ export default function ZatoLinkPage() {
 
           try {
             const productsResponse = await getActiveProducts();
-            if (productsResponse.success) {
-              setProducts(productsResponse.products);
+            if (
+              productsResponse.success &&
+              Array.isArray(productsResponse.products)
+            ) {
+              const rows: any[] = productsResponse.products;
+              const filtered = rows.filter(
+                (p: any) => !(p.is_archived ?? p.is_archived)
+              );
+              const availableProducts = filtered.map(
+                mapPolarProductToProduct
+              ) as Product[];
+              setProducts(availableProducts);
+            } else {
+              setProducts([]);
             }
           } catch (productError) {
             console.warn('Could not load products:', productError);
@@ -136,7 +149,7 @@ export default function ZatoLinkPage() {
               filteredProducts.map((product) => (
                 <WebCards
                   key={product.id}
-                  productId={product.id} // for navegation
+                  productId={(product as any).polar_id || product.id} // navigate using Polar ID
                   storeSlug={slug}
                   title={product.name}
                   description={product.description || ''}

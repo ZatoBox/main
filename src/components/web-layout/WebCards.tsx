@@ -25,14 +25,8 @@ const WebCards: React.FC<WebCardsProps> = ({
   onBuyClick,
 }) => {
   const router = useRouter();
-  const [isInShoppingList] = useState(false);
-  const [isSharedLink] = useState(false);
   const unitPrice = typeof price === 'number' && isFinite(price) ? price : 0;
   const unitStock = typeof stock === 'number' && isFinite(stock) ? stock : 0;
-
-  const handleShoppingListClick = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-  };
 
   const handleBuyClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -56,20 +50,6 @@ const WebCards: React.FC<WebCardsProps> = ({
             <Package className="w-16 h-16" />
           </div>
         )}
-        <div className="absolute top-2 right-2 flex gap-2 transition-opacity duration-200">
-          <WebButton
-            className="bg-zatobox-50"
-            onClick={(e) => handleShoppingListClick(e)}
-            variant={isInShoppingList ? 'shoppinglist-active' : 'shoppinglist'}
-            size="sm"
-          />
-          <WebButton
-            className="bg-zatobox-50"
-            variant={isSharedLink ? 'shareProduct-active' : 'shareProduct'}
-            productId={productId}
-            size="sm"
-          ></WebButton>
-        </div>
       </div>
 
       <div className="p-4 flex flex-col flex-grow">
