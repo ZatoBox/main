@@ -3,6 +3,7 @@ import { UserRepository } from './repository';
 import type { UserItem } from './models';
 import { hashPassword, verifyPassword } from '@/utils/password';
 import { uploadProfileImage } from '@/utils/cloudinary';
+import { getCurrentTimeWithTimezone } from '@/utils/timezone';
 
 const SECRET_KEY = process.env.SECRET_KEY;
 const ALGORITHM = 'HS256';
@@ -46,6 +47,7 @@ export class AuthService {
           throw new Error('Invalid credentials');
         const userData: UserItem = { ...user };
         delete (userData as any).password;
+        this.ensureLoginAllowed(userData);
         const token = this.createAccessToken(
           { user_id: user.id },
           expiresMinutes
@@ -96,6 +98,7 @@ export class AuthService {
       if (!user) throw new Error('Authentication error');
       const userData: UserItem = { ...user };
       delete (userData as any).password;
+      this.ensureLoginAllowed(userData);
       const token = this.createAccessToken(
         { user_id: user.id },
         expiresMinutes
@@ -124,7 +127,11 @@ export class AuthService {
       password: hashed,
       phone,
     });
-    return this.login(email, password, expiresMinutes);
+    const user = await this.repo.findByUserId(String(user_id));
+    if (!user) throw new Error('Registration error');
+    const userData: UserItem = { ...user };
+    delete (userData as any).password;
+    return { user: userData, token: '' };
   }
 
   logout(token: string) {
@@ -139,6 +146,7 @@ export class AuthService {
       if (!user_id) throw new Error('Invalid Token');
       const user = await this.repo.findByUserId(String(user_id));
       if (!user) throw new Error('User not found');
+      this.ensureLoginAllowed(user as UserItem);
       return user;
     } catch (e) {
       throw new Error('Invalid Token');
@@ -223,5 +231,37 @@ export class AuthService {
   ): Promise<{ success: true; user: UserItem | null }> {
     const user = await this.repo.deleteUser(user_id);
     return { success: true, user };
+  }
+
+  ensureLoginAllowed(user: UserItem) {
+    const role = (user.role || 'user').toString();
+    if (role === 'admin') return;
+    if (role === 'premium') {
+      const until = user.premium_up_to ? Date.parse(user.premium_up_to) : NaN;
+      if (!isNaN(until) && until > Date.now()) return;
+    }
+    throw new Error('Acceso restringido a usuarios premium o admin');
+  }
+
+  async promoteToPremium(
+    user_id: string,
+    months: number = 1
+  ): Promise<{ success: true; user: UserItem }> {
+    const user = await this.repo.findByUserId(user_id);
+    if (!user) throw new Error('User not found');
+    const now = new Date();
+    const currentUntil = user.premium_up_to
+      ? new Date(user.premium_up_to)
+      : null;
+    let base = now;
+    if (currentUntil && currentUntil.getTime() > now.getTime())
+      base = currentUntil;
+    const newUntil = new Date(base);
+    newUntil.setMonth(newUntil.getMonth() + months);
+    const updated = await this.repo.updateProfile(user_id, {
+      role: 'premium',
+      premium_up_to: newUntil.toISOString(),
+    });
+    return { success: true, user: updated };
   }
 }

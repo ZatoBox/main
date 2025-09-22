@@ -98,12 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       set({ loading: true, error: null });
       try {
         const res = await authAPI.register(data);
-        if (!res.token) throw new Error('Token no recibido');
-        setAuthToken(res.token);
-        if (res.user) {
-          setCookie(USER_COOKIE, JSON.stringify(res.user), { expires: 7 });
-        }
-        set({ token: res.token, user: res.user || null, loading: false });
+        set({ token: undefined, user: res.user || null, loading: false });
       } catch (e: any) {
         set({
           error: e?.message || 'Error al registrar',

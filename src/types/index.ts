@@ -11,7 +11,7 @@ export interface CookieOptions {
 /// Auth
 export enum RoleUser {
   ADMIN = 'admin',
-  MANAGER = 'manager',
+  PREMIUM = 'premium',
   USER = 'user',
 }
 
@@ -24,6 +24,7 @@ export interface User {
   polar_organization_id?: string;
   role: RoleUser;
   profile_image?: string;
+  premium_up_to?: string;
   created_at?: string;
   last_updated?: string;
 }
