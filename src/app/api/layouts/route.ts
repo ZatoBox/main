@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { LayoutService } from '@/../backend/back/layout/service';
 
 const service = new LayoutService();
@@ -6,7 +7,23 @@ const service = new LayoutService();
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const owner = req.headers.get('x-user-id') || 'anonymous';
+    let owner = req.headers.get('x-user-id') || '';
+    if (!owner) {
+      const cookieStore = await cookies();
+      const raw = cookieStore.get('zatobox_user')?.value;
+      if (raw) {
+        try {
+          const u = JSON.parse(raw);
+          if (u && typeof u.id === 'string') owner = u.id;
+        } catch {}
+      }
+    }
+    if (!owner) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized: missing owner id' },
+        { status: 401 }
+      );
+    }
     const layout = await service.createLayout(body, owner);
     return NextResponse.json({
       success: true,
@@ -32,10 +49,6 @@ export async function GET(req: NextRequest) {
     const parts = pathname.split('/').filter(Boolean);
     if (parts[0] === 'owner' && parts[1]) {
       const layouts = await service.listLayoutsByOwner(parts[1]);
-      return NextResponse.json({ success: true, layouts });
-    }
-    if (parts[0] === 'inventory' && parts[1]) {
-      const layouts = await service.listLayoutsByInventory(parts[1]);
       return NextResponse.json({ success: true, layouts });
     }
     if (parts[0]) {

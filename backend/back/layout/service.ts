@@ -27,7 +27,12 @@ export class LayoutService {
     for (const k of Object.keys(updates)) {
       if (!allowed.includes(k)) throw new Error(`Invalid field: ${k}`);
     }
-    for (const fld of ['hero_title', 'web_description', 'banner', 'social_links']) {
+    for (const fld of [
+      'hero_title',
+      'web_description',
+      'banner',
+      'social_links',
+    ]) {
       const val = updates[fld];
       if (val === '' || val == null) delete updates[fld];
     }
@@ -40,9 +45,5 @@ export class LayoutService {
 
   async listLayoutsByOwner(owner_id: string) {
     return this.repo.findByOwner(owner_id);
-  }
-
-  async listLayoutsByInventory(inventory_id: string) {
-    return this.repo.findByInventory(inventory_id);
   }
 }

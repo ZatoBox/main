@@ -26,6 +26,7 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
     '/home',
     '/inventory',
     '/landing',
+    '/my-store',
     '/new-product',
     '/ocr-result',
     '/plugin-store',
@@ -42,10 +43,11 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
     if (path.startsWith('/link/')) return true;
     return false;
   };
-  const showSidebar = isExisting(pathname || '/') && !noSidebarPaths.includes(pathname || '/');
+  const showSidebar =
+    isExisting(pathname || '/') && !noSidebarPaths.includes(pathname || '/');
 
   return (
-    <div className='flex min-h-screen w-full overflow-x-hidden'>
+    <div className="flex min-h-screen w-full overflow-x-hidden">
       {showSidebar && <SideMenu />}
       <div
         className={`${

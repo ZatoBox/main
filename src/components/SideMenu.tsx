@@ -15,6 +15,7 @@ import {
   X,
   Scan,
   Store,
+  Building,
 } from 'lucide-react';
 import { useAuth } from '../context/auth-store';
 import { usePlugins } from '@/context/plugin-context';
@@ -151,6 +152,13 @@ const SideMenu: React.FC = () => {
       alwaysVisible: false,
     },
     {
+      name: 'My Store',
+      icon: Building,
+      path: '/my-store',
+      description: 'Manage my store',
+      alwaysVisible: true,
+    },
+    {
       name: 'POS Integration',
       icon: Package,
       path: '/pos-integration',
@@ -256,7 +264,7 @@ const SideMenu: React.FC = () => {
                     : 'text-text-secondary group-hover:text-text-primary group-hover:scale-105'
                 }`}
               />
-              <div className='flex-1'>
+              <div className="flex-1">
                 <div
                   className={`font-medium transition-colors duration-300 ${
                     isActive ? 'text-[#F88612]' : 'text-text-primary'
@@ -264,7 +272,7 @@ const SideMenu: React.FC = () => {
                 >
                   {item.name}
                 </div>
-                <div className='text-xs transition-colors duration-300 text-[#475569]'>
+                <div className="text-xs transition-colors duration-300 text-[#475569]">
                   {item.description}
                 </div>
               </div>
@@ -278,15 +286,15 @@ const SideMenu: React.FC = () => {
   return (
     <>
       {/* Mobile Menu Button */}
-      <div className='fixed z-50 md:hidden top-4 left-4'>
+      <div className="fixed z-50 md:hidden top-4 left-4">
         <button
           onClick={toggleMobileMenu}
-          className='p-2 transition-colors border rounded-lg shadow-lg bg-white border-[#CBD5E1] hover:bg-gray-50'
+          className="p-2 transition-colors border rounded-lg shadow-lg bg-white border-[#CBD5E1] hover:bg-gray-50"
         >
           {isMobileMenuOpen ? (
-            <X size={24} className='text-zatobox-900' />
+            <X size={24} className="text-zatobox-900" />
           ) : (
-            <Menu size={24} className='text-zatobox-900' />
+            <Menu size={24} className="text-zatobox-900" />
           )}
         </button>
       </div>
@@ -294,7 +302,7 @@ const SideMenu: React.FC = () => {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className='fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden'
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -306,47 +314,47 @@ const SideMenu: React.FC = () => {
         }`}
       >
         {/* Logo/Brand */}
-        <div className='flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]'>
+        <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
           <img
-            src='/images/logozato.png'
-            alt='ZatoBox Logo'
-            className='w-auto h-10'
+            src="/images/logozato.png"
+            alt="ZatoBox Logo"
+            className="w-auto h-10"
           />
         </div>
 
         {/* Main Navigation */}
-        <nav className='flex-1 px-4 py-6 space-y-2 overflow-y-auto sidebar-menu-container'>
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto sidebar-menu-container">
           {renderMenuItems(menuItems)}
         </nav>
 
-        <div className='px-4 py-2'>
-          <div className='mb-2 flex justify-center'>
+        <div className="px-4 py-2">
+          <div className="mb-2 flex justify-center">
             <button
               onClick={() => router.push('/upgrade')}
-              className='w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]'
+              className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]"
             >
-              <Sparkles size={16} className='text-current' />
-              <span className='font-medium'>Upgrade</span>
+              <Sparkles size={16} className="text-current" />
+              <span className="font-medium">Upgrade</span>
             </button>
           </div>
         </div>
 
-        <div className='px-4 py-4 border-t border-[#CBD5E1]'>
-          <div className='flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50'>
-            <div className='flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]'>
-              <User size={16} className='text-white' />
+        <div className="px-4 py-4 border-t border-[#CBD5E1]">
+          <div className="flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]">
+              <User size={16} className="text-white" />
             </div>
-            <div className='flex-1 min-w-0'>
-              <div className='text-sm font-medium truncate text-black'>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium truncate text-black">
                 {user?.full_name || 'User'}
               </div>
-              <div className='text-xs truncate text-black'>
+              <div className="text-xs truncate text-black">
                 {user?.role === 'admin' ? 'Administrator' : 'User'}
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className='p-2 transition-colors rounded-lg text-white hover:bg-[#FEF9EC] hover:text-[#F88612] hover:border hover:border-[#EEB131]'
+              className="p-2 transition-colors rounded-lg text-white hover:bg-[#FEF9EC] hover:text-[#F88612] hover:border hover:border-[#EEB131]"
             >
               <LogOut size={16} />
             </button>
@@ -355,37 +363,37 @@ const SideMenu: React.FC = () => {
       </div>
 
       {/* Desktop Side Menu */}
-      <div className='hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-white md:border-r md:border-[#CBD5E1] md:z-40'>
+      <div className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-white md:border-r md:border-[#CBD5E1] md:z-40">
         {/* Logo/Brand */}
-        <div className='flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]'>
+        <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
           <img
-            src='/images/logozato.png'
-            alt='ZatoBox Logo'
-            className='w-auto h-10'
+            src="/images/logozato.png"
+            alt="ZatoBox Logo"
+            className="w-auto h-10"
           />
         </div>
 
         {/* Main Navigation */}
-        <nav className='flex-1 px-4 py-6 space-y-2 sidebar-menu-container'>
+        <nav className="flex-1 px-4 py-6 space-y-2 sidebar-menu-container">
           {renderMenuItems(menuItems)}
         </nav>
 
-        <div className='px-4 py-2'>
-          <div className='mb-2 flex justify-center'>
+        <div className="px-4 py-2">
+          <div className="mb-2 flex justify-center">
             <button
               onClick={() => router.push('/upgrade')}
-              className='w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]'
+              className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]"
             >
-              <Sparkles size={16} className='text-current' />
-              <span className='font-medium'>Upgrade</span>
+              <Sparkles size={16} className="text-current" />
+              <span className="font-medium">Upgrade</span>
             </button>
           </div>
         </div>
 
-        <div className='px-4 py-4 border-t border-[#CBD5E1]'>
+        <div className="px-4 py-4 border-t border-[#CBD5E1]">
           <div
             ref={userInfoRef}
-            className='relative cursor-pointer'
+            className="relative cursor-pointer"
             onMouseEnter={
               hoverSupported ? () => setShowLogout(true) : undefined
             }
@@ -403,14 +411,14 @@ const SideMenu: React.FC = () => {
                   : 'hover:bg-[#FEF9EC]'
               }`}
             >
-              <div className='flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]'>
-                <User size={16} className='text-white' />
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]">
+                <User size={16} className="text-white" />
               </div>
-              <div className='flex-1 min-w-0'>
-                <div className='text-sm font-medium truncate text-black'>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium truncate text-black">
                   {user?.full_name || 'User'}
                 </div>
-                <div className='text-xs truncate text-black'>
+                <div className="text-xs truncate text-black">
                   {user?.role === 'admin' ? 'Administrator' : 'User'}
                 </div>
               </div>
@@ -422,7 +430,7 @@ const SideMenu: React.FC = () => {
                     : 'opacity-0 translate-x-2'
                 }`}
               >
-                <LogOut size={16} className='text-white' />
+                <LogOut size={16} className="text-white" />
               </div>
             </div>
 
@@ -435,9 +443,9 @@ const SideMenu: React.FC = () => {
             >
               <button
                 onClick={handleLogout}
-                className='flex items-center space-x-2 text-sm font-medium'
+                className="flex items-center space-x-2 text-sm font-medium"
               >
-                <LogOut size={16} className='text-[#F88612]' />
+                <LogOut size={16} className="text-[#F88612]" />
                 <span>Logout</span>
               </button>
             </div>

@@ -221,7 +221,6 @@ export interface SalesResponse {
 /// Layouts
 export interface CreateLayoutRequest {
   slug: string;
-  inventory_id: string;
   hero_title?: string;
   web_description?: string;
   social_links?: Record<string, any>;
@@ -236,9 +235,9 @@ export interface UpdateLayoutRequest {
 export interface Layout {
   slug: string;
   owner_id: string;
-  inventory_id: string;
   hero_title?: string;
   web_description?: string;
+  banner?: string | null;
   social_links?: Record<string, any>;
   created_at?: string;
   last_updated?: string;
