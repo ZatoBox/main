@@ -196,7 +196,8 @@ const WebButton: React.FC<WebButtonProps> = ({
       variant === 'shareStoreHeader'
     ) {
       const { title, description, url } = getShareContent();
-      handleShare(title, description, url);
+      const finalUrl = variant === 'shareStoreHeader' ? `${url}?role=guest` : url;
+      handleShare(title, description, finalUrl);
     } else if (variant === 'shoppingCar') {
     }
 
