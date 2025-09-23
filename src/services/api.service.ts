@@ -212,6 +212,14 @@ export const getActiveProducts = async (
   return apiRequest(`/products/${params}`);
 };
 
+export const getProductsByUserId = async (
+  userId: string,
+  organizationId?: string
+): Promise<any> => {
+  const params = organizationId ? `?organization_id=${organizationId}` : '';
+  return apiRequest(`/products/user/${userId}${params}`);
+};
+
 export const getAllProducts = getActiveProducts;
 
 /// Inventory
@@ -328,23 +336,28 @@ export const layoutAPI = {
   uploadBanner: (
     layoutSlug: string,
     payload: { file?: File; base64?: string; image?: string }
-  ): Promise<{ success: boolean; message?: string; banner?: string; layout?: Layout }> => {
+  ): Promise<{
+    success: boolean;
+    message?: string;
+    banner?: string;
+    layout?: Layout;
+  }> => {
     if (payload.file) {
-      const form = new FormData()
-      form.append('file', payload.file)
+      const form = new FormData();
+      form.append('file', payload.file);
       return apiRequest(`/layouts/${layoutSlug}/banner`, {
         method: 'POST',
         data: form,
         headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      });
     }
-    const body: any = {}
-    if (payload.base64) body.base64 = payload.base64
-    else if (payload.image) body.image = payload.image
+    const body: any = {};
+    if (payload.base64) body.base64 = payload.base64;
+    else if (payload.image) body.image = payload.image;
     return apiRequest(`/layouts/${layoutSlug}/banner`, {
       method: 'POST',
       data: body,
-    })
+    });
   },
 };
 

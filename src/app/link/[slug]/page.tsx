@@ -7,7 +7,7 @@ import WebCardsContainer from '@/components/web-layout/WebCardsContainer';
 import WebCards from '@/components/web-layout/WebCards';
 import WebFooter from '@/components/web-layout/WebFooter';
 import { layoutAPI } from '@/services/api.service';
-import { getActiveProducts } from '@/services/api.service';
+import { getActiveProducts, getProductsByUserId } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
 import type { Layout, Product } from '@/types';
 import { mapPolarProductToProduct } from '@/utils/polar.utils';
@@ -50,7 +50,9 @@ export default function ZatoLinkPage() {
           setLayout(layoutResponse.layout);
 
           try {
-            const productsResponse = await getActiveProducts();
+            const productsResponse = await getProductsByUserId(
+              layoutResponse.layout.owner_id
+            );
             if (
               productsResponse.success &&
               Array.isArray(productsResponse.products)
@@ -68,6 +70,7 @@ export default function ZatoLinkPage() {
             }
           } catch (productError) {
             console.warn('Could not load products:', productError);
+            setProducts([]);
           }
         } else {
           setError('Store not found');
