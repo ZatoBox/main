@@ -292,10 +292,10 @@ const HomePage: React.FC<HomePageProps> = ({
   // Show loading state
   if (loading) {
     return (
-      <div className='flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in'>
-        <div className='text-center'>
-          <div className='w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary animate-pulse-glow'></div>
-          <p className='text-text-secondary animate-slide-in-left'>
+      <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary animate-pulse-glow"></div>
+          <p className="text-text-secondary animate-slide-in-left">
             Loading products...
           </p>
         </div>
@@ -306,29 +306,29 @@ const HomePage: React.FC<HomePageProps> = ({
   // Show error state
   if (error) {
     return (
-      <div className='flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in'>
-        <div className='text-center'>
-          <div className='mb-4 text-red-500 animate-bounce-in'>
+      <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
+        <div className="text-center">
+          <div className="mb-4 text-red-500 animate-bounce-in">
             <svg
-              className='w-12 h-12 mx-auto'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
+              className="w-12 h-12 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
               <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 strokeWidth={2}
-                d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z'
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
           </div>
-          <p className='mb-4 text-text-primary animate-slide-in-left'>
+          <p className="mb-4 text-text-primary animate-slide-in-left">
             {error}
           </p>
           <button
             onClick={() => window.location.reload()}
-            className='px-4 py-2 font-medium text-black transition-all duration-300 rounded-lg bg-primary hover:bg-primary-600 hover:scale-105 hover:shadow-lg btn-animate'
+            className="px-4 py-2 font-medium text-black transition-all duration-300 rounded-lg bg-primary hover:bg-primary-600 hover:scale-105 hover:shadow-lg btn-animate"
           >
             Reintentar
           </button>
@@ -339,28 +339,28 @@ const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <>
+      <HomeHeader
+        searchValue={localSearchTerm}
+        onSearchChange={handleLocalSearchChange}
+        onReload={reloadProducts}
+        loading={loading}
+      />
+
       <div
-        className={`py-8 transition-all duration-300 ${
+        className={`pt-6 px-4 transition-all duration-300 ${
           isDrawerOpen && !isPaymentOpen && !isSuccessOpen
             ? 'md:mr-[40%] lg:mr-[33.333333%]'
             : ''
         }`}
       >
-        <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+        <div className='mx-auto max-w-7xl sm:px-6 lg:px-8'>
           <div className='mb-6'>
-            <HomeHeader
-              searchValue={localSearchTerm}
-              onSearchChange={handleLocalSearchChange}
-              onReload={reloadProducts}
-              loading={loading}
-            />
             <HomeStats
               count={filteredProducts.length}
               searchTerm={activeSearchTerm}
             />
           </div>
 
-          {/* Responsive Grid with white background */}
           <div className='p-6 bg-white border rounded-lg border-gray-300 animate-scale-in'>
             <ProductGrid
               products={filteredProducts}

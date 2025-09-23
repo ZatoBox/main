@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 import { FaRegFolder } from 'react-icons/fa6';
 import { IoMdArrowRoundBack } from 'react-icons/io';
 import ImagesUploader from '@/components/new-product/ImagesUploader';
+import EditHeader from '@/components/edit-product/EditHeader';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 const MAX_FILES = 4;
@@ -102,6 +103,7 @@ const EditProductPage: React.FC = () => {
     setFiles(current.slice(0, MAX_FILES));
   };
 
+
   const handleRemoveFile = (index: number) =>
     setFiles((prev) => prev.filter((_, i) => i !== index));
 
@@ -181,11 +183,25 @@ const EditProductPage: React.FC = () => {
   });
 
   if (loading) {
-    return <div className='min-h-screen bg-bg-main'>Loading product...</div>;
+    return  (
+      <div className='flex items-center justify-center min-h-screen  bg-bg-main'>
+        <div className='text-center'>
+          <div className='w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary'></div>
+          <p className='text-text-secondary'>Loading products...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!productData) {
-    return <div className='min-h-screen bg-bg-main'>Product not found</div>;
+    return  (
+      <div className='flex items-center justify-center min-h-screen  bg-bg-main'>
+        <div className='text-center'>
+          <div className='w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary'></div>
+          <p className='text-text-secondary'>Loading products...</p>
+        </div>
+      </div>
+    );
   }
 
   const primaryPrice = productData.prices?.[0];
@@ -207,7 +223,7 @@ const EditProductPage: React.FC = () => {
     tags: currentTags,
   } as any;
 
-  return (
+return (
     <div className='min-h-screen bg-bg-main'>
       <Formik
         initialValues={initialValues}
@@ -216,43 +232,15 @@ const EditProductPage: React.FC = () => {
       >
         {(formik) => (
           <>
-            <div className='flex flex-col sm:flex-row items-center justify-between h-auto sm:h-16 px-4 sm:px-6 py-4 sm:py-0 border-b border-[#CBD5E1] bg-white gap-4 sm:gap-0'>
-              <div className='flex items-center w-full sm:w-auto gap-2'>
-                <button
-                  onClick={() => router.push('/inventory')}
-                  className='p-2 transition-colors rounded-full hover:bg-gray-50 flex-shrink-0'
-                >
-                  <IoMdArrowRoundBack className='w-6 h-6 text-[#F88612]' />
-                </button>
-                <h1 className='text-xl font-semibold text-[#F88612] ml-2 sm:ml-4 md:ml-0'>
-                  Edit Product
-                </h1>
-              </div>
-              <div className='flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto'>
-                <div className='w-full sm:w-[158px] h-[40px] flex items-center justify-center bg-white rounded-lg border border-[#CBD5E1] gap-2'>
-                  <span className='text-black font-medium'>Status:</span>
-                  <span className='text-[#F88612] font-medium'>Active</span>
-                </div>
-                {error && <div className='text-sm text-red-500'>{error}</div>}
-                <button
-                  type='button'
-                  onClick={() => formik.handleSubmit()}
-                  disabled={saving}
-                  className={`bg-[#F88612] hover:bg-[#D9740F] text-white font-semibold rounded-lg transition-colors flex items-center justify-center space-x-1 w-full sm:w-[82px] h-[40px] ${
-                    saving ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {saving ? (
-                    <div className='w-4 h-4 border-b-2 border-white rounded-full animate-spin'></div>
-                  ) : (
-                    <>
-                      <FaRegFolder className='w-4 h-4 self-center' />
-                      <span>Save</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
+            <EditHeader
+              onBack={() => router.push('/inventory')}
+              onSave={() => formik.handleSubmit()}
+              onArchive={() => {/* lógica para archivar producto */}}
+              onToggleStatus={() => { /* lógica de cambio de estado */ }}
+              status={productData?.status || ''}
+              saving={saving}
+              togglingStatus={false}
+            />
             <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
               <Form>
                 <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
