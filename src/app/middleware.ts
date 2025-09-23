@@ -43,11 +43,12 @@ export function middleware(request: NextRequest) {
   }
   if (!publicRoute && token) {
     const isAdmin = role === 'admin';
+    const isGuest = role === 'guest';
     const isPremium =
       role === 'premium' &&
       typeof premiumUntil === 'number' &&
       premiumUntil > Date.now();
-    if (!isAdmin && !isPremium && pathname !== '/upgrade') {
+    if (!isAdmin && !isPremium && !isGuest && pathname !== '/upgrade') {
       const url = request.nextUrl.clone();
       url.pathname = '/upgrade';
       return NextResponse.redirect(url);
@@ -56,11 +57,12 @@ export function middleware(request: NextRequest) {
   if (token && (pathname === '/login' || pathname === '/register')) {
     const url = request.nextUrl.clone();
     const isAdmin = role === 'admin';
+    const isGuest = role === 'guest';
     const isPremium =
       role === 'premium' &&
       typeof premiumUntil === 'number' &&
       premiumUntil > Date.now();
-    url.pathname = isAdmin || isPremium ? '/home' : '/upgrade';
+    url.pathname = isAdmin || isPremium || isGuest ? '/home' : '/upgrade';
     return NextResponse.redirect(url);
   }
   return NextResponse.next();

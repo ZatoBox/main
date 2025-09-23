@@ -2,12 +2,15 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/auth-store';
 import SideMenu from '@/components/SideMenu';
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
+
   const noSidebarPaths = [
     '/',
     '/login',
@@ -26,6 +29,7 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
     '/home',
     '/inventory',
     '/landing',
+    '/my-store',
     '/new-product',
     '/ocr-result',
     '/plugin-store',
@@ -36,16 +40,24 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
     '/swagger',
     '/upgrade',
   ];
+
   const isExisting = (path: string) => {
     if (existingPaths.includes(path)) return true;
     if (path.startsWith('/edit-product/')) return true;
     if (path.startsWith('/link/')) return true;
     return false;
   };
-  const showSidebar = isExisting(pathname || '/') && !noSidebarPaths.includes(pathname || '/');
+
+  const isLinkPath = pathname?.startsWith('/link/');
+  const shouldShowSidebar =
+    isExisting(pathname || '/') &&
+    !noSidebarPaths.includes(pathname || '/') &&
+    (!isLinkPath || isAuthenticated);
+
+  const showSidebar = shouldShowSidebar;
 
   return (
-    <div className='flex min-h-screen w-full overflow-x-hidden'>
+    <div className="flex min-h-screen w-full overflow-x-hidden">
       {showSidebar && <SideMenu />}
       <div
         className={`${

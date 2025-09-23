@@ -29,9 +29,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     ? Date.parse(user.premium_up_to)
     : NaN;
   const isAdmin = role === 'admin';
+  const isGuest = role === 'guest';
   const isActivePremium =
     role === 'premium' && !isNaN(premiumUntil) && premiumUntil > Date.now();
-  if (!isAdmin && !isActivePremium) {
+  if (!isAdmin && !isActivePremium && !isGuest) {
     return <Navigate to="/upgrade" replace />;
   }
 

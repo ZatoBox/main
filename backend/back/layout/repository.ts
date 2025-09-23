@@ -56,10 +56,7 @@ export class LayoutRepository {
 
   async findByInventory(inventory_id: string) {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from(this.table)
-      .select('*')
-      .eq('inventory_id', inventory_id);
+    const { data, error } = await supabase.from(this.table).select('*');
     if (error) throw error;
     return data || [];
   }

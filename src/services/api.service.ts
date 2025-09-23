@@ -212,6 +212,21 @@ export const getActiveProducts = async (
   return apiRequest(`/products/${params}`);
 };
 
+export const getProductsByUserId = async (
+  userId: string,
+  organizationId?: string
+): Promise<any> => {
+  const params = organizationId ? `?organization_id=${organizationId}` : '';
+  return apiRequest(`/products/user/${userId}${params}`);
+};
+
+export const getProductByUserId = async (
+  userId: string,
+  productId: string
+): Promise<any> => {
+  return apiRequest(`/products/user/${userId}/${productId}`);
+};
+
 export const getAllProducts = getActiveProducts;
 
 /// Inventory
@@ -308,7 +323,7 @@ export const profileAPI = {
 };
 
 /// Layouts
-export const layoutsAPI = {
+export const layoutAPI = {
   create: (layoutData: CreateLayoutRequest): Promise<LayoutResponse> =>
     apiRequest('/layouts/', { method: 'POST', data: layoutData }),
   getBySlug: (layoutSlug: string): Promise<LayoutResponse> =>
@@ -317,7 +332,7 @@ export const layoutsAPI = {
     layoutSlug: string,
     updates: UpdateLayoutRequest
   ): Promise<LayoutResponse> =>
-    apiRequest(`/layouts/${layoutSlug}`, { method: 'PUT', data: updates }),
+    apiRequest(`/layouts/${layoutSlug}`, { method: 'PATCH', data: updates }),
   delete: (layoutSlug: string): Promise<LayoutResponse> =>
     apiRequest(`/layouts/${layoutSlug}`, { method: 'DELETE' }),
   list: (): Promise<LayoutsResponse> => apiRequest('/layouts/'),
@@ -325,6 +340,32 @@ export const layoutsAPI = {
     apiRequest(`/layouts/owner/${ownerId}`),
   listByInventory: (inventoryId: string): Promise<LayoutsResponse> =>
     apiRequest(`/layouts/inventory/${inventoryId}`),
+  uploadBanner: (
+    layoutSlug: string,
+    payload: { file?: File; base64?: string; image?: string }
+  ): Promise<{
+    success: boolean;
+    message?: string;
+    banner?: string;
+    layout?: Layout;
+  }> => {
+    if (payload.file) {
+      const form = new FormData();
+      form.append('file', payload.file);
+      return apiRequest(`/layouts/${layoutSlug}/banner`, {
+        method: 'POST',
+        data: form,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    }
+    const body: any = {};
+    if (payload.base64) body.base64 = payload.base64;
+    else if (payload.image) body.image = payload.image;
+    return apiRequest(`/layouts/${layoutSlug}/banner`, {
+      method: 'POST',
+      data: body,
+    });
+  },
 };
 
 export const categoriesAPI = {
