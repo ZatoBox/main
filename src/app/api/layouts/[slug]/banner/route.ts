@@ -9,10 +9,10 @@ const service = new LayoutService();
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  context: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = await params;
+    const { slug } = await context.params;
     if (!slug) {
       return NextResponse.json(
         { success: false, message: 'Missing layout slug' },
