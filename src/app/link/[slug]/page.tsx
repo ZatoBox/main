@@ -268,11 +268,7 @@ export default function ZatoLinkPage() {
 
   return (
     <>
-      <div
-        className={`min-h-screen bg-background transition-all duration-300 ${
-          isDrawerOpen ? 'md:mr-[40%] lg:mr-[33.333333%]' : ''
-        }`}
-      >
+      <div className={`min-h-screen bg-background transition-all duration-300`}>
         <WebHero
           title={layout.hero_title || 'My Store'}
           description={layout.web_description || ''}

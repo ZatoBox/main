@@ -45,17 +45,20 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
     onNavigateToPayment(validCartAmount);
   };
 
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <div
-      className={`fixed inset-y-0 right-0 w-full sm:w-96 bg-white border-l border-[#CBD5E1] transform transition-transform duration-300 ease-in-out z-30 flex flex-col ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}
-    >
-      {/* Header */}
+    <>
+      <div
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 z-40 ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={onClose}
+      />
+
+      <aside
+        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white border-l border-[#CBD5E1] transform transition-transform duration-300 ease-in-out z-50 flex flex-col ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
       <div className="flex items-center justify-between p-4 border-b border-[#CBD5E1] bg-[#F9FAFB]">
         <h2 className="text-lg font-semibold text-black animate-slide-in-left">
           Shopping Cart
@@ -156,13 +159,6 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                   <span className="text-black">${subtotal.toFixed(2)}</span>
                 </div>
 
-                {/* 
-                <div className='flex justify-between text-sm'>
-                  <span className='text-[#CBD5E1]'>Tax (15%):</span>
-                  <span className='text-black'>${tax.toFixed(2)}</span>
-                </div>
-                */}
-
                 <div className="flex justify-between pt-2 text-lg font-bold border-t border-[#CBD5E1]">
                   <span className="text-black">Total:</span>
                   <span className="text-success">${cartAmount.toFixed(2)}</span>
@@ -188,7 +184,8 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
           </div>
         )}
       </div>
-    </div>
+      </aside>
+    </>
   );
 };
 
