@@ -409,14 +409,14 @@ const PluginStorePage: React.FC = () => {
   return (
     <div className='min-h-screen bg-bg-main'>
       {/* Header */}
-      <div className='bg-white '>
+      <div className='bg-white border-b border-[#CBD5E1] '>
         <div className='px-3 mx-auto max-w-7xl sm:px-6 lg:px-8 w-full min-w-0'>
           <div className='flex items-center justify-between h-16'>
             <div className='flex items-center gap-2 sm:gap-4 min-w-0'>
-              <h1 className='text-xl sm:text-2xl font-bold text-text-primary truncate'>
+              <h1 className='text-xl  font-bold text-text-primary truncate'>
                 Plugin Store
               </h1>
-              <p className='hidden text-xs sm:text-sm text-text-secondary lg:block truncate'>
+              <p className='hidden m-4 text-xs sm:text-sm text-text-secondary lg:block truncate'>
                 Browse the ever-growing collection of business modules on
                 ZatoBox
               </p>
