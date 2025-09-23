@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { layoutAPI } from '@/services/api.service';
+import { useAuth } from '@/context/auth-store';
 
 function slugify(input: string) {
   return input
@@ -18,6 +19,7 @@ function slugify(input: string) {
 
 export default function MyStorePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -26,6 +28,16 @@ export default function MyStorePage() {
   const [github, setGithub] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      layoutAPI.list().then((res) => {
+        if (res.layouts && res.layouts.length > 0) {
+          router.push(`/link/${res.layouts[0].slug}`);
+        }
+      }).catch(() => {});
+    }
+  }, [user, router]);
 
   const slug = useMemo(() => slugify(title || 'mi-tienda'), [title]);
 
