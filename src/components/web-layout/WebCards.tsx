@@ -40,7 +40,7 @@ const WebCards: React.FC<WebCardsProps> = ({
   return (
     <div
       onClick={handleCardClick}
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col h-full"
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col h-full cursor-pointer group"
     >
       <div className="h-48 bg-gray-200 flex items-center justify-center relative group">
         {image ? (
@@ -60,7 +60,7 @@ const WebCards: React.FC<WebCardsProps> = ({
           )}
         </div>
         <div className="flex justify-between items-center mb-4">
-          <span className="text-2xl font-bold text-zatobox-600">
+          <span className="text-2xl font-bold text-black group-hover:text-[#E28E18] transition-colors duration-300">
             ${unitPrice.toFixed(2)}
           </span>
           <div className="text-sm text-gray-500">Stock: {unitStock}</div>

@@ -12,7 +12,7 @@ export async function POST(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const slug = params?.slug;
+    const { slug } = await params;
     if (!slug) {
       return NextResponse.json(
         { success: false, message: 'Missing layout slug' },

@@ -21,11 +21,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
 
   return (
     <div>
-      <img
-        src={images[selectedImageIndex]}
-        alt={productName}
-        className="w-full h-96 rounded-lg"
-      />
+      <div className="w-[688px] h-[688px] rounded-[20px] overflow-hidden">
+        <img
+          src={images[selectedImageIndex]}
+          alt={productName}
+          className="w-full h-full object-cover"
+        />
+      </div>
       {images.length > 1 && (
         <div className="flex space-x-2 px-0 py-6">
           {images.map((img, index) => (

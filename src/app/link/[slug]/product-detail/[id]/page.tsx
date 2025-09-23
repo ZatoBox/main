@@ -111,14 +111,14 @@ export default function ProductLinkPage() {
         </div>
       </nav>
 
-      <div className="flex flex-col md:flex-row gap-8">
-        <div className="w-full md:w-1/2">
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="w-full lg:w-auto lg:flex-shrink-0">
           <ProductImageGallery
             images={product?.images || []}
             productName={product?.name || ''}
           ></ProductImageGallery>
         </div>
-        <div className="w-full md:w-1/2">
+        <div className="w-full lg:flex-1">
           <ProductInfo
             productName={product?.name || ''}
             price={product?.price || 0}

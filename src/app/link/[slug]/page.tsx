@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import WebHero from '@/components/web-layout/WebHero';
 import WebCardsContainer from '@/components/web-layout/WebCardsContainer';
 import WebCards from '@/components/web-layout/WebCards';
-import WebFooter from '@/components/web-layout/WebFooter';
 import SalesDrawer from '@/components/SalesDrawer';
 import { layoutAPI } from '@/services/api.service';
 import { getActiveProducts, getProductsByUserId } from '@/services/api.service';
@@ -208,6 +207,29 @@ export default function ZatoLinkPage() {
     }
   }, [slug]);
 
+  const handleShareClick = () => {
+    const currentUrl = window.location.href;
+    if (navigator.share) {
+      navigator.share({
+        title: layout?.hero_title || 'My Store',
+        url: currentUrl,
+      });
+    } else {
+      navigator.clipboard.writeText(currentUrl);
+      alert('Store link copied to clipboard!');
+    }
+  };
+
+  const handleCartClick = () => {
+    setIsDrawerOpen(true);
+  };
+
+  const handleBannerUpdated = (bannerUrl: string) => {
+    if (layout) {
+      setLayout({ ...layout, banner: bannerUrl });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -251,11 +273,14 @@ export default function ZatoLinkPage() {
           title={layout.hero_title || 'My Store'}
           description={layout.web_description || ''}
           isOwner={isOwner}
+          layoutSlug={slug}
+          bannerUrl={layout.banner || undefined}
+          onBannerUpdated={handleBannerUpdated}
         />
 
-        <main className="max-w-7xl mx-auto px-4 py-8">
+        <main className="max-w-7xl mx-auto">
           {products.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 px-4">
               <p className={'text-muted-foreground text-lg'}>
                 No product available at the moment
               </p>
@@ -265,6 +290,9 @@ export default function ZatoLinkPage() {
               searchValue={searchTerm}
               onSearchChange={setSearchTerm}
               placeholder="Search products..."
+              onShareClick={handleShareClick}
+              onCartClick={handleCartClick}
+              cartItemsCount={cartItems.length}
             >
               {filteredProducts.length === 0 ? (
                 <div className="col-span-full text-center py-12">
@@ -291,8 +319,6 @@ export default function ZatoLinkPage() {
           )}
           <WebShoppingList />
         </main>
-
-        <WebFooter />
       </div>
 
       <SalesDrawer
