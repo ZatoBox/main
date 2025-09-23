@@ -62,12 +62,21 @@ export class ProductRepository {
     return data as Product;
   }
 
-  async findByCreator(creator_id: string): Promise<Product[]> {
+  async findByCreator(creator_id: string, status?: string): Promise<Product[]> {
     const supabase = await createClient();
-    const { data } = await supabase
+    
+    // Inicia la consulta
+    let query = supabase
       .from(this.table)
       .select('*')
       .eq('creator_id', creator_id);
+    
+    // Si se proporciona un estado, agrégalo a la consulta
+    if (status) {
+      query = query.eq('status', status);
+    }
+    
+    const { data } = await query;
     return (data || []) as Product[];
   }
 
