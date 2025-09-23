@@ -15,9 +15,11 @@ import {
   X,
   Scan,
   Store,
+  Building,
 } from 'lucide-react';
 import { useAuth } from '../context/auth-store';
 import { usePlugins } from '@/context/plugin-context';
+
 const SideMenu: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -151,6 +153,13 @@ const SideMenu: React.FC = () => {
       alwaysVisible: false,
     },
     {
+      name: 'My Store',
+      icon: Building,
+      path: '/my-store',
+      description: 'Manage my store',
+      alwaysVisible: true,
+    },
+    {
       name: 'POS Integration',
       icon: Package,
       path: '/pos-integration',
@@ -256,7 +265,7 @@ const SideMenu: React.FC = () => {
                     : 'text-text-secondary group-hover:text-text-primary group-hover:scale-105'
                 }`}
               />
-              <div className='flex-1'>
+              <div className="flex-1">
                 <div
                   className={`font-medium transition-colors duration-300 ${
                     isActive ? 'text-[#F88612]' : 'text-text-primary'
@@ -264,7 +273,7 @@ const SideMenu: React.FC = () => {
                 >
                   {item.name}
                 </div>
-                <div className='text-xs transition-colors duration-300 text-[#475569]'>
+                <div className="text-xs transition-colors duration-300 text-[#475569]">
                   {item.description}
                 </div>
               </div>
@@ -277,173 +286,197 @@ const SideMenu: React.FC = () => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <div className='fixed z-50 md:hidden top-4 left-4'>
-        <button
-          onClick={toggleMobileMenu}
-          className='p-2 transition-colors border rounded-lg shadow-lg bg-white border-[#CBD5E1] hover:bg-gray-50'
-        >
-          {isMobileMenuOpen ? (
-            <X size={24} className='text-zatobox-900' />
-          ) : (
-            <Menu size={24} className='text-zatobox-900' />
+      {user?.role === 'guest' ? null : (
+        <>
+          {/* Mobile Menu Button */}
+          <div className="fixed z-50 md:hidden top-4 left-4">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 transition-colors border rounded-lg shadow-lg bg-white border-[#CBD5E1] hover:bg-gray-50"
+            >
+              {isMobileMenuOpen ? (
+                <X size={24} className="text-zatobox-900" />
+              ) : (
+                <Menu size={24} className="text-zatobox-900" />
+              )}
+            </button>
+          </div>
+
+          {/* Mobile Menu Overlay */}
+          {isMobileMenuOpen && (
+            <div
+              className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
           )}
-        </button>
-      </div>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className='fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden'
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Mobile Menu Sidebar */}
-      <div
-        className={`md:hidden fixed inset-y-0 left-0 w-64 bg-white border-r border-[#CBD5E1] z-50 transform transition-transform duration-300 ease-in-out ${
-          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        {/* Logo/Brand */}
-        <div className='flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]'>
-          <img
-            src='/images/logozato.png'
-            alt='ZatoBox Logo'
-            className='w-auto h-10'
-          />
-        </div>
-
-        {/* Main Navigation */}
-        <nav className='flex-1 px-4 py-6 space-y-2 overflow-y-auto sidebar-menu-container'>
-          {renderMenuItems(menuItems)}
-        </nav>
-
-        <div className='px-4 py-2'>
-          <div className='mb-2 flex justify-center'>
-            <button
-              onClick={() => router.push('/upgrade')}
-              className='w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]'
-            >
-              <Sparkles size={16} className='text-current' />
-              <span className='font-medium'>Upgrade</span>
-            </button>
-          </div>
-        </div>
-
-        <div className='px-4 py-4 border-t border-[#CBD5E1]'>
-          <div className='flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50'>
-            <div className='flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]'>
-              <User size={16} className='text-white' />
-            </div>
-            <div className='flex-1 min-w-0'>
-              <div className='text-sm font-medium truncate text-black'>
-                {user?.full_name || 'User'}
-              </div>
-              <div className='text-xs truncate text-black'>
-                {user?.role === 'admin' ? 'Administrator' : 'User'}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className='p-2 transition-colors rounded-lg text-white hover:bg-[#FEF9EC] hover:text-[#F88612] hover:border hover:border-[#EEB131]'
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop Side Menu */}
-      <div className='hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-white md:border-r md:border-[#CBD5E1] md:z-40'>
-        {/* Logo/Brand */}
-        <div className='flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]'>
-          <img
-            src='/images/logozato.png'
-            alt='ZatoBox Logo'
-            className='w-auto h-10'
-          />
-        </div>
-
-        {/* Main Navigation */}
-        <nav className='flex-1 px-4 py-6 space-y-2 sidebar-menu-container'>
-          {renderMenuItems(menuItems)}
-        </nav>
-
-        <div className='px-4 py-2'>
-          <div className='mb-2 flex justify-center'>
-            <button
-              onClick={() => router.push('/upgrade')}
-              className='w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]'
-            >
-              <Sparkles size={16} className='text-current' />
-              <span className='font-medium'>Upgrade</span>
-            </button>
-          </div>
-        </div>
-
-        <div className='px-4 py-4 border-t border-[#CBD5E1]'>
+          {/* Mobile Menu Sidebar */}
           <div
-            ref={userInfoRef}
-            className='relative cursor-pointer'
-            onMouseEnter={
-              hoverSupported ? () => setShowLogout(true) : undefined
-            }
-            onMouseLeave={
-              hoverSupported ? () => setShowLogout(false) : undefined
-            }
-            onClick={
-              !hoverSupported ? () => setShowLogout((prev) => !prev) : undefined
-            }
+            className={`md:hidden fixed inset-y-0 left-0 w-64 bg-white border-r border-[#CBD5E1] z-50 transform transition-transform duration-300 ease-in-out ${
+              isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
           >
-            <div
-              className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 ease-in-out ${
-                showLogout
-                  ? 'bg-[#FEF9EC]  border-[#EEB131] shadow-sm'
-                  : 'hover:bg-[#FEF9EC]'
-              }`}
-            >
-              <div className='flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]'>
-                <User size={16} className='text-white' />
-              </div>
-              <div className='flex-1 min-w-0'>
-                <div className='text-sm font-medium truncate text-black'>
-                  {user?.full_name || 'User'}
-                </div>
-                <div className='text-xs truncate text-black'>
-                  {user?.role === 'admin' ? 'Administrator' : 'User'}
-                </div>
-              </div>
+            {/* Logo/Brand */}
+            <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
+              <img
+                src="/images/logozato.png"
+                alt="ZatoBox Logo"
+                className="w-auto h-10"
+              />
+            </div>
 
-              <div
-                className={`transition-all duration-300 ease-in-out ${
-                  showLogout
-                    ? 'opacity-100 translate-x-0'
-                    : 'opacity-0 translate-x-2'
-                }`}
-              >
-                <LogOut size={16} className='text-white' />
+            {/* Main Navigation */}
+            <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto sidebar-menu-container">
+              {renderMenuItems(menuItems)}
+            </nav>
+
+            <div className="px-4 py-2">
+              <div className="mb-2 flex justify-center">
+                <button
+                  onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform', '_blank')}
+                  className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-[#F88612] text-white gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-white hover:border-[#F88612] hover:text-[#F88612]"
+                >
+                  <Sparkles size={16} className="text-current" />
+                  <span className="font-medium">Feedback</span>
+                </button>
+              </div>
+              <div className="mb-2 flex justify-center">
+                <button
+                  onClick={() => router.push('/upgrade')}
+                  className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]"
+                >
+                  <Sparkles size={16} className="text-current" />
+                  <span className="font-medium">Upgrade</span>
+                </button>
               </div>
             </div>
 
-            <div
-              className={`absolute inset-0 flex items-center justify-center rounded-lg transition-all duration-300 ease-in-out ${
-                showLogout
-                  ? 'opacity-100 bg-[#FEF9EC] text-[#F88612] shadow-lg transform scale-100'
-                  : 'opacity-0 bg-transparent transform scale-95 pointer-events-none'
-              }`}
-            >
-              <button
-                onClick={handleLogout}
-                className='flex items-center space-x-2 text-sm font-medium'
-              >
-                <LogOut size={16} className='text-[#F88612]' />
-                <span>Logout</span>
-              </button>
+            <div className="px-4 py-4 border-t border-[#CBD5E1]">
+              <div className="flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]">
+                  <User size={16} className="text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium truncate text-black">
+                    {user?.full_name || 'User'}
+                  </div>
+                  <div className="text-xs truncate text-black">
+                    {user?.role === 'admin' ? 'Administrator' : 'User'}
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 transition-colors rounded-lg text-white hover:bg-[#FEF9EC] hover:text-[#F88612] hover:border hover:border-[#EEB131]"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+
+          {/* Desktop Side Menu */}
+          <div className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-white md:border-r md:border-[#CBD5E1] md:z-40">
+            {/* Logo/Brand */}
+            <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
+              <img
+                src="/images/logozato.png"
+                alt="ZatoBox Logo"
+                className="w-auto h-10"
+              />
+            </div>
+
+            {/* Main Navigation */}
+            <nav className="flex-1 px-4 py-6 space-y-2 sidebar-menu-container">
+              {renderMenuItems(menuItems)}
+            </nav>
+
+            <div className="px-4 py-2">
+              <div className="mb-2 flex justify-center">
+                <button
+                  onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform', '_blank')}
+                  className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-[#F88612] text-white gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-white hover:border-[#F88612] hover:text-[#F88612]"
+                >
+                  <Sparkles size={16} className="text-current" />
+                  <span className="font-medium">Feedback</span>
+                </button>
+              </div>
+              <div className="mb-2 flex justify-center">
+                <button
+                  onClick={() => router.push('/upgrade')}
+                  className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]"
+                >
+                  <Sparkles size={16} className="text-current" />
+                  <span className="font-medium">Upgrade</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="px-4 py-4 border-t border-[#CBD5E1]">
+              <div
+                ref={userInfoRef}
+                className="relative cursor-pointer"
+                onMouseEnter={
+                  hoverSupported ? () => setShowLogout(true) : undefined
+                }
+                onMouseLeave={
+                  hoverSupported ? () => setShowLogout(false) : undefined
+                }
+                onClick={
+                  !hoverSupported
+                    ? () => setShowLogout((prev) => !prev)
+                    : undefined
+                }
+              >
+                <div
+                  className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 ease-in-out ${
+                    showLogout
+                      ? 'bg-[#FEF9EC]  border-[#EEB131] shadow-sm'
+                      : 'hover:bg-[#FEF9EC]'
+                  }`}
+                >
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]">
+                    <User size={16} className="text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate text-black">
+                      {user?.full_name || 'User'}
+                    </div>
+                    <div className="text-xs truncate text-black">
+                      {user?.role === 'admin' ? 'Administrator' : 'User'}
+                    </div>
+                  </div>
+
+                  <div
+                    className={`transition-all duration-300 ease-in-out ${
+                      showLogout
+                        ? 'opacity-100 translate-x-0'
+                        : 'opacity-0 translate-x-2'
+                    }`}
+                  >
+                    <LogOut size={16} className="text-white" />
+                  </div>
+                </div>
+
+                <div
+                  className={`absolute inset-0 flex items-center justify-center rounded-lg transition-all duration-300 ease-in-out ${
+                    showLogout
+                      ? 'opacity-100 bg-[#FEF9EC] text-[#F88612] shadow-lg transform scale-100'
+                      : 'opacity-0 bg-transparent transform scale-95 pointer-events-none'
+                  }`}
+                >
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center space-x-2 text-sm font-medium"
+                  >
+                    <LogOut size={16} className="text-[#F88612]" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };

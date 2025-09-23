@@ -239,7 +239,7 @@ const OCRResultPage: React.FC = () => {
   };
 
   return (
-    <div className='flex items-start justify-center min-h-screen p-6 bg-[#F7F7F7]'>
+    <div className='flex items-start justify-center min-h-screen p-6  md:mt-32 mt-24'>
       <div className='w-full max-w-5xl'>
         {!result ? (
           <div className='p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]'>

@@ -13,7 +13,8 @@ const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 export async function uploadImageFromBase64(
-  base64String: string
+  base64String: string,
+  folder: string = 'products'
 ): Promise<string> {
   if (!base64String.startsWith('data:image/'))
     throw new Error('Invalid base64 format');
@@ -24,7 +25,7 @@ export async function uploadImageFromBase64(
     throw new Error('File size exceeds 5MB limit');
   const res = await new Promise<any>((resolve, reject) => {
     const stream = cloudinary.v2.uploader.upload_stream(
-      { folder: 'products' },
+      { folder },
       (error: unknown, result: any) => {
         if (error) return reject(error);
         resolve(result);
@@ -36,18 +37,22 @@ export async function uploadImageFromBase64(
 }
 
 export async function uploadMultipleImagesFromBase64(
-  base64Strings: string[]
+  base64Strings: string[],
+  folder: string = 'products'
 ): Promise<string[]> {
   const urls: string[] = [];
   for (const s of base64Strings) {
     if (!s) continue;
-    const url = await uploadImageFromBase64(s);
+    const url = await uploadImageFromBase64(s, folder);
     urls.push(url);
   }
   return urls;
 }
 
-export async function uploadImageToCloudinary(file: File): Promise<string> {
+export async function uploadImageToCloudinary(
+  file: File,
+  folder: string = 'products'
+): Promise<string> {
   const size = (file as any).size || 0;
   if (size > MAX_FILE_SIZE) throw new Error('File size exceeds 5MB limit');
   const name = (file as any).name || '';
@@ -58,7 +63,7 @@ export async function uploadImageToCloudinary(file: File): Promise<string> {
   const buffer = Buffer.from(arrayBuffer);
   const res = await new Promise<any>((resolve, reject) => {
     const stream = cloudinary.v2.uploader.upload_stream(
-      { folder: 'products' },
+      { folder },
       (error: unknown, result: any) => {
         if (error) return reject(error);
         resolve(result);
@@ -92,12 +97,13 @@ export async function uploadProfileImage(file: File): Promise<string> {
 }
 
 export async function uploadMultipleImagesFromFiles(
-  files: File[]
+  files: File[],
+  folder: string = 'products'
 ): Promise<string[]> {
   const urls: string[] = [];
   for (const f of files) {
     if (!f) continue;
-    const url = await uploadImageToCloudinary(f);
+    const url = await uploadImageToCloudinary(f, folder);
     urls.push(url);
   }
   return urls;

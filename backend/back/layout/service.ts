@@ -23,11 +23,16 @@ export class LayoutService {
   }
 
   async updateLayout(layout_slug: string, updates: any) {
-    const allowed = ['hero_title', 'web_description', 'social_links'];
+    const allowed = ['hero_title', 'web_description', 'banner', 'social_links'];
     for (const k of Object.keys(updates)) {
       if (!allowed.includes(k)) throw new Error(`Invalid field: ${k}`);
     }
-    for (const fld of ['hero_title', 'web_description', 'social_links']) {
+    for (const fld of [
+      'hero_title',
+      'web_description',
+      'banner',
+      'social_links',
+    ]) {
       const val = updates[fld];
       if (val === '' || val == null) delete updates[fld];
     }
@@ -40,9 +45,5 @@ export class LayoutService {
 
   async listLayoutsByOwner(owner_id: string) {
     return this.repo.findByOwner(owner_id);
-  }
-
-  async listLayoutsByInventory(inventory_id: string) {
-    return this.repo.findByInventory(inventory_id);
   }
 }

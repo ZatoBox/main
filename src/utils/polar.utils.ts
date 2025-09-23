@@ -194,3 +194,59 @@ export const polarAPI = {
     return info;
   },
 };
+
+// Reusable mapper from Polar product to local Product shape
+export const mapPolarProductToProduct = (p: any) => {
+  const prices = Array.isArray(p.prices) ? p.prices : [];
+  let price = 0;
+  if (prices.length > 0) {
+    const pr = prices[0] || {};
+    const amt = pr.price_amount ?? pr.priceAmount;
+    const amtType = pr.amount_type ?? pr.amountType;
+    if (typeof amt === 'number') {
+      price = amtType === 'free' ? 0 : amt / 100;
+    }
+  }
+  const imageUrls = Array.isArray(p.medias)
+    ? p.medias
+        .filter(
+          (m: any) =>
+            m &&
+            typeof m.public_url === 'string' &&
+            m.mime_type &&
+            m.mime_type.startsWith('image/')
+        )
+        .map((m: any) => m.public_url)
+    : [];
+  const baseId = String(p.id ?? '');
+  const safeName =
+    typeof p.name === 'string'
+      ? p.name.trim().replace(/\s+/g, '_').toLowerCase()
+      : '';
+  const stableId = safeName ? `polar_${baseId}_${safeName}` : `polar_${baseId}`;
+  const product: any = {
+    id: stableId,
+    name: p.name || 'Unnamed Product',
+    description: p.description || '',
+    price,
+    stock: p.metadata?.quantity || 0,
+    min_stock: 0,
+    category_ids: [],
+    images: imageUrls,
+    status: 'active',
+    weight: 0,
+    sku: String(p.id),
+    creator_id: '',
+    unit: 'Per item',
+    product_type: 'Physical Product',
+    localization: '',
+    created_at: p.created_at || p.createdAt || new Date().toISOString(),
+    last_updated:
+      p.modified_at || p.modifiedAt || p.updatedAt || new Date().toISOString(),
+  };
+  product.prices = prices;
+  product.recurring_interval = p.recurring_interval;
+  product.metadata = p.metadata;
+  product.polar_id = p.id;
+  return product;
+};
