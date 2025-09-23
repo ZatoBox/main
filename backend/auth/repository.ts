@@ -42,7 +42,6 @@ export class UserRepository {
     const insertPayload = {
       full_name: payload.full_name,
       email: payload.email,
-      password: payload.password,
       phone: payload.phone || null,
       role: payload.role || 'user',
       profile_image: payload.profile_image || null,

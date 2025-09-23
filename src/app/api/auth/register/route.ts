@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const res = await service.register(
       body.full_name,
       body.email,
-      body.password,
+      body.password || '',
       body.phone
     );
     return NextResponse.json(res);

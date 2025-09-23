@@ -5,7 +5,7 @@ import { polarAPI } from '@/utils/polar.utils';
 import crypto from 'crypto';
 
 function verifyPolarSignature(payload: string, signature: string): boolean {
-  const secret = process.env.POLAR_SECRET;
+  const secret = process.env.POLAR_WEBHOOK_SECRET;
   if (!secret) return false;
 
   const expectedSignature = crypto
@@ -34,6 +34,12 @@ export async function POST(request: NextRequest) {
     const data = JSON.parse(payload);
     const eventType = data.type;
     const eventData = data.data || {};
+    const resolvedEmail =
+      eventData?.customer?.email ||
+      eventData?.user?.email ||
+      eventData?.metadata?.email ||
+      eventData?.product?.metadata?.email ||
+      null;
 
     console.log(`Webhook received${userId ? ` for user ${userId}` : ''}:`, {
       type: eventType,
@@ -42,6 +48,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (
+      !Array.isArray([
+        'subscription.created',
+        'subscription.updated',
+        'subscription.active',
+        'subscription.canceled',
+        'subscription.revoked',
+        'checkout.created',
+        'checkout.updated',
+        'order.created',
+        'order.paid',
+      ]) ||
       ![
         'subscription.created',
         'subscription.updated',
@@ -60,11 +77,29 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     if (eventType.startsWith('subscription.')) {
-      await handleSubscriptionEvent(supabase, eventType, eventData);
+      await handleSubscriptionEvent(
+        supabase,
+        userId,
+        eventType,
+        eventData,
+        resolvedEmail
+      );
     } else if (eventType.startsWith('checkout.')) {
-      await handleCheckoutEvent(supabase, userId, eventType, eventData);
+      await handleCheckoutEvent(
+        supabase,
+        userId,
+        eventType,
+        eventData,
+        resolvedEmail
+      );
     } else if (eventType.startsWith('order.')) {
-      await handleOrderEvent(supabase, userId, eventType, eventData);
+      await handleOrderEvent(
+        supabase,
+        userId,
+        eventType,
+        eventData,
+        resolvedEmail
+      );
     }
 
     return NextResponse.json({ status: 'success' });
@@ -79,8 +114,10 @@ export async function POST(request: NextRequest) {
 
 async function handleSubscriptionEvent(
   supabase: any,
+  userId: string | null,
   eventType: string,
-  eventData: any
+  eventData: any,
+  email?: string | null
 ) {
   const polarSubId = eventData.id;
   if (!polarSubId) return;
@@ -121,6 +158,25 @@ async function handleSubscriptionEvent(
       .from('subscriptions')
       .update(updateData)
       .eq('polar_subscription_id', polarSubId);
+
+    if (eventType === 'subscription.active') {
+      const interval = (eventData.recurring_interval || '')
+        .toString()
+        .toLowerCase();
+      const months =
+        interval === 'yearly' || interval === 'annual' || interval === 'year'
+          ? 12
+          : 1;
+      if (userId) {
+        await promoteUserIfSubscription(userId, {
+          metadata: { type: 'subscription', cycle: interval },
+        });
+      } else if (email) {
+        await promoteUserByEmailIfSubscription(email, {
+          metadata: { type: 'subscription', cycle: interval },
+        });
+      }
+    }
   }
 }
 
@@ -128,7 +184,8 @@ async function handleCheckoutEvent(
   supabase: any,
   userId: string | null,
   eventType: string,
-  eventData: any
+  eventData: any,
+  email?: string | null
 ) {
   const status = eventData.status;
 
@@ -147,6 +204,9 @@ async function handleCheckoutEvent(
       if (userId) {
         await updateProductStock(userId, eventData);
         await deleteCartProduct(userId, eventData);
+        await promoteUserIfSubscription(userId, eventData);
+      } else if (email) {
+        await promoteUserByEmailIfSubscription(email, eventData);
       }
     } else if (status === 'failed') {
       console.log(
@@ -165,7 +225,8 @@ async function handleOrderEvent(
   supabase: any,
   userId: string | null,
   eventType: string,
-  eventData: any
+  eventData: any,
+  email?: string | null
 ) {
   if (eventType === 'order.created') {
     console.log(
@@ -189,10 +250,45 @@ async function handleOrderEvent(
         console.log(
           `Updated user profile for successful order: ${eventData.id}`
         );
+        await promoteUserIfSubscription(userId, eventData);
       } catch (error) {
         console.error('Failed to update user profile:', error);
       }
+    } else if (email) {
+      await promoteUserByEmailIfSubscription(email, eventData);
     }
+  }
+}
+
+async function promoteUserIfSubscription(userId: string, payload: any) {
+  try {
+    const authService = new AuthService();
+    const meta = payload?.metadata || payload?.product?.metadata || {};
+    const planType = meta.plan || meta.type;
+    const cycle = (meta.cycle || '').toString().toLowerCase();
+    if (planType === 'subscription') {
+      const months = cycle === 'yearly' || cycle === 'annual' ? 12 : 1;
+      await authService.promoteToPremium(userId, months);
+    }
+  } catch (e) {
+    console.error('Failed to promote user to premium:', e);
+  }
+}
+
+async function promoteUserByEmailIfSubscription(email: string, payload: any) {
+  try {
+    const authService = new AuthService();
+    const meta = payload?.metadata || payload?.product?.metadata || {};
+    const planType = meta.plan || meta.type;
+    const cycle = (meta.cycle || '').toString().toLowerCase();
+    if (planType === 'subscription' || payload?.recurring_interval) {
+      const interval =
+        cycle || String(payload?.recurring_interval || '').toLowerCase();
+      const months = interval === 'yearly' || interval === 'annual' ? 12 : 1;
+      await authService.promoteEmailToPremium(email, months);
+    }
+  } catch (e) {
+    console.error('Failed to promote email to premium:', e);
   }
 }
 

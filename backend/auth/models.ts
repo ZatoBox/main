@@ -1,4 +1,4 @@
-export type RoleUser = 'admin' | 'manager' | 'user';
+export type RoleUser = 'admin' | 'premium' | 'user';
 
 export interface UserItem {
   id: string;
@@ -10,6 +10,7 @@ export interface UserItem {
   profile_image?: string | null;
   polar_api_key?: string | null;
   polar_organization_id?: string | null;
+  premium_up_to?: string | null;
 }
 
 export interface LoginRequest {
@@ -31,6 +32,7 @@ export interface UserInfo {
   phone?: string | null;
   address?: string | null;
   role: RoleUser;
+  premium_up_to?: string | null;
   created_at: string;
   last_updated: string;
 }
