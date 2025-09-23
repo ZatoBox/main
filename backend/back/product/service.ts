@@ -48,9 +48,8 @@ export class ProductService {
     });
   }
 
-  async listProducts(creator_id: string, status?: string) {
-    // Pasa el parámetro de estado al método del repositorio
-    return this.repo.findByCreator(creator_id, status);
+  async listProducts(creator_id: string) {
+    return this.repo.findByCreator(creator_id);
   }
 
   async searchByCategory(category: string) {

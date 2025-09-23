@@ -85,20 +85,6 @@ const EditProductPage: React.FC = () => {
     }
   };
 
-   const handleArchiveProduct = async () => {
-    // Aquí puedes agregar una confirmación de usuario, como un modal o una alerta.
-    if (window.confirm('¿Estás seguro de que quieres archivar este producto?')) {
-      try {
-        await productsAPI.update(id!, { status: 'archived' });
-        router.push('/inventory');
-      } catch (err: unknown) {
-        setError(
-          err instanceof Error ? err.message : 'Error al archivar el producto'
-        );
-      }
-    }
-  };
-
   const billingOptions = [
     { label: 'One-time', value: 'once' },
     { label: 'Monthly', value: 'month' },
@@ -249,7 +235,7 @@ return (
             <EditHeader
               onBack={() => router.push('/inventory')}
               onSave={() => formik.handleSubmit()}
-              onArchive={() => {handleArchiveProduct}}
+              onArchive={() => {/* lógica para archivar producto */}}
               onToggleStatus={() => { /* lógica de cambio de estado */ }}
               status={productData?.status || ''}
               saving={saving}
