@@ -230,6 +230,10 @@ export default function ZatoLinkPage() {
     }
   };
 
+  const handleLayoutUpdated = (updates: Partial<Layout>) => {
+    setLayout((prev) => (prev ? { ...prev, ...updates } : prev));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -276,6 +280,7 @@ export default function ZatoLinkPage() {
           layoutSlug={slug}
           bannerUrl={layout.banner || undefined}
           onBannerUpdated={handleBannerUpdated}
+          onLayoutUpdated={handleLayoutUpdated}
         />
 
         <main className="max-w-7xl mx-auto">

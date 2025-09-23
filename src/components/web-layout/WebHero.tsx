@@ -9,6 +9,10 @@ interface WebHeroProps {
   layoutSlug?: string;
   bannerUrl?: string;
   onBannerUpdated?: (bannerUrl: string) => void;
+  onLayoutUpdated?: (updates: {
+    hero_title?: string;
+    web_description?: string;
+  }) => void;
 }
 
 const WebHero: React.FC<WebHeroProps> = ({
@@ -18,6 +22,7 @@ const WebHero: React.FC<WebHeroProps> = ({
   layoutSlug,
   bannerUrl,
   onBannerUpdated,
+  onLayoutUpdated,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -84,6 +89,41 @@ const WebHero: React.FC<WebHeroProps> = ({
     }
   };
 
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState(title || '');
+  const [newDescription, setNewDescription] = useState(description || '');
+
+  const openSettings = () => {
+    setNewTitle(title || '');
+    setNewDescription(description || '');
+    setIsSettingsOpen(true);
+  };
+
+  const closeSettings = () => setIsSettingsOpen(false);
+
+  const saveSettings = async () => {
+    if (!layoutSlug) return;
+    try {
+      const updates: any = {};
+      if (newTitle !== title) updates.hero_title = newTitle;
+      if (newDescription !== description)
+        updates.web_description = newDescription;
+      if (Object.keys(updates).length === 0) {
+        closeSettings();
+        return;
+      }
+      const res = await layoutAPI.update(layoutSlug, updates);
+      if (res && res.success) {
+        onLayoutUpdated?.(updates);
+        closeSettings();
+      } else {
+        throw new Error(res?.message || 'Update failed');
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Update error');
+    }
+  };
+
   return (
     <div className="relative">
       <div
@@ -103,14 +143,24 @@ const WebHero: React.FC<WebHeroProps> = ({
         </div>
         {isOwner && (
           <div className="absolute top-4 right-4 z-20">
-            <WebButton
-              variant="secondary"
-              size="sm"
-              onClick={handleEditBanner}
-              disabled={isUploading}
-            >
-              {isUploading ? 'Uploading...' : 'Edit Banner'}
-            </WebButton>
+            <div className="flex items-center gap-2">
+              <WebButton
+                variant="secondary"
+                size="sm"
+                onClick={openSettings}
+                disabled={isUploading}
+              >
+                Settings
+              </WebButton>
+              <WebButton
+                variant="secondary"
+                size="sm"
+                onClick={handleEditBanner}
+                disabled={isUploading}
+              >
+                {isUploading ? 'Uploading...' : 'Edit Banner'}
+              </WebButton>
+            </div>
             <input
               ref={fileInputRef}
               type="file"
@@ -121,6 +171,47 @@ const WebHero: React.FC<WebHeroProps> = ({
           </div>
         )}
       </div>
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={closeSettings}
+          ></div>
+          <div className="bg-white rounded-lg p-6 z-60 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Edit Store</h3>
+            <div className="mb-3">
+              <label className="block text-sm mb-1">Title</label>
+              <input
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                className="w-full border px-3 py-2 rounded"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm mb-1">Description</label>
+              <textarea
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                className="w-full border px-3 py-2 rounded"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={closeSettings}
+                className="px-3 py-2 rounded border"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveSettings}
+                className="px-3 py-2 rounded bg-[#E28E18] text-white"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
