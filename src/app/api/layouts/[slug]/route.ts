@@ -5,10 +5,10 @@ const service = new LayoutService();
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const slug = params?.slug;
+    const { slug } = await params;
     const layout = await service.getLayout(slug);
     return NextResponse.json({ success: true, layout });
   } catch (err: any) {
@@ -21,10 +21,10 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const slug = params?.slug;
+    const { slug } = await params;
     const updates = await req.json();
     const updated = await service.updateLayout(slug, updates);
     return NextResponse.json({
@@ -41,10 +41,10 @@ export async function PATCH(
 }
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const slug = params?.slug;
+    const { slug } = await params;
     const deleted = await service.deleteLayout(slug);
     return NextResponse.json({
       success: true,

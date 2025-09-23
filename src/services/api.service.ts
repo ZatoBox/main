@@ -220,6 +220,13 @@ export const getProductsByUserId = async (
   return apiRequest(`/products/user/${userId}${params}`);
 };
 
+export const getProductByUserId = async (
+  userId: string,
+  productId: string
+): Promise<any> => {
+  return apiRequest(`/products/user/${userId}/${productId}`);
+};
+
 export const getAllProducts = getActiveProducts;
 
 /// Inventory

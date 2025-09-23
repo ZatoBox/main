@@ -5,16 +5,17 @@ import { AuthService } from '@/../backend/auth/service';
 interface RouteParams {
   params: Promise<{
     userId: string;
+    productId: string;
   }>;
 }
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
-    const { userId } = await params;
+    const { userId, productId } = await params;
 
-    if (!userId) {
+    if (!userId || !productId) {
       return NextResponse.json(
-        { success: false, message: 'User ID is required' },
+        { success: false, message: 'User ID and Product ID are required' },
         { status: 400 }
       );
     }
@@ -30,7 +31,6 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     }
 
     const polarApiKey = userProfile.user.polar_api_key;
-    const polarOrganizationId = userProfile.user.polar_organization_id;
 
     if (!polarApiKey) {
       return NextResponse.json(
@@ -39,27 +39,18 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const url = new URL(req.url);
-    const organizationId =
-      url.searchParams.get('organization_id') ||
-      polarOrganizationId ||
-      undefined;
-
-    const products = await polarAPI.listProducts(polarApiKey, organizationId);
-    const filteredProducts = products.filter(
-      (product) => !product.name || !product.name.startsWith('Order #')
-    );
+    const product = await polarAPI.getProduct(polarApiKey, productId);
 
     return NextResponse.json({
       success: true,
-      products: filteredProducts,
+      product,
       user_id: userId,
     });
   } catch (error: any) {
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to fetch user products',
+        message: error.message || 'Failed to fetch user product',
       },
       { status: 500 }
     );

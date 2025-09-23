@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { productsAPI } from '@/services/api.service';
+import { getProductByUserId } from '@/services/api.service';
 import type { Layout, Product } from '@/types';
 import { layoutAPI } from '@/services/api.service';
 import Link from 'next/link';
@@ -32,7 +32,10 @@ export default function ProductLinkPage() {
           setLayout(layoutResponse.layout);
 
           try {
-            const productsResponse = await productsAPI.getById(productId);
+            const productsResponse = await getProductByUserId(
+              layoutResponse.layout.owner_id,
+              productId
+            );
             if (productsResponse.success && productsResponse.product) {
               const mapped = mapPolarProductToProduct(
                 productsResponse.product
@@ -43,9 +46,10 @@ export default function ProductLinkPage() {
             }
           } catch (productError) {
             console.warn('Could not load product:', productError);
+            setProduct(null);
           }
         } else {
-          setError('Product not found');
+          setError('Store not found');
         }
       } catch (err: any) {
         console.error('Error loading page:', err);
@@ -76,10 +80,10 @@ export default function ProductLinkPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">
-            Store not found
+            Product not found
           </h1>
           <p className="text-gray-600">
-            {error || 'This store does not exist or was removed.'}
+            {error || 'This product does not exist or was removed.'}
           </p>
           <button
             onClick={() => window.location.reload()}
