@@ -29,17 +29,47 @@ async function getCurrentUser(req: NextRequest) {
   };
 }
 
+async function getOwnerUser(ownerId: string) {
+  const authService = new AuthService();
+  const profile = await authService.getProfileUser(ownerId);
+  if (!profile.success || !profile.user) {
+    throw new Error('Owner user not found');
+  }
+  const polarApiKey = profile.user.polar_api_key || '';
+  if (!polarApiKey) throw new Error('Missing Polar API key for owner user');
+  return {
+    userId: profile.user.id,
+    userEmail: profile.user.email,
+    polarApiKey,
+    polarOrganizationId: profile.user.polar_organization_id || '',
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { polarApiKey, polarOrganizationId } = await getCurrentUser(req);
-    const { userId, items, successUrl, metadata } = await req.json();
+    const { userId, items, successUrl, metadata, ownerId } = await req.json();
 
-    if (!userId || !items || !Array.isArray(items) || items.length === 0) {
+    let polarApiKey, polarOrganizationId;
+    if (ownerId) {
+      const ownerData = await getOwnerUser(ownerId);
+      polarApiKey = ownerData.polarApiKey;
+      polarOrganizationId = ownerData.polarOrganizationId;
+    } else {
+      const userData = await getCurrentUser(req);
+      polarApiKey = userData.polarApiKey;
+      polarOrganizationId = userData.polarOrganizationId;
+    }
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { success: false, message: 'Invalid cart data' },
         { status: 400 }
       );
     }
+
+    const finalUserId =
+      userId ||
+      `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const totalPrice = items.reduce((sum: number, item: any) => {
       const itemPrice = item.productData?.prices?.[0]?.price_amount || 0;
@@ -60,8 +90,11 @@ export async function POST(req: NextRequest) {
       return images;
     }, []);
 
+    const isGuestUser = !userId || finalUserId.startsWith('guest_');
+
     const combinedMetadata = {
-      user_id: userId,
+      user_id: finalUserId,
+      user_type: isGuestUser ? 'guest' : 'registered',
       cart_total: totalPrice.toString(),
       item_count: items.length.toString(),
       items: JSON.stringify(
@@ -96,7 +129,7 @@ export async function POST(req: NextRequest) {
         successUrl ||
         `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/success`,
       metadata: {
-        user_id: userId,
+        user_id: finalUserId,
         cart_product_id: cartProduct.id,
         ...metadata,
       },
