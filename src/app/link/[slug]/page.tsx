@@ -91,16 +91,21 @@ export default function ZatoLinkPage() {
   };
 
   const handleNavigateToPayment = async (total: number) => {
-    if (!user?.id) {
-      alert('Please log in to checkout');
+    if (!layout?.owner_id) {
+      alert('Store owner information not found');
       return;
     }
 
     try {
       const { checkoutPolarCart } = await import('@/services/payments-service');
 
+      const guestId =
+        user?.id ||
+        `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
       const cartData = {
-        userId: user.id,
+        userId: guestId,
+        ownerId: layout.owner_id,
         items: cartItems.map((item) => ({
           polarProductId: item.polarProductId,
           priceId: item.priceId,
@@ -110,6 +115,8 @@ export default function ZatoLinkPage() {
         successUrl: `${window.location.origin}/success`,
         metadata: {
           total_amount: total.toString(),
+          store_slug: slug,
+          store_owner_id: layout.owner_id,
         },
       };
 

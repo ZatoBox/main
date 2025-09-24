@@ -19,7 +19,7 @@ export const createCheckout = async (
 };
 
 export const checkoutPolarCart = async (cartData: {
-  userId: string;
+  userId?: string;
   items: Array<{
     polarProductId: string;
     priceId: string;
@@ -28,6 +28,7 @@ export const checkoutPolarCart = async (cartData: {
   }>;
   successUrl?: string;
   metadata?: any;
+  ownerId?: string;
 }) => {
   const response = await axios.post('/api/checkout/polar', cartData);
   return response.data;
