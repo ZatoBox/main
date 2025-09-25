@@ -70,24 +70,41 @@ const OCRResultPage: React.FC = () => {
     setIsAddingToInventory(true);
     setError('');
     try {
-      const polarProducts = (result.line_items || [])
-        .map((it) => {
+      const sourceItems =
+        result.line_items && result.line_items.length > 0
+          ? result.line_items
+          : (((result as unknown as { products?: OCRLineItem[] }).products ||
+              []) as OCRLineItem[]);
+      const polarProducts = sourceItems
+        .map((item) => {
           const name =
-            (it.name || it.description || '').trim().substring(0, 50) ||
-            'Unnamed';
-          const description = (it.description || 'No description').substring(
-            0,
-            200
+            (item.name || '').trim().substring(0, 80) || 'Unnamed Product';
+          const description = (
+            item.description ||
+            item.name ||
+            'No description'
+          ).substring(0, 200);
+          const unitPriceStr = String(item.unit_price || '0').replace(
+            /[^\d.-]/g,
+            ''
           );
-          const price =
-            parseFloat(String(it.unit_price).replace(/[^\d.-]/g, '')) || 0;
-          const stock =
-            parseInt(String(it.quantity).replace(/[^\d]/g, '')) || 1;
+          const price = parseFloat(unitPriceStr) || 0;
+          const quantityStr = String(item.quantity || '1').replace(
+            /[^\d]/g,
+            ''
+          );
+          const stock = parseInt(quantityStr) || 1;
           const priceInCents = Math.round(price * 100);
+          const category = (item.category || 'General').substring(0, 50);
+
+          if (!name.trim() || priceInCents < 0) {
+            return null;
+          }
 
           return {
             name,
             description,
+            recurring_interval: null,
             prices: [
               {
                 amount_type: 'fixed',
@@ -97,13 +114,13 @@ const OCRResultPage: React.FC = () => {
             ],
             metadata: {
               quantity: stock,
-              category: 'General',
+              category,
               subcategory: 'OCR Import',
-              tags: 'ocr,imported',
+              tags: 'ocr,imported,invoice',
             },
           };
         })
-        .filter((p) => p.name && p.prices[0].price_amount >= 0);
+        .filter(Boolean);
 
       if (polarProducts.length === 0) {
         setError('No valid products to create');
@@ -111,10 +128,14 @@ const OCRResultPage: React.FC = () => {
         return;
       }
 
-      await productsAPI.createBulk(polarProducts);
-      router.push('/inventory');
+      const response = await productsAPI.createBulk(polarProducts);
+      if (response.success) {
+        router.push('/inventory');
+      } else {
+        setError(response.message || 'Error creating products');
+      }
     } catch (err: any) {
-      setError(err.message || 'Error adding products');
+      setError(err.message || 'Error adding products to inventory');
     } finally {
       setIsAddingToInventory(false);
     }
@@ -126,44 +147,90 @@ const OCRResultPage: React.FC = () => {
     setError('');
     try {
       const ocrResult = await ocrAPI.process(file);
-      const rawItems =
-        ocrResult.line_items || (ocrResult as any).products || [];
-      const lineItems = (rawItems as any[]).map((it) => {
-        const unit_price = it.unit_price || it.price || '0';
-        const quantity = it.quantity || it.stock || '1';
-        let total_price = it.total_price;
-        if (!total_price) {
-          const nUnit =
-            parseFloat(
-              String(unit_price)
-                .toString()
-                .replace(/[^\d.-]/g, '')
-            ) || 0;
-          const nQty =
-            parseFloat(
-              String(quantity)
-                .toString()
-                .replace(/[^\d.-]/g, '')
-            ) || 0;
-          total_price = (nUnit * nQty).toFixed(2);
+      const pickArray = (value: unknown) => (Array.isArray(value) ? value : []);
+      const sanitizeText = (value: unknown, fallback: string) => {
+        if (value === null || value === undefined) return fallback;
+        const asString = typeof value === 'string' ? value : String(value);
+        return asString.trim() || fallback;
+      };
+      const sanitizeNumber = (value: unknown, fallback: string) => {
+        const textValue = sanitizeText(value, fallback).replace(
+          /[^0-9.,-]/g,
+          ''
+        );
+        const normalized = textValue.replace(',', '.');
+        const parsed = parseFloat(normalized);
+        return Number.isFinite(parsed) ? parsed.toFixed(2) : fallback;
+      };
+      const sanitizeQuantity = (value: unknown) => {
+        const textValue = sanitizeText(value, '1').replace(/[^0-9]/g, '');
+        const parsed = parseInt(textValue, 10);
+        return Number.isFinite(parsed) && parsed > 0 ? String(parsed) : '1';
+      };
+
+      const candidateLineItems = [
+        pickArray((ocrResult as any).line_items),
+        pickArray((ocrResult as any).products),
+        pickArray((ocrResult as any).productos),
+        pickArray((ocrResult as any).items),
+      ].find((arr) => arr.length > 0) as Array<any> | undefined;
+
+      const processedItems: OCRLineItem[] = (candidateLineItems || []).map(
+        (item: any) => ({
+          name: sanitizeText(item?.name, 'Unnamed Product'),
+          description: sanitizeText(
+            item?.description || item?.name,
+            'No description'
+          ),
+          unit_price: sanitizeNumber(item?.unit_price ?? item?.price, '0.00'),
+          quantity: sanitizeQuantity(item?.quantity ?? item?.qty ?? '1'),
+          total_price: sanitizeNumber(
+            item?.total_price ?? item?.total ?? item?.price,
+            '0.00'
+          ),
+          category: sanitizeText(item?.category, 'General'),
+        })
+      );
+
+      const metadataSource = (() => {
+        if (ocrResult.metadata && typeof ocrResult.metadata === 'object') {
+          return ocrResult.metadata as Record<string, unknown>;
         }
-        return {
-          ...it,
-          unit_price:
-            typeof unit_price === 'number' ? unit_price.toFixed(2) : unit_price,
-          quantity: String(quantity),
-          total_price:
-            typeof total_price === 'number'
-              ? total_price.toFixed(2)
-              : String(total_price),
-        };
-      });
+        const topLevelKeys = [
+          'company_name',
+          'ruc',
+          'date',
+          'invoice_number',
+          'subtotal',
+          'iva',
+          'tax',
+          'total',
+        ];
+        const collected = topLevelKeys.reduce<Record<string, unknown>>(
+          (acc, key) => {
+            if (key in (ocrResult as any)) acc[key] = (ocrResult as any)[key];
+            return acc;
+          },
+          {}
+        );
+        return collected;
+      })();
+
+      const processedMetadata = {
+        company_name: sanitizeText(metadataSource?.company_name, ''),
+        ruc: sanitizeText(metadataSource?.ruc, ''),
+        date: sanitizeText(metadataSource?.date, ''),
+        invoice_number: sanitizeText(metadataSource?.invoice_number, ''),
+        subtotal: sanitizeNumber(metadataSource?.subtotal, ''),
+        iva: sanitizeNumber(metadataSource?.iva ?? metadataSource?.tax, ''),
+        total: sanitizeNumber(metadataSource?.total, ''),
+      };
 
       const normalized: OCRResponse = {
-        success: ocrResult.success ?? true,
-        message: ocrResult.message ?? 'Documento procesado exitosamente',
-        metadata: ocrResult.metadata || {},
-        line_items: lineItems,
+        success: true,
+        message: 'Documento procesado exitosamente',
+        metadata: processedMetadata,
+        line_items: processedItems,
         detections: ocrResult.detections || [],
         processed_image: ocrResult.processed_image || null,
         processing_time: ocrResult.processing_time || 3,
@@ -239,10 +306,10 @@ const OCRResultPage: React.FC = () => {
   };
 
   return (
-    <div className='flex items-start justify-center min-h-screen p-6  md:mt-32 mt-24'>
-      <div className='w-full max-w-5xl'>
+    <div className="flex items-start justify-center min-h-screen p-6  md:mt-32 mt-24">
+      <div className="w-full max-w-5xl">
         {!result ? (
-          <div className='p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]'>
+          <div className="p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]">
             <Header />
             <FileUploader
               fileName={file?.name ?? null}
@@ -253,33 +320,33 @@ const OCRResultPage: React.FC = () => {
               }}
             />
 
-            <div className='text-center'>
+            <div className="text-center">
               <button
                 onClick={handleUpload}
                 disabled={!file || loading}
-                className='flex items-center px-8 py-4 mx-auto font-medium text-white transition-colors rounded-md bg-[#F88612] md:px-10 md:py-5 hover:bg-[#A94D14] disabled:opacity-50 disabled:cursor-not-allowed'
+                className="flex items-center px-8 py-4 mx-auto font-medium text-white transition-colors rounded-md bg-[#F88612] md:px-10 md:py-5 hover:bg-[#A94D14] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
-                    <div className='w-4 h-4 mr-2 border-b-2 border-white rounded-full animate-spin md:h-5 md:w-5 md:mr-3'></div>
+                    <div className="w-4 h-4 mr-2 border-b-2 border-white rounded-full animate-spin md:h-5 md:w-5 md:mr-3"></div>
                     Processing document...
                   </>
                 ) : (
                   <>
-                    <span className='mr-2'>🔍</span> Upload and process
+                    <span className="mr-2">🔍</span> Upload and process
                   </>
                 )}
               </button>
             </div>
 
             {error && (
-              <div className='p-4 mt-4 border rounded-lg bg-error-50 border-error-200 text-error-700 animate-shake'>
+              <div className="p-4 mt-4 border rounded-lg bg-error-50 border-error-200 text-error-700 animate-shake">
                 {error}
               </div>
             )}
           </div>
         ) : (
-          <div className='p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]'>
+          <div className="p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]">
             <ResultOverview result={result} fileName={file?.name ?? null} />
 
             <ItemsTable
@@ -293,18 +360,18 @@ const OCRResultPage: React.FC = () => {
             />
 
             {result.processed_image && (
-              <div className='mb-6 md:mb-8'>
-                <h3 className='mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4'>
+              <div className="mb-6 md:mb-8">
+                <h3 className="mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4">
                   🖼️ Processed Image with Detections
                 </h3>
-                <div className='p-4 overflow-hidden rounded-lg bg-bg-surface'>
+                <div className="p-4 overflow-hidden rounded-lg bg-bg-surface">
                   <img
                     src={`data:image/jpeg;base64,${result.processed_image}`}
-                    alt='Processed document with AI detections'
-                    className='w-full h-auto rounded-lg shadow-md'
+                    alt="Processed document with AI detections"
+                    className="w-full h-auto rounded-lg shadow-md"
                     style={{ maxHeight: '500px', objectFit: 'contain' }}
                   />
-                  <p className='mt-2 text-xs text-center text-gray-500'>
+                  <p className="mt-2 text-xs text-center text-gray-500">
                     Image showing YOLO detections (green boxes) and table
                     regions (blue boxes)
                   </p>
@@ -313,10 +380,10 @@ const OCRResultPage: React.FC = () => {
             )}
 
             {error && (
-              <div className='p-4 mb-6 border rounded-lg md:mb-8 bg-error-50 border-error-200 text-error-700 animate-shake'>
-                <div className='flex items-center'>
-                  <span className='mr-2 text-error-600'>⚠️</span>
-                  <span className='text-sm'>{error}</span>
+              <div className="p-4 mb-6 border rounded-lg md:mb-8 bg-error-50 border-error-200 text-error-700 animate-shake">
+                <div className="flex items-center">
+                  <span className="mr-2 text-error-600">⚠️</span>
+                  <span className="text-sm">{error}</span>
                 </div>
               </div>
             )}
