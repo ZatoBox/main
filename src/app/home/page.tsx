@@ -9,6 +9,7 @@ import { getActiveProducts, salesAPI } from '@/services/api.service';
 import type { Product } from '@/types/index';
 import { PolarProduct } from '@/types/polar';
 import { useAuth } from '@/context/auth-store';
+import { mapPolarProductToProduct } from '@/utils/polar.utils';
 import { ShoppingCart } from 'lucide-react';
 
 interface HomePageProps {
@@ -48,66 +49,6 @@ const HomePage: React.FC<HomePageProps> = ({
 
   // Use local search term (takes priority over external)
   const activeSearchTerm = localSearchTerm || externalSearchTerm;
-
-  const mapPolarProductToProduct = (p: any): Product => {
-    const prices = Array.isArray(p.prices) ? p.prices : [];
-    let price = 0;
-    if (prices.length > 0) {
-      const pr = prices[0] || {};
-      const amt = pr.price_amount ?? pr.priceAmount;
-      const amtType = pr.amount_type ?? pr.amountType;
-      if (typeof amt === 'number') {
-        price = amtType === 'free' ? 0 : amt / 100;
-      }
-    }
-    const imageUrls = Array.isArray(p.medias)
-      ? p.medias
-          .filter(
-            (m: any) =>
-              m &&
-              typeof m.public_url === 'string' &&
-              m.mime_type &&
-              m.mime_type.startsWith('image/')
-          )
-          .map((m: any) => m.public_url)
-      : [];
-    const baseId = String(p.id ?? '');
-    const safeName =
-      typeof p.name === 'string'
-        ? p.name.trim().replace(/\s+/g, '_').toLowerCase()
-        : '';
-    const stableId = safeName
-      ? `polar_${baseId}_${safeName}`
-      : `polar_${baseId}`;
-    const product = {
-      id: stableId,
-      name: p.name || 'Unnamed Product',
-      description: p.description || '',
-      price,
-      stock: p.metadata?.quantity || 0,
-      min_stock: 0,
-      category_ids: [],
-      images: imageUrls,
-      status: 'active' as any,
-      weight: 0,
-      sku: String(p.id),
-      creator_id: '',
-      unit: 'Per item' as any,
-      product_type: 'Physical Product' as any,
-      localization: '',
-      created_at: p.created_at || p.createdAt || new Date().toISOString(),
-      last_updated:
-        p.modified_at ||
-        p.modifiedAt ||
-        p.updatedAt ||
-        new Date().toISOString(),
-    } as Product;
-    (product as any).prices = prices;
-    (product as any).recurring_interval = p.recurring_interval;
-    (product as any).metadata = p.metadata;
-    (product as any).polar_id = p.id;
-    return product;
-  };
 
   // Fetch products from backend
   useEffect(() => {
