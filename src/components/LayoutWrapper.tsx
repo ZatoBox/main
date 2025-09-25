@@ -29,7 +29,6 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
     '/home',
     '/inventory',
     '/landing',
-    '/my-store',
     '/new-product',
     '/ocr-result',
     '/plugin-store',
@@ -43,16 +42,11 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
 
   const isExisting = (path: string) => {
     if (existingPaths.includes(path)) return true;
-    if (path.startsWith('/edit-product/')) return true;
-    if (path.startsWith('/link/')) return true;
     return false;
   };
 
-  const isLinkPath = pathname?.startsWith('/link/');
   const shouldShowSidebar =
-    isExisting(pathname || '/') &&
-    !noSidebarPaths.includes(pathname || '/') &&
-    (!isLinkPath || isAuthenticated);
+    isExisting(pathname || '/') && !noSidebarPaths.includes(pathname || '/');
 
   const showSidebar = shouldShowSidebar;
 

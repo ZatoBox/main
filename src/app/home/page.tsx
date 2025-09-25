@@ -9,6 +9,7 @@ import { getActiveProducts, salesAPI } from '@/services/api.service';
 import type { Product } from '@/types/index';
 import { PolarProduct } from '@/types/polar';
 import { useAuth } from '@/context/auth-store';
+import { ShoppingCart } from 'lucide-react';
 
 interface HomePageProps {
   tab?: string;
@@ -154,7 +155,6 @@ const HomePage: React.FC<HomePageProps> = ({
   const handleProductClick = (productUntyped: Product | PolarProduct) => {
     const product = productUntyped as Product;
     setSelectedProduct(product);
-    setIsDrawerOpen(true);
     setCartItems((prevCart) => {
       const pid = String(product.id); // stable local id for UI/cart identity
       const polarProductId = (product as any).polar_id || String(product.id); // original Polar ID for API calls
@@ -263,6 +263,8 @@ const HomePage: React.FC<HomePageProps> = ({
     setCartItems([]);
   };
 
+  const totalItems = cartItems.length;
+
   // Function to reload products
   const reloadProducts = async () => {
     try {
@@ -346,22 +348,16 @@ const HomePage: React.FC<HomePageProps> = ({
         loading={loading}
       />
 
-      <div
-        className={`pt-6 px-4 transition-all duration-300 ${
-          isDrawerOpen && !isPaymentOpen && !isSuccessOpen
-            ? 'md:mr-[40%] lg:mr-[33.333333%]'
-            : ''
-        }`}
-      >
-        <div className='mx-auto max-w-7xl sm:px-6 lg:px-8'>
-          <div className='mb-6'>
+      <div className="pt-6 px-4 transition-all duration-300">
+        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="mb-6">
             <HomeStats
               count={filteredProducts.length}
               searchTerm={activeSearchTerm}
             />
           </div>
 
-          <div className='p-6 bg-white border rounded-lg border-gray-300 animate-scale-in'>
+          <div className="p-6 bg-white border rounded-lg border-gray-300 animate-scale-in">
             <ProductGrid
               products={filteredProducts}
               onProductClick={handleProductClick}
@@ -369,6 +365,20 @@ const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
       </div>
+
+      <button
+        onClick={() => setIsDrawerOpen(true)}
+        className="fixed bottom-4 right-4 bg-[#F88612] text-white p-3 rounded-full shadow-lg hover:bg-[#d17110] transition-colors"
+      >
+        <div className="relative">
+          <ShoppingCart size={24} />
+          {totalItems > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              {totalItems}
+            </span>
+          )}
+        </div>
+      </button>
 
       <SalesDrawer
         isOpen={isDrawerOpen}
