@@ -27,6 +27,7 @@ const EditProductPage: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [productData, setProductData] = useState<any>(null);
+  const [togglingStatus, setTogglingStatus] = useState(false);
 
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
     []
@@ -103,7 +104,6 @@ const EditProductPage: React.FC = () => {
     setFiles(current.slice(0, MAX_FILES));
   };
 
-
   const handleRemoveFile = (index: number) =>
     setFiles((prev) => prev.filter((_, i) => i !== index));
 
@@ -166,6 +166,59 @@ const EditProductPage: React.FC = () => {
     }
   };
 
+  const handleStatusUpdate = (updated: any, archivedValue: boolean) => {
+    if (updated && typeof updated === 'object') {
+      setProductData(updated);
+    } else {
+      setProductData((prev: any) =>
+        prev ? { ...prev, is_archived: archivedValue } : prev
+      );
+    }
+  };
+
+  const handleToggleStatus = async () => {
+    if (!id || !productData) return;
+    setTogglingStatus(true);
+    setError(null);
+    const nextArchived = !productData.is_archived;
+    try {
+      const response = await productsAPI.update(id, {
+        is_archived: nextArchived,
+      });
+      if (response?.success && response.product) {
+        handleStatusUpdate(response.product, nextArchived);
+      } else {
+        handleStatusUpdate(null, nextArchived);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Error updating product status'
+      );
+    } finally {
+      setTogglingStatus(false);
+    }
+  };
+
+  const handleArchiveProduct = async () => {
+    if (!id || !productData || productData.is_archived) return;
+    setTogglingStatus(true);
+    setError(null);
+    try {
+      const response = await productsAPI.update(id, { is_archived: true });
+      if (response?.success && response.product) {
+        handleStatusUpdate(response.product, true);
+      } else {
+        handleStatusUpdate(null, true);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Error updating product status'
+      );
+    } finally {
+      setTogglingStatus(false);
+    }
+  };
+
   const validationSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
     price: Yup.number()
@@ -183,22 +236,22 @@ const EditProductPage: React.FC = () => {
   });
 
   if (loading) {
-    return  (
-      <div className='flex items-center justify-center min-h-screen  bg-bg-main'>
-        <div className='text-center'>
-          <div className='w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary'></div>
-          <p className='text-text-secondary'>Loading products...</p>
+    return (
+      <div className="flex items-center justify-center min-h-screen  bg-bg-main">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
+          <p className="text-text-secondary">Loading products...</p>
         </div>
       </div>
     );
   }
 
   if (!productData) {
-    return  (
-      <div className='flex items-center justify-center min-h-screen  bg-bg-main'>
-        <div className='text-center'>
-          <div className='w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary'></div>
-          <p className='text-text-secondary'>Loading products...</p>
+    return (
+      <div className="flex items-center justify-center min-h-screen  bg-bg-main">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
+          <p className="text-text-secondary">Loading products...</p>
         </div>
       </div>
     );
@@ -223,8 +276,8 @@ const EditProductPage: React.FC = () => {
     tags: currentTags,
   } as any;
 
-return (
-    <div className='min-h-screen bg-bg-main'>
+  return (
+    <div className="min-h-screen bg-bg-main">
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -235,96 +288,96 @@ return (
             <EditHeader
               onBack={() => router.push('/inventory')}
               onSave={() => formik.handleSubmit()}
-              onArchive={() => {/* lógica para archivar producto */}}
-              onToggleStatus={() => { /* lógica de cambio de estado */ }}
-              status={productData?.status || ''}
+              onArchive={handleArchiveProduct}
+              onToggleStatus={handleToggleStatus}
+              status={productData?.is_archived ? 'inactive' : 'active'}
               saving={saving}
-              togglingStatus={false}
+              togglingStatus={togglingStatus}
             />
-            <div className='px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+            <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
               <Form>
-                <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
-                  <div className='space-y-6'>
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                  <div className="space-y-6">
                     <ImagesUploader
                       files={files}
                       onAddFiles={handleAddFiles}
                       onRemove={handleRemoveFile}
                     />
-                    <div className='p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]'>
-                      <div className='space-y-4'>
+                    <div className="p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]">
+                      <div className="space-y-4">
                         <div>
-                          <label className='block mb-2 text-sm font-medium text-black'>
+                          <label className="block mb-2 text-sm font-medium text-black">
                             Description
                           </label>
                           <textarea
-                            name='description'
+                            name="description"
                             value={formik.values.description}
                             onChange={formik.handleChange}
-                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
                         </div>
                         <div>
-                          <label className='block mb-2 text-sm font-medium text-black'>
+                          <label className="block mb-2 text-sm font-medium text-black">
                             Category
                           </label>
                           <input
-                            name='category'
+                            name="category"
                             value={formik.values.category}
                             onChange={formik.handleChange}
-                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
                         </div>
                         <div>
-                          <label className='block mb-2 text-sm font-medium text-black'>
+                          <label className="block mb-2 text-sm font-medium text-black">
                             Subcategory
                           </label>
                           <input
-                            name='subcategory'
+                            name="subcategory"
                             value={formik.values.subcategory}
                             onChange={formik.handleChange}
-                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
                         </div>
                         <div>
-                          <label className='block mb-2 text-sm font-medium text-black'>
+                          <label className="block mb-2 text-sm font-medium text-black">
                             Tags (comma separated)
                           </label>
                           <input
-                            name='tags'
+                            name="tags"
                             value={formik.values.tags}
                             onChange={formik.handleChange}
-                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className='space-y-6'>
-                    <div className='p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]'>
-                      <div className='space-y-4'>
+                  <div className="space-y-6">
+                    <div className="p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]">
+                      <div className="space-y-4">
                         <div>
-                          <label className='block mb-2 text-sm font-medium text-black'>
+                          <label className="block mb-2 text-sm font-medium text-black">
                             Name *
                           </label>
                           <input
-                            name='name'
+                            name="name"
                             value={formik.values.name}
                             onChange={formik.handleChange}
-                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
-                          <div className='mt-1 text-xs text-red-500'>
+                          <div className="mt-1 text-xs text-red-500">
                             {formik.errors.name as any}
                           </div>
                         </div>
                         <div>
-                          <label className='block mb-2 text-sm font-medium text-black'>
+                          <label className="block mb-2 text-sm font-medium text-black">
                             Billing *
                           </label>
                           <select
-                            name='billingInterval'
+                            name="billingInterval"
                             value={formik.values.billingInterval}
                             onChange={formik.handleChange}
-                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           >
                             {billingOptions.map((opt) => (
                               <option key={opt.value} value={opt.value}>
@@ -332,38 +385,38 @@ return (
                               </option>
                             ))}
                           </select>
-                          <div className='mt-1 text-xs text-red-500'>
+                          <div className="mt-1 text-xs text-red-500">
                             {formik.errors.billingInterval as any}
                           </div>
                         </div>
                         <div>
-                          <label className='block mb-2 text-sm font-medium text-black'>
+                          <label className="block mb-2 text-sm font-medium text-black">
                             Price *
                           </label>
                           <input
-                            name='price'
-                            type='number'
-                            step='0.01'
+                            name="price"
+                            type="number"
+                            step="0.01"
                             value={formik.values.price}
                             onChange={formik.handleChange}
-                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
-                          <div className='mt-1 text-xs text-red-500'>
+                          <div className="mt-1 text-xs text-red-500">
                             {formik.errors.price as any}
                           </div>
                         </div>
                         <div>
-                          <label className='block mb-2 text-sm font-medium text-black'>
+                          <label className="block mb-2 text-sm font-medium text-black">
                             Stock *
                           </label>
                           <input
-                            name='stock'
-                            type='number'
+                            name="stock"
+                            type="number"
                             value={formik.values.stock}
                             onChange={formik.handleChange}
-                            className='w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
+                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
-                          <div className='mt-1 text-xs text-red-500'>
+                          <div className="mt-1 text-xs text-red-500">
                             {formik.errors.stock as any}
                           </div>
                         </div>

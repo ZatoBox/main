@@ -6,39 +6,61 @@ export const decryptApiKey = (rawKey: string): string => {
 };
 
 export const polarAPI = {
-  async listProducts(apiKey: string, organizationId?: string): Promise<any[]> {
+  async listProducts(
+    apiKey: string,
+    organizationId?: string,
+    options?: { includeArchived?: boolean }
+  ): Promise<any[]> {
     const token = decryptApiKey(apiKey);
-    const params = new URLSearchParams();
+    const includeArchived = options?.includeArchived ?? false;
 
-    params.set('expand', 'medias,prices,benefits');
-    params.set('limit', '100');
-    params.set('is_archived', 'false');
+    const fetchPage = async (archivedValue: 'true' | 'false') => {
+      const params = new URLSearchParams();
+      params.set('expand', 'medias,prices,benefits');
+      params.set('limit', '100');
+      params.set('is_archived', archivedValue);
+      if (organizationId && organizationId.trim() !== '') {
+        params.set('organization_id', organizationId.trim());
+      }
+      const url = `${BASE_URL}/products${
+        params.toString() ? `?${params.toString()}` : ''
+      }`;
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'Failed to list products');
+      }
+      const data: any = await res.json();
+      const items = Array.isArray(data)
+        ? data
+        : Array.isArray(data.items)
+        ? data.items
+        : [];
+      return items;
+    };
 
-    if (organizationId && organizationId.trim() !== '') {
-      params.set('organization_id', organizationId.trim());
+    if (!includeArchived) {
+      return fetchPage('false');
     }
 
-    const url = `${BASE_URL}/products${
-      params.toString() ? `?${params.toString()}` : ''
-    }`;
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
+    const [active, archived] = await Promise.all([
+      fetchPage('false'),
+      fetchPage('true'),
+    ]);
+    const seen = new Set<string>();
+    const merged = [...active, ...archived].filter((item: any) => {
+      const identifier = String(item?.id ?? '');
+      if (seen.has(identifier)) return false;
+      seen.add(identifier);
+      return true;
     });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text || 'Failed to list products');
-    }
-    const data: any = await res.json();
-    const items = Array.isArray(data)
-      ? data
-      : Array.isArray(data.items)
-      ? data.items
-      : [];
-    return items;
+    return merged;
   },
 
   async getProduct(apiKey: string, productId: string): Promise<any> {
@@ -98,13 +120,27 @@ export const polarAPI = {
     productData: any
   ): Promise<any> {
     const token = decryptApiKey(apiKey);
-    const body: any = {
-      name: productData.name,
-      description: productData.description,
-      prices: productData.prices,
-      is_archived: productData.is_archived,
-      metadata: productData.metadata,
-    };
+    const body: Record<string, unknown> = {};
+    if (Object.prototype.hasOwnProperty.call(productData, 'name')) {
+      body.name = productData.name;
+    }
+    if (Object.prototype.hasOwnProperty.call(productData, 'description')) {
+      body.description = productData.description;
+    }
+    if (Object.prototype.hasOwnProperty.call(productData, 'prices')) {
+      body.prices = productData.prices;
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(productData, 'recurring_interval')
+    ) {
+      body.recurring_interval = productData.recurring_interval;
+    }
+    if (Object.prototype.hasOwnProperty.call(productData, 'is_archived')) {
+      body.is_archived = productData.is_archived;
+    }
+    if (Object.prototype.hasOwnProperty.call(productData, 'metadata')) {
+      body.metadata = productData.metadata;
+    }
     const res = await fetch(`${BASE_URL}/products/${productId}`, {
       method: 'PATCH',
       headers: {
@@ -195,7 +231,6 @@ export const polarAPI = {
   },
 };
 
-// Reusable mapper from Polar product to local Product shape
 export const mapPolarProductToProduct = (p: any) => {
   const prices = Array.isArray(p.prices) ? p.prices : [];
   let price = 0;
@@ -224,8 +259,9 @@ export const mapPolarProductToProduct = (p: any) => {
       ? p.name.trim().replace(/\s+/g, '_').toLowerCase()
       : '';
   const stableId = safeName ? `polar_${baseId}_${safeName}` : `polar_${baseId}`;
+  const isArchived = Boolean(p.is_archived);
   const product: any = {
-    id: stableId,
+    id: String(p.id ?? stableId),
     name: p.name || 'Unnamed Product',
     description: p.description || '',
     price,
@@ -233,7 +269,7 @@ export const mapPolarProductToProduct = (p: any) => {
     min_stock: 0,
     category_ids: [],
     images: imageUrls,
-    status: 'active',
+    status: isArchived ? 'inactive' : 'active',
     weight: 0,
     sku: String(p.id),
     creator_id: '',
@@ -248,5 +284,7 @@ export const mapPolarProductToProduct = (p: any) => {
   product.recurring_interval = p.recurring_interval;
   product.metadata = p.metadata;
   product.polar_id = p.id;
+  product.client_id = stableId;
+  product.is_archived = isArchived;
   return product;
 };
