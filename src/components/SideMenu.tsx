@@ -15,7 +15,6 @@ import {
   X,
   Scan,
   Store,
-  Building,
 } from 'lucide-react';
 import { useAuth } from '../context/auth-store';
 import { usePlugins } from '@/context/plugin-context';
@@ -151,13 +150,6 @@ const SideMenu: React.FC = () => {
       description: 'Process documents',
       pluginId: 'ocr-module',
       alwaysVisible: false,
-    },
-    {
-      name: 'My Store',
-      icon: Building,
-      path: '/my-store',
-      description: 'Manage my store',
-      alwaysVisible: true,
     },
     {
       name: 'POS Integration',
@@ -333,7 +325,12 @@ const SideMenu: React.FC = () => {
             <div className="px-4 py-2">
               <div className="mb-2 flex justify-center">
                 <button
-                  onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform', '_blank')}
+                  onClick={() =>
+                    window.open(
+                      'https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform',
+                      '_blank'
+                    )
+                  }
                   className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-[#F88612] text-white gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-white hover:border-[#F88612] hover:text-[#F88612]"
                 >
                   <Sparkles size={16} className="text-current" />
@@ -393,7 +390,12 @@ const SideMenu: React.FC = () => {
             <div className="px-4 py-2">
               <div className="mb-2 flex justify-center">
                 <button
-                  onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform', '_blank')}
+                  onClick={() =>
+                    window.open(
+                      'https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform',
+                      '_blank'
+                    )
+                  }
                   className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-[#F88612] text-white gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-white hover:border-[#F88612] hover:text-[#F88612]"
                 >
                   <Sparkles size={16} className="text-current" />

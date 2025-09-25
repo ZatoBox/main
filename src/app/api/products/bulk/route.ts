@@ -21,7 +21,7 @@ async function getCurrentUser(req: NextRequest) {
   const profile = await authService.getProfileUser(String(user.id));
   const polarApiKey = profile.user?.polar_api_key || '';
   if (!polarApiKey) throw new Error('Missing Polar API key for user');
-  
+
   return {
     userId: user.id,
     userEmail: user.email,
@@ -47,40 +47,62 @@ export async function POST(req: NextRequest) {
 
     for (const productData of products) {
       try {
-        if (!productData.name) {
-          errors.push({ error: 'Product name is required', data: productData });
+        if (!productData.name || !productData.name.trim()) {
+          errors.push({
+            error: 'Product name is required',
+            data: { name: productData.name },
+          });
+          continue;
+        }
+
+        if (
+          !productData.prices ||
+          !Array.isArray(productData.prices) ||
+          productData.prices.length === 0
+        ) {
+          errors.push({
+            error: 'Product prices are required',
+            data: { name: productData.name },
+          });
           continue;
         }
 
         const product = await polarAPI.createProduct(polarApiKey, {
-          name: productData.name,
+          name: productData.name.trim(),
           description: productData.description || '',
-          recurring_interval: null,
-          prices: productData.prices || [{
-            amount_type: 'fixed',
-            price_currency: 'usd',
-            price_amount: productData.price_amount || 0
-          }],
-          metadata: productData.metadata || {}
+          recurring_interval: productData.recurring_interval || null,
+          prices: productData.prices,
+          metadata: productData.metadata || {},
         });
 
-        createdProducts.push(product);
+        createdProducts.push({
+          id: product.id,
+          name: product.name,
+          polar_id: product.id,
+        });
       } catch (error: any) {
-        errors.push({ 
-          error: error.message || 'Failed to create product', 
-          data: productData 
+        errors.push({
+          error: error.message || 'Failed to create product',
+          data: { name: productData.name },
         });
       }
     }
 
+    const success = createdProducts.length > 0;
+    const message = success
+      ? `Successfully created ${createdProducts.length} products${
+          errors.length ? ` (${errors.length} failed)` : ''
+        }`
+      : 'Failed to create any products';
+
     return NextResponse.json({
-      success: true,
+      success,
+      message,
       created: createdProducts.length,
       errors: errors.length,
       products: createdProducts,
-      failed: errors
+      failed: errors,
     });
-
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: error.message || 'Failed to create products' },

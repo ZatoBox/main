@@ -8,6 +8,8 @@ export type OCRResponse = {
   confidence?: number;
   language?: string;
   products?: Array<Record<string, unknown>>;
+  line_items?: Array<Record<string, unknown>>;
+  metadata?: Record<string, unknown>;
 };
 
 export function parseAuthHeader(authHeader: string | null | undefined) {
@@ -71,14 +73,54 @@ export async function processImageFile(params: {
 
   try {
     const parsed = JSON.parse(extractedText);
-    let products = null;
-    if (Array.isArray(parsed)) products = parsed;
-    else if (parsed && typeof parsed === 'object') {
-      if ('productos' in parsed) products = (parsed as any).productos;
-      else products = [parsed];
+    let lineItems: Array<Record<string, unknown>> = [];
+    let metadata: Record<string, unknown> = {};
+
+    if (Array.isArray(parsed)) {
+      lineItems = parsed as Array<Record<string, unknown>>;
+    } else if (parsed && typeof parsed === 'object') {
+      const obj = parsed as Record<string, unknown>;
+      if (Array.isArray(obj.line_items)) {
+        lineItems = obj.line_items as Array<Record<string, unknown>>;
+      } else if (Array.isArray(obj.items)) {
+        lineItems = obj.items as Array<Record<string, unknown>>;
+      } else if (Array.isArray(obj.products)) {
+        lineItems = obj.products as Array<Record<string, unknown>>;
+      } else if (Array.isArray(obj.productos)) {
+        lineItems = obj.productos as Array<Record<string, unknown>>;
+      } else {
+        lineItems = [obj];
+      }
+
+      if (obj.metadata && typeof obj.metadata === 'object') {
+        metadata = obj.metadata as Record<string, unknown>;
+      } else {
+        const metadataKeys = [
+          'company_name',
+          'ruc',
+          'date',
+          'invoice_number',
+          'subtotal',
+          'iva',
+          'tax',
+          'total',
+        ];
+        metadataKeys.forEach((key) => {
+          if (key in obj) metadata[key] = obj[key] as unknown;
+        });
+      }
     }
 
-    return { text: extractedText, confidence: 0.95, language: 'es', products };
+    const products = lineItems.length > 0 ? lineItems : undefined;
+
+    return {
+      text: extractedText,
+      confidence: 0.95,
+      language: 'es',
+      products,
+      line_items: lineItems,
+      metadata,
+    };
   } catch (e) {
     return { text: extractedText, confidence: 0.95, language: 'es' };
   }
