@@ -37,12 +37,19 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url);
     const productId = url.searchParams.get('id');
     const organizationId = url.searchParams.get('organization_id') || undefined;
+    const includeArchived = url.searchParams.get('include_archived') === 'true';
 
     if (productId) {
       const product = await polarAPI.getProduct(polarApiKey, productId);
       return NextResponse.json({ success: true, product });
     } else {
-      const products = await polarAPI.listProducts(polarApiKey, organizationId);
+      const products = await polarAPI.listProducts(
+        polarApiKey,
+        organizationId,
+        {
+          includeArchived,
+        }
+      );
       const filteredProducts = products.filter(
         (product) => !product.name || !product.name.startsWith('Order #')
       );

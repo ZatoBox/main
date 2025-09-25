@@ -6,7 +6,7 @@ import { Package } from 'lucide-react';
 import {
   productsAPI,
   categoriesAPI,
-  getActiveProducts,
+  getAllProductsIncludingArchived,
 } from '@/services/api.service';
 import { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
@@ -14,6 +14,7 @@ import InventoryHeader from '@/components/inventory/InventoryHeader';
 import InventoryFilters from '@/components/inventory/InventoryFilters';
 import InventoryGrid from '@/components/inventory/InventoryGrid';
 import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
+import { mapPolarProductToProduct } from '@/utils/polar.utils';
 
 const InventoryPage: React.FC = () => {
   const router = useRouter();
@@ -31,52 +32,6 @@ const InventoryPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const mapPolarProductToProduct = (p: any): Product => {
-    const prices = Array.isArray(p.prices) ? p.prices : [];
-    let price = 0;
-    if (prices.length > 0) {
-      const pr = prices[0] || {};
-      const amt = pr.price_amount ?? pr.priceAmount;
-      const amtType = pr.amount_type ?? pr.amountType;
-      if (typeof amt === 'number') {
-        price = amtType === 'free' ? 0 : amt / 100;
-      }
-    }
-    const imageUrls = Array.isArray(p.medias)
-      ? p.medias
-          .filter(
-            (m: any) =>
-              m &&
-              typeof m.public_url === 'string' &&
-              m.mime_type &&
-              m.mime_type.startsWith('image/')
-          )
-          .map((m: any) => m.public_url)
-      : [];
-    return {
-      id: String(p.id),
-      name: p.name || 'Unnamed Product',
-      description: p.description || '',
-      price,
-      stock: p.metadata?.quantity || 0,
-      min_stock: 0,
-      category_ids: [],
-      images: imageUrls,
-      status: 'active' as any,
-      weight: 0,
-      sku: String(p.id),
-      creator_id: '',
-      unit: 'Per item' as any,
-      product_type: 'Physical Product' as any,
-      localization: '',
-      created_at: p.created_at || p.createdAt || new Date().toISOString(),
-      last_updated:
-        p.modified_at ||
-        p.modifiedAt ||
-        p.updatedAt ||
-        new Date().toISOString(),
-    } as Product;
-  };
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -92,13 +47,10 @@ const InventoryPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const response = await getActiveProducts();
+        const response = await getAllProductsIncludingArchived();
         if (response && response.success && Array.isArray(response.products)) {
           const rows: any[] = response.products;
-          const filtered = rows.filter(
-            (p: any) => !(p.is_archived ?? p.is_archived)
-          );
-          const availableProducts = filtered.map(mapPolarProductToProduct);
+          const availableProducts = rows.map(mapPolarProductToProduct);
           setInventoryItems(availableProducts);
           setError(null);
         } else {
@@ -171,11 +123,16 @@ const InventoryPage: React.FC = () => {
     setError(null);
 
     try {
-      const response = await productsAPI.delete(deleteConfirmId);
+      const response = await productsAPI.update(deleteConfirmId, {
+        is_archived: true,
+      });
 
       if (response.success) {
+        const updatedProduct = mapPolarProductToProduct(response.product);
         setInventoryItems((prevItems) =>
-          prevItems.filter((item) => item.id !== deleteConfirmId)
+          prevItems.map((item) =>
+            item.id === deleteConfirmId ? (updatedProduct as Product) : item
+          )
         );
         setSelectedItems((prevSelected) =>
           prevSelected.filter((itemId) => itemId !== deleteConfirmId)
@@ -239,10 +196,10 @@ const InventoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className='flex items-center justify-center min-h-screen  bg-bg-main'>
-        <div className='text-center'>
-          <div className='w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary'></div>
-          <p className='text-text-secondary'>Loading products...</p>
+      <div className="flex items-center justify-center min-h-screen  bg-bg-main">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
+          <p className="text-text-secondary">Loading products...</p>
         </div>
       </div>
     );
@@ -250,27 +207,27 @@ const InventoryPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className='flex items-center justify-center min-h-screen bg-bg-main'>
-        <div className='text-center'>
-          <div className='mb-4 text-red-500'>
+      <div className="flex items-center justify-center min-h-screen bg-bg-main">
+        <div className="text-center">
+          <div className="mb-4 text-red-500">
             <svg
-              className='w-12 h-12 mx-auto'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
+              className="w-12 h-12 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
               <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 strokeWidth={2}
-                d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z'
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
           </div>
-          <p className='mb-4 text-text-primary'>{error}</p>
+          <p className="mb-4 text-text-primary">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className='px-4 py-2 font-medium text-black transition-colors rounded-lg bg-primary hover:bg-primary-600'
+            className="px-4 py-2 font-medium text-black transition-colors rounded-lg bg-primary hover:bg-primary-600"
           >
             Retry
           </button>
@@ -280,13 +237,13 @@ const InventoryPage: React.FC = () => {
   }
 
   return (
-    <div className='min-h-screen bg-bg-main'>
+    <div className="min-h-screen bg-bg-main">
       <InventoryHeader
         onBack={() => router.push('/')}
         onCreate={() => router.push('/new-product')}
       />
 
-      <div className='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <InventoryFilters
           categories={['all', ...categories.map((c) => c.name)]}
           categoryFilter={categoryFilter}
@@ -297,31 +254,31 @@ const InventoryPage: React.FC = () => {
           setSearchTerm={setSearchTerm}
         />
 
-        <div className='px-0 py-6 mx-auto max-w-7xl sm:px-0 lg:px-0'>
+        <div className="px-0 py-6 mx-auto max-w-7xl sm:px-0 lg:px-0">
           {error && (
-            <div className='p-4 mb-4 border border-red-200 rounded-lg bg-red-50'>
-              <div className='flex'>
-                <div className='flex-shrink-0'>
+            <div className="p-4 mb-4 border border-red-200 rounded-lg bg-red-50">
+              <div className="flex">
+                <div className="flex-shrink-0">
                   <svg
-                    className='w-5 h-5 text-red-400'
-                    viewBox='0 0 20 20'
-                    fill='currentColor'
+                    className="w-5 h-5 text-red-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
                   >
                     <path
-                      fillRule='evenodd'
-                      d='M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z'
-                      clipRule='evenodd'
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
                     />
                   </svg>
                 </div>
-                <div className='ml-3'>
-                  <h3 className='text-sm font-medium text-red-800'>Error</h3>
-                  <div className='mt-2 text-sm text-red-700'>{error}</div>
-                  <div className='mt-4'>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Error</h3>
+                  <div className="mt-2 text-sm text-red-700">{error}</div>
+                  <div className="mt-4">
                     <button
-                      type='button'
+                      type="button"
                       onClick={() => setError(null)}
-                      className='bg-red-50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 hover:bg-red-100'
+                      className="bg-red-50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 hover:bg-red-100"
                     >
                       Dismiss
                     </button>
@@ -340,12 +297,12 @@ const InventoryPage: React.FC = () => {
           />
 
           {filteredItems.length === 0 && (
-            <div className='p-12 text-center border rounded-lg shadow-sm bg-bg-surface border-divider'>
-              <Package size={48} className='mx-auto mb-4 text-gray-300' />
-              <h3 className='mb-2 text-lg font-medium text-text-primary'>
+            <div className="p-12 text-center border rounded-lg shadow-sm bg-bg-surface border-divider">
+              <Package size={48} className="mx-auto mb-4 text-gray-300" />
+              <h3 className="mb-2 text-lg font-medium text-text-primary">
                 No items found
               </h3>
-              <p className='text-text-secondary'>
+              <p className="text-text-secondary">
                 Try adjusting the filters or create a new item.
               </p>
             </div>

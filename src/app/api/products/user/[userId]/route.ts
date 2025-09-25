@@ -45,7 +45,10 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       polarOrganizationId ||
       undefined;
 
-    const products = await polarAPI.listProducts(polarApiKey, organizationId);
+    const includeArchived = url.searchParams.get('include_archived') === 'true';
+    const products = await polarAPI.listProducts(polarApiKey, organizationId, {
+      includeArchived,
+    });
     const filteredProducts = products.filter(
       (product) => !product.name || !product.name.startsWith('Order #')
     );

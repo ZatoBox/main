@@ -9,7 +9,7 @@ import { getActiveProducts, salesAPI } from '@/services/api.service';
 import type { Product } from '@/types/index';
 import { PolarProduct } from '@/types/polar';
 import { useAuth } from '@/context/auth-store';
-import { ShoppingCart } from 'lucide-react';
+import { mapPolarProductToProduct } from '@/utils/polar.utils';
 
 interface HomePageProps {
   tab?: string;
@@ -49,91 +49,34 @@ const HomePage: React.FC<HomePageProps> = ({
   // Use local search term (takes priority over external)
   const activeSearchTerm = localSearchTerm || externalSearchTerm;
 
-  const mapPolarProductToProduct = (p: any): Product => {
-    const prices = Array.isArray(p.prices) ? p.prices : [];
-    let price = 0;
-    if (prices.length > 0) {
-      const pr = prices[0] || {};
-      const amt = pr.price_amount ?? pr.priceAmount;
-      const amtType = pr.amount_type ?? pr.amountType;
-      if (typeof amt === 'number') {
-        price = amtType === 'free' ? 0 : amt / 100;
+  const reloadProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await getActiveProducts();
+      if (response && response.success && Array.isArray(response.products)) {
+        const rows: any[] = response.products;
+        const filtered = rows.filter(
+          (p: any) => !(p.is_archived ?? p.is_archived)
+        );
+        const availableProducts = filtered.map(mapPolarProductToProduct);
+        setProducts(availableProducts);
+      } else {
+        setProducts([]);
+        setError('Error reloading products');
       }
+    } catch (err) {
+      console.error('Error reloading products:', err);
+      setProducts([]);
+      setError('Error reloading products');
+    } finally {
+      setLoading(false);
     }
-    const imageUrls = Array.isArray(p.medias)
-      ? p.medias
-          .filter(
-            (m: any) =>
-              m &&
-              typeof m.public_url === 'string' &&
-              m.mime_type &&
-              m.mime_type.startsWith('image/')
-          )
-          .map((m: any) => m.public_url)
-      : [];
-    const baseId = String(p.id ?? '');
-    const safeName =
-      typeof p.name === 'string'
-        ? p.name.trim().replace(/\s+/g, '_').toLowerCase()
-        : '';
-    const stableId = safeName
-      ? `polar_${baseId}_${safeName}`
-      : `polar_${baseId}`;
-    const product = {
-      id: stableId,
-      name: p.name || 'Unnamed Product',
-      description: p.description || '',
-      price,
-      stock: p.metadata?.quantity || 0,
-      min_stock: 0,
-      category_ids: [],
-      images: imageUrls,
-      status: 'active' as any,
-      weight: 0,
-      sku: String(p.id),
-      creator_id: '',
-      unit: 'Per item' as any,
-      product_type: 'Physical Product' as any,
-      localization: '',
-      created_at: p.created_at || p.createdAt || new Date().toISOString(),
-      last_updated:
-        p.modified_at ||
-        p.modifiedAt ||
-        p.updatedAt ||
-        new Date().toISOString(),
-    } as Product;
-    (product as any).prices = prices;
-    (product as any).recurring_interval = p.recurring_interval;
-    (product as any).metadata = p.metadata;
-    (product as any).polar_id = p.id;
-    return product;
   };
 
   // Fetch products from backend
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await getActiveProducts();
-        if (response && response.success && Array.isArray(response.products)) {
-          const rows: any[] = response.products;
-          const filtered = rows.filter(
-            (p: any) => !(p.is_archived ?? p.is_archived)
-          );
-          const availableProducts = filtered.map(mapPolarProductToProduct);
-          setProducts(availableProducts);
-        } else {
-          setProducts([]);
-        }
-      } catch (err) {
-        console.error('Error fetching products:', err);
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
+    void reloadProducts();
   }, []);
 
   const enrichedProducts = useMemo(() => {
@@ -155,6 +98,7 @@ const HomePage: React.FC<HomePageProps> = ({
   const handleProductClick = (productUntyped: Product | PolarProduct) => {
     const product = productUntyped as Product;
     setSelectedProduct(product);
+    setIsDrawerOpen(true);
     setCartItems((prevCart) => {
       const pid = String(product.id); // stable local id for UI/cart identity
       const polarProductId = (product as any).polar_id || String(product.id); // original Polar ID for API calls
@@ -263,34 +207,6 @@ const HomePage: React.FC<HomePageProps> = ({
     setCartItems([]);
   };
 
-  const totalItems = cartItems.length;
-
-  // Function to reload products
-  const reloadProducts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await getActiveProducts();
-      if (response && response.success && Array.isArray(response.products)) {
-        const rows: any[] = response.products;
-        const filtered = rows.filter(
-          (p: any) => !(p.is_archived ?? p.is_archived)
-        );
-        const availableProducts = filtered.map(mapPolarProductToProduct);
-        setProducts(availableProducts);
-      } else {
-        setProducts([]);
-        setError('Error reloading products');
-      }
-    } catch (err) {
-      console.error('Error reloading products:', err);
-      setProducts([]);
-      setError('Error reloading products');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Show loading state
   if (loading) {
     return (
@@ -341,44 +257,36 @@ const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <>
-      <HomeHeader
-        searchValue={localSearchTerm}
-        onSearchChange={handleLocalSearchChange}
-        onReload={reloadProducts}
-        loading={loading}
-      />
+      <div
+        className={`transition-all duration-300 ${
+          isDrawerOpen ? 'md:pr-[22rem] lg:pr-[26rem] xl:pr-[28rem]' : ''
+        }`}
+      >
+        <HomeHeader
+          searchValue={localSearchTerm}
+          onSearchChange={handleLocalSearchChange}
+          onReload={reloadProducts}
+          loading={loading}
+        />
 
-      <div className="pt-6 px-4 transition-all duration-300">
-        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="mb-6">
-            <HomeStats
-              count={filteredProducts.length}
-              searchTerm={activeSearchTerm}
-            />
-          </div>
+        <div className="pt-6 px-4">
+          <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div className="mb-6">
+              <HomeStats
+                count={filteredProducts.length}
+                searchTerm={activeSearchTerm}
+              />
+            </div>
 
-          <div className="p-6 bg-white border rounded-lg border-gray-300 animate-scale-in">
-            <ProductGrid
-              products={filteredProducts}
-              onProductClick={handleProductClick}
-            />
+            <div className="p-6 bg-white border rounded-lg border-gray-300 animate-scale-in">
+              <ProductGrid
+                products={filteredProducts}
+                onProductClick={handleProductClick}
+              />
+            </div>
           </div>
         </div>
       </div>
-
-      <button
-        onClick={() => setIsDrawerOpen(true)}
-        className="fixed bottom-4 right-4 bg-[#F88612] text-white p-3 rounded-full shadow-lg hover:bg-[#d17110] transition-colors"
-      >
-        <div className="relative">
-          <ShoppingCart size={24} />
-          {totalItems > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              {totalItems}
-            </span>
-          )}
-        </div>
-      </button>
 
       <SalesDrawer
         isOpen={isDrawerOpen}

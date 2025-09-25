@@ -212,6 +212,18 @@ export const getActiveProducts = async (
   return apiRequest(`/products/${params}`);
 };
 
+export const getAllProductsIncludingArchived = async (
+  organizationId?: string
+): Promise<any> => {
+  const queryParts: string[] = [];
+  if (organizationId) {
+    queryParts.push(`organization_id=${encodeURIComponent(organizationId)}`);
+  }
+  queryParts.push('include_archived=true');
+  const query = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
+  return apiRequest(`/products/${query}`);
+};
+
 export const getProductsByUserId = async (
   userId: string,
   organizationId?: string
@@ -227,7 +239,7 @@ export const getProductByUserId = async (
   return apiRequest(`/products/user/${userId}/${productId}`);
 };
 
-export const getAllProducts = getActiveProducts;
+export const getAllProducts = getAllProductsIncludingArchived;
 
 /// Inventory
 export const inventoryAPI = {
