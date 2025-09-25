@@ -123,11 +123,16 @@ const InventoryPage: React.FC = () => {
     setError(null);
 
     try {
-      const response = await productsAPI.delete(deleteConfirmId);
+      const response = await productsAPI.update(deleteConfirmId, {
+        is_archived: true,
+      });
 
       if (response.success) {
+        const updatedProduct = mapPolarProductToProduct(response.product);
         setInventoryItems((prevItems) =>
-          prevItems.filter((item) => item.id !== deleteConfirmId)
+          prevItems.map((item) =>
+            item.id === deleteConfirmId ? (updatedProduct as Product) : item
+          )
         );
         setSelectedItems((prevSelected) =>
           prevSelected.filter((itemId) => itemId !== deleteConfirmId)
