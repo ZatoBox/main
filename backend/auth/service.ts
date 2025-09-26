@@ -4,6 +4,7 @@ import type { UserItem } from './models';
 import { hashPassword, verifyPassword } from '@/utils/password';
 import { uploadProfileImage } from '@/utils/cloudinary';
 import { getCurrentTimeWithTimezone } from '@/utils/timezone';
+import { createClient, createAdminClient } from '@/utils/supabase/server';
 
 const SECRET_KEY = process.env.SECRET_KEY;
 const ALGORITHM = 'HS256';
@@ -133,18 +134,73 @@ export class AuthService {
   ): Promise<{ user: UserItem; token: string }> {
     if (!email || !full_name)
       throw new Error('Email and fullname are required');
+    if (!password || password.trim() === '')
+      throw new Error('Password is required');
     const existing = await this.repo.findByEmail(email);
     if (existing) throw new Error('Email already exists');
-    const user_id = await this.repo.createUser({
-      full_name,
-      email,
-      phone,
-    });
-    const user = await this.repo.findByUserId(String(user_id));
+
+    const supabase = createAdminClient();
+    const { data: authData, error: authError } =
+      await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name,
+          phone: phone || undefined,
+        },
+      });
+    if (authError) {
+      const msg = authError.message || '';
+      if (/exists/i.test(msg) || /registered/i.test(msg)) {
+        throw new Error('Email already exists');
+      }
+      throw new Error(msg || 'Failed to create auth user');
+    }
+
+    const authUserId = authData?.user?.id;
+    if (!authUserId) {
+      throw new Error('Failed to retrieve auth user ID');
+    }
+
+    const existingById = await this.repo.findByUserId(authUserId);
+    if (existingById) {
+      // Update the existing user profile if the ID already exists (partial registration)
+      await this.repo.updateProfile(authUserId, {
+        full_name,
+        email,
+        phone,
+        role: 'user',
+      });
+      const user = existingById;
+      const userData: UserItem = { ...user };
+      delete (userData as any).password;
+      const token = this.createAccessToken(
+        { user_id: user.id },
+        expiresMinutes
+      );
+      return { user: userData, token };
+    }
+
+    try {
+      await this.repo.createUser({
+        id: authUserId,
+        full_name,
+        email,
+        phone,
+        role: 'user',
+      });
+    } catch (e: any) {
+      await supabase.auth.admin.deleteUser(authUserId).catch(() => undefined);
+      throw new Error(String(e?.message ?? 'Failed to persist user profile'));
+    }
+
+    const user = await this.repo.findByUserId(String(authUserId));
     if (!user) throw new Error('Registration error');
     const userData: UserItem = { ...user };
     delete (userData as any).password;
-    return { user: userData, token: '' };
+    const token = this.createAccessToken({ user_id: user.id }, expiresMinutes);
+    return { user: userData, token };
   }
 
   logout(token: string) {

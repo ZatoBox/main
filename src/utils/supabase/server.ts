@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,4 +23,11 @@ export const createClient = async () => {
       },
     },
   });
+};
+
+export const createAdminClient = () => {
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) throw new Error('Service role key not found');
+  return createSupabaseClient(supabaseUrl!, serviceKey);
 };
