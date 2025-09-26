@@ -59,7 +59,7 @@ export async function processImageFile(params: {
     { inlineData: { mimeType: file.type, data: base64Data } },
   ];
 
-  const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = client.getGenerativeModel({ model: 'gemini-2.0-flash-001' });
   const result = await model.generateContent(parts);
   const response = result.response;
 
