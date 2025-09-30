@@ -154,18 +154,54 @@ const OCRResultPage: React.FC = () => {
         return asString.trim() || fallback;
       };
       const sanitizeNumber = (value: unknown, fallback: string) => {
-        const textValue = sanitizeText(value, fallback).replace(
-          /[^0-9.,-]/g,
-          ''
-        );
-        const normalized = textValue.replace(',', '.');
-        const parsed = parseFloat(normalized);
+        const raw = sanitizeText(value, fallback)
+          .replace(/[^0-9.,-\s]/g, '')
+          .trim();
+        if (!raw) return fallback;
+        let s = raw.replace(/\s+/g, '');
+        const hasDot = s.includes('.');
+        const hasComma = s.includes(',');
+        if (hasDot && hasComma) {
+          if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+            s = s.replace(/\./g, '').replace(/,/g, '.');
+          } else {
+            s = s.replace(/,/g, '');
+          }
+        } else if (hasComma) {
+          s = s.replace(/,/g, '.');
+        }
+        const parsed = parseFloat(s);
         return Number.isFinite(parsed) ? parsed.toFixed(2) : fallback;
       };
       const sanitizeQuantity = (value: unknown) => {
-        const textValue = sanitizeText(value, '1').replace(/[^0-9]/g, '');
-        const parsed = parseInt(textValue, 10);
-        return Number.isFinite(parsed) && parsed > 0 ? String(parsed) : '1';
+        if (value === null || value === undefined) return '1';
+        if (typeof value === 'number') {
+          const n = Math.floor(value);
+          return Number.isFinite(n) && n > 0 ? String(n) : '1';
+        }
+        const raw = sanitizeText(value, '')
+          .replace(/[^0-9.,-\s]/g, '')
+          .trim();
+        if (!raw) return '1';
+        let s = raw.replace(/\s+/g, '');
+        const hasDot = s.includes('.');
+        const hasComma = s.includes(',');
+        if (hasDot && hasComma) {
+          if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+            s = s.replace(/\./g, '').replace(/,/g, '.');
+          } else {
+            s = s.replace(/,/g, '');
+          }
+        } else if (hasComma) {
+          s = s.replace(/,/g, '.');
+        }
+        const parsed = parseFloat(s);
+        if (Number.isFinite(parsed) && parsed > 0) {
+          return String(Math.floor(parsed));
+        }
+        const digits = s.replace(/[^0-9]/g, '');
+        const num = parseInt(digits, 10);
+        return Number.isFinite(num) && num > 0 ? String(num) : '1';
       };
 
       const candidateLineItems = [
@@ -176,20 +212,55 @@ const OCRResultPage: React.FC = () => {
       ].find((arr) => arr.length > 0) as Array<any> | undefined;
 
       const processedItems: OCRLineItem[] = (candidateLineItems || []).map(
-        (item: any) => ({
-          name: sanitizeText(item?.name, 'Unnamed Product'),
-          description: sanitizeText(
+        (item: any) => {
+          const name = sanitizeText(item?.name, 'Unnamed Product');
+          const description = sanitizeText(
             item?.description || item?.name,
             'No description'
-          ),
-          unit_price: sanitizeNumber(item?.unit_price ?? item?.price, '0.00'),
-          quantity: sanitizeQuantity(item?.quantity ?? item?.qty ?? '1'),
-          total_price: sanitizeNumber(
-            item?.total_price ?? item?.total ?? item?.price,
+          );
+          const unitPrice = sanitizeNumber(
+            item?.unit_price ?? item?.price,
             '0.00'
-          ),
-          category: sanitizeText(item?.category, 'General'),
-        })
+          );
+          const quantityStr = sanitizeQuantity(
+            item?.quantity ?? item?.qty ?? '1'
+          );
+          const quantityNum = parseInt(quantityStr, 10);
+          const unitPriceNum = parseFloat(unitPrice);
+          const providedTotal = sanitizeNumber(
+            item?.total_price ?? item?.total ?? item?.price,
+            ''
+          );
+          const computedTotal =
+            Number.isFinite(unitPriceNum) && Number.isFinite(quantityNum)
+              ? (unitPriceNum * quantityNum).toFixed(2)
+              : '0.00';
+          let finalTotal = computedTotal;
+          if (providedTotal) {
+            const providedNum = parseFloat(providedTotal);
+            const computedNum = parseFloat(computedTotal);
+            if (
+              Number.isFinite(providedNum) &&
+              Number.isFinite(computedNum) &&
+              Math.abs(providedNum - computedNum) <= 0.02
+            ) {
+              finalTotal = providedNum.toFixed(2);
+            } else if (
+              Number.isFinite(providedNum) &&
+              !Number.isFinite(computedNum)
+            ) {
+              finalTotal = providedNum.toFixed(2);
+            }
+          }
+          return {
+            name,
+            description,
+            unit_price: unitPrice,
+            quantity: quantityStr,
+            total_price: finalTotal,
+            category: sanitizeText(item?.category, 'General'),
+          } as OCRLineItem;
+        }
       );
 
       const metadataSource = (() => {
@@ -216,14 +287,42 @@ const OCRResultPage: React.FC = () => {
         return collected;
       })();
 
+      const subtotalFromItems = processedItems.reduce((acc, current) => {
+        const value = parseFloat(
+          typeof current.total_price === 'number'
+            ? String(current.total_price)
+            : current.total_price || '0'
+        );
+        return acc + (Number.isFinite(value) ? value : 0);
+      }, 0);
+      const subtotalFromModel = sanitizeNumber(metadataSource?.subtotal, '');
+      const ivaFromModel = sanitizeNumber(
+        metadataSource?.iva ?? metadataSource?.tax,
+        ''
+      );
+      const totalFromModel = sanitizeNumber(metadataSource?.total, '');
+      const subtotal = subtotalFromModel || subtotalFromItems.toFixed(2);
+      const iva = ivaFromModel;
+      let total = totalFromModel;
+      if (!total) {
+        const subtotalNum = parseFloat(subtotal);
+        const ivaNum = iva ? parseFloat(iva) : 0;
+        if (Number.isFinite(subtotalNum)) {
+          const sum = subtotalNum + (Number.isFinite(ivaNum) ? ivaNum : 0);
+          total = sum.toFixed(2);
+        } else {
+          total = '';
+        }
+      }
+
       const processedMetadata = {
         company_name: sanitizeText(metadataSource?.company_name, ''),
         ruc: sanitizeText(metadataSource?.ruc, ''),
         date: sanitizeText(metadataSource?.date, ''),
         invoice_number: sanitizeText(metadataSource?.invoice_number, ''),
-        subtotal: sanitizeNumber(metadataSource?.subtotal, ''),
-        iva: sanitizeNumber(metadataSource?.iva ?? metadataSource?.tax, ''),
-        total: sanitizeNumber(metadataSource?.total, ''),
+        subtotal,
+        iva,
+        total,
       };
 
       const normalized: OCRResponse = {
