@@ -384,26 +384,48 @@ async function updateProductStock(userId: string, checkoutData: any) {
       return;
     }
 
-    const product = checkoutData.product;
-    if (!product || !product.metadata) {
-      console.error('No product or metadata found in checkout data');
+    const cartProductId =
+      checkoutData.metadata?.cart_product_id ||
+      checkoutData.product?.metadata?.cart_product_id ||
+      checkoutData.product_id ||
+      checkoutData.product?.id;
+    if (!cartProductId) {
+      console.error('No cart product id found in checkout data');
       return;
     }
 
-    const cartItems = JSON.parse(product.metadata.items || '[]');
+    const cartProduct = await polarAPI.getProduct(polarApiKey, cartProductId);
+    const cartMetadata = cartProduct?.metadata || {};
+    const rawItems = cartMetadata.items;
+    if (!rawItems) {
+      console.error('No items metadata found for cart product:', cartProductId);
+      return;
+    }
+
+    const parsedItems = Array.isArray(rawItems)
+      ? rawItems
+      : (() => {
+          try {
+            return JSON.parse(rawItems);
+          } catch {
+            return [];
+          }
+        })();
+    const cartItems = Array.isArray(parsedItems) ? parsedItems : [];
 
     for (const item of cartItems) {
       if (!item.polarProductId) continue;
 
       const productId = item.polarProductId;
-      const quantityPurchased = item.quantity || 1;
+      const quantityPurchased = Number(item.quantity) || 1;
 
       try {
         const currentProduct = await polarAPI.getProduct(
           polarApiKey,
           productId
         );
-        const currentStock = currentProduct.metadata?.quantity || 0;
+        const currentQuantityRaw = currentProduct.metadata?.quantity;
+        const currentStock = Number(currentQuantityRaw) || 0;
         const newStock = Math.max(0, currentStock - quantityPurchased);
 
         await polarAPI.updateProduct(polarApiKey, productId, {
