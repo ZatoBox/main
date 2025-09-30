@@ -8,10 +8,8 @@ function verifyPolarSignature(payload: string, headers: any): boolean {
   const secret = process.env.POLAR_WEBHOOK_SECRET;
   if (!secret) return false;
 
-  // Standard Webhooks requiere base64 encoding del secret
   const encodedSecret = Buffer.from(secret).toString('base64');
 
-  // Headers correctos según Standard Webhooks
   const webhookId = headers.get('webhook-id');
   const webhookSignature = headers.get('webhook-signature');
   const webhookTimestamp = headers.get('webhook-timestamp');
@@ -20,16 +18,13 @@ function verifyPolarSignature(payload: string, headers: any): boolean {
     return false;
   }
 
-  // Crear el payload firmado según Standard Webhooks
   const signedPayload = `${webhookId}.${webhookTimestamp}.${payload}`;
 
-  // Generar firma esperada
   const expectedSignature = crypto
     .createHmac('sha256', Buffer.from(encodedSecret, 'base64'))
     .update(signedPayload)
     .digest('base64');
 
-  // Extraer firmas del header (formato: "v1,signature1 v1,signature2")
   const signatures = webhookSignature.split(' ');
 
   return signatures.some((sig: string) => {
