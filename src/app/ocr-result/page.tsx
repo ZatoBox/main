@@ -204,6 +204,22 @@ const OCRResultPage: React.FC = () => {
         return Number.isFinite(num) && num > 0 ? String(num) : '1';
       };
 
+      const buildAutoDescription = (
+        name: string,
+        quantity: string,
+        unitPrice: string
+      ) => {
+        const safeName = sanitizeText(name, 'Producto');
+        const qtyNum = parseInt(quantity, 10);
+        const qtyText = Number.isFinite(qtyNum)
+          ? `${qtyNum} unidad${qtyNum === 1 ? '' : 'es'}`
+          : `Cantidad ${quantity}`;
+        const priceText = unitPrice
+          ? `${unitPrice} por unidad`
+          : 'precio no especificado';
+        return `${safeName} - ${qtyText}, ${priceText}`;
+      };
+
       const candidateLineItems = [
         pickArray((ocrResult as any).line_items),
         pickArray((ocrResult as any).products),
@@ -214,9 +230,9 @@ const OCRResultPage: React.FC = () => {
       const processedItems: OCRLineItem[] = (candidateLineItems || []).map(
         (item: any) => {
           const name = sanitizeText(item?.name, 'Unnamed Product');
-          const description = sanitizeText(
-            item?.description || item?.name,
-            'No description'
+          let description = sanitizeText(
+            item?.description || item?.descripcion || item?.detalles,
+            ''
           );
           const unitPrice = sanitizeNumber(
             item?.unit_price ?? item?.price,
@@ -252,6 +268,10 @@ const OCRResultPage: React.FC = () => {
               finalTotal = providedNum.toFixed(2);
             }
           }
+          if (!description || description === name) {
+            description = buildAutoDescription(name, quantityStr, unitPrice);
+          }
+
           return {
             name,
             description,

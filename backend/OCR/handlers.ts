@@ -72,6 +72,22 @@ function parseQuantity(value: unknown): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
 }
 
+function buildAutoDescription(
+  name: string,
+  quantity: number,
+  unitPrice: string
+): string {
+  const safeName = cleanString(name, 'Producto');
+  const qtyText = Number.isFinite(quantity)
+    ? `${quantity} unidad${quantity === 1 ? '' : 'es'}`
+    : 'Cantidad no especificada';
+  const normalizedPrice = normalizeNumberString(unitPrice) || unitPrice;
+  const priceText = normalizedPrice
+    ? `${normalizedPrice} por unidad`
+    : 'precio no especificado';
+  return `${safeName} - ${qtyText}, ${priceText}`;
+}
+
 export async function processImageFile(params: {
   file: File;
   authHeader: string | null | undefined;
@@ -198,6 +214,16 @@ export async function processImageFile(params: {
       const finalTotalValue = parseFloat(finalTotal);
       subtotalAcc += Number.isFinite(finalTotalValue) ? finalTotalValue : 0;
 
+      const autoDescription = buildAutoDescription(
+        (record as any).name ??
+          (record as any).nombre ??
+          (record as any).product ??
+          (record as any).descripcion ??
+          'Unnamed Product',
+        qty,
+        unitNorm
+      );
+
       return {
         ...record,
         name: cleanString(
@@ -208,14 +234,19 @@ export async function processImageFile(params: {
             'Unnamed Product',
           'Unnamed Product'
         ),
-        description: cleanString(
-          (record as any).description ??
-            (record as any).descripcion ??
-            (record as any).name ??
-            (record as any).nombre ??
-            'No description',
-          'No description'
-        ),
+        description: (() => {
+          const manual = cleanString(
+            (record as any).description ??
+              (record as any).descripcion ??
+              (record as any).detalles ??
+              '',
+            ''
+          );
+          if (manual && manual.toLowerCase() !== 'no description') {
+            return manual;
+          }
+          return autoDescription;
+        })(),
         category: cleanString(
           (record as any).category ?? (record as any).categoria ?? 'General',
           'General'
