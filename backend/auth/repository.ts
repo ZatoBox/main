@@ -8,7 +8,19 @@ export class UserRepository {
 
   async findAllUsers(): Promise<UserItem[]> {
     const supabase = await createClient();
-    const { data } = await supabase.from(this.table).select('*');
+    const { data } = await supabase.from(this.table).select(`
+      id,
+      full_name,
+      email,
+      role,
+      phone,
+      profile_image,
+      polar_api_key,
+      polar_organization_id,
+      premium_up_to,
+      created_at,
+      last_updated
+    `);
     return (data || []) as UserItem[];
   }
 
@@ -17,7 +29,21 @@ export class UserRepository {
     const supabase = await createClient();
     const { data } = await supabase
       .from(this.table)
-      .select('*')
+      .select(
+        `
+        id,
+        full_name,
+        email,
+        role,
+        phone,
+        profile_image,
+        polar_api_key,
+        polar_organization_id,
+        premium_up_to,
+        created_at,
+        last_updated
+      `
+      )
       .eq('email', email)
       .limit(1);
     if (!data || data.length === 0) return null;
@@ -29,7 +55,21 @@ export class UserRepository {
     const supabase = await createClient();
     const { data } = await supabase
       .from(this.table)
-      .select('*')
+      .select(
+        `
+        id,
+        full_name,
+        email,
+        role,
+        phone,
+        profile_image,
+        polar_api_key,
+        polar_organization_id,
+        premium_up_to,
+        created_at,
+        last_updated
+      `
+      )
       .eq('id', user_id)
       .limit(1);
     if (!data || data.length === 0) return null;
@@ -40,6 +80,7 @@ export class UserRepository {
     const supabase = await createClient();
     const now = getCurrentTimeWithTimezone('UTC');
     const insertPayload = {
+      id: payload.id || undefined,
       full_name: payload.full_name,
       email: payload.email,
       phone: payload.phone || null,
@@ -76,7 +117,21 @@ export class UserRepository {
       .from(this.table)
       .update(updates)
       .eq('id', user_id)
-      .select()
+      .select(
+        `
+        id,
+        full_name,
+        email,
+        role,
+        phone,
+        profile_image,
+        polar_api_key,
+        polar_organization_id,
+        premium_up_to,
+        created_at,
+        last_updated
+      `
+      )
       .single();
     if (error) throw error;
     return data as UserItem;
@@ -100,7 +155,21 @@ export class UserRepository {
       .from(this.table)
       .delete()
       .eq('id', user_id)
-      .select()
+      .select(
+        `
+        id,
+        full_name,
+        email,
+        role,
+        phone,
+        profile_image,
+        polar_api_key,
+        polar_organization_id,
+        premium_up_to,
+        created_at,
+        last_updated
+      `
+      )
       .single();
     if (error) throw error;
     return (data as UserItem) || null;

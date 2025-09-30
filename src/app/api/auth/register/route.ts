@@ -13,11 +13,10 @@ export async function POST(req: NextRequest) {
       body.password || '',
       body.phone
     );
-    return NextResponse.json(res);
+    return NextResponse.json({ success: true, ...res });
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, message: String(err?.message ?? err) },
-      { status: 500 }
-    );
+    const message = String(err?.message ?? err);
+    const status = /exists/i.test(message) ? 409 : 500;
+    return NextResponse.json({ success: false, message }, { status });
   }
 }

@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const res = await service.login(body.email, body.password);
-    return NextResponse.json(res);
+    return NextResponse.json({ success: true, ...res });
   } catch (err: any) {
     const msg = String(err?.message ?? err);
     const status = /restringido|restricted|premium|admin/i.test(msg)
