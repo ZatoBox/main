@@ -203,6 +203,11 @@ export const productsAPI = {
     const params = organizationId ? `?organization_id=${organizationId}` : '';
     return apiRequest(`/products/${params}`);
   },
+  archiveBulk: (ids: string[]): Promise<any> =>
+    apiRequest('/products/archive', {
+      method: 'POST',
+      data: { ids },
+    }),
 };
 
 export const getActiveProducts = async (
