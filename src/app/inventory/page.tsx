@@ -15,6 +15,7 @@ import InventoryFilters from '@/components/inventory/InventoryFilters';
 import InventoryGrid from '@/components/inventory/InventoryGrid';
 import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
 import { mapPolarProductToProduct } from '@/utils/polar.utils';
+import { useToast } from '@/hooks/use-toast';
 
 const InventoryPage: React.FC = () => {
   const router = useRouter();
@@ -32,6 +33,8 @@ const InventoryPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isArchivingSelected, setIsArchivingSelected] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -86,19 +89,21 @@ const InventoryPage: React.FC = () => {
     };
   }, []);
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = (ids: string[], checked: boolean) => {
     if (checked) {
-      setSelectedItems(inventoryItems.map((item) => item.id.toString()));
+      setSelectedItems((prev) => Array.from(new Set([...prev, ...ids])));
     } else {
-      setSelectedItems([]);
+      setSelectedItems((prev) =>
+        prev.filter((itemId) => !ids.includes(itemId))
+      );
     }
   };
 
   const handleSelectItem = (id: string, checked: boolean) => {
     if (checked) {
-      setSelectedItems([...selectedItems, id]);
+      setSelectedItems((prev) => (prev.includes(id) ? prev : [...prev, id]));
     } else {
-      setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
+      setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
     }
   };
 
@@ -155,6 +160,69 @@ const InventoryPage: React.FC = () => {
   const handleDeleteCancel = () => {
     setDeleteConfirmId(null);
     setIsDeleting(false);
+  };
+
+  const handleArchiveSelected = async () => {
+    if (selectedItems.length === 0 || isArchivingSelected) {
+      return;
+    }
+
+    setIsArchivingSelected(true);
+    try {
+      const response = await productsAPI.archiveBulk(selectedItems);
+      const successfulIds = Array.isArray(response?.results)
+        ? response.results
+            .filter((r: any) => r && typeof r.id === 'string')
+            .map((r: any) => r.id)
+        : [];
+      const updatedMap = new Map<string, Product>();
+      if (Array.isArray(response?.results)) {
+        response.results.forEach((r: any) => {
+          if (r && typeof r.id === 'string' && r.product) {
+            const mapped = mapPolarProductToProduct(r.product) as Product;
+            updatedMap.set(r.id, mapped);
+          }
+        });
+      }
+      if (updatedMap.size > 0) {
+        setInventoryItems((prev) =>
+          prev.map((item) => {
+            const next = updatedMap.get(item.id);
+            return next ? next : item;
+          })
+        );
+      }
+      if (successfulIds.length > 0) {
+        toast({
+          title: 'Productos archivados',
+          description: `${successfulIds.length} productos archivados correctamente.`,
+        });
+      }
+      const errorsCount = Array.isArray(response?.errors)
+        ? response.errors.length
+        : 0;
+      if (errorsCount > 0) {
+        toast({
+          title: 'Algunos productos no se archivaron',
+          description: 'Intenta de nuevo más tarde.',
+          variant: 'destructive',
+        });
+      }
+      setSelectedItems((prev) =>
+        prev.filter((id) => !successfulIds.includes(id))
+      );
+    } catch (err) {
+      toast({
+        title: 'Error al archivar',
+        description:
+          err instanceof Error
+            ? err.message
+            : 'No se pudieron archivar los productos seleccionados.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsArchivingSelected(false);
+    }
   };
 
   const categoryIdMap: Record<string, string> = Object.fromEntries(
@@ -241,6 +309,9 @@ const InventoryPage: React.FC = () => {
       <InventoryHeader
         onBack={() => router.push('/')}
         onCreate={() => router.push('/new-product')}
+        selectedCount={selectedItems.length}
+        onArchiveSelected={handleArchiveSelected}
+        archivingSelected={isArchivingSelected}
       />
 
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -294,6 +365,7 @@ const InventoryPage: React.FC = () => {
             onSelectItem={handleSelectItem}
             onEditProduct={handleEditProduct}
             onDeleteClick={handleDeleteClick}
+            onSelectAll={handleSelectAll}
           />
 
           {filteredItems.length === 0 && (
