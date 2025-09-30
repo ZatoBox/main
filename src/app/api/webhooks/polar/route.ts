@@ -49,7 +49,7 @@ function verifyPolarSignature(payload: string, headers: any): boolean {
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.text();
-    const signature = request.headers.get('x-polar-signature') || '';
+    const signature = request.headers.get('webhook-signature') || '';
     const url = new URL(request.url);
     const userId = url.searchParams.get('user_id');
 
@@ -73,30 +73,19 @@ export async function POST(request: NextRequest) {
       status: eventData.status,
     });
 
-    if (
-      !Array.isArray([
-        'subscription.created',
-        'subscription.updated',
-        'subscription.active',
-        'subscription.canceled',
-        'subscription.revoked',
-        'checkout.created',
-        'checkout.updated',
-        'order.created',
-        'order.paid',
-      ]) ||
-      ![
-        'subscription.created',
-        'subscription.updated',
-        'subscription.active',
-        'subscription.canceled',
-        'subscription.revoked',
-        'checkout.created',
-        'checkout.updated',
-        'order.created',
-        'order.paid',
-      ].includes(eventType)
-    ) {
+    const validEvents = [
+      'subscription.created',
+      'subscription.updated',
+      'subscription.active',
+      'subscription.canceled',
+      'subscription.revoked',
+      'checkout.created',
+      'checkout.updated',
+      'order.created',
+      'order.paid',
+    ];
+
+    if (!validEvents.includes(eventType)) {
       return NextResponse.json({ status: 'ignored' });
     }
 
@@ -226,14 +215,6 @@ async function handleCheckoutEvent(
         `Checkout succeeded${userId ? ` for user ${userId}` : ''}:`,
         eventData.id
       );
-
-      if (userId) {
-        await updateProductStock(userId, eventData);
-        await deleteCartProduct(userId, eventData);
-        await promoteUserIfSubscription(userId, eventData);
-      } else if (email) {
-        await promoteUserByEmailIfSubscription(email, eventData);
-      }
     } else if (status === 'failed') {
       console.log(
         `Checkout failed${userId ? ` for user ${userId}` : ''}:`,
@@ -276,6 +257,8 @@ async function handleOrderEvent(
         console.log(
           `Updated user profile for successful order: ${eventData.id}`
         );
+        await updateProductStock(userId, eventData);
+        await deleteCartProduct(userId, eventData);
         await promoteUserIfSubscription(userId, eventData);
       } catch (error) {
         console.error('Failed to update user profile:', error);
@@ -318,6 +301,44 @@ async function promoteUserByEmailIfSubscription(email: string, payload: any) {
   }
 }
 
+function extractCartProductId(
+  payload: any,
+  includeFallback: boolean = true
+): string | null {
+  const candidates = [
+    payload?.metadata?.cart_product_id,
+    payload?.metadata?.cartProductId,
+    payload?.product?.metadata?.cart_product_id,
+    payload?.product?.metadata?.cartProductId,
+    payload?.checkout?.metadata?.cart_product_id,
+    payload?.checkout?.metadata?.cartProductId,
+    payload?.checkout?.product?.metadata?.cart_product_id,
+    payload?.checkout?.product?.metadata?.cartProductId,
+    payload?.cart_product_id,
+    payload?.cartProductId,
+  ];
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  if (!includeFallback) {
+    return null;
+  }
+  const fallbackCandidates = [
+    payload?.checkout?.product_id,
+    payload?.checkout?.product?.id,
+    payload?.product_id,
+    payload?.product?.id,
+  ];
+  for (const value of fallbackCandidates) {
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  return null;
+}
+
 async function deleteCartProduct(userId: string, checkoutData: any) {
   try {
     const authService = new AuthService();
@@ -337,17 +358,14 @@ async function deleteCartProduct(userId: string, checkoutData: any) {
           metadata: checkoutData.metadata,
           product: checkoutData.product?.id,
           productMetadata: checkoutData.product?.metadata,
+          checkoutMetadata: checkoutData.checkout?.metadata,
         },
         null,
         2
       )
     );
 
-    // Obtener el ID del producto temporal del carrito desde los metadatos del checkout
-    const cartProductId =
-      checkoutData.metadata?.cart_product_id ||
-      checkoutData.product?.id ||
-      checkoutData.product?.metadata?.cart_product_id;
+    const cartProductId = extractCartProductId(checkoutData, false);
 
     if (cartProductId) {
       try {
@@ -379,11 +397,7 @@ async function updateProductStock(userId: string, checkoutData: any) {
       return;
     }
 
-    const cartProductId =
-      checkoutData.metadata?.cart_product_id ||
-      checkoutData.product?.metadata?.cart_product_id ||
-      checkoutData.product_id ||
-      checkoutData.product?.id;
+    const cartProductId = extractCartProductId(checkoutData);
     if (!cartProductId) {
       console.error('No cart product id found in checkout data');
       return;
