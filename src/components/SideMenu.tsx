@@ -337,15 +337,6 @@ const SideMenu: React.FC = () => {
                   <span className="font-medium">Feedback</span>
                 </button>
               </div>
-              <div className="mb-2 flex justify-center">
-                <button
-                  onClick={() => router.push('/upgrade')}
-                  className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]"
-                >
-                  <Sparkles size={16} className="text-current" />
-                  <span className="font-medium">Upgrade</span>
-                </button>
-              </div>
             </div>
 
             <div className="px-4 py-4 border-t border-[#CBD5E1]">
@@ -400,15 +391,6 @@ const SideMenu: React.FC = () => {
                 >
                   <Sparkles size={16} className="text-current" />
                   <span className="font-medium">Feedback</span>
-                </button>
-              </div>
-              <div className="mb-2 flex justify-center">
-                <button
-                  onClick={() => router.push('/upgrade')}
-                  className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]"
-                >
-                  <Sparkles size={16} className="text-current" />
-                  <span className="font-medium">Upgrade</span>
                 </button>
               </div>
             </div>
