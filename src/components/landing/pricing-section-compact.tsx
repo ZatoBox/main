@@ -74,7 +74,7 @@ export function PricingSectionCompact() {
     <section className="flex flex-col items-center justify-start w-full px-5 py-8 my-0 overflow-hidden md:py-14">
       <div className="self-start mb-4">
         <button
-          onClick={() => router.push('/home')}
+          onClick={() => router.push('/login')}
           className="p-2 rounded hover:bg-gray-100 flex items-center gap-1"
           aria-label="Go back to home"
         >
