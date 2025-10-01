@@ -61,6 +61,8 @@ const HomePage: React.FC<HomePageProps> = ({
         );
         const availableProducts = filtered.map(mapPolarProductToProduct);
         setProducts(availableProducts);
+      } else if (response && response.success) {
+        setProducts([]);
       } else {
         setProducts([]);
         setError('Error reloading products');

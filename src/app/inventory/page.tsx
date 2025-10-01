@@ -56,6 +56,9 @@ const InventoryPage: React.FC = () => {
           const availableProducts = rows.map(mapPolarProductToProduct);
           setInventoryItems(availableProducts);
           setError(null);
+        } else if (response && response.success) {
+          setInventoryItems([]);
+          setError(null);
         } else {
           setInventoryItems([]);
           setError('Error loading inventory');
