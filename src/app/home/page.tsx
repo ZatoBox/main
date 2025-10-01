@@ -61,16 +61,21 @@ const HomePage: React.FC<HomePageProps> = ({
         );
         const availableProducts = filtered.map(mapPolarProductToProduct);
         setProducts(availableProducts);
-      } else if (response && response.success) {
+      } else if (response && response.success === false) {
+        setProducts([]);
+        setError(response.message || 'Error reloading products');
+      } else {
+        setProducts([]);
+      }
+    } catch (err: any) {
+      const errorMessage = err?.message || '';
+      if (errorMessage.toLowerCase().includes('api key')) {
         setProducts([]);
       } else {
+        console.error('Error reloading products:', err);
         setProducts([]);
         setError('Error reloading products');
       }
-    } catch (err) {
-      console.error('Error reloading products:', err);
-      setProducts([]);
-      setError('Error reloading products');
     } finally {
       setLoading(false);
     }
