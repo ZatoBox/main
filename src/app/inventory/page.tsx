@@ -56,16 +56,23 @@ const InventoryPage: React.FC = () => {
           const availableProducts = rows.map(mapPolarProductToProduct);
           setInventoryItems(availableProducts);
           setError(null);
-        } else if (response && response.success) {
+        } else if (response && response.success === false) {
+          setInventoryItems([]);
+          setError(response.message || 'Error loading inventory');
+        } else {
+          setInventoryItems([]);
+          setError(null);
+        }
+      } catch (err: any) {
+        const errorMessage = err?.message || '';
+        if (errorMessage.toLowerCase().includes('api key')) {
           setInventoryItems([]);
           setError(null);
         } else {
+          console.error('Error loading inventory:', err);
           setInventoryItems([]);
           setError('Error loading inventory');
         }
-      } catch (err) {
-        setInventoryItems([]);
-        setError('Error loading inventory');
       } finally {
         setLoading(false);
       }
