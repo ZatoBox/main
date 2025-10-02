@@ -22,7 +22,10 @@ export async function GET(req: NextRequest) {
         }
       );
       const filteredProducts = products.filter(
-        (product) => !product.name || !product.name.startsWith('Order #')
+        (product) =>
+          !product.name ||
+          (!product.name.startsWith('Order #') &&
+            !product.name.startsWith('Cash Order #'))
       );
       return NextResponse.json({ success: true, products: filteredProducts });
     }

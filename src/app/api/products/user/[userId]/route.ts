@@ -50,7 +50,10 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       includeArchived,
     });
     const filteredProducts = products.filter(
-      (product) => !product.name || !product.name.startsWith('Order #')
+      (product) =>
+        !product.name ||
+        (!product.name.startsWith('Order #') &&
+          !product.name.startsWith('Cash Order #'))
     );
 
     return NextResponse.json({

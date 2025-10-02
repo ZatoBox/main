@@ -140,35 +140,64 @@ const HomePage: React.FC<HomePageProps> = ({
     setIsDrawerOpen(false);
   };
 
-  const handleNavigateToPayment = async (total: number) => {
+  const handleNavigateToPayment = async (
+    total: number,
+    paymentMethod: 'cash' | 'zatoconnect'
+  ) => {
     if (!user?.id) {
       alert('Please log in to checkout');
       return;
     }
 
     try {
-      const { checkoutPolarCart } = await import('@/services/payments-service');
+      const items = cartItems.map((item) => ({
+        polarProductId: item.polarProductId,
+        priceId: item.priceId,
+        quantity: item.quantity,
+        productData: item.productData,
+      }));
 
-      const cartData = {
-        userId: user.id,
-        items: cartItems.map((item) => ({
-          polarProductId: item.polarProductId,
-          priceId: item.priceId,
-          quantity: item.quantity,
-          productData: item.productData,
-        })),
-        successUrl: `${window.location.origin}/success`,
-        metadata: {
-          total_amount: total.toString(),
-        },
+      const metadata = {
+        total_amount: total.toString(),
       };
 
-      const response = await checkoutPolarCart(cartData);
+      if (paymentMethod === 'cash') {
+        const { checkoutCashOrder } = await import(
+          '@/services/cash-payments.service'
+        );
 
-      if (response.success && response.checkout_url) {
-        window.location.href = response.checkout_url;
+        const cashData = {
+          userId: user.id,
+          items,
+          metadata,
+        };
+
+        const response = await checkoutCashOrder(cashData);
+
+        if (response.success && response.checkout_url) {
+          window.location.href = response.checkout_url;
+        } else {
+          throw new Error(response.message || 'Failed to create cash order');
+        }
       } else {
-        throw new Error(response.message || 'Failed to create checkout');
+        const { checkoutPolarCart } = await import(
+          '@/services/payments-service'
+        );
+
+        const cartData = {
+          userId: user.id,
+          items,
+          successUrl: `${window.location.origin}/success`,
+          metadata,
+        };
+
+        const response = await checkoutPolarCart(cartData);
+
+        if (response.success && response.checkout_url) {
+          window.location.href = response.checkout_url;
+        } else {
+          throw new Error(response.message || 'Failed to create checkout');
+        }
       }
     } catch (error) {
       console.error('Checkout error:', error);

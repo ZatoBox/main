@@ -1,7 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
+
+type PaymentMethod = 'cash' | 'zatoconnect';
 
 interface SalesItem {
   id: string | number;
@@ -18,7 +20,7 @@ interface SalesItem {
 interface SalesDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigateToPayment: (total: number) => void;
+  onNavigateToPayment: (total: number, paymentMethod: PaymentMethod) => void;
   cartItems: SalesItem[];
   updateCartItemQuantity: (id: string | number, change: number) => void;
   removeCartItem: (id: string | number) => void;
@@ -34,6 +36,9 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
   removeCartItem,
   clearCart,
 }) => {
+  const [paymentMethod, setPaymentMethod] =
+    useState<PaymentMethod>('zatoconnect');
+
   const subtotal = cartItems.reduce((sum, item) => {
     const itemTotal = (item.quantity || 0) * (item.price || 0);
     return sum + (isNaN(itemTotal) ? 0 : itemTotal);
@@ -42,7 +47,7 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
 
   const handlePaymentClick = () => {
     const validCartAmount = isNaN(cartAmount) ? 0 : cartAmount;
-    onNavigateToPayment(validCartAmount);
+    onNavigateToPayment(validCartAmount, paymentMethod);
   };
 
   return (
@@ -144,7 +149,6 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
           {/* Summary */}
           {cartItems.length > 0 && (
             <div className="mt-6 space-y-4 animate-fade-in">
-              {/* Subtotal */}
               <div className="p-4 border rounded-lg bg-gray-50 border-[#CBD5E1]">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
@@ -161,15 +165,43 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                 </div>
               </div>
 
-              {/* Payment Button */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-black">
+                  Payment Method
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPaymentMethod('cash')}
+                    className={`flex-1 py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
+                      paymentMethod === 'cash'
+                        ? 'bg-green-50 border-green-500 text-green-700'
+                        : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    Cash
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod('zatoconnect')}
+                    className={`flex-1 py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
+                      paymentMethod === 'zatoconnect'
+                        ? 'bg-orange-50 border-orange-500 text-orange-700'
+                        : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    ZatoConnect
+                  </button>
+                </div>
+              </div>
+
               <button
                 onClick={handlePaymentClick}
                 className="w-full py-4 font-medium text-white transition-all duration-300 bg-[#F88612] hover:bg-[#d17110] rounded-lg"
               >
-                Proceed to Payment
+                {paymentMethod === 'cash'
+                  ? 'Create Cash Order'
+                  : 'Proceed to Payment'}
               </button>
 
-              {/* Clear Cart */}
               <button
                 onClick={clearCart}
                 className="w-full py-3 font-medium transition-all duration-300 bg-gray-100 rounded-lg hover:bg-gray-200 text-black"
