@@ -84,7 +84,7 @@ const PolarSetupPrompt: React.FC<PolarSetupPromptProps> = ({
           <p className="text-sm text-gray-500">
             Aprende cómo configurar Polar en nuestra{' '}
             <a
-              href=""
+              href="https://www.youtube.com/watch?v=u_FrN7xLQn0"
               target="_blank"
               rel="noopener noreferrer"
               className="text-orange-500 hover:text-orange-600 font-medium"
