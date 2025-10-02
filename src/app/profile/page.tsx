@@ -580,7 +580,7 @@ const ProfilePage: React.FC = () => {
                         </p>
                       </div>
                       <a
-                        href=""
+                        href="https://www.youtube.com/watch?v=u_FrN7xLQn0"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-2 px-4 py-2 bg-orange-50 text-orange-600 hover:bg-orange-100 text-sm font-medium rounded-lg transition-colors"
