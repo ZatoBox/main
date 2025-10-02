@@ -67,7 +67,7 @@ const InventoryPage: React.FC = () => {
         const errorMessage = err?.message || '';
         if (errorMessage.toLowerCase().includes('api key')) {
           setInventoryItems([]);
-          setError(null);
+          setError('polar_not_configured');
         } else {
           console.error('Error loading inventory:', err);
           setInventoryItems([]);
@@ -290,6 +290,25 @@ const InventoryPage: React.FC = () => {
           <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
           <p className="text-text-secondary">Loading products...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (error === 'polar_not_configured') {
+    const PolarSetupPrompt = require('@/components/PolarSetupPrompt').default;
+    return (
+      <div className="min-h-screen bg-bg-main">
+        <InventoryHeader
+          onBack={() => router.push('/')}
+          onCreate={() => router.push('/new-product')}
+          selectedCount={selectedItems.length}
+          onArchiveSelected={handleArchiveSelected}
+          archivingSelected={isArchivingSelected}
+        />
+        <PolarSetupPrompt
+          title="Inventory Setup Required"
+          subtitle="Configure your Polar API credentials to manage your inventory and track product stock levels."
+        />
       </div>
     );
   }

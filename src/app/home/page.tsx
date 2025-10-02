@@ -71,6 +71,7 @@ const HomePage: React.FC<HomePageProps> = ({
       const errorMessage = err?.message || '';
       if (errorMessage.toLowerCase().includes('api key')) {
         setProducts([]);
+        setError('polar_not_configured');
       } else {
         console.error('Error reloading products:', err);
         setProducts([]);
@@ -79,9 +80,7 @@ const HomePage: React.FC<HomePageProps> = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  // Fetch products from backend
+  }; // Fetch products from backend
   useEffect(() => {
     void reloadProducts();
   }, []);
@@ -257,7 +256,24 @@ const HomePage: React.FC<HomePageProps> = ({
     );
   }
 
-  // Show error state
+  if (error === 'polar_not_configured') {
+    const PolarSetupPrompt = require('@/components/PolarSetupPrompt').default;
+    return (
+      <div className="min-h-screen pt-16 bg-bg-main">
+        <HomeHeader
+          searchValue={localSearchTerm}
+          onSearchChange={handleLocalSearchChange}
+          onReload={reloadProducts}
+          loading={loading}
+        />
+        <PolarSetupPrompt
+          title="Bienvenido a ZatoBox!"
+          subtitle="Para comenzar a gestionar tus productos e inventario, por favor configura tus credenciales de API de Polar en la configuración de tu perfil."
+        />
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
