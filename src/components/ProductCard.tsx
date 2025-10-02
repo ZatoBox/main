@@ -51,6 +51,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         : 'Free';
 
       const stock = product.metadata?.quantity || 0;
+      const category = product.metadata?.category || null;
+      const categoryNames = category ? [category] : [];
 
       return {
         name: product.name,
@@ -61,7 +63,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
           : 'one-time',
         stock: stock,
         sku: product.id.slice(-8),
-        categoryNames: [],
+        categoryNames,
         isArchived: product.is_archived,
         isRecurring: product.is_recurring,
         recurringInterval: product.recurring_interval,
@@ -118,18 +120,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       onClick={() => onClick(product)}
       onMouseEnter={startSlide}
       onMouseLeave={stopSlide}
-      className='relative overflow-hidden transition-all duration-300 ease-in-out transform bg-white border rounded-lg cursor-pointer group border-gray-300 hover:scale-105 hover:shadow-lg hover:border-gray-300 animate-fade-in'
+      className="relative overflow-hidden transition-all duration-300 ease-in-out transform bg-white border rounded-lg cursor-pointer group border-gray-300 hover:scale-105 hover:shadow-lg hover:border-gray-300 animate-fade-in"
     >
-      <div className='absolute z-10 top-3 right-3 flex gap-2'>
+      <div className="absolute z-10 top-3 right-3 flex gap-2">
         {productInfo.isArchived && (
-          <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800'>
-            <Archive className='w-3 h-3 mr-1' />
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            <Archive className="w-3 h-3 mr-1" />
             Archived
           </span>
         )}
         {productInfo.isRecurring && (
-          <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800'>
-            <Repeat className='w-3 h-3 mr-1' />
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <Repeat className="w-3 h-3 mr-1" />
             {productInfo.recurringInterval}
           </span>
         )}
@@ -157,21 +159,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         )}
       </div>
 
-      <div className='relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100'>
+      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100">
         {images.length > 0 ? (
-          <div className='w-full h-full overflow-hidden'>
+          <div className="w-full h-full overflow-hidden">
             <div
-              className='flex w-full h-full transition-transform duration-700 ease-in-out'
+              className="flex w-full h-full transition-transform duration-700 ease-in-out"
               style={{ transform: `translateX(-${index * 100}%)` }}
             >
               {images.map((src, i) => (
-                <div key={i} className='w-full h-48 shrink-0 relative'>
+                <div key={i} className="w-full h-48 shrink-0 relative">
                   <img
                     src={src || fallbackImg}
                     alt={productInfo.name}
-                    loading='lazy'
+                    loading="lazy"
                     draggable={false}
-                    className='object-cover w-full h-full select-none'
+                    className="object-cover w-full h-full select-none"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = fallbackImg;
                     }}
@@ -180,7 +182,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
               ))}
             </div>
             {images.length > 1 && (
-              <div className='absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1'>
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
                 {images.map((_, i) => (
                   <div
                     key={i}
@@ -193,52 +195,52 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
             )}
           </div>
         ) : (
-          <div className='absolute inset-0 flex items-center justify-center'>
-            <div className='text-gray-400'>
-              <Package className='w-16 h-16' />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-gray-400">
+              <Package className="w-16 h-16" />
             </div>
           </div>
         )}
-        <div className='absolute inset-0 transition-all duration-300 bg-black/0 group-hover:bg-black/10' />
+        <div className="absolute inset-0 transition-all duration-300 bg-black/0 group-hover:bg-black/10" />
       </div>
 
-      <div className='p-4 space-y-3'>
-        <div className='flex items-center justify-between'>
+      <div className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
           {Array.isArray(productInfo.categoryNames) &&
           productInfo.categoryNames.length > 0 ? (
-            <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
+            <span className="text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900">
               {productInfo.categoryNames.join(', ')}
             </span>
           ) : (
-            <span className='text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900'>
+            <span className="text-xs font-medium tracking-wide uppercase transition-colors duration-300 text-zatobox-900 group-hover:text-zatobox-900">
               Product
             </span>
           )}
         </div>
 
-        <h3 className='text-lg font-semibold transition-colors duration-300 text-black/75 group-hover:text-black line-clamp-2'>
+        <h3 className="text-lg font-semibold transition-colors duration-300 text-black/75 group-hover:text-black line-clamp-2">
           {productInfo.name}
         </h3>
 
         {productInfo.description && (
-          <p className='text-sm transition-colors duration-300 text-gray-500 line-clamp-2 group-hover:text-gray-500'>
+          <p className="text-sm transition-colors duration-300 text-gray-500 line-clamp-2 group-hover:text-gray-500">
             {productInfo.description}
           </p>
         )}
 
-        <div className='flex items-center justify-between pt-2'>
-          <div className='flex flex-col'>
-            <span className='text-2xl font-bold transition-colors duration-300 text-black group-hover:text-zatobox-500'>
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex flex-col">
+            <span className="text-2xl font-bold transition-colors duration-300 text-black group-hover:text-zatobox-500">
               {productInfo.price}
             </span>
-            <span className='text-xs transition-colors duration-300 text-gray-500 group-hover:text-gray-500'>
+            <span className="text-xs transition-colors duration-300 text-gray-500 group-hover:text-gray-500">
               {productInfo.unit}
             </span>
           </div>
 
           {images.length > 0 && (
-            <div className='text-right'>
-              <span className='text-xs text-gray-500'>
+            <div className="text-right">
+              <span className="text-xs text-gray-500">
                 {images.length} image{images.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -246,7 +248,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         </div>
       </div>
 
-      <div className='absolute inset-0 transition-all duration-300 border-2 border-transparent rounded-lg pointer-events-none group-hover:border-zatobox-500/20'></div>
+      <div className="absolute inset-0 transition-all duration-300 border-2 border-transparent rounded-lg pointer-events-none group-hover:border-zatobox-500/20"></div>
     </div>
   );
 };

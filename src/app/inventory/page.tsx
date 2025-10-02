@@ -262,10 +262,21 @@ const InventoryPage: React.FC = () => {
     const names = ids
       .map((id: string) => categoryIdMap[id])
       .filter(Boolean) as string[];
+
+    const polarMetadata = (p as any).metadata;
+    const polarCategory = polarMetadata?.category;
+
+    let categoryDisplay = 'Uncategorized';
+    if (polarCategory && typeof polarCategory === 'string') {
+      categoryDisplay = polarCategory;
+    } else if (names.length > 0) {
+      categoryDisplay = names.join(', ');
+    }
+
     return {
       id: p.id,
       name: p.name,
-      category: names.length === 0 ? 'Uncategorized' : names.join(', '),
+      category: categoryDisplay,
       status: p.status ?? 'inactive',
       stock: p.stock,
       price: p.price,
