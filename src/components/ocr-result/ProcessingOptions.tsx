@@ -13,7 +13,7 @@ const ProcessingOptions: React.FC<Props> = ({ options, onChange }) => {
   return (
     <div className='p-4 mt-4'>
       <h4 className='mb-3 text-sm font-medium text-gray-900'>
-        Processing Options
+        Opciones de procesado
       </h4>
     </div>
   );

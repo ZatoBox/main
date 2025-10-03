@@ -22,7 +22,7 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
               <IoMdArrowRoundBack size={20} className='text-[#000000]' />
             </button>
             <h1 className='text-xl font-bold text-[#000000]'>
-              New Product
+              Nuevo Producto
             </h1>
           </div>
 
@@ -44,7 +44,7 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
               ) : (
                 <>
                   <FaRegFolder size={16} className='self-center' />
-                  <span>Save</span>
+                  <span>Guardar</span>
                 </>
               )}
             </button>

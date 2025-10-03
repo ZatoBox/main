@@ -24,7 +24,7 @@ const ProductForm: React.FC<Props> = ({ formData, onChange }) => {
       <div className='p-6 space-y-4 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
         <div>
           <label className='block mb-2 text-sm font-medium text-[#000000]'>
-            Product Name *
+            Nombre del Producto *
           </label>
           <input
             type='text'
@@ -37,7 +37,7 @@ const ProductForm: React.FC<Props> = ({ formData, onChange }) => {
         </div>
         <div>
           <label className='block mb-2 text-sm font-medium text-[#000000]'>
-            Description
+            Descripción
           </label>
           <textarea
             value={formData.description}
@@ -51,7 +51,7 @@ const ProductForm: React.FC<Props> = ({ formData, onChange }) => {
 
       <div className='p-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
         <label className='block mb-2 text-sm font-medium text-[#000000]'>
-          Locations
+          Ubicaciones
         </label>
         <input
           type='text'

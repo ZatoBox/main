@@ -20,10 +20,10 @@ const SuccessContent: React.FC = () => {
         <div className='mb-6'>
           <CheckCircle className='w-16 h-16 text-green-500 mx-auto mb-4' />
           <h1 className='text-2xl font-bold text-gray-900 mb-2'>
-            Payment Successful!
+            ¡Pago Exitoso!
           </h1>
           <p className='text-gray-600'>
-            Thank you for your purchase. Your order has been confirmed.
+            Gracias por su compra. Su pedido ha sido confirmado.
           </p>
         </div>
 
@@ -41,7 +41,7 @@ const SuccessContent: React.FC = () => {
             onClick={() => router.push('/home')}
             className='w-full bg-[#F88612] hover:bg-[#D9740F] text-white font-semibold py-3 px-6 rounded-lg transition-colors'
           >
-            Continue Shopping
+            Continuar comprando
           </button>
 
           <button
@@ -49,7 +49,7 @@ const SuccessContent: React.FC = () => {
             className='w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2'
           >
             <ArrowLeft className='w-4 h-4' />
-            <span>View Inventory</span>
+            <span>Ver Inventario</span>
           </button>
         </div>
       </div>

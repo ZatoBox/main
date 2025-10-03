@@ -292,7 +292,7 @@ const ProfilePage: React.FC = () => {
                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                   />
                 </svg>
-                <span>Edit</span>
+                <span>Editar</span>
               </button>
             )}
           </div>
@@ -331,13 +331,13 @@ const ProfilePage: React.FC = () => {
                   onClick={() => cancelEditing(field)}
                   className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
                 >
-                  Cancel
+                  Cancelar
                 </button>
                 <button
                   onClick={handleSave}
                   className="px-4 py-2 bg-orange-500 text-white text-sm rounded-md hover:bg-orange-600 transition-colors"
                 >
-                  Save
+                  Guardar
                 </button>
               </div>
             </div>
@@ -348,7 +348,7 @@ const ProfilePage: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <span className="font-mono text-gray-500">•••••••</span>
                     <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                      Configured
+                      Configurado
                     </span>
                   </div>
                 ) : (
@@ -366,12 +366,12 @@ const ProfilePage: React.FC = () => {
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
                       />
                     </svg>
-                    <span>Not configured</span>
+                    <span>No está configurado</span>
                   </span>
                 )
               ) : (
                 currentValue || (
-                  <span className="text-gray-400 italic">Not provided</span>
+                  <span className="text-gray-400 italic">No proporcionado</span>
                 )
               )}
             </div>
@@ -444,7 +444,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-red-800">
-                        Error updating profile
+                        Error editando perfil
                       </h3>
                       <p className="text-sm text-red-700 mt-1">{error}</p>
                     </div>
@@ -472,7 +472,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-green-800">
-                        Success!
+                        ¡Éxito!
                       </h3>
                       <p className="text-sm text-green-700 mt-1">{success}</p>
                     </div>

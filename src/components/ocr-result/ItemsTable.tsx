@@ -15,7 +15,7 @@ const ItemsTable: React.FC<Props> = ({
   return (
     <div className='mb-8'>
       <h3 className='mb-4 text-sm font-semibold tracking-wide text-[#A94D14] uppercase'>
-        Detected Items
+        Items detectados
       </h3>
       <div className='overflow-hidden bg-white border rounded-lg shadow-sm border-[#EDEDED]'>
         <div className='overflow-x-auto'>
@@ -23,22 +23,22 @@ const ItemsTable: React.FC<Props> = ({
             <thead>
               <tr className='bg-[#FAF8F6]'>
                 <th className='px-4 py-3 text-left font-medium text-[#444444]'>
-                  Name
+                  Nombre
                 </th>
                 <th className='px-4 py-3 text-left font-medium text-[#444444]'>
-                  Description
+                  Descripción
                 </th>
                 <th className='px-4 py-3 text-right font-medium text-[#444444]'>
-                  Quantity
+                  Cantidad
                 </th>
                 <th className='px-4 py-3 text-right font-medium text-[#444444]'>
-                  Unit Price
+                  Precio Unitario
                 </th>
                 <th className='px-4 py-3 text-right font-medium text-[#444444]'>
                   Total
                 </th>
                 <th className='px-4 py-3 text-center font-medium text-[#444444]'>
-                  Confidence
+                  Confidencialidad
                 </th>
               </tr>
             </thead>

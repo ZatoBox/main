@@ -13,7 +13,7 @@ interface Props {
 const InventoryHeader: React.FC<Props> = ({
   onBack,
   onCreate,
-  title = 'Inventory',
+  title = 'Inventario',
   selectedCount = 0,
   onArchiveSelected,
   archivingSelected = false,
@@ -52,7 +52,7 @@ const InventoryHeader: React.FC<Props> = ({
               className="flex items-center px-4 py-2 space-x-2 font-medium text-white transition-colors rounded-lg bg-zatobox-500 hover:bg-zatobox-600"
             >
               <Plus size={20} />
-              <span className="hidden sm:inline">Create Product</span>
+              <span className="hidden sm:inline">Crear Producto</span>
             </button>
           </div>
         </div>

@@ -29,7 +29,7 @@ const ImagesUploader: React.FC<Props> = ({ files, onAddFiles, onRemove }) => {
   return (
     <div className='p-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
       <label className='block mb-4 text-sm font-medium text-[#000000]'>
-        Product Images
+        Imagenes del Producto
       </label>
       <div
         className={`relative border-2 border-dashed border-[#CBD5E1] rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer ${
@@ -64,11 +64,11 @@ const ImagesUploader: React.FC<Props> = ({ files, onAddFiles, onRemove }) => {
             <polyline points='7 10 12 15 17 10' />
             <line x1='12' y1='15' x2='12' y2='3' />
           </svg>
-          <p className='mb-2 text-[#88888888]'>Drag and drop images here</p>
-          <p className='text-sm text-[#88888888]'>or click to select files</p>
+          <p className='mb-2 text-[#88888888]'>Arrastra y suelta imágenes aquí</p>
+          <p className='text-sm text-[#88888888]'>o haz clic para seleccionar archivos</p>
         </label>
         <div className='absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center pointer-events-none'>
-          <span className='text-lg font-semibold text-gray-700'>Fixing</span>
+          <span className='text-lg font-semibold text-gray-700'>Subiendo...</span>
         </div>
       </div>
 

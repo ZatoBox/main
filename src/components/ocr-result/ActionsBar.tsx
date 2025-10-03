@@ -34,13 +34,13 @@ const ActionsBar: React.FC<Props> = ({
             onClick={onSaveEdit}
             className={`${baseBtn} bg-[#F88612] hover:bg-[#A94D14] text-white`}
           >
-            Save Changes
+            Guardar cambios
           </button>
           <button
             onClick={onCancelEdit}
             className={`${baseBtn} bg-[#ECECEC] hover:bg-[#E0E0E0] text-[#333333]`}
           >
-            Cancel
+            Cancelar
           </button>
         </>
       ) : (
@@ -56,7 +56,7 @@ const ActionsBar: React.FC<Props> = ({
             onClick={onEdit}
             className={`${baseBtn} bg-[#A94D14] hover:bg-[#8C3D0F] text-white`}
           >
-            Edit Result
+            Editar resultado
           </button>
           <button
             onClick={onConfirm}
@@ -66,7 +66,7 @@ const ActionsBar: React.FC<Props> = ({
             {isAdding ? (
               <>
                 <span className='inline-block w-4 h-4 mr-2 border-2 border-white border-b-transparent rounded-full animate-spin'></span>
-                Adding...
+                Agregando...
               </>
             ) : (
               'Confirm Data'

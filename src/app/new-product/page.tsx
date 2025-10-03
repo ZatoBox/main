@@ -168,7 +168,7 @@ const NewProductPage: React.FC = () => {
                       <div className='space-y-4'>
                         <div>
                           <label className='block mb-2 text-sm font-medium text-black'>
-                            Description
+                            Descripción
                           </label>
                           <textarea
                             name='description'
@@ -179,7 +179,7 @@ const NewProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className='block mb-2 text-sm font-medium text-black'>
-                            Category
+                            Categoría
                           </label>
                           <input
                             name='category'
@@ -190,7 +190,7 @@ const NewProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className='block mb-2 text-sm font-medium text-black'>
-                            Subcategory
+                            Subcategoría
                           </label>
                           <input
                             name='subcategory'
@@ -201,7 +201,7 @@ const NewProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className='block mb-2 text-sm font-medium text-black'>
-                            Tags (comma separated)
+                            Tags (separados por comas)
                           </label>
                           <input
                             name='tags'
@@ -218,7 +218,7 @@ const NewProductPage: React.FC = () => {
                       <div className='space-y-4'>
                         <div>
                           <label className='block mb-2 text-sm font-medium text-black'>
-                            Name *
+                            Nombre *
                           </label>
                           <input
                             name='name'
@@ -232,7 +232,7 @@ const NewProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className='block mb-2 text-sm font-medium text-black'>
-                            Billing *
+                            Facturación *
                           </label>
                           <select
                             name='billingInterval'
@@ -252,7 +252,7 @@ const NewProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className='block mb-2 text-sm font-medium text-black'>
-                            Price *
+                            Precio *
                           </label>
                           <input
                             name='price'
@@ -268,7 +268,7 @@ const NewProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className='block mb-2 text-sm font-medium text-black'>
-                            Initial Stock *
+                            Stock inicial *
                           </label>
                           <input
                             name='stock'

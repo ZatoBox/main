@@ -8,11 +8,11 @@ interface Props {
 const InventoryPanel: React.FC<Props> = ({ formData, onChange }) => {
   return (
     <div className='p-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
-      <h3 className='mb-4 text-lg font-medium text-[#000000]'>Inventory</h3>
+      <h3 className='mb-4 text-lg font-medium text-[#000000]'>Inventario</h3>
       <div className='space-y-4'>
         <div>
           <label className='block mb-2 text-sm font-medium text-[#000000]'>
-            Inventory quantity
+            Cantidad de inventario
           </label>
           <input
             type='number'
@@ -25,7 +25,7 @@ const InventoryPanel: React.FC<Props> = ({ formData, onChange }) => {
 
         <div>
           <label className='block mb-2 text-sm font-medium text-[#000000]'>
-            Low stock alert
+            Alerta de bajo inventario
           </label>
           <input
             type='number'

@@ -5,7 +5,7 @@ type Props = {
   title?: string;
 };
 
-const Header: React.FC<Props> = ({ onBack, title = 'My Profile' }) => {
+const Header: React.FC<Props> = ({ onBack, title = 'Mi Perfil' }) => {
   return (
     <div className="border-b shadow-sm bg-[#FFFFFF] border-[#CBD5E1]">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">

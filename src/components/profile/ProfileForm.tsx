@@ -56,7 +56,7 @@ const ProfileForm: React.FC<Props> = ({
               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
                 <div>
                   <label className='block mb-2 text-sm font-medium text-[#000000]'>
-                    Full Name
+                    Nombre Completo
                   </label>
                   <Field
                     name='full_name'
@@ -83,7 +83,7 @@ const ProfileForm: React.FC<Props> = ({
 
                 <div>
                   <label className='block mb-2 text-sm font-medium text-[#000000]'>
-                    Phone
+                    Teléfono
                   </label>
                   <Field
                     name='phone'
@@ -93,7 +93,7 @@ const ProfileForm: React.FC<Props> = ({
 
                 <div>
                   <label className='block mb-2 text-sm font-medium text-[#000000]'>
-                    Address
+                    Dirección
                   </label>
                   <Field
                     name='address'

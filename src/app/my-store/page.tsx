@@ -73,12 +73,12 @@ export default function MyStorePage() {
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-black mb-3">
-          Create your store
+          Crear mi tienda
         </h1>
         <p className="text-gray-600 mb-8">
-          Here you can create your own virtual store to offer your services or
-          products. Customize the title, description, and add links to your
-          social networks.
+          Aquí puedes crear tu propia tienda virtual para ofrecer tus servicios o
+          productos. Personaliza el título, la descripción y agrega enlaces a tus
+          redes sociales.
         </p>
         <div className="flex gap-3">
           <button
@@ -94,27 +94,27 @@ export default function MyStorePage() {
             <div className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-black mb-1">
-                  Title
+                  Titulo
                 </label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Name of your store"
+                  placeholder="Nombre de tu tienda"
                   className="w-full px-3 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F88612]"
                 />
                 <div className="mt-1 text-xs text-gray-500">
-                  Suggested slug: {slug}
+                  Slug sugerido: {slug}
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-black mb-1">
-                  Description
+                  Descripción
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
-                  placeholder="Briefly tell about your products or services"
+                  placeholder="Describe brevemente tus productos o servicios"
                   className="w-full px-3 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F88612]"
                 />
               </div>

@@ -27,7 +27,7 @@ const ProductInfoForm: React.FC<Props> = ({ formik, categories }) => {
       <div className='p-6 space-y-4 border rounded-lg shadow-sm  bg-white border-[#CBD5E1]'>
         <div>
           <label className='block mb-2 text-sm font-medium text-black'>
-            Product Name *
+            Nombre del Producto *
           </label>
           <Field
             name='name'
@@ -40,7 +40,7 @@ const ProductInfoForm: React.FC<Props> = ({ formik, categories }) => {
 
         <div>
           <label className='block mb-2 text-sm font-medium text-black'>
-            Description
+            Descripción
           </label>
           <Field
             as='textarea'
@@ -52,10 +52,10 @@ const ProductInfoForm: React.FC<Props> = ({ formik, categories }) => {
       </div>
 
       <div className='p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1] space-y-4'>
-        <h3 className='text-lg font-medium text-black'>Categories</h3>
+        <h3 className='text-lg font-medium text-black'>Categorías</h3>
         <input
           type='text'
-          placeholder='Search categories...'
+          placeholder='Buscar categorías...'
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className='w-full p-2 text-sm border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'
@@ -85,7 +85,7 @@ const ProductInfoForm: React.FC<Props> = ({ formik, categories }) => {
           })}
           {filtered.length === 0 && (
             <div className='px-2 py-4 text-xs text-center text-gray-400'>
-              No matches
+              No hay coincidencias
             </div>
           )}
         </div>
