@@ -36,7 +36,7 @@ const EditHeader: React.FC<Props> = ({
               <IoMdArrowRoundBack size={20} className='text-[#000000]' />
             </button>
             <h1 className='hidden text-xl font-bold text-[#000000] md:block'>
-              Edit Product
+              Editar producto
             </h1>
           </div>
           <div className='flex items-center space-x-3'>
@@ -58,7 +58,7 @@ const EditHeader: React.FC<Props> = ({
               onClick={onArchive}
               className='px-4 py-2 font-medium text-[#FFFFFF] transition-colors bg-[#A94D14] rounded-lg hover:bg-[#8A3D16] hidden sm:block'
             >
-              Archive
+              Archivar
             </button>
             <button
               onClick={onSave}
@@ -72,7 +72,7 @@ const EditHeader: React.FC<Props> = ({
               ) : (
                 <>
                   <FaRegFolder className='w-4 h-4 self-center' />
-                  <span>Save</span>
+                  <span>Guardar</span>
                 </>
               )}
             </button>

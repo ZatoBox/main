@@ -27,14 +27,14 @@ const Categorization: React.FC<Props> = ({
   );
   return (
     <div className='p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1] space-y-4'>
-      <h3 className='text-lg font-medium text-black'>Categories</h3>
+      <h3 className='text-lg font-medium text-black'>Categorías</h3>
       {loading ? (
-        <div className='text-sm text-gray-500'>Loading...</div>
+        <div className='text-sm text-gray-500'>Cargando...</div>
       ) : (
         <>
           <input
             type='text'
-            placeholder='Search categories...'
+            placeholder='Buscar categorías...'
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className='w-full p-2 text-sm border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent'

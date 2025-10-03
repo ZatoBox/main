@@ -25,7 +25,7 @@ const ImagesUploader: React.FC<Props> = ({
   return (
     <div className='p-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]'>
       <label className='block mb-2 text-sm font-medium text-[#000000]'>
-        Product Images
+        Imágenes del Producto
       </label>
       <div className='mb-4'>
         <label className='relative block w-full p-8 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-[#CBD5E1] hover:border-gray-400'>
@@ -50,7 +50,7 @@ const ImagesUploader: React.FC<Props> = ({
           {existingImages.length > 0 && (
             <div>
               <p className='mb-2 text-sm font-medium text-[#000000]'>
-                Existing
+                Existente
               </p>
               <div className='flex flex-wrap gap-2'>
                 {existingImages.map((url, idx) => (
@@ -119,7 +119,7 @@ const ImagesUploader: React.FC<Props> = ({
               onChange={(e) => onReplaceAll(e.target.files)}
               className='hidden'
             />
-            Replace all images
+            Reemplazar todas las imagenes
           </label>
         </div>
       )}

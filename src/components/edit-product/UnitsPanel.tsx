@@ -25,18 +25,18 @@ const UnitsPanel: React.FC<Props> = ({
 }) => {
   return (
     <div className='p-6 border rounded-lg shadow-sm bg-zatobox-50 border-zatobox-200'>
-      <h3 className='mb-4 text-lg font-medium text-zatobox-900'>Units</h3>
+      <h3 className='mb-4 text-lg font-medium text-zatobox-900'>Unidades</h3>
       <div className='space-y-4'>
         <div>
           <label className='block mb-2 text-sm font-medium text-zatobox-900'>
-            Unit
+            Unidad
           </label>
           <select
             value={formData.unit}
             onChange={(e) => onChange('unit', e.target.value)}
             className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
           >
-            <option value=''>-- Leave blank to keep current --</option>
+            <option value=''>-- Dejalo en blanco para mantener el actual --</option>
             {unitOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
@@ -47,14 +47,14 @@ const UnitsPanel: React.FC<Props> = ({
 
         <div>
           <label className='block mb-2 text-sm font-medium text-zatobox-900'>
-            Product Type
+            Tipo de Producto
           </label>
           <select
             value={formData.productType}
             onChange={(e) => onChange('productType', e.target.value)}
             className='w-full p-3 border rounded-lg border-zatobox-200 focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-zatobox-50 text-zatobox-900'
           >
-            <option value=''>-- Leave blank to keep current --</option>
+            <option value=''>-- Dejalo en blanco para mantener el actual --</option>
             {productTypeOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
@@ -65,7 +65,7 @@ const UnitsPanel: React.FC<Props> = ({
 
         <div>
           <label className='block mb-2 text-sm font-medium text-zatobox-900'>
-            Weight (kg)
+            Peso (kg)
           </label>
           <input
             type='number'
@@ -79,7 +79,7 @@ const UnitsPanel: React.FC<Props> = ({
 
         <div>
           <label className='block mb-2 text-sm font-medium text-zatobox-900'>
-            Price (required)
+            Precio (requerido)
           </label>
           <div className='relative'>
             <span className='absolute transform -translate-y-1/2 left-3 top-1/2 text-zatobox-600'>
@@ -97,7 +97,7 @@ const UnitsPanel: React.FC<Props> = ({
         </div>
 
         <button className='flex items-center justify-center w-full p-3 space-x-2 transition-colors border border-dashed rounded-lg border-zatobox-200 text-zatobox-600 hover:bg-zatobox-100'>
-          <span>Add additional unit</span>
+          <span>Añadir unidad adicional</span>
         </button>
       </div>
     </div>

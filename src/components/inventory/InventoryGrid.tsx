@@ -67,19 +67,19 @@ const InventoryGrid: React.FC<Props> = ({
                 />
               </th>
               <th className="w-16 px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-[#475569]">
-                Image
+                Imagen
               </th>
               <th className="px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-[#475569]">
-                Item
+                Artículo
               </th>
               <th className="px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-[#475569]">
-                Category
+                Categoría
               </th>
               <th className="hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-[#475569] lg:table-cell">
                 Stock
               </th>
               <th className="hidden px-4 py-3 text-xs font-medium tracking-wider text-left uppercase text-[#475569] xl:table-cell">
-                Price
+                Precio
               </th>
               <th className="w-12 px-4 py-3"></th>
             </tr>
@@ -138,7 +138,7 @@ const InventoryGrid: React.FC<Props> = ({
                         : 'bg-[#FEF3C7] text-[#92400E]'
                     }`}
                   >
-                    {item.stock} units
+                    {item.stock} unidades
                   </span>
                 </td>
                 <td className="hidden px-4 py-4 text-sm font-semibold text-[#374151] xl:table-cell">
@@ -209,11 +209,11 @@ const InventoryGrid: React.FC<Props> = ({
                 onChange={(e) => handleSelectAllChange(e.target.checked)}
                 className="w-4 h-4 rounded border border-[#767676] bg-white appearance-none checked:bg-[#EEB131] focus:outline-none focus:ring-2 focus:ring-[#CBD5E1]"
               />
-              <span>Select all</span>
+              <span>Seleccionar todo</span>
             </label>
             {selectedInView > 0 && (
               <span className="text-xs text-[#475569]">
-                {selectedInView} selected
+                {selectedInView} seleccionado
               </span>
             )}
           </div>

@@ -10,10 +10,10 @@ const HomeStats: React.FC<Props> = ({ count, searchTerm }) => {
     <p className='text-gray-500 animate-slide-in-right'>
       {searchTerm ? (
         <>
-          Showing {count} result{count !== 1 ? 's' : ''} for "{searchTerm}"
+          Mostrando {count} resultados{count !== 1 ? 's' : ''} para "{searchTerm}"
         </>
       ) : (
-        'Select products to create sales orders quickly'
+        'Selecciona productos para crear pedidos de venta rápidamente'
       )}
     </p>
   );

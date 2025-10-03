@@ -4,7 +4,7 @@ type Props = {
   title?: string;
 };
 
-const Header: React.FC<Props> = ({ title = 'OCR Processing Result' }) => {
+const Header: React.FC<Props> = ({ title = 'Resultado procesado OCR' }) => {
   return (
     <div className='mb-8 text-center'>
       <h2 className='text-2xl font-bold text-[#1F1F1F] md:text-3xl'>{title}</h2>

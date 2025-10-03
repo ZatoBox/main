@@ -10,7 +10,7 @@ const FileUploader: React.FC<Props> = ({ fileName, onChange }) => {
   return (
     <div className='mb-6'>
       <label className='block mb-3 text-sm font-medium text-black'>
-        Select invoice document
+        Seleccionar documento
       </label>
       <div className='p-6 text-center transition-colors duration-300 border-2 border-dashed rounded-lg border-[#888888] md:p-8 hover:border-[#888888]'>
         <input
@@ -32,7 +32,7 @@ const FileUploader: React.FC<Props> = ({ fileName, onChange }) => {
                 : 'Click to select an invoice'}
             </p>
             <p className='mt-2 text-xs md:text-sm text-[#888888]'>
-              PDF, PNG, JPG, JPEG, TIFF, BMP (max 50MB)
+              PNG, WEBP, JPG, JPEG (max 5MB)
             </p>
           </div>
         </label>

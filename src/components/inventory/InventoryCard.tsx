@@ -68,7 +68,7 @@ const InventoryCard: React.FC<Props> = ({
                       : 'bg-error-100 text-error-800'
                   }`}
                 >
-                  {item.stock} units
+                  {item.stock} unidades
                 </span>
 
                 <span className='text-sm font-medium text-[#000000]'>

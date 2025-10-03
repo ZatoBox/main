@@ -116,7 +116,7 @@ const AvatarUploader: React.FC<Props> = ({
       </div>
 
       {uploading && (
-        <div className="text-sm text-orange-500 font-medium">Uploading...</div>
+        <div className="text-sm text-orange-500 font-medium">Subiendo...</div>
       )}
     </div>
   );
