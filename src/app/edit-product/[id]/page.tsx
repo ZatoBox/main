@@ -240,7 +240,7 @@ const EditProductPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen  bg-bg-main">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
-          <p className="text-text-secondary">Loading products...</p>
+          <p className="text-text-secondary">Cargando productos...</p>
         </div>
       </div>
     );
@@ -251,7 +251,7 @@ const EditProductPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen  bg-bg-main">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
-          <p className="text-text-secondary">Loading products...</p>
+          <p className="text-text-secondary">Cargando productos...</p>
         </div>
       </div>
     );
@@ -307,7 +307,7 @@ const EditProductPage: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Description
+                            Descripción
                           </label>
                           <textarea
                             name="description"
@@ -318,7 +318,7 @@ const EditProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Category
+                            Categoría
                           </label>
                           <input
                             name="category"
@@ -329,7 +329,7 @@ const EditProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Subcategory
+                            Subcategoría
                           </label>
                           <input
                             name="subcategory"
@@ -340,7 +340,7 @@ const EditProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Tags (comma separated)
+                            Tags (separados por comas)
                           </label>
                           <input
                             name="tags"
@@ -357,7 +357,7 @@ const EditProductPage: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Name *
+                            Nombre *
                           </label>
                           <input
                             name="name"
@@ -371,7 +371,7 @@ const EditProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Billing *
+                            Facturación *
                           </label>
                           <select
                             name="billingInterval"
@@ -391,7 +391,7 @@ const EditProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Price *
+                            Precio *
                           </label>
                           <input
                             name="price"

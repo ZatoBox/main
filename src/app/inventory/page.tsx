@@ -288,7 +288,7 @@ const InventoryPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen  bg-bg-main">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
-          <p className="text-text-secondary">Loading products...</p>
+          <p className="text-text-secondary">Cargando productos...</p>
         </div>
       </div>
     );
@@ -306,8 +306,8 @@ const InventoryPage: React.FC = () => {
           archivingSelected={isArchivingSelected}
         />
         <PolarSetupPrompt
-          title="Inventory Setup Required"
-          subtitle="Configure your Polar API credentials to manage your inventory and track product stock levels."
+          title="Configuración de Inventario Requerida"
+          subtitle="Configura tus credenciales de API de Polar para gestionar tu inventario y rastrear los niveles de stock de productos."
         />
       </div>
     );
@@ -337,7 +337,7 @@ const InventoryPage: React.FC = () => {
             onClick={() => window.location.reload()}
             className="px-4 py-2 font-medium text-black transition-colors rounded-lg bg-primary hover:bg-primary-600"
           >
-            Retry
+            Reintentar
           </button>
         </div>
       </div>
@@ -391,7 +391,7 @@ const InventoryPage: React.FC = () => {
                       onClick={() => setError(null)}
                       className="bg-red-50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 hover:bg-red-100"
                     >
-                      Dismiss
+                      Descartar
                     </button>
                   </div>
                 </div>
@@ -412,10 +412,10 @@ const InventoryPage: React.FC = () => {
             <div className="p-12 text-center border rounded-lg shadow-sm bg-bg-surface border-divider">
               <Package size={48} className="mx-auto mb-4 text-gray-300" />
               <h3 className="mb-2 text-lg font-medium text-text-primary">
-                No items found
+                No se encontraron elementos
               </h3>
               <p className="text-text-secondary">
-                Try adjusting the filters or create a new item.
+                Intenta ajustar los filtros o crear un nuevo elemento.
               </p>
             </div>
           )}

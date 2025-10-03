@@ -448,7 +448,7 @@ const OCRResultPage: React.FC = () => {
                 {loading ? (
                   <>
                     <div className="w-4 h-4 mr-2 border-b-2 border-white rounded-full animate-spin md:h-5 md:w-5 md:mr-3"></div>
-                    Processing document...
+                    Procesando documento...
                   </>
                 ) : (
                   <>
@@ -481,7 +481,7 @@ const OCRResultPage: React.FC = () => {
             {result.processed_image && (
               <div className="mb-6 md:mb-8">
                 <h3 className="mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4">
-                  🖼️ Processed Image with Detections
+                  🖼️ Imagen procesada con detecciones
                 </h3>
                 <div className="p-4 overflow-hidden rounded-lg bg-bg-surface">
                   <img
@@ -491,8 +491,7 @@ const OCRResultPage: React.FC = () => {
                     style={{ maxHeight: '500px', objectFit: 'contain' }}
                   />
                   <p className="mt-2 text-xs text-center text-gray-500">
-                    Image showing YOLO detections (green boxes) and table
-                    regions (blue boxes)
+                    Imagen que muestra las detecciones de YOLO (cuadrículas verdes) y las regiones de la tabla (cuadrículas azules)
                   </p>
                 </div>
               </div>
