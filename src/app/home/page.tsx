@@ -319,19 +319,31 @@ const HomePage: React.FC<HomePageProps> = ({
                 onProductClick={handleProductClick}
               />
 
-              {/*  Paginadoción */}
+              {/*  Paginación */}
               <div className="mt-8 flex items-center justify-center gap-4">
                 <button
                   disabled={page === 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   className="
                     px-4 py-2 
-                    hover:text-[#E28E18] 
+                    duration-300
+                    hover:text-zatobox-500 
                     disabled:opacity-50 
                     disabled:hover:text-inherit
-                  "
+                    group
+                    cursor-pointer 
+                     "
                 >
-                  <IoMdArrowRoundBack size={20} />
+                  <span
+                    className={`
+                    w-8 h-8         
+                    flex items-center justify-center 
+                    transition-transform duration-300 
+                    ${page !== 1 ? 'group-hover:scale-132' : ''}
+                    `}
+                  >
+                    <IoMdArrowRoundBack />
+                  </span>
                 </button>
 
                 <span className="text-sm text-gray-700">
@@ -343,12 +355,28 @@ const HomePage: React.FC<HomePageProps> = ({
                   onClick={() => setPage((p) => p + 1)}
                   className="
                     px-4 py-2 
-                    hover:text-[#E28E18] 
+                    duration-300
+                    hover:text-zatobox-500 
                     disabled:opacity-50 
                     disabled:hover:text-inherit
-                  "
+                    group 
+                    cursor-pointer 
+                     "
                 >
-                  <IoMdArrowRoundForward size={20} />
+                  <span
+                    className={`
+                    w-8 h-8
+                    flex items-center justify-center 
+                    transition-transform duration-300 
+                    ${
+                      page * pageSize < totalProducts
+                        ? 'group-hover:scale-132'
+                        : ''
+                    }
+                    `}
+                  >
+                    <IoMdArrowRoundForward />
+                  </span>
                 </button>
               </div>
             </div>
