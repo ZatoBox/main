@@ -10,7 +10,7 @@ interface Props {
 }
 
 const HomeHeader: React.FC<Props> = ({
-  title = 'Sales Dashboard',
+  title = 'Dashboard de Ventas',
   searchValue,
   onSearchChange,
   onReload,

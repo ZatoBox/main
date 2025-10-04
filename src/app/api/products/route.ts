@@ -1,43 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { polarAPI } from '@/utils/polar.utils';
-import { AuthService } from '@/../backend/auth/service';
-
-async function getCurrentUser(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new Error('Missing authentication token');
-  }
-
-  const token = authHeader.split(' ')[1];
-  const authService = new AuthService();
-
-  try {
-    const user = await authService.verifyToken(token);
-    const profile = await authService.getProfileUser(String(user.id));
-
-    const polarApiKey = profile.user?.polar_api_key || '';
-    if (!polarApiKey) {
-      throw new Error('Missing Polar API key for user');
-    }
-
-    return {
-      userId: user.id,
-      userEmail: user.email,
-      polarApiKey: polarApiKey,
-      polarOrganizationId: profile.user?.polar_organization_id || '',
-    };
-  } catch (error) {
-    throw new Error('Invalid authentication');
-  }
-}
+import { resolveCurrentProductUser } from './auth';
 
 export async function GET(req: NextRequest) {
   try {
-    const { polarApiKey } = await getCurrentUser(req);
+    const { polarApiKey } = await resolveCurrentProductUser(req);
     const url = new URL(req.url);
     const productId = url.searchParams.get('id');
     const organizationId = url.searchParams.get('organization_id') || undefined;
     const includeArchived = url.searchParams.get('include_archived') === 'true';
+    const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+    const offset = parseInt(url.searchParams.get('offset') || '0', 10);
 
     if (productId) {
       const product = await polarAPI.getProduct(polarApiKey, productId);
@@ -46,14 +19,26 @@ export async function GET(req: NextRequest) {
       const products = await polarAPI.listProducts(
         polarApiKey,
         organizationId,
-        {
-          includeArchived,
-        }
+        { includeArchived }
       );
+
       const filteredProducts = products.filter(
-        (product) => !product.name || !product.name.startsWith('Order #')
+        (product) =>
+          !product.name ||
+          (!product.name.startsWith('Order #') &&
+            !product.name.startsWith('Cash Order #'))
       );
-      return NextResponse.json({ success: true, products: filteredProducts });
+
+      const total = filteredProducts.length;
+      const paginatedProducts = filteredProducts.slice(offset, offset + limit);
+
+      return NextResponse.json({
+        success: true,
+        products: paginatedProducts,
+        total,
+        limit,
+        offset,
+      });
     }
   } catch (error: any) {
     return NextResponse.json(
@@ -65,7 +50,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { polarApiKey, polarOrganizationId } = await getCurrentUser(req);
+    const { polarApiKey, polarOrganizationId } =
+      await resolveCurrentProductUser(req);
     const contentType = req.headers.get('content-type') || '';
 
     if (contentType.includes('multipart/form-data')) {
@@ -149,7 +135,7 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const { polarApiKey } = await getCurrentUser(req);
+    const { polarApiKey } = await resolveCurrentProductUser(req);
     const url = new URL(req.url);
     const productId = url.searchParams.get('id');
 
@@ -173,7 +159,7 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const { polarApiKey } = await getCurrentUser(req);
+    const { polarApiKey } = await resolveCurrentProductUser(req);
     const url = new URL(req.url);
     const productId = url.searchParams.get('id');
 

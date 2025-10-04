@@ -70,14 +70,14 @@ const PluginCard: React.FC<PluginCardProps> = ({
               disabled
               className='w-full px-4 py-2 font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed'
             >
-              Coming Soon
+              En Desarrollo
             </button>
           ) : plugin.status === 'maintenance' ? (
             <button
               disabled
               className='w-full px-4 py-2 font-medium text-yellow-800 bg-yellow-100 rounded-lg cursor-not-allowed'
             >
-              Maintenance
+              En Mantenimiento
             </button>
           ) : (
             <button

@@ -122,55 +122,55 @@ const SideMenu: React.FC = () => {
 
   const menuItems = [
     {
-      name: 'Home',
+      name: 'Inicio',
       icon: Home,
       path: '/home',
-      description: 'Main page',
+      description: 'Página principal',
       alwaysVisible: true,
     },
     {
-      name: 'Inventory',
+      name: 'Inventario',
       icon: Archive,
       path: '/inventory',
-      description: 'View inventory',
+      description: 'Gestionar inventario',
       alwaysVisible: true,
     },
     {
-      name: 'Smart Inventory',
+      name: 'Inventario Inteligente',
       icon: Brain,
       path: '/smart-inventory',
-      description: 'AI for inventory',
+      description: 'AI para inventario',
       pluginId: 'smart-inventory',
       alwaysVisible: false,
     },
     {
-      name: 'OCR Documents',
+      name: 'Documentos OCR',
       icon: Scan,
       path: '/ocr-result',
-      description: 'Process documents',
+      description: 'Procesar documentos',
       pluginId: 'ocr-module',
       alwaysVisible: false,
     },
     {
-      name: 'POS Integration',
+      name: 'Integración POS',
       icon: Package,
       path: '/pos-integration',
-      description: 'POS system integration',
+      description: 'Integración con sistemas POS',
       pluginId: 'pos-integration',
       alwaysVisible: false,
     },
     {
-      name: 'Plugin Store',
+      name: 'Tienda de Plugins',
       icon: Store,
       path: '/plugin-store',
-      description: 'Browse modules',
+      description: 'Buscar módulos',
       alwaysVisible: true,
     },
     {
-      name: 'Profile',
+      name: 'Perfil',
       icon: User,
       path: '/profile',
-      description: 'Manage account',
+      description: 'Gestionar cuenta',
       alwaysVisible: true,
     },
   ];
@@ -337,15 +337,6 @@ const SideMenu: React.FC = () => {
                   <span className="font-medium">Feedback</span>
                 </button>
               </div>
-              <div className="mb-2 flex justify-center">
-                <button
-                  onClick={() => router.push('/upgrade')}
-                  className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]"
-                >
-                  <Sparkles size={16} className="text-current" />
-                  <span className="font-medium">Upgrade</span>
-                </button>
-              </div>
             </div>
 
             <div className="px-4 py-4 border-t border-[#CBD5E1]">
@@ -400,15 +391,6 @@ const SideMenu: React.FC = () => {
                 >
                   <Sparkles size={16} className="text-current" />
                   <span className="font-medium">Feedback</span>
-                </button>
-              </div>
-              <div className="mb-2 flex justify-center">
-                <button
-                  onClick={() => router.push('/upgrade')}
-                  className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-white text-black gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-[#FEF9EC] hover:border-[#F88612] hover:text-[#F88612]"
-                >
-                  <Sparkles size={16} className="text-current" />
-                  <span className="font-medium">Upgrade</span>
                 </button>
               </div>
             </div>

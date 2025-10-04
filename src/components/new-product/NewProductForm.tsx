@@ -21,7 +21,7 @@ const NewProductForm: React.FC<Props> = ({
         <div className='space-y-4'>
           <div>
             <label className='block mb-2 text-sm font-medium text-black'>
-              Price *
+              Precio *
             </label>
             <Field
               name='price'
@@ -35,7 +35,7 @@ const NewProductForm: React.FC<Props> = ({
           </div>
           <div>
             <label className='block mb-2 text-sm font-medium text-black'>
-              Unit *
+              Unidad *
             </label>
             <Field
               as='select'
@@ -55,7 +55,7 @@ const NewProductForm: React.FC<Props> = ({
 
           <div>
             <label className='block mb-2 text-sm font-medium text-black'>
-              Product Type
+              Tipo de Producto
             </label>
             <Field
               as='select'
@@ -72,7 +72,7 @@ const NewProductForm: React.FC<Props> = ({
 
           <div>
             <label className='block mb-2 text-sm font-medium text-black'>
-              Weight (kg)
+              Peso (kg)
             </label>
             <Field
               name='weight'
@@ -89,7 +89,7 @@ const NewProductForm: React.FC<Props> = ({
         <div className='space-y-4'>
           <div>
             <label className='block mb-2 text-sm font-medium text-black'>
-              Inventory quantity *
+              Cantidad en inventario *
             </label>
             <Field
               name='inventoryQuantity'
@@ -103,7 +103,7 @@ const NewProductForm: React.FC<Props> = ({
 
           <div>
             <label className='block mb-2 text-sm font-medium text-black'>
-              Low stock alert
+              Alerta de bajo stock
             </label>
             <Field
               name='lowStockAlert'
@@ -126,7 +126,7 @@ const NewProductForm: React.FC<Props> = ({
 
       <div className='p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]'>
         <label className='block mb-2 text-sm font-medium text-black'>
-          Location
+          Ubicación
         </label>
         <Field
           name='location'

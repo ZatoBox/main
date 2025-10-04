@@ -81,13 +81,13 @@ const LoginForm: React.FC = () => {
                 name="remember"
                 className="w-4 h-4 border-gray-300 rounded text-black focus:ring-zatobox-500"
               />
-              <span>Remember me</span>
+              <span>Recordarme</span>
             </label>
             <button
               type="button"
               className="text-sm transition-colors text-zatobox-500 hover:text-zatobox-600"
             >
-              Forgot password?
+              Olvidaste tu contraseña?
             </button>
           </div>
 
@@ -96,15 +96,15 @@ const LoginForm: React.FC = () => {
               {/Acceso restringido/i.test(error || authError || '') ||
               /HTTP error 403/i.test(error || authError || '') ? (
                 <>
-                  Access restricted. Requires Premium or Admin plan. Go to{' '}
+                  Acceso restringido. Requiere plan Premium. Ve a{' '}
                   <button
                     type="button"
                     onClick={() => router.push('/upgrade')}
                     className="underline font-medium text-red-700 hover:text-red-800"
                   >
-                    upgrade
+                    mejorar
                   </button>{' '}
-                  to upgrade your plan.
+                  para mejorar tu plan.
                 </>
               ) : (
                 <>{error || authError}</>
@@ -127,7 +127,7 @@ const LoginForm: React.FC = () => {
           <div className="w-full border-t border-[#CBD5E1]"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-black">Or continue with</span>
+          <span className="px-2 bg-white text-black">O continuar con</span>
         </div>
       </div>
 
@@ -135,12 +135,12 @@ const LoginForm: React.FC = () => {
 
       <div className="mt-4 text-center">
         <p className="text-[#888888]">
-          Don't have an account?{' '}
+          No tienes una cuenta?{' '}
           <button
             onClick={() => router.push('/register')}
             className="font-medium transition-colors text-black hover:text-zatobox-600"
           >
-            Sign up
+            Regístrate
           </button>
         </p>
       </div>

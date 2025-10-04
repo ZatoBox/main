@@ -5,11 +5,12 @@ import HomeHeader from '@/components/home/HomeHeader';
 import ProductGrid from '@/components/home/ProductGrid';
 import HomeStats from '@/components/home/HomeStats';
 import SalesDrawer from '@/components/SalesDrawer';
-import { getActiveProducts, salesAPI } from '@/services/api.service';
+import { getActiveProducts } from '@/services/api.service';
 import type { Product } from '@/types/index';
 import { PolarProduct } from '@/types/polar';
 import { useAuth } from '@/context/auth-store';
 import { mapPolarProductToProduct } from '@/utils/polar.utils';
+import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io';
 
 interface HomePageProps {
   tab?: string;
@@ -22,8 +23,6 @@ const HomePage: React.FC<HomePageProps> = ({
   const { user } = useAuth();
   const { isAuthenticated } = useAuth();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
-  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [paymentTotal, setPaymentTotal] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
@@ -32,7 +31,12 @@ const HomePage: React.FC<HomePageProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Shopping cart
+  // 🧭 Paginación
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(12);
+  const [totalProducts, setTotalProducts] = useState(0);
+
+  // 🛒 Carrito
   interface CartItem {
     id: string;
     polarProductId: string;
@@ -46,14 +50,17 @@ const HomePage: React.FC<HomePageProps> = ({
   }
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  // Use local search term (takes priority over external)
   const activeSearchTerm = localSearchTerm || externalSearchTerm;
 
+  // ✅ Cargar productos con paginación
   const reloadProducts = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getActiveProducts();
+
+      const offset = (page - 1) * pageSize;
+      const response = await getActiveProducts({ limit: pageSize, offset });
+
       if (response && response.success && Array.isArray(response.products)) {
         const rows: any[] = response.products;
         const filtered = rows.filter(
@@ -61,47 +68,50 @@ const HomePage: React.FC<HomePageProps> = ({
         );
         const availableProducts = filtered.map(mapPolarProductToProduct);
         setProducts(availableProducts);
+        setTotalProducts(response.total || 0);
+      } else if (response && response.success === false) {
+        setProducts([]);
+        setError(response.message || 'Error reloading products');
       } else {
+        setProducts([]);
+      }
+    } catch (err: any) {
+      const errorMessage = err?.message || '';
+      if (errorMessage.toLowerCase().includes('api key')) {
+        setProducts([]);
+        setError('polar_not_configured');
+      } else {
+        console.error('Error reloading products:', err);
         setProducts([]);
         setError('Error reloading products');
       }
-    } catch (err) {
-      console.error('Error reloading products:', err);
-      setProducts([]);
-      setError('Error reloading products');
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch products from backend
+  // 📦 Llamada inicial o cuando cambie página
   useEffect(() => {
     void reloadProducts();
-  }, []);
+  }, [page]);
 
-  const enrichedProducts = useMemo(() => {
-    return products;
-  }, [products]);
+  const enrichedProducts = useMemo(() => products, [products]);
 
-  // Filter products based on search term
+  // 🔍 Filtro local
   const filteredProducts = useMemo(() => {
-    if (!activeSearchTerm.trim()) {
-      return enrichedProducts;
-    }
-
+    if (!activeSearchTerm.trim()) return enrichedProducts;
     return enrichedProducts.filter((product: any) =>
       product.name.toLowerCase().includes(activeSearchTerm.toLowerCase())
     );
   }, [activeSearchTerm, enrichedProducts]);
 
-  // When clicking on a product, add it to cart
   const handleProductClick = (productUntyped: Product | PolarProduct) => {
     const product = productUntyped as Product;
     setSelectedProduct(product);
     setIsDrawerOpen(true);
     setCartItems((prevCart) => {
-      const pid = String(product.id); // stable local id for UI/cart identity
-      const polarProductId = (product as any).polar_id || String(product.id); // original Polar ID for API calls
+      const pid = String(product.id);
+      const polarProductId = (product as any).polar_id || String(product.id);
       const existing = prevCart.find((item) => item.id === pid);
       if (existing) {
         return prevCart.map((item) =>
@@ -129,39 +139,54 @@ const HomePage: React.FC<HomePageProps> = ({
     });
   };
 
-  const handleCloseDrawer = () => {
-    setIsDrawerOpen(false);
-  };
+  const handleCloseDrawer = () => setIsDrawerOpen(false);
 
-  const handleNavigateToPayment = async (total: number) => {
+  const handleNavigateToPayment = async (
+    total: number,
+    paymentMethod: 'cash' | 'zatoconnect'
+  ) => {
     if (!user?.id) {
       alert('Please log in to checkout');
       return;
     }
 
     try {
-      const { checkoutPolarCart } = await import('@/services/payments-service');
+      const items = cartItems.map((item) => ({
+        polarProductId: item.polarProductId,
+        priceId: item.priceId,
+        quantity: item.quantity,
+        productData: item.productData,
+      }));
 
-      const cartData = {
-        userId: user.id,
-        items: cartItems.map((item) => ({
-          polarProductId: item.polarProductId,
-          priceId: item.priceId,
-          quantity: item.quantity,
-          productData: item.productData,
-        })),
-        successUrl: `${window.location.origin}/success`,
-        metadata: {
-          total_amount: total.toString(),
-        },
-      };
+      const metadata = { total_amount: total.toString() };
 
-      const response = await checkoutPolarCart(cartData);
-
-      if (response.success && response.checkout_url) {
-        window.location.href = response.checkout_url;
+      if (paymentMethod === 'cash') {
+        const { checkoutCashOrder } = await import(
+          '@/services/cash-payments.service'
+        );
+        const cashData = { userId: user.id, items, metadata };
+        const response = await checkoutCashOrder(cashData);
+        if (response.success && response.checkout_url) {
+          window.location.href = response.checkout_url;
+        } else {
+          throw new Error(response.message || 'Failed to create cash order');
+        }
       } else {
-        throw new Error(response.message || 'Failed to create checkout');
+        const { checkoutPolarCart } = await import(
+          '@/services/payments-service'
+        );
+        const cartData = {
+          userId: user.id,
+          items,
+          successUrl: `${window.location.origin}/success`,
+          metadata,
+        };
+        const response = await checkoutPolarCart(cartData);
+        if (response.success && response.checkout_url) {
+          window.location.href = response.checkout_url;
+        } else {
+          throw new Error(response.message || 'Failed to create checkout');
+        }
       }
     } catch (error) {
       console.error('Checkout error:', error);
@@ -169,11 +194,8 @@ const HomePage: React.FC<HomePageProps> = ({
     }
   };
 
-  const handleLocalSearchChange = (value: string) => {
-    setLocalSearchTerm(value);
-  };
+  const handleLocalSearchChange = (value: string) => setLocalSearchTerm(value);
 
-  // Modify quantity of a product in cart
   const updateCartItemQuantity = (
     productId: number | string,
     change: number
@@ -195,19 +217,15 @@ const HomePage: React.FC<HomePageProps> = ({
     });
   };
 
-  // Remove product from cart
   const removeFromCart = (productId: number | string) => {
     setCartItems((prev) =>
       prev.filter((item) => item.id !== String(productId))
     );
   };
 
-  // Clear cart
-  const clearCart = () => {
-    setCartItems([]);
-  };
+  const clearCart = () => setCartItems([]);
 
-  // Show loading state
+  // 🌀 Estados de carga / error
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
@@ -221,7 +239,24 @@ const HomePage: React.FC<HomePageProps> = ({
     );
   }
 
-  // Show error state
+  if (error === 'polar_not_configured') {
+    const PolarSetupPrompt = require('@/components/PolarSetupPrompt').default;
+    return (
+      <div className="min-h-screen pt-16 bg-bg-main">
+        <HomeHeader
+          searchValue={localSearchTerm}
+          onSearchChange={handleLocalSearchChange}
+          onReload={reloadProducts}
+          loading={loading}
+        />
+        <PolarSetupPrompt
+          title="Bienvenido a ZatoBox!"
+          subtitle="Para comenzar a gestionar tus productos e inventario, por favor configura tus credenciales de API de Polar en la configuración de tu perfil."
+        />
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
@@ -283,6 +318,67 @@ const HomePage: React.FC<HomePageProps> = ({
                 products={filteredProducts}
                 onProductClick={handleProductClick}
               />
+
+              {/*  Paginación */}
+              <div className="mt-8 flex items-center justify-center gap-4">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="
+                    px-4 py-2 
+                    duration-300
+                    hover:text-zatobox-500 
+                    disabled:opacity-50 
+                    disabled:hover:text-inherit
+                    group
+                    cursor-pointer 
+                     "
+                >
+                  <span
+                    className={`
+                    w-8 h-8         
+                    flex items-center justify-center 
+                    transition-transform duration-300 
+                    ${page !== 1 ? 'group-hover:scale-132' : ''}
+                    `}
+                  >
+                    <IoMdArrowRoundBack />
+                  </span>
+                </button>
+
+                <span className="text-sm text-gray-700">
+                  Página {page} / {Math.ceil(totalProducts / pageSize) || 1}
+                </span>
+
+                <button
+                  disabled={page * pageSize >= totalProducts}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="
+                    px-4 py-2 
+                    duration-300
+                    hover:text-zatobox-500 
+                    disabled:opacity-50 
+                    disabled:hover:text-inherit
+                    group 
+                    cursor-pointer 
+                     "
+                >
+                  <span
+                    className={`
+                    w-8 h-8
+                    flex items-center justify-center 
+                    transition-transform duration-300 
+                    ${
+                      page * pageSize < totalProducts
+                        ? 'group-hover:scale-132'
+                        : ''
+                    }
+                    `}
+                  >
+                    <IoMdArrowRoundForward />
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

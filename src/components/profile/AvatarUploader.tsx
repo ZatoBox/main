@@ -63,90 +63,61 @@ const AvatarUploader: React.FC<Props> = ({
   };
 
   return (
-    <div className='flex items-center space-x-4'>
-      <div className='relative'>
-        <div className='flex items-center justify-center w-32 h-32 rounded-full bg-[#E28E18]'>
+    <div className="flex items-center space-x-4">
+      <div className="relative group">
+        <div className="flex items-center justify-center w-32 h-32 rounded-full bg-orange-100 border border-orange-200">
           {uploading ? (
-            <div className='flex items-center justify-center w-8 h-8'>
-              <div className='w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
-            </div>
+            <div className="w-6 h-6 border-2 border-orange-400 border-t-transparent rounded-full animate-spin"></div>
           ) : imageUrl ? (
             <img
               src={imageUrl}
-              alt='avatar'
-              className='object-cover w-32 h-32 rounded-full'
+              alt="Profile"
+              className="object-cover w-32 h-32 rounded-full"
             />
           ) : (
             <svg
-              width='32'
-              height='32'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              className='text-white'
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="text-orange-400"
             >
-              <path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' />
-              <circle cx='12' cy='7' r='4' />
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
             </svg>
           )}
         </div>
+
         {!uploading && (
-          <label className='absolute flex items-center justify-center w-8 h-8 transition-colors rounded-full cursor-pointer -bottom-1 -right-1 bg-[#A94D14] hover:bg-[#8A3D16]'>
+          <label className="absolute bottom-0 right-0 w-8 h-8 bg-white border border-orange-300 rounded-full cursor-pointer flex items-center justify-center hover:bg-orange-50 transition-colors shadow-sm">
             <input
-              type='file'
-              accept='image/*'
-              className='hidden'
+              type="file"
+              accept="image/*"
+              className="hidden"
               onChange={handleFileChange}
               disabled={uploading}
             />
             <svg
-              width='16'
-              height='16'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              className='text-white'
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-orange-500"
             >
-              <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' />
-              <polyline points='7 10 12 15 17 10' />
-              <line x1='12' y1='15' x2='12' y2='3' />
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+              <circle cx="12" cy="13" r="3" />
             </svg>
           </label>
         )}
-        {imageUrl && !uploading && (
-          <button
-            onClick={handleDeleteImage}
-            className='absolute flex items-center justify-center w-6 h-6 transition-colors rounded-full cursor-pointer -top-1 -right-1 bg-red-500 hover:bg-red-600'
-          >
-            <svg
-              width='12'
-              height='12'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              className='text-white'
-            >
-              <line x1='18' y1='6' x2='6' y2='18'></line>
-              <line x1='6' y1='6' x2='18' y2='18'></line>
-            </svg>
-          </button>
-        )}
       </div>
-      <div>
-        <div className='text-sm font-medium text-[#A94D14]'>
-          {uploading ? 'Uploading...' : 'Change avatar'}
-        </div>
-        <div className='text-sm text-[#88888888]'>PNG, JPG up to 5MB</div>
-      </div>
+
+      {uploading && (
+        <div className="text-sm text-orange-500 font-medium">Subiendo...</div>
+      )}
     </div>
   );
 };

@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Test for tailwindcss
 tailwind.config.js
+
+# Github
+.github

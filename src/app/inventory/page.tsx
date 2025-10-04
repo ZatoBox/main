@@ -15,6 +15,7 @@ import InventoryFilters from '@/components/inventory/InventoryFilters';
 import InventoryGrid from '@/components/inventory/InventoryGrid';
 import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
 import { mapPolarProductToProduct } from '@/utils/polar.utils';
+import { useToast } from '@/hooks/use-toast';
 
 const InventoryPage: React.FC = () => {
   const router = useRouter();
@@ -32,6 +33,8 @@ const InventoryPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isArchivingSelected, setIsArchivingSelected] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -53,13 +56,23 @@ const InventoryPage: React.FC = () => {
           const availableProducts = rows.map(mapPolarProductToProduct);
           setInventoryItems(availableProducts);
           setError(null);
+        } else if (response && response.success === false) {
+          setInventoryItems([]);
+          setError(response.message || 'Error loading inventory');
         } else {
+          setInventoryItems([]);
+          setError(null);
+        }
+      } catch (err: any) {
+        const errorMessage = err?.message || '';
+        if (errorMessage.toLowerCase().includes('api key')) {
+          setInventoryItems([]);
+          setError('polar_not_configured');
+        } else {
+          console.error('Error loading inventory:', err);
           setInventoryItems([]);
           setError('Error loading inventory');
         }
-      } catch (err) {
-        setInventoryItems([]);
-        setError('Error loading inventory');
       } finally {
         setLoading(false);
       }
@@ -86,19 +99,21 @@ const InventoryPage: React.FC = () => {
     };
   }, []);
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = (ids: string[], checked: boolean) => {
     if (checked) {
-      setSelectedItems(inventoryItems.map((item) => item.id.toString()));
+      setSelectedItems((prev) => Array.from(new Set([...prev, ...ids])));
     } else {
-      setSelectedItems([]);
+      setSelectedItems((prev) =>
+        prev.filter((itemId) => !ids.includes(itemId))
+      );
     }
   };
 
   const handleSelectItem = (id: string, checked: boolean) => {
     if (checked) {
-      setSelectedItems([...selectedItems, id]);
+      setSelectedItems((prev) => (prev.includes(id) ? prev : [...prev, id]));
     } else {
-      setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
+      setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
     }
   };
 
@@ -157,6 +172,69 @@ const InventoryPage: React.FC = () => {
     setIsDeleting(false);
   };
 
+  const handleArchiveSelected = async () => {
+    if (selectedItems.length === 0 || isArchivingSelected) {
+      return;
+    }
+
+    setIsArchivingSelected(true);
+    try {
+      const response = await productsAPI.archiveBulk(selectedItems);
+      const successfulIds = Array.isArray(response?.results)
+        ? response.results
+            .filter((r: any) => r && typeof r.id === 'string')
+            .map((r: any) => r.id)
+        : [];
+      const updatedMap = new Map<string, Product>();
+      if (Array.isArray(response?.results)) {
+        response.results.forEach((r: any) => {
+          if (r && typeof r.id === 'string' && r.product) {
+            const mapped = mapPolarProductToProduct(r.product) as Product;
+            updatedMap.set(r.id, mapped);
+          }
+        });
+      }
+      if (updatedMap.size > 0) {
+        setInventoryItems((prev) =>
+          prev.map((item) => {
+            const next = updatedMap.get(item.id);
+            return next ? next : item;
+          })
+        );
+      }
+      if (successfulIds.length > 0) {
+        toast({
+          title: 'Productos archivados',
+          description: `${successfulIds.length} productos archivados correctamente.`,
+        });
+      }
+      const errorsCount = Array.isArray(response?.errors)
+        ? response.errors.length
+        : 0;
+      if (errorsCount > 0) {
+        toast({
+          title: 'Algunos productos no se archivaron',
+          description: 'Intenta de nuevo más tarde.',
+          variant: 'destructive',
+        });
+      }
+      setSelectedItems((prev) =>
+        prev.filter((id) => !successfulIds.includes(id))
+      );
+    } catch (err) {
+      toast({
+        title: 'Error al archivar',
+        description:
+          err instanceof Error
+            ? err.message
+            : 'No se pudieron archivar los productos seleccionados.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsArchivingSelected(false);
+    }
+  };
+
   const categoryIdMap: Record<string, string> = Object.fromEntries(
     categories.map((c) => [c.id, c.name])
   );
@@ -184,10 +262,21 @@ const InventoryPage: React.FC = () => {
     const names = ids
       .map((id: string) => categoryIdMap[id])
       .filter(Boolean) as string[];
+
+    const polarMetadata = (p as any).metadata;
+    const polarCategory = polarMetadata?.category;
+
+    let categoryDisplay = 'Uncategorized';
+    if (polarCategory && typeof polarCategory === 'string') {
+      categoryDisplay = polarCategory;
+    } else if (names.length > 0) {
+      categoryDisplay = names.join(', ');
+    }
+
     return {
       id: p.id,
       name: p.name,
-      category: names.length === 0 ? 'Uncategorized' : names.join(', '),
+      category: categoryDisplay,
       status: p.status ?? 'inactive',
       stock: p.stock,
       price: p.price,
@@ -199,8 +288,27 @@ const InventoryPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen  bg-bg-main">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
-          <p className="text-text-secondary">Loading products...</p>
+          <p className="text-text-secondary">Cargando productos...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (error === 'polar_not_configured') {
+    const PolarSetupPrompt = require('@/components/PolarSetupPrompt').default;
+    return (
+      <div className="min-h-screen bg-bg-main">
+        <InventoryHeader
+          onBack={() => router.push('/')}
+          onCreate={() => router.push('/new-product')}
+          selectedCount={selectedItems.length}
+          onArchiveSelected={handleArchiveSelected}
+          archivingSelected={isArchivingSelected}
+        />
+        <PolarSetupPrompt
+          title="Configuración de Inventario Requerida"
+          subtitle="Configura tus credenciales de API de Polar para gestionar tu inventario y rastrear los niveles de stock de productos."
+        />
       </div>
     );
   }
@@ -229,7 +337,7 @@ const InventoryPage: React.FC = () => {
             onClick={() => window.location.reload()}
             className="px-4 py-2 font-medium text-black transition-colors rounded-lg bg-primary hover:bg-primary-600"
           >
-            Retry
+            Reintentar
           </button>
         </div>
       </div>
@@ -241,6 +349,9 @@ const InventoryPage: React.FC = () => {
       <InventoryHeader
         onBack={() => router.push('/')}
         onCreate={() => router.push('/new-product')}
+        selectedCount={selectedItems.length}
+        onArchiveSelected={handleArchiveSelected}
+        archivingSelected={isArchivingSelected}
       />
 
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -280,7 +391,7 @@ const InventoryPage: React.FC = () => {
                       onClick={() => setError(null)}
                       className="bg-red-50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 hover:bg-red-100"
                     >
-                      Dismiss
+                      Descartar
                     </button>
                   </div>
                 </div>
@@ -294,16 +405,17 @@ const InventoryPage: React.FC = () => {
             onSelectItem={handleSelectItem}
             onEditProduct={handleEditProduct}
             onDeleteClick={handleDeleteClick}
+            onSelectAll={handleSelectAll}
           />
 
           {filteredItems.length === 0 && (
             <div className="p-12 text-center border rounded-lg shadow-sm bg-bg-surface border-divider">
               <Package size={48} className="mx-auto mb-4 text-gray-300" />
               <h3 className="mb-2 text-lg font-medium text-text-primary">
-                No items found
+                No se encontraron elementos
               </h3>
               <p className="text-text-secondary">
-                Try adjusting the filters or create a new item.
+                Intenta ajustar los filtros o crear un nuevo elemento.
               </p>
             </div>
           )}

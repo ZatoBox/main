@@ -203,13 +203,29 @@ export const productsAPI = {
     const params = organizationId ? `?organization_id=${organizationId}` : '';
     return apiRequest(`/products/${params}`);
   },
+  archiveBulk: (ids: string[]): Promise<any> =>
+    apiRequest('/products/archive', {
+      method: 'POST',
+      data: { ids },
+    }),
 };
 
-export const getActiveProducts = async (
-  organizationId?: string
-): Promise<any> => {
-  const params = organizationId ? `?organization_id=${organizationId}` : '';
-  return apiRequest(`/products/${params}`);
+export const getActiveProducts = async ({
+  organizationId,
+  limit = 12,
+  offset = 0,
+}: {
+  organizationId?: string;
+  limit?: number;
+  offset?: number;
+} = {}): Promise<any> => {
+  const queryParams = new URLSearchParams();
+
+  if (organizationId) queryParams.append('organization_id', organizationId);
+  queryParams.append('limit', limit.toString());
+  queryParams.append('offset', offset.toString());
+
+  return apiRequest(`/products?${queryParams.toString()}`);
 };
 
 export const getAllProductsIncludingArchived = async (

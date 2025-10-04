@@ -27,6 +27,67 @@ export const ALLOWED_TYPES = [
   'application/pdf',
 ];
 
+function cleanString(value: unknown, fallback = ''): string {
+  if (value === null || value === undefined) return fallback;
+  const str = typeof value === 'string' ? value : String(value);
+  const trimmed = str.trim();
+  return trimmed || fallback;
+}
+
+function normalizeNumberString(value: unknown): string | null {
+  if (value === null || value === undefined) return null;
+  const raw = typeof value === 'string' ? value : String(value);
+  let cleaned = raw.trim().replace(/[^0-9.,-\s]/g, '');
+  if (!cleaned) return null;
+  cleaned = cleaned.replace(/\s+/g, '');
+  const hasDot = cleaned.includes('.');
+  const hasComma = cleaned.includes(',');
+  if (hasDot && hasComma) {
+    if (cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')) {
+      cleaned = cleaned.replace(/\./g, '').replace(/,/g, '.');
+    } else {
+      cleaned = cleaned.replace(/,/g, '');
+    }
+  } else if (hasComma) {
+    cleaned = cleaned.replace(/,/g, '.');
+  }
+  const num = parseFloat(cleaned);
+  if (!Number.isFinite(num)) return null;
+  return num.toFixed(2);
+}
+
+function parseQuantity(value: unknown): number {
+  if (value === null || value === undefined) return 1;
+  if (typeof value === 'number') {
+    const n = Math.floor(value);
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  }
+  const normalized = normalizeNumberString(value);
+  if (normalized) {
+    const floored = Math.floor(parseFloat(normalized));
+    if (Number.isFinite(floored) && floored > 0) return floored;
+  }
+  const digits = String(value).replace(/[^0-9]/g, '');
+  const parsed = parseInt(digits, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
+
+function buildAutoDescription(
+  name: string,
+  quantity: number,
+  unitPrice: string
+): string {
+  const safeName = cleanString(name, 'Producto');
+  const qtyText = Number.isFinite(quantity)
+    ? `${quantity} unidad${quantity === 1 ? '' : 'es'}`
+    : 'Cantidad no especificada';
+  const normalizedPrice = normalizeNumberString(unitPrice) || unitPrice;
+  const priceText = normalizedPrice
+    ? `${normalizedPrice} por unidad`
+    : 'precio no especificado';
+  return `${safeName} - ${qtyText}, ${priceText}`;
+}
+
 export async function processImageFile(params: {
   file: File;
   authHeader: string | null | undefined;
@@ -111,15 +172,139 @@ export async function processImageFile(params: {
       }
     }
 
-    const products = lineItems.length > 0 ? lineItems : undefined;
+    let subtotalAcc = 0;
+    const processedItems = (lineItems || []).map((item) => {
+      const record = item || {};
+      const unitNorm =
+        normalizeNumberString(
+          (record as any).unit_price ??
+            (record as any).price ??
+            (record as any).precio ??
+            ''
+        ) || '0.00';
+      const qty = parseQuantity(
+        (record as any).quantity ??
+          (record as any).qty ??
+          (record as any).cantidad ??
+          1
+      );
+      const providedTotal = normalizeNumberString(
+        (record as any).total_price ??
+          (record as any).total ??
+          (record as any).importe ??
+          ''
+      );
+      const unitValue = parseFloat(unitNorm);
+      const computedTotal = unitValue * qty;
+      let finalTotal = Number.isFinite(computedTotal)
+        ? computedTotal.toFixed(2)
+        : '0.00';
+      if (providedTotal) {
+        const providedValue = parseFloat(providedTotal);
+        if (Number.isFinite(providedValue)) {
+          if (Number.isFinite(computedTotal)) {
+            if (Math.abs(providedValue - computedTotal) <= 0.02) {
+              finalTotal = providedValue.toFixed(2);
+            }
+          } else {
+            finalTotal = providedValue.toFixed(2);
+          }
+        }
+      }
+      const finalTotalValue = parseFloat(finalTotal);
+      subtotalAcc += Number.isFinite(finalTotalValue) ? finalTotalValue : 0;
+
+      const autoDescription = buildAutoDescription(
+        (record as any).name ??
+          (record as any).nombre ??
+          (record as any).product ??
+          (record as any).descripcion ??
+          'Unnamed Product',
+        qty,
+        unitNorm
+      );
+
+      return {
+        ...record,
+        name: cleanString(
+          (record as any).name ??
+            (record as any).nombre ??
+            (record as any).product ??
+            (record as any).descripcion ??
+            'Unnamed Product',
+          'Unnamed Product'
+        ),
+        description: (() => {
+          const manual = cleanString(
+            (record as any).description ??
+              (record as any).descripcion ??
+              (record as any).detalles ??
+              '',
+            ''
+          );
+          if (manual && manual.toLowerCase() !== 'no description') {
+            return manual;
+          }
+          return autoDescription;
+        })(),
+        category: cleanString(
+          (record as any).category ?? (record as any).categoria ?? 'General',
+          'General'
+        ),
+        unit_price: unitNorm,
+        quantity: qty,
+        total_price: finalTotal,
+      } as Record<string, unknown>;
+    });
+
+    const metadataSubtotal =
+      normalizeNumberString(
+        (metadata as any)?.subtotal ??
+          (metadata as any)?.Subtotal ??
+          (metadata as any)?.sub_total ??
+          ''
+      ) || subtotalAcc.toFixed(2);
+    const metadataIva =
+      normalizeNumberString(
+        (metadata as any)?.iva ?? (metadata as any)?.tax ?? ''
+      ) || '';
+    let metadataTotal =
+      normalizeNumberString(
+        (metadata as any)?.total ?? (metadata as any)?.Total ?? ''
+      ) || '';
+    const subtotalNumber = parseFloat(metadataSubtotal);
+    const ivaNumber = metadataIva ? parseFloat(metadataIva) : 0;
+    if (!metadataTotal) {
+      if (Number.isFinite(subtotalNumber)) {
+        const sum =
+          subtotalNumber + (Number.isFinite(ivaNumber) ? ivaNumber : 0);
+        metadataTotal = sum.toFixed(2);
+      }
+    }
+
+    const finalMetadata: Record<string, unknown> = {
+      company_name: cleanString(
+        (metadata as any)?.company_name ?? (metadata as any)?.company ?? ''
+      ),
+      ruc: cleanString((metadata as any)?.ruc ?? ''),
+      date: cleanString((metadata as any)?.date ?? ''),
+      invoice_number: cleanString(
+        (metadata as any)?.invoice_number ?? (metadata as any)?.invoice ?? ''
+      ),
+      subtotal: metadataSubtotal,
+      iva: metadataIva,
+      total: metadataTotal,
+    };
+
+    const products = processedItems.length > 0 ? processedItems : undefined;
 
     return {
       text: extractedText,
       confidence: 0.95,
       language: 'es',
       products,
-      line_items: lineItems,
-      metadata,
+      line_items: processedItems,
+      metadata: finalMetadata,
     };
   } catch (e) {
     return { text: extractedText, confidence: 0.95, language: 'es' };

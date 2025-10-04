@@ -197,7 +197,7 @@ const RegisterForm: React.FC = () => {
               className='font-medium transition-colors'
               style={{ color: 'black' }}
             >
-              Terms and Conditions
+              Terminos y Condiciones
             </button>{' '}
             and{' '}
             <button
@@ -205,7 +205,7 @@ const RegisterForm: React.FC = () => {
               className='font-medium transition-colors'
               style={{ color: 'black' }}
             >
-              Privacy Policy
+              Política de Privacidad
             </button>
           </label>
         </div>

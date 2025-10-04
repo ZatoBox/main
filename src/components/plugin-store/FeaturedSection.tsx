@@ -16,7 +16,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({
   return (
     <div className='mb-6 sm:mb-8'>
       <h2 className='mb-3 sm:mb-4 text-lg sm:text-xl font-bold text-black'>
-        🔥 MOST INSTALLS By popular demand
+        🔥 MAYORES INSTALACIONES por Popularidad
       </h2>
       <div className='grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 w-full min-w-0'>
         {plugins.slice(0, 3).map((plugin) => {
@@ -68,28 +68,28 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({
                     onClick={() => onToggle(plugin.id)}
                     className='w-full px-4 py-2 font-medium text-red-800 transition-colors bg-red-100 rounded-lg hover:bg-red-200'
                   >
-                    Deactivate
+                    Desactivar
                   </button>
                 ) : plugin.status === 'inactive' ? (
                   <button
                     onClick={() => onToggle(plugin.id)}
                     className='w-full px-4 py-2 font-medium text-green-800 transition-colors bg-green-100 rounded-lg hover:bg-green-200'
                   >
-                    Activate
+                    Activar
                   </button>
                 ) : plugin.status === 'coming-soon' ? (
                   <button
                     disabled
                     className='w-full px-4 py-2 font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed'
                   >
-                    Coming Soon
+                    En Desarrollo
                   </button>
                 ) : (
                   <button
                     disabled
                     className='w-full px-4 py-2 font-medium text-yellow-800 bg-yellow-100 rounded-lg cursor-not-allowed'
                   >
-                    Maintenance
+                    En Mantenimiento
                   </button>
                 )}
               </div>
