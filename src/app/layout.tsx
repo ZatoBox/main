@@ -10,6 +10,21 @@ export const metadata: Metadata = {
   title: 'ZatoBox',
   description: 'Programming made easy',
   generator: 'ZatoBox',
+  openGraph: {
+    title: 'ZatoBox', 
+    description: 'Programming made easy', 
+    url: '', //Aqui hay que agregar la URL cuando la app este en produccion
+    siteName: 'ZatoBox',
+    images: [
+      {
+        url: '/images/logozato.png', 
+        width: 800, 
+        height: 600, 
+        alt: 'ZatoBox Logo', 
+      },
+    ],
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
