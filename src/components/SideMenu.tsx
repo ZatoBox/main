@@ -310,11 +310,16 @@ const SideMenu: React.FC = () => {
           >
             {/* Logo/Brand */}
             <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
-              <img
-                src="/images/logozato.png"
-                alt="ZatoBox Logo"
-                className="w-auto h-10"
-              />
+              <div
+                onClick={() => router.push('/home')}
+                className="cursor-pointer"
+              >
+                <img
+                  src="/images/logozato.png"
+                  alt="ZatoBox Logo"
+                  className="w-auto h-10"
+                />
+              </div>
             </div>
 
             {/* Main Navigation */}
@@ -366,11 +371,16 @@ const SideMenu: React.FC = () => {
           <div className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-white md:border-r md:border-[#CBD5E1] md:z-40">
             {/* Logo/Brand */}
             <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
-              <img
-                src="/images/logozato.png"
-                alt="ZatoBox Logo"
-                className="w-auto h-10"
-              />
+              <div
+                onClick={() => router.push('/home')}
+                className="cursor-pointer"
+              >
+                <img
+                  src="/images/logozato.png"
+                  alt="ZatoBox Logo"
+                  className="w-auto h-10"
+                />
+              </div>
             </div>
 
             {/* Main Navigation */}
