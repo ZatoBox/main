@@ -10,6 +10,21 @@ export const metadata: Metadata = {
   title: 'ZatoBox',
   description: 'Programming made easy',
   generator: 'ZatoBox',
+  openGraph: {
+    title: 'ZatoBox',
+    description: 'Programming made easy',
+    url: 'https://zatobox.io',
+    siteName: 'ZatoBox',
+    images: [
+      {
+        url: '/images/logozato.png',
+        width: 800,
+        height: 600,
+        alt: 'ZatoBox Logo',
+      },
+    ],
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
@@ -18,8 +33,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='es' className={`${GeistSans.variable}`}>
-      <body className='antialiased'>
+    <html lang="es" className={`${GeistSans.variable}`}>
+      <body className="antialiased">
         <PluginProvider>
           <LanguageProvider>
             <AuthProvider>
