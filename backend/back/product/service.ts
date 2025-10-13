@@ -17,47 +17,35 @@ export class ProductService {
     product_data: CreateProductRequest,
     creator_id: string
   ): Promise<Product> {
-    const unit_val = (product_data as any).unit ?? product_data.unit;
-    const type_val =
-      (product_data as any).product_type ?? product_data.product_type;
-    const category_ids_val = (product_data as any).category_ids || [];
-    if (!Array.isArray(category_ids_val))
-      throw new Error('category_ids must be a list');
-    for (const cid of category_ids_val) {
-      if (typeof cid !== 'string' || !cid)
-        throw new Error('Invalid category id in category_ids');
-    }
-    const initial_images: string[] = [];
-    if (initial_images.length > MAX_IMAGES)
+    const categories = Array.isArray(product_data.categories)
+      ? product_data.categories
+      : [];
+    const images = Array.isArray(product_data.images)
+      ? product_data.images.slice(0, MAX_IMAGES)
+      : [];
+
+    if (images.length > MAX_IMAGES) {
       throw new Error('Maximum 4 images allowed');
+    }
+
     return this.repo.createProduct({
+      creator_id: String(creator_id),
       name: product_data.name,
       description: product_data.description ?? null,
-      price: Number(product_data.price),
       stock: Number(product_data.stock),
-      unit: unit_val,
-      product_type: type_val,
-      category_ids: category_ids_val,
+      categories,
+      price: Number(product_data.price),
       sku: product_data.sku ?? null,
-      min_stock: Number((product_data as any).min_stock ?? 0),
-      status: (product_data as any).status ?? 'active',
-      weight: (product_data as any).weight ?? null,
-      localization: (product_data as any).localization ?? null,
-      creator_id: String(creator_id),
-      images: initial_images,
+      images,
+      active: true,
     });
   }
 
-  async listProducts(creator_id: string) {
-    return this.repo.findByCreator(creator_id);
-  }
-
-  async searchByCategory(category: string) {
-    return this.repo.findByName(category);
-  }
-
-  async searchByName(name: string) {
-    return this.repo.findByName(name);
+  async listProducts(creator_id: string, includeInactive = false) {
+    if (includeInactive) {
+      return this.repo.findByCreator(creator_id);
+    }
+    return this.repo.findActiveByCreator(creator_id);
   }
 
   async getProduct(product_id: string) {
@@ -69,107 +57,72 @@ export class ProductService {
 
   async updateProduct(
     product_id: string,
-    updates: Record<string, any>,
-    user_timezone: string = 'UTC'
-  ) {
+    updates: UpdateProductRequest
+  ): Promise<Product> {
     if (!product_id) throw new Error('Invalid product ID');
-    const allowed_fields = [
-      'name',
-      'description',
-      'price',
-      'stock',
-      'category_ids',
-      'images',
-      'sku',
-      'weight',
-      'localization',
-      'min_stock',
-      'status',
-      'product_type',
-      'unit',
-    ];
-    for (const field of Object.keys(updates)) {
-      if (!allowed_fields.includes(field))
-        throw new Error(`Invalid field: ${field}`);
+
+    const cleanUpdates: Record<string, any> = {};
+
+    if (updates.name !== undefined) {
+      cleanUpdates.name = updates.name;
     }
-    for (const fld of [
-      'product_type',
-      'unit',
-      'category_ids',
-      'description',
-      'localization',
-      'sku',
-      'status',
-    ]) {
-      const val = updates[fld];
-      if (val === '' || val === null || val === undefined) delete updates[fld];
+
+    if (updates.description !== undefined) {
+      cleanUpdates.description = updates.description;
     }
-    if ('category_ids' in updates) {
-      if (!Array.isArray(updates['category_ids']))
-        throw new Error('category_ids must be a list');
-      const cleaned: string[] = [];
-      for (const cid of updates['category_ids']) {
-        if (typeof cid !== 'string' || !cid)
-          throw new Error('Invalid category id in category_ids');
-        cleaned.push(cid);
-      }
-      updates['category_ids'] = cleaned;
+
+    if (updates.price !== undefined) {
+      const v = Number(updates.price);
+      if (Number.isNaN(v) || v < 0) throw new Error('Invalid price value');
+      cleanUpdates.price = v;
     }
-    if ('price' in updates) {
-      const v = Number(updates['price']);
-      if (Number.isNaN(v) || v <= 0) throw new Error('Invalid price value');
-      updates['price'] = v;
-    }
-    if ('stock' in updates) {
-      const v = Number(updates['stock']);
+
+    if (updates.stock !== undefined) {
+      const v = Number(updates.stock);
       if (!Number.isInteger(v) || v < 0) throw new Error('Invalid stock value');
-      updates['stock'] = v;
+      cleanUpdates.stock = v;
     }
-    if ('min_stock' in updates) {
-      const v = Number(updates['min_stock']);
-      if (!Number.isInteger(v) || v < 0)
-        throw new Error('Invalid min_stock value');
-      updates['min_stock'] = v;
+
+    if (updates.categories !== undefined) {
+      if (!Array.isArray(updates.categories)) {
+        throw new Error('categories must be an array');
+      }
+      cleanUpdates.categories = updates.categories;
     }
-    if ('weight' in updates) {
-      const v = Number(updates['weight']);
-      if (Number.isNaN(v) || v < 0) throw new Error('Invalid weight value');
-      updates['weight'] = v;
+
+    if (updates.sku !== undefined) {
+      cleanUpdates.sku = updates.sku;
     }
-    return this.repo.updateProduct(product_id, updates);
-  }
 
-  async addImages(product_id: string, new_images: string[]) {
-    if (!product_id) throw new Error('Invalid product ID');
-    if (new_images.length > MAX_IMAGES)
-      throw new Error('Maximum 4 images allowed');
-    const product = await this.repo.findById(product_id);
-    if (!product) throw new Error('Product not found');
-    const current = product.images || [];
-    if (current.length + new_images.length > MAX_IMAGES)
-      throw new Error('Maximum 4 images allowed');
-    return this.repo.addImages(product_id, new_images);
-  }
+    if (updates.images !== undefined) {
+      if (!Array.isArray(updates.images)) {
+        throw new Error('images must be an array');
+      }
+      if (updates.images.length > MAX_IMAGES) {
+        throw new Error('Maximum 4 images allowed');
+      }
+      cleanUpdates.images = updates.images;
+    }
 
-  async getImages(product_id: string) {
-    if (!product_id) throw new Error('Invalid product ID');
-    return this.repo.getImages(product_id);
-  }
+    if (updates.active !== undefined) {
+      cleanUpdates.active = Boolean(updates.active);
+    }
 
-  async deleteImage(product_id: string, image_index: number) {
-    if (!product_id) throw new Error('Invalid product ID');
-    return this.repo.deleteImage(product_id, image_index);
-  }
-
-  async updateImages(product_id: string, new_images: string[]) {
-    if (!product_id) throw new Error('Invalid product ID');
-    if (new_images.length > MAX_IMAGES)
-      throw new Error('Maximum 4 images allowed');
-    return this.repo.updateImages(product_id, new_images);
+    return this.repo.updateProduct(product_id, cleanUpdates);
   }
 
   async deleteProduct(product_id: string) {
     if (!product_id) throw new Error('Invalid product ID');
     return this.repo.deleteProduct(product_id);
+  }
+
+  async archiveProduct(product_id: string) {
+    if (!product_id) throw new Error('Invalid product ID');
+    return this.repo.updateProduct(product_id, { active: false });
+  }
+
+  async activateProduct(product_id: string) {
+    if (!product_id) throw new Error('Invalid product ID');
+    return this.repo.updateProduct(product_id, { active: true });
   }
 }

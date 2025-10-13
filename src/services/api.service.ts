@@ -151,44 +151,10 @@ export const authAPI = {
 
 /// Products
 export const productsAPI = {
-  create: (productData: any, organizationId?: string): Promise<any> => {
-    if (productData && productData.images && productData.images.length > 0) {
-      const form = new FormData();
-      form.append('name', productData.name);
-      if (productData.description)
-        form.append('description', productData.description);
-      form.append(
-        'billing_interval',
-        productData.billing_interval || productData.recurring_interval || 'once'
-      );
-      form.append(
-        'price',
-        String(
-          productData.price ||
-            (productData.prices?.[0]?.price_amount || 0) / 100
-        )
-      );
-      form.append(
-        'stock',
-        String(productData.metadata?.quantity || productData.stock || 0)
-      );
-      const img = productData.images[0];
-      form.append('image', img);
-      return apiRequest('/products/', {
-        method: 'POST',
-        data: form,
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-    }
-    return apiRequest('/products/', {
+  create: (productData: any): Promise<any> =>
+    apiRequest('/products/', {
       method: 'POST',
-      data: { ...productData },
-    });
-  },
-  createBulk: (products: any[]): Promise<any> =>
-    apiRequest('/products/bulk', {
-      method: 'POST',
-      data: { products },
+      data: productData,
     }),
   getById: (productId: string): Promise<any> =>
     apiRequest(`/products/?id=${productId}`),
@@ -199,63 +165,19 @@ export const productsAPI = {
     }),
   delete: (productId: string): Promise<any> =>
     apiRequest(`/products/?id=${productId}`, { method: 'DELETE' }),
-  list: (organizationId?: string): Promise<any> => {
-    const params = organizationId ? `?organization_id=${organizationId}` : '';
+  list: (includeInactive?: boolean): Promise<any> => {
+    const params = includeInactive ? '?include_inactive=true' : '';
     return apiRequest(`/products/${params}`);
   },
-  archiveBulk: (ids: string[]): Promise<any> =>
-    apiRequest('/products/archive', {
-      method: 'POST',
-      data: { ids },
-    }),
 };
 
-export const getActiveProducts = async ({
-  organizationId,
-  limit = 12,
-  offset = 0,
-}: {
-  organizationId?: string;
-  limit?: number;
-  offset?: number;
-} = {}): Promise<any> => {
-  const queryParams = new URLSearchParams();
-
-  if (organizationId) queryParams.append('organization_id', organizationId);
-  queryParams.append('limit', limit.toString());
-  queryParams.append('offset', offset.toString());
-
-  return apiRequest(`/products?${queryParams.toString()}`);
+export const getActiveProducts = async (): Promise<any> => {
+  return apiRequest('/products/');
 };
 
-export const getAllProductsIncludingArchived = async (
-  organizationId?: string
-): Promise<any> => {
-  const queryParts: string[] = [];
-  if (organizationId) {
-    queryParts.push(`organization_id=${encodeURIComponent(organizationId)}`);
-  }
-  queryParts.push('include_archived=true');
-  const query = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
-  return apiRequest(`/products/${query}`);
+export const getAllProducts = async (): Promise<any> => {
+  return apiRequest('/products/?include_inactive=true');
 };
-
-export const getProductsByUserId = async (
-  userId: string,
-  organizationId?: string
-): Promise<any> => {
-  const params = organizationId ? `?organization_id=${organizationId}` : '';
-  return apiRequest(`/products/user/${userId}${params}`);
-};
-
-export const getProductByUserId = async (
-  userId: string,
-  productId: string
-): Promise<any> => {
-  return apiRequest(`/products/user/${userId}/${productId}`);
-};
-
-export const getAllProducts = getAllProductsIncludingArchived;
 
 /// Inventory
 export const inventoryAPI = {

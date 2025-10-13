@@ -48,42 +48,19 @@ export interface RegisterRequest {
 }
 
 /// Products
-export enum ProductType {
-  PHYSICAL_PRODUCT = 'Physical Product',
-  SERVICE = 'Service',
-  DIGITAL = 'Digital',
-}
-
-export enum ProductStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-}
-
-export enum ProductUnity {
-  PER_ITEM = 'Per item',
-  PER_KILOGRAM = 'Per kilogram',
-  PER_LITER = 'Per liter',
-  PER_METRO = 'Per metro',
-}
-
 export interface Product {
   id: string;
+  creator_id: string;
   name: string;
-  description?: string;
-  price: number;
+  description: string | null;
   stock: number;
-  min_stock: number;
-  category_ids?: string[];
-  images?: string[];
-  status: ProductStatus;
-  weight?: number;
-  sku?: string;
-  creator_id?: string;
-  unit: ProductUnity;
-  product_type: ProductType;
-  localization?: string;
+  categories: string[];
+  price: number;
+  sku: string | null;
+  images: string[];
+  active: boolean;
   created_at: string;
-  last_updated: string;
+  updated_at: string;
 }
 
 export interface Category {
@@ -100,32 +77,23 @@ export interface CategoriesResponse {
 
 export interface CreateProductRequest {
   name: string;
+  description?: string | null;
   price: number;
   stock: number;
-  unit: ProductUnity;
-  product_type: ProductType;
-  category_ids?: string[];
-  description: string;
-  sku: string;
-  weight?: number;
-  localization?: string;
-  status: ProductStatus;
-  min_stock?: number;
+  categories?: string[];
+  sku?: string | null;
+  images?: string[];
 }
 
 export interface UpdateProductRequest {
   name?: string;
-  description?: string;
+  description?: string | null;
   price?: number;
   stock?: number;
-  category_ids?: string[];
-  sku?: string;
-  weight?: number;
-  localization?: string;
-  min_stock?: number;
-  status?: ProductStatus;
-  product_type?: ProductType;
-  unit?: ProductUnity;
+  categories?: string[];
+  sku?: string | null;
+  images?: string[];
+  active?: boolean;
 }
 
 export interface ProductResponse {

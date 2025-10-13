@@ -3,18 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Package } from 'lucide-react';
-import {
-  productsAPI,
-  categoriesAPI,
-  getAllProductsIncludingArchived,
-} from '@/services/api.service';
+import { productsAPI } from '@/services/api.service';
 import { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import InventoryHeader from '@/components/inventory/InventoryHeader';
 import InventoryFilters from '@/components/inventory/InventoryFilters';
 import InventoryGrid from '@/components/inventory/InventoryGrid';
 import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
-import { mapPolarProductToProduct } from '@/utils/polar.utils';
 import { useToast } from '@/hooks/use-toast';
 
 const InventoryPage: React.FC = () => {
@@ -43,36 +38,28 @@ const InventoryPage: React.FC = () => {
       }
 
       if (!isAuthenticated) {
-        setError('You must log in to view inventory');
+        setError('Debes iniciar sesión para ver el inventario');
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        const response = await getAllProductsIncludingArchived();
+        const response = await productsAPI.list(true);
         if (response && response.success && Array.isArray(response.products)) {
-          const rows: any[] = response.products;
-          const availableProducts = rows.map(mapPolarProductToProduct);
-          setInventoryItems(availableProducts);
+          setInventoryItems(response.products);
           setError(null);
         } else if (response && response.success === false) {
           setInventoryItems([]);
-          setError(response.message || 'Error loading inventory');
+          setError(response.message || 'Error al cargar inventario');
         } else {
           setInventoryItems([]);
           setError(null);
         }
       } catch (err: any) {
-        const errorMessage = err?.message || '';
-        if (errorMessage.toLowerCase().includes('api key')) {
-          setInventoryItems([]);
-          setError('polar_not_configured');
-        } else {
-          console.error('Error loading inventory:', err);
-          setInventoryItems([]);
-          setError('Error loading inventory');
-        }
+        console.error('Error loading inventory:', err);
+        setInventoryItems([]);
+        setError(err?.message || 'Error al cargar inventario');
       } finally {
         setLoading(false);
       }
@@ -86,9 +73,21 @@ const InventoryPage: React.FC = () => {
     const loadCats = async () => {
       setLoadingCategories(true);
       try {
-        const res = await categoriesAPI.list();
-        if (active && (res as any).success)
-          setCategories((res as any).categories);
+        const uniqueCategories = new Set<string>();
+        inventoryItems.forEach((item) => {
+          if (Array.isArray(item.categories)) {
+            item.categories.forEach((cat) => {
+              if (cat && typeof cat === 'string') {
+                uniqueCategories.add(cat);
+              }
+            });
+          }
+        });
+        const catArray = Array.from(uniqueCategories).map((name, idx) => ({
+          id: `cat-${idx}`,
+          name,
+        }));
+        if (active) setCategories(catArray);
       } finally {
         if (active) setLoadingCategories(false);
       }
@@ -97,7 +96,7 @@ const InventoryPage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [inventoryItems]);
 
   const handleSelectAll = (ids: string[], checked: boolean) => {
     if (checked) {
@@ -139,27 +138,30 @@ const InventoryPage: React.FC = () => {
 
     try {
       const response = await productsAPI.update(deleteConfirmId, {
-        is_archived: true,
+        active: false,
       });
 
       if (response.success) {
-        const updatedProduct = mapPolarProductToProduct(response.product);
         setInventoryItems((prevItems) =>
           prevItems.map((item) =>
-            item.id === deleteConfirmId ? (updatedProduct as Product) : item
+            item.id === deleteConfirmId ? response.product : item
           )
         );
         setSelectedItems((prevSelected) =>
           prevSelected.filter((itemId) => itemId !== deleteConfirmId)
         );
+        toast({
+          title: 'Producto archivado',
+          description: 'El producto se archivó correctamente.',
+        });
         setError(null);
       } else {
-        setError('Error deleting product: ' + response.message);
+        setError('Error al archivar producto: ' + response.message);
       }
     } catch (err) {
       setError(
-        'Error deleting product: ' +
-          (err instanceof Error ? err.message : 'Unknown error')
+        'Error al archivar producto: ' +
+          (err instanceof Error ? err.message : 'Error desconocido')
       );
     } finally {
       setIsDeleting(false);
@@ -179,47 +181,42 @@ const InventoryPage: React.FC = () => {
 
     setIsArchivingSelected(true);
     try {
-      const response = await productsAPI.archiveBulk(selectedItems);
-      const successfulIds = Array.isArray(response?.results)
-        ? response.results
-            .filter((r: any) => r && typeof r.id === 'string')
-            .map((r: any) => r.id)
-        : [];
-      const updatedMap = new Map<string, Product>();
-      if (Array.isArray(response?.results)) {
-        response.results.forEach((r: any) => {
-          if (r && typeof r.id === 'string' && r.product) {
-            const mapped = mapPolarProductToProduct(r.product) as Product;
-            updatedMap.set(r.id, mapped);
-          }
-        });
-      }
-      if (updatedMap.size > 0) {
+      const updates = selectedItems.map(async (id) => {
+        try {
+          const response = await productsAPI.update(id, { active: false });
+          return { success: true, id, product: response.product };
+        } catch (error) {
+          return { success: false, id, error };
+        }
+      });
+
+      const results = await Promise.all(updates);
+      const successful = results.filter((r) => r.success);
+      const failed = results.filter((r) => !r.success);
+
+      if (successful.length > 0) {
         setInventoryItems((prev) =>
           prev.map((item) => {
-            const next = updatedMap.get(item.id);
-            return next ? next : item;
+            const update = successful.find((s) => s.id === item.id);
+            return update && update.product ? update.product : item;
           })
         );
-      }
-      if (successfulIds.length > 0) {
         toast({
           title: 'Productos archivados',
-          description: `${successfulIds.length} productos archivados correctamente.`,
+          description: `${successful.length} productos archivados correctamente.`,
         });
       }
-      const errorsCount = Array.isArray(response?.errors)
-        ? response.errors.length
-        : 0;
-      if (errorsCount > 0) {
+
+      if (failed.length > 0) {
         toast({
           title: 'Algunos productos no se archivaron',
-          description: 'Intenta de nuevo más tarde.',
+          description: `${failed.length} productos no pudieron archivarse.`,
           variant: 'destructive',
         });
       }
+
       setSelectedItems((prev) =>
-        prev.filter((id) => !successfulIds.includes(id))
+        prev.filter((id) => !successful.some((s) => s.id === id))
       );
     } catch (err) {
       toast({
@@ -235,20 +232,14 @@ const InventoryPage: React.FC = () => {
     }
   };
 
-  const categoryIdMap: Record<string, string> = Object.fromEntries(
-    categories.map((c) => [c.id, c.name])
-  );
-  const nameToId: Record<string, string> = Object.fromEntries(
-    categories.map((c) => [c.name, c.id])
-  );
   const filteredItems = inventoryItems.filter((item) => {
-    const ids = Array.isArray((item as any).category_ids)
-      ? (item as any).category_ids
+    const itemCategories = Array.isArray(item.categories)
+      ? item.categories
       : [];
-    const targetId = categoryFilter === 'all' ? null : nameToId[categoryFilter];
-    const matchesCategory = !targetId || ids.includes(targetId);
-    const matchesStatus =
-      statusFilter === 'all' || item.status === statusFilter;
+    const matchesCategory =
+      categoryFilter === 'all' || itemCategories.includes(categoryFilter);
+    const itemStatus = item.active ? 'active' : 'inactive';
+    const matchesStatus = statusFilter === 'all' || itemStatus === statusFilter;
     const matchesSearch = item.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -256,28 +247,16 @@ const InventoryPage: React.FC = () => {
   });
 
   const uiItems = filteredItems.map((p) => {
-    const ids = Array.isArray((p as any).category_ids)
-      ? (p as any).category_ids
-      : [];
-    const names = ids
-      .map((id: string) => categoryIdMap[id])
-      .filter(Boolean) as string[];
-
-    const polarMetadata = (p as any).metadata;
-    const polarCategory = polarMetadata?.category;
-
-    let categoryDisplay = 'Uncategorized';
-    if (polarCategory && typeof polarCategory === 'string') {
-      categoryDisplay = polarCategory;
-    } else if (names.length > 0) {
-      categoryDisplay = names.join(', ');
-    }
+    const categoryDisplay =
+      Array.isArray(p.categories) && p.categories.length > 0
+        ? p.categories.join(', ')
+        : 'Sin categoría';
 
     return {
       id: p.id,
       name: p.name,
       category: categoryDisplay,
-      status: p.status ?? 'inactive',
+      status: p.active ? 'active' : 'inactive',
       stock: p.stock,
       price: p.price,
     };
@@ -290,25 +269,6 @@ const InventoryPage: React.FC = () => {
           <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
           <p className="text-text-secondary">Cargando productos...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (error === 'polar_not_configured') {
-    const PolarSetupPrompt = require('@/components/PolarSetupPrompt').default;
-    return (
-      <div className="min-h-screen bg-bg-main">
-        <InventoryHeader
-          onBack={() => router.push('/')}
-          onCreate={() => router.push('/new-product')}
-          selectedCount={selectedItems.length}
-          onArchiveSelected={handleArchiveSelected}
-          archivingSelected={isArchivingSelected}
-        />
-        <PolarSetupPrompt
-          title="Configuración de Inventario Requerida"
-          subtitle="Configura tus credenciales de API de Polar para gestionar tu inventario y rastrear los niveles de stock de productos."
-        />
       </div>
     );
   }

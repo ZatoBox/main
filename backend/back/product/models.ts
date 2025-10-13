@@ -3,14 +3,10 @@ export interface CreateProductRequest {
   description?: string | null;
   price: number;
   stock: number;
-  unit?: string | null;
-  product_type?: string | null;
-  category_ids?: string[] | null;
+  unlimited_stock?: boolean;
+  categories?: string[];
   sku?: string | null;
-  min_stock?: number | null;
-  status?: string | null;
-  weight?: number | null;
-  localization?: string | null;
+  images?: string[];
 }
 
 export interface UpdateProductRequest {
@@ -18,34 +14,27 @@ export interface UpdateProductRequest {
   description?: string | null;
   price?: number;
   stock?: number;
-  unit?: string | null;
-  product_type?: string | null;
-  category_ids?: string[] | null;
+  unlimited_stock?: boolean;
+  categories?: string[];
   sku?: string | null;
-  min_stock?: number | null;
-  status?: string | null;
-  weight?: number | null;
-  localization?: string | null;
+  images?: string[];
+  active?: boolean;
 }
 
 export interface Product {
   id: string;
+  creator_id: string;
   name: string;
-  description?: string | null;
-  price: number;
+  description: string | null;
   stock: number;
-  unit?: string | null;
-  product_type?: string | null;
-  category_ids?: string[] | null;
-  sku?: string | null;
-  min_stock?: number | null;
-  status?: string | null;
-  weight?: number | null;
-  localization?: string | null;
-  images?: string[];
-  creator_id?: string | null;
-  created_at?: string | null;
-  last_updated?: string | null;
+  unlimited_stock: boolean;
+  categories: string[];
+  price: number;
+  sku: string | null;
+  images: string[];
+  active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProductResponse {
