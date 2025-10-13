@@ -266,7 +266,7 @@ const InventoryPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen  bg-bg-main">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-gray-300"></div>
           <p className="text-text-secondary">Cargando productos...</p>
         </div>
       </div>
@@ -369,7 +369,7 @@ const InventoryPage: React.FC = () => {
           />
 
           {filteredItems.length === 0 && (
-            <div className="p-12 text-center border rounded-lg shadow-sm bg-bg-surface border-divider">
+            <div className="p-12 text-center border border-gray-300 rounded-lg shadow-sm bg-bg-surface border-divider">
               <Package size={48} className="mx-auto mb-4 text-gray-300" />
               <h3 className="mb-2 text-lg font-medium text-text-primary">
                 No se encontraron elementos

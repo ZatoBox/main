@@ -313,7 +313,7 @@ const HomePage: React.FC<HomePageProps> = ({
               />
             </div>
 
-            <div className="p-6 bg-white border rounded-lg border-gray-300 animate-scale-in">
+            <div className="p-6 bg-white border border-gray-300 rounded-lg animate-scale-in">
               <ProductGrid
                 products={filteredProducts}
                 onProductClick={handleProductClick}
