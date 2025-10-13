@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     siteName: 'ZatoBox',
     images: [
       {
-        url: '/images/logozato.png',
+        url: 'images/logozatobox.png',
         width: 800,
         height: 600,
         alt: 'ZatoBox Logo',
