@@ -7,6 +7,7 @@ import LayoutWrapper from '@/components/LayoutWrapper';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://zatobox.io'),
   title: 'ZatoBox',
   description: 'Programming made easy',
   generator: 'ZatoBox',
