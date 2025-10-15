@@ -78,7 +78,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         stock: product.stock,
         sku: product.sku,
         categoryNames:
-          (product as any).category_names || product.category_ids || [],
+          (product as any).category_names|| [],
         isArchived: false,
         isRecurring: false,
         recurringInterval: null,
