@@ -9,16 +9,18 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://zatobox.io'),
   title: 'ZatoBox',
-  description: 'Programming made easy',
+  description:
+    'ZatoBox is an all-in-one platform to digitalize and automate businesses. It integrates point of sale, smart inventory, and Bitcoin-fiat payments into a modular, open ecosystem built to scale with your company.',
   generator: 'ZatoBox',
   openGraph: {
     title: 'ZatoBox',
-    description: 'Programming made easy',
+    description:
+      'ZatoBox is an all-in-one platform to digitalize and automate businesses. It integrates point of sale, smart inventory, and Bitcoin-fiat payments into a modular, open ecosystem built to scale with your company.',
     url: 'https://zatobox.io',
     siteName: 'ZatoBox',
     images: [
       {
-        url: 'images/logozatobox.png',
+        url: 'images/logo.png',
         width: 800,
         height: 600,
         alt: 'ZatoBox Logo',
