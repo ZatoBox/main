@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { X, Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 
-type PaymentMethod = 'cash' | 'zatoconnect';
+type PaymentMethod = 'cash' | 'zatoconnect' | 'crypto';
 
 interface SalesItem {
   id: string | number;
@@ -169,10 +169,10 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                 <label className="text-sm font-medium text-black">
                   Payment Method
                 </label>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => setPaymentMethod('cash')}
-                    className={`flex-1 py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
+                    className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
                       paymentMethod === 'cash'
                         ? 'bg-green-50 border-green-500 text-green-700'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -182,13 +182,23 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                   </button>
                   <button
                     onClick={() => setPaymentMethod('zatoconnect')}
-                    className={`flex-1 py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
+                    className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
                       paymentMethod === 'zatoconnect'
                         ? 'bg-orange-50 border-orange-500 text-orange-700'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
                     }`}
                   >
-                    ZatoConnect
+                    Zato
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod('crypto')}
+                    className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
+                      paymentMethod === 'crypto'
+                        ? 'bg-blue-50 border-blue-500 text-blue-700'
+                        : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    Crypto
                   </button>
                 </div>
               </div>
@@ -199,6 +209,8 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
               >
                 {paymentMethod === 'cash'
                   ? 'Create Cash Order'
+                  : paymentMethod === 'crypto'
+                  ? 'Pay with Crypto'
                   : 'Proceed to Payment'}
               </button>
 

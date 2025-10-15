@@ -362,3 +362,40 @@ export interface UpdateSubscriptionRequest {
   start_date?: string;
   end_date?: string;
 }
+
+export enum CryptoInvoiceStatus {
+  NEW = 'New',
+  PROCESSING = 'Processing',
+  EXPIRED = 'Expired',
+  INVALID = 'Invalid',
+  SETTLED = 'Settled',
+}
+
+export interface CryptoInvoice {
+  id: string;
+  invoiceId: string;
+  checkoutLink: string;
+  amount: string;
+  currency: string;
+  status: CryptoInvoiceStatus;
+  metadata?: any;
+}
+
+export interface CreateCryptoInvoiceRequest {
+  amount: string | number;
+  currency: string;
+  metadata?: any;
+  checkout?: {
+    speedPolicy?: 'HighSpeed' | 'MediumSpeed' | 'LowSpeed';
+    expirationMinutes?: number;
+    redirectURL?: string;
+  };
+}
+
+export interface CryptoInvoiceResponse {
+  success: boolean;
+  invoiceId?: string;
+  checkoutLink?: string;
+  status?: CryptoInvoiceStatus;
+  message?: string;
+}
