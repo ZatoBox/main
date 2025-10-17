@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadImageToCloudinary } from '@/utils/cloudinary';
-import { AuthService } from '@/../backend/auth/service';
+import { AuthService } from '@/backend/auth/service';
 
 async function getCurrentUserId(req: NextRequest): Promise<string> {
   const authHeader = req.headers.get('authorization');

@@ -3,7 +3,7 @@ import {
   uploadImageFromBase64,
   uploadImageToCloudinary,
 } from '@/utils/cloudinary';
-import { LayoutService } from '@/../backend/back/layout/service';
+import { LayoutService } from '@/backend/back/layout/service';
 
 const service = new LayoutService();
 

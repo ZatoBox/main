@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ProductService } from '@/../backend/back/product/service';
-import { AuthService } from '@/../backend/auth/service';
+import { ProductService } from '@/backend/back/product/service';
+import { AuthService } from '@/backend/auth/service';
 import type {
   CreateProductRequest,
   UpdateProductRequest,
-} from '@/../backend/back/product/models';
+} from '@/backend/back/product/models';
 
 async function getCurrentUserId(req: NextRequest): Promise<string> {
   const authHeader = req.headers.get('authorization');

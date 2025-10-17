@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/backend/*": ["./backend/*"]
+      "@/backend/*": ["./src/modules/backend/*"],
+      "@/microservices/*": ["./src/modules/microservices/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

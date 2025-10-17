@@ -1,28 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BTCPayService } from '@/backend/payments/btcpay/service';
-
-const btcpayService = new BTCPayService(
-  process.env.BTCPAY_URL!,
-  process.env.BTCPAY_API_KEY!
-);
+import { TorGatewayClient } from '@/backend/payments/btcpay/tor-gateway-client';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const invoiceId = params.id;
+    if (!process.env.BTCPAY_URL || !process.env.BTCPAY_API_KEY) {
+      return NextResponse.json(
+        { success: false, message: 'BTCPay configuration missing' },
+        { status: 500 }
+      );
+    }
 
-    const { status, invoice } = await btcpayService.getInvoiceStatus(invoiceId);
+    const btcpayService = new BTCPayService(
+      process.env.BTCPAY_URL,
+      process.env.BTCPAY_API_KEY
+    );
+    const torGateway = new TorGatewayClient();
+
+    const { id } = await params;
+    const invoiceId = id;
+
+    const invoice = await torGateway.get(`invoices/${invoiceId}`);
 
     return NextResponse.json({
       success: true,
-      status,
+      status: invoice.status,
       invoice: {
         id: invoice.id,
-        amount: invoice.amount,
+        amount: invoice.price,
         currency: invoice.currency,
-        checkoutLink: invoice.checkoutLink,
+        checkoutLink: invoice.url,
         createdTime: invoice.createdTime,
         expirationTime: invoice.expirationTime,
         metadata: invoice.metadata,

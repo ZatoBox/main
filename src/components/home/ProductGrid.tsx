@@ -1,11 +1,10 @@
 import React from 'react';
 import { Product } from '@/types/index';
-import { PolarProduct } from '@/types/polar';
 import ProductCard from '../ProductCard';
 
 interface Props {
-  products: (Product | PolarProduct)[];
-  onProductClick: (p: Product | PolarProduct) => void;
+  products: Product[];
+  onProductClick: (p: Product) => void;
 }
 
 const ProductGrid: React.FC<Props> = ({ products, onProductClick }) => {

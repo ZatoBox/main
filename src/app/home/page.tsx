@@ -7,10 +7,47 @@ import HomeStats from '@/components/home/HomeStats';
 import SalesDrawer from '@/components/SalesDrawer';
 import { getActiveProducts } from '@/services/api.service';
 import type { Product } from '@/types/index';
-import { PolarProduct } from '@/types/polar';
 import { useAuth } from '@/context/auth-store';
-import { mapPolarProductToProduct } from '@/utils/polar.utils';
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io';
+
+const mapProductToProduct = (p: any): Product => {
+  const prices = Array.isArray(p.prices) ? p.prices : [];
+  let price = 0;
+  if (prices.length > 0) {
+    const pr = prices[0] || {};
+    const amt = pr.price_amount ?? pr.priceAmount;
+    const amtType = pr.amount_type ?? pr.amountType;
+    if (typeof amt === 'number') {
+      price = amtType === 'free' ? 0 : amt / 100;
+    }
+  }
+  const imageUrls = Array.isArray(p.medias)
+    ? p.medias
+        .filter(
+          (m: any) =>
+            m &&
+            typeof m.public_url === 'string' &&
+            m.mime_type &&
+            m.mime_type.startsWith('image/')
+        )
+        .map((m: any) => m.public_url)
+    : [];
+  return {
+    id: String(p.id ?? ''),
+    name: p.name || 'Unnamed Product',
+    description: p.description || '',
+    price,
+    stock: p.metadata?.quantity || 0,
+    categories: [],
+    images: imageUrls,
+    active: !p.is_archived,
+    sku: String(p.id),
+    creator_id: '',
+    created_at: p.created_at || p.createdAt || new Date().toISOString(),
+    updated_at:
+      p.modified_at || p.modifiedAt || p.updatedAt || new Date().toISOString(),
+  };
+};
 
 interface HomePageProps {
   tab?: string;
@@ -59,14 +96,14 @@ const HomePage: React.FC<HomePageProps> = ({
       setError(null);
 
       const offset = (page - 1) * pageSize;
-      const response = await getActiveProducts({ limit: pageSize, offset });
+      const response = await getActiveProducts();
 
       if (response && response.success && Array.isArray(response.products)) {
         const rows: any[] = response.products;
         const filtered = rows.filter(
           (p: any) => !(p.is_archived ?? p.is_archived)
         );
-        const availableProducts = filtered.map(mapPolarProductToProduct);
+        const availableProducts = filtered.map(mapProductToProduct);
         setProducts(availableProducts);
         setTotalProducts(response.total || 0);
       } else if (response && response.success === false) {
@@ -105,8 +142,7 @@ const HomePage: React.FC<HomePageProps> = ({
     );
   }, [activeSearchTerm, enrichedProducts]);
 
-  const handleProductClick = (productUntyped: Product | PolarProduct) => {
-    const product = productUntyped as Product;
+  const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setIsDrawerOpen(true);
     setCartItems((prevCart) => {
@@ -143,7 +179,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   const handleNavigateToPayment = async (
     total: number,
-    paymentMethod: 'cash' | 'zatoconnect'
+    paymentMethod: string
   ) => {
     if (!user?.id) {
       alert('Please log in to checkout');

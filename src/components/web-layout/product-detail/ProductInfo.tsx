@@ -6,7 +6,6 @@ interface ProductInfoProps {
   productName: string;
   price: number;
   stock: number;
-  minStock: number;
   description?: string;
 }
 
@@ -15,17 +14,14 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   price,
   description,
   stock,
-  minStock,
 }) => {
   const getStockColor = () => {
     if (stock === 0) return 'text-red-500';
-    if (stock < minStock) return 'text-yellow-500';
     return 'text-green-500';
   };
 
   const getStockText = () => {
     if (stock === 0) return 'Out of stock';
-    if (stock < minStock) return `Low stock: ${stock} remaining`;
     return `${stock} In stock`;
   };
 

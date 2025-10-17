@@ -1,8 +1,5 @@
 'use client';
 
-import SwaggerUI from 'swagger-ui-react';
-import 'swagger-ui-react/swagger-ui.css';
-
 const spec = {
   openapi: '3.0.0',
   info: {
@@ -75,5 +72,12 @@ const spec = {
 };
 
 export default function SwaggerPage() {
-  return <SwaggerUI spec={spec} />;
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">API Documentation</h1>
+      <p className="text-gray-600">
+        Swagger UI documentation is temporarily unavailable.
+      </p>
+    </div>
+  );
 }

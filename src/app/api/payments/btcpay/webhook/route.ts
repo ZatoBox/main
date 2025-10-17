@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BTCPayService } from '@/backend/payments/btcpay/service';
 
-const btcpayService = new BTCPayService(
-  process.env.BTCPAY_URL!,
-  process.env.BTCPAY_API_KEY!
-);
-
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.BTCPAY_URL || !process.env.BTCPAY_API_KEY) {
+      return NextResponse.json(
+        { success: false, message: 'BTCPay configuration missing' },
+        { status: 500 }
+      );
+    }
+
+    const btcpayService = new BTCPayService(
+      process.env.BTCPAY_URL,
+      process.env.BTCPAY_API_KEY
+    );
+
     const signature = req.headers.get('btcpay-sig');
     if (!signature) {
       return NextResponse.json(

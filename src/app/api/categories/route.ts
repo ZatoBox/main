@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { CategoryService } from '@/../backend/back/category/service';
+import { CategoryService } from '@/backend/back/category/service';
 
 const service = new CategoryService();
 

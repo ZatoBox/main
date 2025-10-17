@@ -10,8 +10,46 @@ import { layoutAPI } from '@/services/api.service';
 import { getActiveProducts, getProductsByUserId } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
 import type { Layout, Product } from '@/types';
-import { mapPolarProductToProduct } from '@/utils/polar.utils';
 import WebShoppingList from '@/components/web-layout/WebShoppingList';
+
+const mapProductToProduct = (p: any): Product => {
+  const prices = Array.isArray(p.prices) ? p.prices : [];
+  let price = 0;
+  if (prices.length > 0) {
+    const pr = prices[0] || {};
+    const amt = pr.price_amount ?? pr.priceAmount;
+    const amtType = pr.amount_type ?? pr.amountType;
+    if (typeof amt === 'number') {
+      price = amtType === 'free' ? 0 : amt / 100;
+    }
+  }
+  const imageUrls = Array.isArray(p.medias)
+    ? p.medias
+        .filter(
+          (m: any) =>
+            m &&
+            typeof m.public_url === 'string' &&
+            m.mime_type &&
+            m.mime_type.startsWith('image/')
+        )
+        .map((m: any) => m.public_url)
+    : [];
+  return {
+    id: String(p.id ?? ''),
+    name: p.name || 'Unnamed Product',
+    description: p.description || '',
+    price,
+    stock: p.metadata?.quantity || 0,
+    categories: [],
+    images: imageUrls,
+    active: !p.is_archived,
+    sku: String(p.id),
+    creator_id: '',
+    created_at: p.created_at || p.createdAt || new Date().toISOString(),
+    updated_at:
+      p.modified_at || p.modifiedAt || p.updatedAt || new Date().toISOString(),
+  };
+};
 
 interface CartItem {
   id: string;
@@ -92,7 +130,7 @@ export default function ZatoLinkPage() {
 
   const handleNavigateToPayment = async (
     total: number,
-    paymentMethod: 'cash' | 'zatoconnect'
+    paymentMethod: string
   ) => {
     if (!layout?.owner_id) {
       alert('Store owner information not found');
@@ -218,7 +256,7 @@ export default function ZatoLinkPage() {
                 (p: any) => !(p.is_archived ?? p.is_archived)
               );
               const availableProducts = filtered.map(
-                mapPolarProductToProduct
+                mapProductToProduct
               ) as Product[];
               setProducts(availableProducts);
             } else {

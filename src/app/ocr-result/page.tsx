@@ -4,14 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-store';
 import { productsAPI, ocrAPI } from '@/services/api.service';
-import {
-  OCRResponse,
-  OCRLineItem,
-  CreateProductRequest,
-  ProductUnity,
-  ProductType,
-  ProductStatus,
-} from '@/types/index';
+import { OCRResponse, OCRLineItem, CreateProductRequest } from '@/types/index';
 import Header from '@/components/ocr-result/Header';
 import FileUploader from '@/components/ocr-result/FileUploader';
 import ResultOverview from '@/components/ocr-result/ResultOverview';
@@ -75,7 +68,7 @@ const OCRResultPage: React.FC = () => {
           ? result.line_items
           : (((result as unknown as { products?: OCRLineItem[] }).products ||
               []) as OCRLineItem[]);
-      const polarProducts = sourceItems
+      const products = sourceItems
         .map((item) => {
           const name =
             (item.name || '').trim().substring(0, 80) || 'Unnamed Product';
@@ -94,46 +87,34 @@ const OCRResultPage: React.FC = () => {
             ''
           );
           const stock = parseInt(quantityStr) || 1;
-          const priceInCents = Math.round(price * 100);
-          const category = (item.category || 'General').substring(0, 50);
 
-          if (!name.trim() || priceInCents < 0) {
+          if (!name.trim() || price < 0) {
             return null;
           }
 
           return {
             name,
             description,
-            recurring_interval: null,
-            prices: [
-              {
-                amount_type: 'fixed',
-                price_currency: 'usd',
-                price_amount: priceInCents,
-              },
-            ],
-            metadata: {
-              quantity: stock,
-              category,
-              subcategory: 'OCR Import',
-              tags: 'ocr,imported,invoice',
-            },
+            price,
+            stock,
+            sku: `OCR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            categories: [(item.category || 'General').substring(0, 50)],
+            images: [],
           };
         })
         .filter(Boolean);
 
-      if (polarProducts.length === 0) {
+      if (products.length === 0) {
         setError('No valid products to create');
         setIsAddingToInventory(false);
         return;
       }
 
-      const response = await productsAPI.createBulk(polarProducts);
-      if (response.success) {
-        router.push('/inventory');
-      } else {
-        setError(response.message || 'Error creating products');
+      for (const product of products) {
+        await productsAPI.create(product);
       }
+
+      router.push('/inventory');
     } catch (err: any) {
       setError(err.message || 'Error adding products to inventory');
     } finally {
@@ -491,7 +472,8 @@ const OCRResultPage: React.FC = () => {
                     style={{ maxHeight: '500px', objectFit: 'contain' }}
                   />
                   <p className="mt-2 text-xs text-center text-gray-500">
-                    Imagen que muestra las detecciones de YOLO (cuadrículas verdes) y las regiones de la tabla (cuadrículas azules)
+                    Imagen que muestra las detecciones de YOLO (cuadrículas
+                    verdes) y las regiones de la tabla (cuadrículas azules)
                   </p>
                 </div>
               </div>

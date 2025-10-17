@@ -179,6 +179,17 @@ export const getAllProducts = async (): Promise<any> => {
   return apiRequest('/products/?include_inactive=true');
 };
 
+export const getProductsByUserId = async (userId: string): Promise<any> => {
+  return apiRequest(`/products/user/${userId}`);
+};
+
+export const getProductByUserId = async (
+  userId: string,
+  productId: string
+): Promise<any> => {
+  return apiRequest(`/products/user/${userId}/${productId}`);
+};
+
 /// Inventory
 export const inventoryAPI = {
   get: (): Promise<InventoryResponse> => apiRequest('/inventory'),

@@ -1,0 +1,34 @@
+services:
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zatobox-app
+    ports:
+      - "3000:3000"
+    environment:
+      - TOR_GATEWAY_URL=http://tor-gateway:3001
+      - NEXT_PUBLIC_TOR_GATEWAY_URL=http://localhost:3001
+    depends_on:
+      tor-gateway:
+        condition: service_healthy
+    restart: unless-stopped
+
+  tor-gateway:
+    build:
+      context: ./src/modules/microservices/tor-gateway
+      dockerfile: Dockerfile
+    container_name: zatobox-tor-gateway
+    ports:
+      - "3001:3001"
+    environment:
+      - BTCPAY_URL=${BTCPAY_URL}
+      - BTCPAY_API_KEY=${BTCPAY_API_KEY}
+      - PORT=3001
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

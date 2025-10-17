@@ -4,8 +4,12 @@ import type {
   InvoiceStatus,
 } from '@/backend/payments/btcpay/models';
 
+const TOR_GATEWAY_URL =
+  process.env.NEXT_PUBLIC_TOR_GATEWAY_URL || 'http://localhost:3001';
+
 class BTCPayAPIService {
   private baseUrl = '/api/payments/btcpay';
+  private torGatewayUrl = TOR_GATEWAY_URL;
 
   async createInvoice(data: CreateInvoiceRequest): Promise<{
     success: boolean;
@@ -77,7 +81,10 @@ class BTCPayAPIService {
   }> {
     const response = await fetch(`${this.baseUrl}/store`);
     if (!response.ok) {
-      return { success: false, message: `Error: ${response.status} ${response.statusText}` };
+      return {
+        success: false,
+        message: `Error: ${response.status} ${response.statusText}`,
+      };
     }
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {

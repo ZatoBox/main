@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.github
+README.md
+.vscode
+.prettierrc
+LICENSE.txt
+TOR-GATEWAY-SETUP.md
