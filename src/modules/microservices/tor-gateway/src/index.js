@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const { btcpayProxy } = require('./proxy');
 const { errorHandler } = require('./middleware/errorHandler');

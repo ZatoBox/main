@@ -13,7 +13,11 @@ const btcpayProxy = async (req, res, next) => {
     const path = req.params.path || '';
     const targetUrl = `${btcpayUrl.replace(/\/$/, '')}/api/v1/${path}`;
 
-    const socksAgent = new SocksProxyAgent('socks5://127.0.0.1:9050');
+    const socksHost = process.env.SOCKS_HOST || '127.0.0.1';
+    const socksPort = process.env.SOCKS_PORT || '9050';
+    const socksAgent = new SocksProxyAgent(
+      `socks5://${socksHost}:${socksPort}`
+    );
 
     const config = {
       method: req.method.toLowerCase(),
