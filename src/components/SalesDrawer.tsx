@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { X, Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 
-type PaymentMethod = 'cash' | 'zatoconnect' | 'crypto';
+type PaymentMethod = 'cash' | 'crypto';
 
 interface SalesItem {
   id: string | number;
@@ -36,8 +36,7 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
   removeCartItem,
   clearCart,
 }) => {
-  const [paymentMethod, setPaymentMethod] =
-    useState<PaymentMethod>('zatoconnect');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
 
   const subtotal = cartItems.reduce((sum, item) => {
     const itemTotal = (item.quantity || 0) * (item.price || 0);
@@ -169,7 +168,7 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                 <label className="text-sm font-medium text-black">
                   Payment Method
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setPaymentMethod('cash')}
                     className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
@@ -179,16 +178,6 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                     }`}
                   >
                     Cash
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod('zatoconnect')}
-                    className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
-                      paymentMethod === 'zatoconnect'
-                        ? 'bg-orange-50 border-orange-500 text-orange-700'
-                        : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    Zato
                   </button>
                   <button
                     onClick={() => setPaymentMethod('crypto')}
@@ -209,9 +198,7 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
               >
                 {paymentMethod === 'cash'
                   ? 'Create Cash Order'
-                  : paymentMethod === 'crypto'
-                  ? 'Pay with Crypto'
-                  : 'Proceed to Payment'}
+                  : 'Pay with Crypto'}
               </button>
 
               <button

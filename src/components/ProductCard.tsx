@@ -147,7 +147,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         <div className="flex items-center justify-between pt-2">
           <div className="flex flex-col">
             <span className="text-2xl font-bold transition-colors duration-300 text-black group-hover:text-zatobox-500">
-              ${product.price.toFixed(2)}
+              ${(product.price || 0).toFixed(2)}
             </span>
           </div>
 

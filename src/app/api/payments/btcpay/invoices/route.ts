@@ -14,9 +14,9 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
 
     const btcpayService = new BTCPayService(
       process.env.BTCPAY_URL,
-      process.env.BTCPAY_API_KEY
+      process.env.BTCPAY_API_KEY,
+      userId
     );
-    const torGateway = new TorGatewayClient();
 
     const body = await req.json();
     const { amount, currency, metadata, checkout } = body;
@@ -28,8 +28,8 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
       );
     }
 
-    const invoice = await torGateway.post('invoices', {
-      price: amount,
+    const invoice = await btcpayService.createInvoice(userId, {
+      amount,
       currency,
       metadata,
       checkout,
@@ -38,7 +38,7 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     return NextResponse.json({
       success: true,
       invoiceId: invoice.id,
-      checkoutLink: invoice.url,
+      checkoutLink: invoice.checkoutLink,
       status: invoice.status,
     });
   } catch (error: any) {

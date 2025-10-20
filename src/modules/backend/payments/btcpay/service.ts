@@ -11,10 +11,12 @@ import crypto from 'crypto';
 export class BTCPayService {
   private client: BTCPayClient;
   private repository: BTCPayRepository;
+  private userId?: string;
 
-  constructor(apiUrl: string, apiKey: string) {
-    this.client = new BTCPayClient({ apiUrl, apiKey });
+  constructor(apiUrl: string, apiKey: string, userId?: string) {
+    this.client = new BTCPayClient({ apiUrl, apiKey, userId });
     this.repository = new BTCPayRepository();
+    this.userId = userId;
   }
 
   async createUserStore(userId: string, storeName: string) {
@@ -70,14 +72,27 @@ export class BTCPayService {
     userId: string,
     request: CreateInvoiceRequest
   ): Promise<BTCPayInvoice> {
-    const userStore = await this.repository.getUserStore(userId);
-    if (!userStore) {
-      throw new Error('User store not found. Please setup your store first.');
+    const stores = await this.client.getStores();
+    if (!stores || stores.length === 0) {
+      throw new Error(
+        'No BTCPay store found. Please configure your BTCPay server.'
+      );
     }
 
+    const masterStoreId = stores[0].id;
+
+    const enrichedRequest = {
+      ...request,
+      metadata: {
+        ...request.metadata,
+        userId,
+        timestamp: new Date().toISOString(),
+      },
+    };
+
     const invoice = await this.client.createInvoice(
-      userStore.btcpay_store_id,
-      request
+      masterStoreId,
+      enrichedRequest
     );
     await this.repository.saveInvoice(userId, invoice);
     return invoice;

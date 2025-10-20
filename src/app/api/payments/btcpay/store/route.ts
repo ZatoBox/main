@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BTCPayService } from '@/backend/payments/btcpay/service';
-import { TorGatewayClient } from '@/backend/payments/btcpay/tor-gateway-client';
 import { withAuth } from '@/app/api/middleware/auth';
 
 export const POST = withAuth(async (req: NextRequest, userId: string) => {
@@ -14,9 +13,9 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
 
     const btcpayService = new BTCPayService(
       process.env.BTCPAY_URL,
-      process.env.BTCPAY_API_KEY
+      process.env.BTCPAY_API_KEY,
+      userId
     );
-    const torGateway = new TorGatewayClient();
 
     const body = await req.json();
     const { storeName, xpub } = body;
@@ -28,18 +27,7 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
       );
     }
 
-    const existingStore = await btcpayService.getUserStore(userId);
-    if (existingStore) {
-      return NextResponse.json({
-        success: true,
-        message: 'Store already exists',
-        store: existingStore,
-      });
-    }
-
-    const userStore = await torGateway.post('stores', {
-      name: storeName,
-    });
+    const userStore = await btcpayService.createUserStore(userId, storeName);
 
     if (xpub) {
       await btcpayService.setupUserWallet(userId, xpub);
@@ -72,7 +60,8 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
 
     const btcpayService = new BTCPayService(
       process.env.BTCPAY_URL,
-      process.env.BTCPAY_API_KEY
+      process.env.BTCPAY_API_KEY,
+      userId
     );
 
     const userStore = await btcpayService.getUserStore(userId);

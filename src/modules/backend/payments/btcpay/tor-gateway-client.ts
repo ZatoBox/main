@@ -2,15 +2,19 @@ import axios, { AxiosInstance } from 'axios';
 
 export class TorGatewayClient {
   private client: AxiosInstance;
+  private userId?: string;
 
   constructor(
     gatewayUrl: string = process.env.TOR_GATEWAY_URL ||
-      'http://tor-gateway:3001'
+      'http://tor-gateway:3001',
+    userId?: string
   ) {
     this.client = axios.create({
       baseURL: gatewayUrl,
       timeout: 30000,
+      headers: userId ? { 'x-user-id': userId } : {},
     });
+    this.userId = userId;
   }
 
   async post(path: string, data: any) {

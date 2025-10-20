@@ -11,16 +11,6 @@ import { useAuth } from '@/context/auth-store';
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io';
 
 const mapProductToProduct = (p: any): Product => {
-  const prices = Array.isArray(p.prices) ? p.prices : [];
-  let price = 0;
-  if (prices.length > 0) {
-    const pr = prices[0] || {};
-    const amt = pr.price_amount ?? pr.priceAmount;
-    const amtType = pr.amount_type ?? pr.amountType;
-    if (typeof amt === 'number') {
-      price = amtType === 'free' ? 0 : amt / 100;
-    }
-  }
   const imageUrls = Array.isArray(p.medias)
     ? p.medias
         .filter(
@@ -36,16 +26,15 @@ const mapProductToProduct = (p: any): Product => {
     id: String(p.id ?? ''),
     name: p.name || 'Unnamed Product',
     description: p.description || '',
-    price,
-    stock: p.metadata?.quantity || 0,
-    categories: [],
+    price: p.price || 0,
+    stock: p.stock || 0,
+    categories: p.categories || [],
     images: imageUrls,
-    active: !p.is_archived,
-    sku: String(p.id),
-    creator_id: '',
-    created_at: p.created_at || p.createdAt || new Date().toISOString(),
-    updated_at:
-      p.modified_at || p.modifiedAt || p.updatedAt || new Date().toISOString(),
+    active: p.active !== false,
+    sku: p.sku || String(p.id),
+    creator_id: p.creator_id || '',
+    created_at: p.created_at || new Date().toISOString(),
+    updated_at: p.updated_at || new Date().toISOString(),
   };
 };
 
@@ -68,12 +57,12 @@ const HomePage: React.FC<HomePageProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 🧭 Paginación
+  // Paginación
   const [page, setPage] = useState(1);
   const [pageSize] = useState(12);
   const [totalProducts, setTotalProducts] = useState(0);
 
-  // 🛒 Carrito
+  // Carrito
   interface CartItem {
     id: string;
     polarProductId: string;
@@ -89,7 +78,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   const activeSearchTerm = localSearchTerm || externalSearchTerm;
 
-  // ✅ Cargar productos con paginación
+  // Cargar productos con paginación
   const reloadProducts = async () => {
     try {
       setLoading(true);
@@ -127,14 +116,14 @@ const HomePage: React.FC<HomePageProps> = ({
     }
   };
 
-  // 📦 Llamada inicial o cuando cambie página
+  // Llamada inicial o cuando cambie página
   useEffect(() => {
     void reloadProducts();
   }, [page]);
 
   const enrichedProducts = useMemo(() => products, [products]);
 
-  // 🔍 Filtro local
+  // Filtro local
   const filteredProducts = useMemo(() => {
     if (!activeSearchTerm.trim()) return enrichedProducts;
     return enrichedProducts.filter((product: any) =>
@@ -207,21 +196,26 @@ const HomePage: React.FC<HomePageProps> = ({
         } else {
           throw new Error(response.message || 'Failed to create cash order');
         }
-      } else {
-        const { checkoutPolarCart } = await import(
-          '@/services/payments-service'
-        );
+      } else if (paymentMethod === 'crypto') {
         const cartData = {
           userId: user.id,
           items,
           successUrl: `${window.location.origin}/success`,
           metadata,
         };
-        const response = await checkoutPolarCart(cartData);
-        if (response.success && response.checkout_url) {
-          window.location.href = response.checkout_url;
+        const response = await fetch('/api/checkout/crypto', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(cartData),
+        });
+        const data = await response.json();
+        if (data.success && data.checkout_url) {
+          window.location.href = data.checkout_url;
         } else {
-          throw new Error(response.message || 'Failed to create checkout');
+          throw new Error(data.message || 'Failed to create checkout');
         }
       }
     } catch (error) {
@@ -261,7 +255,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   const clearCart = () => setCartItems([]);
 
-  // 🌀 Estados de carga / error
+  // Estados de carga / error
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">

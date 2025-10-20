@@ -11,22 +11,27 @@ import type {
   PullPayment,
   Payout,
 } from './models';
+import { TorGatewayClient } from './tor-gateway-client';
 
 interface BTCPayClientConfig {
   apiUrl: string;
   apiKey: string;
   storeId?: string;
+  userId?: string;
 }
 
 export class BTCPayClient {
   private apiUrl: string;
   private apiKey: string;
   private storeId?: string;
+  private torGateway: TorGatewayClient;
 
   constructor(config: BTCPayClientConfig) {
     this.apiUrl = config.apiUrl.replace(/\/$/, '');
     this.apiKey = config.apiKey;
     this.storeId = config.storeId;
+    const gatewayUrl = process.env.TOR_GATEWAY_URL || 'http://localhost:3001';
+    this.torGateway = new TorGatewayClient(gatewayUrl, config.userId);
   }
 
   private async request<T>(
@@ -34,26 +39,19 @@ export class BTCPayClient {
     path: string,
     body?: any
   ): Promise<T> {
-    const url = `${this.apiUrl}${path}`;
-    const headers: Record<string, string> = {
-      Authorization: `token ${this.apiKey}`,
-      'Content-Type': 'application/json',
-    };
+    const cleanPath = path.replace('/api/v1/', '');
 
-    const response = await fetch(url, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `BTCPay API error: ${response.status} ${response.statusText} - ${errorText}`
-      );
+    if (method === 'POST') {
+      return this.torGateway.post(cleanPath, body) as Promise<T>;
+    } else if (method === 'GET') {
+      return this.torGateway.get(cleanPath) as Promise<T>;
+    } else if (method === 'PUT') {
+      return this.torGateway.put(cleanPath, body) as Promise<T>;
+    } else if (method === 'DELETE') {
+      return this.torGateway.delete(cleanPath) as Promise<T>;
     }
 
-    return response.json();
+    throw new Error(`Unsupported HTTP method: ${method}`);
   }
 
   async createStore(data: CreateStoreRequest): Promise<BTCPayStore> {
