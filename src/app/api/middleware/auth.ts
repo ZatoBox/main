@@ -15,9 +15,20 @@ export function withAuth(
       if (authHeader?.startsWith('Bearer ')) {
         const token = authHeader.slice(7);
         try {
-          const decoded = jwtDecode<{ sub?: string; id?: string }>(token);
-          userId = decoded.sub || decoded.id;
-        } catch {
+          const decoded = jwtDecode<{
+            sub?: string;
+            id?: string;
+            user_id?: string;
+          }>(token);
+          userId = decoded.sub || decoded.id || decoded.user_id;
+          console.log(
+            'Auth: Bearer token decoded, userId:',
+            userId,
+            'decoded:',
+            decoded
+          );
+        } catch (e) {
+          console.error('Auth: Failed to decode Bearer token:', e);
           userId = null;
         }
       }
@@ -33,8 +44,18 @@ export function withAuth(
         const token = cookies['zatobox_token'];
         if (token) {
           try {
-            const decoded = jwtDecode<{ sub?: string; id?: string }>(token);
-            userId = decoded.sub || decoded.id;
+            const decoded = jwtDecode<{
+              sub?: string;
+              id?: string;
+              user_id?: string;
+            }>(token);
+            userId = decoded.sub || decoded.id || decoded.user_id;
+            console.log(
+              'Auth: Cookie token decoded, userId:',
+              userId,
+              'decoded:',
+              decoded
+            );
           } catch (e) {
             console.error('JWT decode error:', e);
             userId = null;

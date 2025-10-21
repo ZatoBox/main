@@ -10,7 +10,7 @@ interface XpubData {
 }
 
 const CryptoStoreSetup: React.FC = () => {
-  const { token } = useAuth();
+  const { token, initialized } = useAuth();
   const [xpubData, setXpubData] = useState<XpubData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -19,10 +19,17 @@ const CryptoStoreSetup: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    loadUserXpub();
-  }, []);
+    if (initialized) {
+      loadUserXpub();
+    }
+  }, [token, initialized]);
 
   const loadUserXpub = async () => {
+    if (!token || !initialized) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await btcpayAPI.getXpub(token);
@@ -37,6 +44,11 @@ const CryptoStoreSetup: React.FC = () => {
   };
 
   const handleGenerateXpub = async () => {
+    if (!token) {
+      setError('Token no disponible');
+      return;
+    }
+
     setSaving(true);
     setError(null);
     setSuccess(null);
@@ -62,6 +74,11 @@ const CryptoStoreSetup: React.FC = () => {
   };
 
   const handleSaveXpub = async () => {
+    if (!token) {
+      setError('Token no disponible');
+      return;
+    }
+
     if (!xpubInput.trim()) {
       setError('El XPUB no puede estar vacío');
       return;

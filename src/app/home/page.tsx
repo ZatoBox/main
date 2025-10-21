@@ -125,6 +125,7 @@ const HomePage: React.FC<HomePageProps> = ({
         setHasXpub(!!xpubResponse.xpub);
       } catch (err) {
         console.error('Error checking XPUB:', err);
+        setHasXpub(false);
       }
     }
   };

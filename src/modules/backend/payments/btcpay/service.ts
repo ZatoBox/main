@@ -25,6 +25,15 @@ export class BTCPayService {
   }
 
   async saveUserXpub(userId: string, xpub: string): Promise<void> {
+    // Ensure user store exists, create if not
+    let userStore = await this.repository.getUserStore(userId);
+    if (!userStore) {
+      await this.repository.saveUserStore(userId, {
+        btcpay_store_id: this.storeId,
+        store_name: `User Store ${userId.substring(0, 8)}`,
+      });
+    }
+    // Now update the xpub
     await this.repository.updateUserStoreXpub(userId, xpub);
   }
 
@@ -42,6 +51,15 @@ export class BTCPayService {
 
     if (!wallet.xpub) {
       throw new Error('Failed to generate XPUB');
+    }
+
+    // Ensure user store exists, create if not
+    let userStore = await this.repository.getUserStore(userId);
+    if (!userStore) {
+      await this.repository.saveUserStore(userId, {
+        btcpay_store_id: this.storeId,
+        store_name: `User Store ${userId.substring(0, 8)}`,
+      });
     }
 
     await this.repository.updateUserStoreXpub(userId, wallet.xpub);
