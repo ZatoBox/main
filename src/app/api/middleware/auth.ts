@@ -21,12 +21,6 @@ export function withAuth(
             user_id?: string;
           }>(token);
           userId = decoded.sub || decoded.id || decoded.user_id;
-          console.log(
-            'Auth: Bearer token decoded, userId:',
-            userId,
-            'decoded:',
-            decoded
-          );
         } catch (e) {
           console.error('Auth: Failed to decode Bearer token:', e);
           userId = null;

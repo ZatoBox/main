@@ -71,9 +71,23 @@ export class BTCPayService {
     userId: string,
     request: CreateInvoiceRequest
   ): Promise<BTCPayInvoice> {
+    let amountToUse = request.amount;
+    let currencyToUse = request.currency;
+
+    if (request.currency !== 'BTC') {
+      try {
+        const rate = await this.client.getBTCRate(request.currency);
+        const amountInBTC = (parseFloat(request.amount) / rate).toFixed(8);
+        amountToUse = amountInBTC;
+        currencyToUse = 'BTC';
+      } catch (error) {
+        console.warn('Failed to get rate, using original amount', error);
+      }
+    }
+
     const enrichedRequest = {
-      amount: request.amount,
-      currency: request.currency,
+      amount: amountToUse,
+      currency: currencyToUse,
       metadata: {
         ...request.metadata,
         userId,
@@ -81,7 +95,7 @@ export class BTCPayService {
       },
       checkout: {
         speedPolicy: 'MediumSpeed',
-        paymentMethods: ['BTC-CHAIN', 'BTC-LN'],
+        paymentMethods: ['BTC-CHAIN'],
         expirationMinutes: 15,
         monitoringMinutes: 24,
         ...request.checkout,
@@ -106,10 +120,24 @@ export class BTCPayService {
       enrichedRequest.metadata.userXpub = userXpub;
     }
 
+    console.log(
+      'Creating invoice with request:',
+      JSON.stringify(enrichedRequest, null, 2)
+    );
+
     const invoice = await this.client.createInvoice(
       this.storeId,
       enrichedRequest
     );
+
+    const btcpayUrl = process.env.BTCPAY_URL || '';
+    if (invoice.checkoutLink && btcpayUrl) {
+      invoice.checkoutLink = invoice.checkoutLink.replace(
+        /https?:\/\/[^\/]+/,
+        btcpayUrl
+      );
+    }
+
     await this.repository.saveInvoice(userId, invoice);
     return invoice;
   }

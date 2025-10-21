@@ -41,11 +41,16 @@ export async function POST(req: NextRequest) {
       return sum + itemPrice * (item.quantity || 1);
     }, 0);
 
+    const cleanedItems = items.map((item: any) => ({
+      quantity: item.quantity,
+      productData: item.productData,
+    }));
+
     const invoice = await btcpayService.createInvoice(userId, {
       amount: totalAmount.toString(),
       currency: 'USD',
       metadata: {
-        items,
+        items: cleanedItems,
       },
     });
 
@@ -57,6 +62,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('Crypto checkout error:', error);
+    console.error('Error response:', error.response?.data);
     return NextResponse.json(
       {
         success: false,

@@ -178,4 +178,25 @@ export class BTCPayClient {
       {}
     );
   }
+
+  async getRate(storeId: string, currency: string): Promise<{ rate: number }> {
+    const response = await this.btcpayClient.get(
+      `stores/${storeId}/payment-methods/BTC/rate?currencyPair=${currency}_BTC`
+    );
+    return { rate: parseFloat(response.rate) || 1 };
+  }
+
+  async getBTCRate(currency: string): Promise<number> {
+    try {
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency.toLowerCase()}`
+      );
+      const data = await response.json();
+      const rate = data.bitcoin[currency.toLowerCase()];
+      if (rate) return rate;
+    } catch (error) {
+      console.warn('Failed to fetch rate from CoinGecko:', error);
+    }
+    return 1;
+  }
 }
