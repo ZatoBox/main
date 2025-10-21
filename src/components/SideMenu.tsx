@@ -18,11 +18,12 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/auth-store';
 import { usePlugins } from '@/context/plugin-context';
+import { btcpayAPI } from '@/services/btcpay.service';
 
 const SideMenu: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
   const { isPluginActive } = usePlugins();
   const [showLogout, setShowLogout] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -30,6 +31,7 @@ const SideMenu: React.FC = () => {
   const [animatingItems, setAnimatingItems] = useState<Set<string>>(new Set());
   const userInfoRef = useRef<HTMLDivElement | null>(null);
   const [hoverSupported, setHoverSupported] = useState<boolean>(true);
+  const [hasXpub, setHasXpub] = useState<boolean | null>(null);
 
   useEffect(() => {
     try {
@@ -39,7 +41,19 @@ const SideMenu: React.FC = () => {
     } catch {
       setHoverSupported(true);
     }
-  }, []);
+
+    // Verificar XPUB
+    if (token) {
+      btcpayAPI
+        .getXpub(token)
+        .then((resp) => {
+          setHasXpub(!!resp.xpub);
+        })
+        .catch(() => {
+          setHasXpub(false);
+        });
+    }
+  }, [token]);
 
   useEffect(() => {
     if (hoverSupported) return;
@@ -269,6 +283,13 @@ const SideMenu: React.FC = () => {
                   {item.description}
                 </div>
               </div>
+              {item.path === '/profile' && hasXpub === false && (
+                <div className="ml-2 flex-shrink-0">
+                  <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                    !
+                  </span>
+                </div>
+              )}
             </button>
           </div>
         );

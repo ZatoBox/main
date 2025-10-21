@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BTCPayService } from '@/backend/payments/btcpay/service';
-import { TorGatewayClient } from '@/backend/payments/btcpay/tor-gateway-client';
 import { withAuth } from '@/app/api/middleware/auth';
 
 export const GET = withAuth(async (req: NextRequest, userId: string) => {
@@ -14,11 +13,11 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
 
     const btcpayService = new BTCPayService(
       process.env.BTCPAY_URL,
-      process.env.BTCPAY_API_KEY
+      process.env.BTCPAY_API_KEY,
+      userId
     );
-    const torGateway = new TorGatewayClient();
 
-    const invoices = await torGateway.get('invoices');
+    const invoices = await btcpayService.getUserInvoices(userId);
 
     return NextResponse.json({
       success: true,

@@ -17,34 +17,27 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
       userId
     );
 
-    const body = await req.json();
-    const { amount, currency, metadata, checkout } = body;
-
-    if (!amount || !currency) {
+    const existingXpub = await btcpayService.getUserXpub(userId);
+    if (existingXpub) {
       return NextResponse.json(
-        { success: false, message: 'Amount and currency are required' },
+        { success: false, message: 'User already has an XPUB' },
         { status: 400 }
       );
     }
 
-    const invoice = await btcpayService.createInvoice(userId, {
-      amount,
-      currency,
-      metadata,
-      checkout,
-    });
+    const wallet = await btcpayService.generateUserWallet(userId);
 
     return NextResponse.json({
       success: true,
-      invoiceId: invoice.id,
-      checkoutLink: invoice.checkoutLink,
-      status: invoice.status,
+      xpub: wallet.xpub,
+      message: 'XPUB generated successfully',
     });
   } catch (error: any) {
+    console.error('Wallet generation error:', error);
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to create invoice',
+        message: error.message || 'Failed to generate wallet',
       },
       { status: 500 }
     );

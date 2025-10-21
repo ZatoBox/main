@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BTCPayService } from '@/backend/payments/btcpay/service';
-import { TorGatewayClient } from '@/backend/payments/btcpay/tor-gateway-client';
 
 export async function GET(
   req: NextRequest,
@@ -18,12 +17,12 @@ export async function GET(
       process.env.BTCPAY_URL,
       process.env.BTCPAY_API_KEY
     );
-    const torGateway = new TorGatewayClient();
 
     const { id } = await params;
     const invoiceId = id;
 
-    const invoice = await torGateway.get(`invoices/${invoiceId}`);
+    const result = await btcpayService.getInvoiceStatus(invoiceId);
+    const invoice = result.invoice;
 
     return NextResponse.json({
       success: true,

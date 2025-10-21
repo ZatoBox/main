@@ -18,31 +18,26 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     );
 
     const body = await req.json();
-    const { storeName, xpub } = body;
+    const { xpub } = body;
 
-    if (!storeName) {
+    if (!xpub || typeof xpub !== 'string' || !xpub.trim()) {
       return NextResponse.json(
-        { success: false, message: 'Store name is required' },
+        { success: false, message: 'Valid XPUB is required' },
         { status: 400 }
       );
     }
 
-    const userStore = await btcpayService.createUserStore(userId, storeName);
-
-    if (xpub) {
-      await btcpayService.setupUserWallet(userId, xpub);
-    }
+    await btcpayService.saveUserXpub(userId, xpub.trim());
 
     return NextResponse.json({
       success: true,
-      store: userStore,
-      message: 'Store created successfully',
+      message: 'XPUB saved successfully',
     });
   } catch (error: any) {
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to setup store',
+        message: error.message || 'Failed to save XPUB',
       },
       { status: 500 }
     );
@@ -64,25 +59,17 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
       userId
     );
 
-    const userStore = await btcpayService.getUserStore(userId);
-
-    if (!userStore) {
-      return NextResponse.json({
-        success: true,
-        store: null,
-        message: 'No store found',
-      });
-    }
+    const userXpub = await btcpayService.getUserXpub(userId);
 
     return NextResponse.json({
       success: true,
-      store: userStore,
+      xpub: userXpub || null,
     });
   } catch (error: any) {
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to get store',
+        message: error.message || 'Failed to get XPUB',
       },
       { status: 500 }
     );

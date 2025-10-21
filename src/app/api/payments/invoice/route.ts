@@ -1,21 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
-
-const TOR_GATEWAY_URL =
-  process.env.TOR_GATEWAY_INTERNAL_URL || 'http://tor-gateway:3001';
+import { BTCPayService } from '@/backend/payments/btcpay/service';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    if (!process.env.BTCPAY_URL || !process.env.BTCPAY_API_KEY) {
+      return NextResponse.json(
+        { error: 'BTCPay configuration missing' },
+        { status: 500 }
+      );
+    }
 
-    const response = await axios.post(
-      `${TOR_GATEWAY_URL}/api/btcpay/invoices`,
-      body
+    const btcpayService = new BTCPayService(
+      process.env.BTCPAY_URL,
+      process.env.BTCPAY_API_KEY
     );
 
-    return NextResponse.json(response.data, { status: response.status });
+    const body = await request.json();
+    const invoice = await btcpayService.createInvoice('system', body);
+
+    return NextResponse.json(invoice, { status: 200 });
   } catch (error: any) {
-    console.error('Proxy error:', error.message);
+    console.error('Invoice creation error:', error.message);
     return NextResponse.json(
       { error: 'Failed to create invoice' },
       { status: 500 }

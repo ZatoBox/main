@@ -12,86 +12,84 @@ export class BTCPayService {
   private client: BTCPayClient;
   private repository: BTCPayRepository;
   private userId?: string;
+  private storeId: string;
 
   constructor(apiUrl: string, apiKey: string, userId?: string) {
     this.client = new BTCPayClient({ apiUrl, apiKey, userId });
     this.repository = new BTCPayRepository();
     this.userId = userId;
-  }
-
-  async createUserStore(userId: string, storeName: string) {
-    const existingStore = await this.repository.getUserStore(userId);
-    if (existingStore) {
-      return existingStore;
+    this.storeId = process.env.BTCPAY_STORE_ID || '';
+    if (!this.storeId) {
+      throw new Error('BTCPAY_STORE_ID is not configured');
     }
-
-    const store = await this.client.createStore({
-      name: storeName,
-      defaultCurrency: 'USD',
-    });
-
-    const webhook = await this.client.createWebhook(store.id, {
-      url: `${process.env.NEXT_PUBLIC_URL}/api/payments/btcpay/webhook`,
-      authorizedEvents: { everything: true },
-    });
-
-    const userStore = await this.repository.saveUserStore(userId, {
-      btcpay_store_id: store.id,
-      store_name: storeName,
-      webhook_secret: webhook.secret,
-    });
-
-    return userStore;
   }
 
-  async setupUserWallet(userId: string, xpub?: string) {
+  async saveUserXpub(userId: string, xpub: string): Promise<void> {
+    await this.repository.updateUserStoreXpub(userId, xpub);
+  }
+
+  async getUserXpub(userId: string): Promise<string | null> {
     const userStore = await this.repository.getUserStore(userId);
-    if (!userStore) {
-      throw new Error('User store not found');
+    return userStore?.xpub || null;
+  }
+
+  async generateUserWallet(userId: string): Promise<{ xpub: string }> {
+    const wallet = await this.client.generateWallet(this.storeId, 'BTC-CHAIN', {
+      savePrivateKeys: false,
+      importKeysToRPC: false,
+      wordCount: 12,
+    });
+
+    if (!wallet.xpub) {
+      throw new Error('Failed to generate XPUB');
     }
 
-    if (xpub) {
-      await this.repository.updateUserStoreXpub(userId, xpub);
-    } else {
-      const wallet = await this.client.generateWallet(
-        userStore.btcpay_store_id,
-        'BTC-CHAIN',
-        {
-          savePrivateKeys: false,
-          importKeysToRPC: false,
-          wordCount: 12,
-        }
-      );
-      if (wallet.xpub) {
-        await this.repository.updateUserStoreXpub(userId, wallet.xpub);
-      }
-    }
+    await this.repository.updateUserStoreXpub(userId, wallet.xpub);
+
+    return { xpub: wallet.xpub };
   }
 
   async createInvoice(
     userId: string,
     request: CreateInvoiceRequest
   ): Promise<BTCPayInvoice> {
-    const stores = await this.client.getStores();
-    if (!stores || stores.length === 0) {
-      throw new Error(
-        'No BTCPay store found. Please configure your BTCPay server.'
-      );
-    }
-
-    const masterStoreId = stores[0].id;
-
     const enrichedRequest = {
-      ...request,
+      amount: request.amount,
+      currency: request.currency,
       metadata: {
         ...request.metadata,
         userId,
         timestamp: new Date().toISOString(),
       },
+      checkout: {
+        speedPolicy: 'MediumSpeed',
+        paymentMethods: ['BTC-CHAIN', 'BTC-LN'],
+        expirationMinutes: 15,
+        monitoringMinutes: 24,
+        ...request.checkout,
+      },
     };
 
+    let userXpub = await this.getUserXpub(userId);
+
+    if (!userXpub) {
+      try {
+        const wallet = await this.generateUserWallet(userId);
+        userXpub = wallet.xpub;
+      } catch (error) {
+        console.warn(
+          'Failed to auto-generate wallet, continuing without XPUB',
+          error
+        );
+      }
+    }
+
+    if (userXpub) {
+      enrichedRequest.metadata.userXpub = userXpub;
+    }
+
     const invoice = await this.client.createInvoice(
-      masterStoreId,
+      this.storeId,
       enrichedRequest
     );
     await this.repository.saveInvoice(userId, invoice);

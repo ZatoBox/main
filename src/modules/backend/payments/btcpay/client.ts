@@ -24,14 +24,17 @@ export class BTCPayClient {
   private apiUrl: string;
   private apiKey: string;
   private storeId?: string;
-  private torGateway: TorGatewayClient;
+  private btcpayClient: TorGatewayClient;
 
   constructor(config: BTCPayClientConfig) {
     this.apiUrl = config.apiUrl.replace(/\/$/, '');
     this.apiKey = config.apiKey;
     this.storeId = config.storeId;
-    const gatewayUrl = process.env.TOR_GATEWAY_URL || 'http://localhost:3001';
-    this.torGateway = new TorGatewayClient(gatewayUrl, config.userId);
+    this.btcpayClient = new TorGatewayClient(
+      this.apiUrl,
+      this.apiKey,
+      config.userId
+    );
   }
 
   private async request<T>(
@@ -42,13 +45,13 @@ export class BTCPayClient {
     const cleanPath = path.replace('/api/v1/', '');
 
     if (method === 'POST') {
-      return this.torGateway.post(cleanPath, body) as Promise<T>;
+      return this.btcpayClient.post(cleanPath, body) as Promise<T>;
     } else if (method === 'GET') {
-      return this.torGateway.get(cleanPath) as Promise<T>;
+      return this.btcpayClient.get(cleanPath) as Promise<T>;
     } else if (method === 'PUT') {
-      return this.torGateway.put(cleanPath, body) as Promise<T>;
+      return this.btcpayClient.put(cleanPath, body) as Promise<T>;
     } else if (method === 'DELETE') {
-      return this.torGateway.delete(cleanPath) as Promise<T>;
+      return this.btcpayClient.delete(cleanPath) as Promise<T>;
     }
 
     throw new Error(`Unsupported HTTP method: ${method}`);
