@@ -3,7 +3,9 @@ import { GeistSans } from 'geist/font/sans';
 import { LanguageProvider } from '@/context/language-context';
 import { PluginProvider } from '@/context/plugin-context';
 import { AuthProvider } from '@/components/auth/AuthProvider';
+import { CashSuccessProvider } from '@/context/cash-success-context';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import CashSuccessPortal from '@/components/CashSuccessPortal';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -41,7 +43,10 @@ export default function RootLayout({
         <PluginProvider>
           <LanguageProvider>
             <AuthProvider>
-              <LayoutWrapper>{children}</LayoutWrapper>
+              <CashSuccessProvider>
+                <LayoutWrapper>{children}</LayoutWrapper>
+                <CashSuccessPortal />
+              </CashSuccessProvider>
             </AuthProvider>
           </LanguageProvider>
         </PluginProvider>

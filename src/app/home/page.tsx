@@ -203,11 +203,15 @@ const HomePage: React.FC<HomePageProps> = ({
         const { checkoutCashOrder } = await import(
           '@/services/cash-payments.service'
         );
-        const cashData = { userId: user.id, items, metadata };
-        const response = await checkoutCashOrder(cashData);
-        if (response.success && response.checkout_url) {
-          window.location.href = response.checkout_url;
-        } else {
+        const cashItems = cartItems.map((item) => ({
+          productId: String(item.id),
+          quantity: item.quantity,
+          price: item.price,
+        }));
+        const response = await checkoutCashOrder({
+          items: cashItems,
+        });
+        if (!response.success) {
           throw new Error(response.message || 'Failed to create cash order');
         }
       } else if (paymentMethod === 'crypto') {
@@ -473,6 +477,7 @@ const HomePage: React.FC<HomePageProps> = ({
         updateCartItemQuantity={updateCartItemQuantity}
         removeCartItem={removeFromCart}
         clearCart={clearCart}
+        onPaymentSuccess={reloadProducts}
       />
     </>
   );
