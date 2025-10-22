@@ -96,12 +96,10 @@ const HomePage: React.FC<HomePageProps> = ({
 
       if (response && response.success && Array.isArray(response.products)) {
         const rows: any[] = response.products;
-        const filtered = rows.filter(
-          (p: any) => !(p.is_archived ?? p.is_archived)
-        );
+        const filtered = rows.filter((p: any) => p.active === true);
         const availableProducts = filtered.map(mapProductToProduct);
         setProducts(availableProducts);
-        setTotalProducts(response.total || 0);
+        setTotalProducts(availableProducts.length);
       } else if (response && response.success === false) {
         setProducts([]);
         setError(response.message || 'Error reloading products');

@@ -28,7 +28,6 @@ const InventoryPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isArchivingSelected, setIsArchivingSelected] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -174,16 +173,18 @@ const InventoryPage: React.FC = () => {
     setIsDeleting(false);
   };
 
-  const handleArchiveSelected = async () => {
-    if (selectedItems.length === 0 || isArchivingSelected) {
+  const handleToggleSelectedStatus = async () => {
+    if (selectedItems.length === 0) {
       return;
     }
 
-    setIsArchivingSelected(true);
     try {
       const updates = selectedItems.map(async (id) => {
+        const currentItem = inventoryItems.find((item) => item.id === id);
+        const newStatus = !currentItem?.active;
+
         try {
-          const response = await productsAPI.update(id, { active: false });
+          const response = await productsAPI.update(id, { active: newStatus });
           return { success: true, id, product: response.product };
         } catch (error) {
           return { success: false, id, error };
@@ -202,33 +203,29 @@ const InventoryPage: React.FC = () => {
           })
         );
         toast({
-          title: 'Productos archivados',
-          description: `${successful.length} productos archivados correctamente.`,
+          title: 'Estado actualizado',
+          description: `${successful.length} productos actualizados correctamente.`,
         });
       }
 
       if (failed.length > 0) {
         toast({
-          title: 'Algunos productos no se archivaron',
-          description: `${failed.length} productos no pudieron archivarse.`,
+          title: 'Algunos productos no se actualizaron',
+          description: `${failed.length} productos no pudieron actualizarse.`,
           variant: 'destructive',
         });
       }
 
-      setSelectedItems((prev) =>
-        prev.filter((id) => !successful.some((s) => s.id === id))
-      );
+      setSelectedItems([]);
     } catch (err) {
       toast({
-        title: 'Error al archivar',
+        title: 'Error al actualizar',
         description:
           err instanceof Error
             ? err.message
-            : 'No se pudieron archivar los productos seleccionados.',
+            : 'No se pudieron actualizar los productos seleccionados.',
         variant: 'destructive',
       });
-    } finally {
-      setIsArchivingSelected(false);
     }
   };
 
@@ -310,8 +307,13 @@ const InventoryPage: React.FC = () => {
         onBack={() => router.push('/')}
         onCreate={() => router.push('/new-product')}
         selectedCount={selectedItems.length}
-        onArchiveSelected={handleArchiveSelected}
-        archivingSelected={isArchivingSelected}
+        onToggleSelectedStatus={handleToggleSelectedStatus}
+        selectedStatus={
+          selectedItems.length > 0 &&
+          inventoryItems.some(
+            (item) => selectedItems.includes(item.id) && item.active
+          )
+        }
       />
 
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
