@@ -48,7 +48,7 @@ const CashSuccessPortal: React.FC = () => {
             </h2>
 
             <p className="text-center text-gray-600 mb-6">
-              Tu orden ha sido procesada correctamente en caja.
+              Tu orden ha sido procesada correctamente.
             </p>
 
             {orderId && (

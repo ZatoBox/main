@@ -24,14 +24,20 @@ export async function GET(
     const result = await btcpayService.getInvoiceStatus(invoiceId);
     const invoice = result.invoice;
 
+    const paymentUrl =
+      invoice.paymentMethods?.[0]?.paymentLink ||
+      invoice.paymentMethods?.[0]?.destination ||
+      invoice.checkoutLink;
+
     return NextResponse.json({
       success: true,
       status: invoice.status,
       invoice: {
         id: invoice.id,
-        amount: invoice.price,
+        amount: invoice.amount,
         currency: invoice.currency,
-        checkoutLink: invoice.url,
+        checkoutLink: invoice.checkoutLink,
+        paymentUrl,
         createdTime: invoice.createdTime,
         expirationTime: invoice.expirationTime,
         metadata: invoice.metadata,

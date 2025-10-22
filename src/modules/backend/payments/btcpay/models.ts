@@ -36,6 +36,18 @@ export interface CreateInvoiceRequest {
   checkout?: BTCPayCheckoutOptions;
 }
 
+export interface PaymentMethod {
+  paymentMethodId: string;
+  destination: string;
+  paymentLink: string;
+  rate: string;
+  paymentMethodPaid: string;
+  totalPaid: string;
+  due: string;
+  amount: string;
+  networkFee: string;
+}
+
 export interface BTCPayInvoice {
   id: string;
   storeId: string;
@@ -49,6 +61,7 @@ export interface BTCPayInvoice {
   monitoringExpiration: number;
   metadata?: BTCPayInvoiceMetadata;
   checkout?: BTCPayCheckoutOptions;
+  paymentMethods?: PaymentMethod[];
 }
 
 export interface InvoiceWebhookPayload {

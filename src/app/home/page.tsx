@@ -5,8 +5,10 @@ import HomeHeader from '@/components/home/HomeHeader';
 import ProductGrid from '@/components/home/ProductGrid';
 import HomeStats from '@/components/home/HomeStats';
 import SalesDrawer from '@/components/SalesDrawer';
+import BTCPayModal from '@/components/btcpay/BTCPayModal';
 import { getActiveProducts } from '@/services/api.service';
 import { btcpayAPI } from '@/services/btcpay.service';
+import { useBTCPayCheckout } from '@/hooks/use-btcpay-checkout';
 import type { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io';
@@ -50,6 +52,14 @@ const HomePage: React.FC<HomePageProps> = ({
   const { user } = useAuth();
   const { isAuthenticated } = useAuth();
   const { token } = useAuth();
+  const {
+    isLoading: isBTCPayLoading,
+    showPaymentModal,
+    invoiceData,
+    createInvoice,
+    startPolling,
+    closeModal,
+  } = useBTCPayCheckout();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [paymentTotal, setPaymentTotal] = useState<number>(0);
@@ -215,29 +225,16 @@ const HomePage: React.FC<HomePageProps> = ({
           throw new Error(response.message || 'Failed to create cash order');
         }
       } else if (paymentMethod === 'crypto') {
-        const cartData = {
-          userId: user.id,
-          items,
-          successUrl: `${window.location.origin}/success`,
-          metadata,
-        };
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-        };
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        const response = await fetch('/api/checkout/crypto', {
-          method: 'POST',
-          headers,
-          credentials: 'include',
-          body: JSON.stringify(cartData),
+        const invoiceId = await createInvoice(total, 'USD', {
+          orderId: `order-${Date.now()}`,
+          itemDesc: `${items.length} productos`,
         });
-        const data = await response.json();
-        if (data.success && data.checkout_url) {
-          window.location.href = data.checkout_url;
-        } else {
-          throw new Error(data.message || 'Failed to create checkout');
+
+        if (invoiceId) {
+          startPolling(invoiceId, () => {
+            clearCart();
+            reloadProducts();
+          });
         }
       }
     } catch (error) {
@@ -479,6 +476,18 @@ const HomePage: React.FC<HomePageProps> = ({
         clearCart={clearCart}
         onPaymentSuccess={reloadProducts}
       />
+
+      {showPaymentModal && invoiceData && (
+        <BTCPayModal
+          isOpen={showPaymentModal}
+          invoiceId={invoiceData.invoiceId}
+          amount={invoiceData.amount}
+          currency={invoiceData.currency}
+          paymentUrl={invoiceData.paymentUrl}
+          status={invoiceData.status}
+          onClose={closeModal}
+        />
+      )}
     </>
   );
 };

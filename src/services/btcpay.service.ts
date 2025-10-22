@@ -11,6 +11,9 @@ class BTCPayAPIService {
     success: boolean;
     invoiceId?: string;
     checkoutLink?: string;
+    paymentUrl?: string;
+    amount?: string;
+    currency?: string;
     status?: InvoiceStatus;
     message?: string;
   }> {

@@ -15,6 +15,8 @@ import {
   CardTitle,
 } from '@/components/landing/ui/card';
 import { Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import BTCPayModal from '@/components/btcpay/BTCPayModal';
+import { useCashSuccess } from '@/context/cash-success-context';
 
 export function CryptoCheckout() {
   const { items, getTotalPrice, clearCart } = useCartStore();
@@ -30,10 +32,15 @@ export function CryptoCheckout() {
     setError,
     reset,
   } = useCheckoutStore();
+  const { showModal: showSuccessModal } = useCashSuccess();
 
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(
     null
   );
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [invoiceAmount, setInvoiceAmount] = useState<string>('');
+  const [invoiceCurrency, setInvoiceCurrency] = useState<string>('');
+  const [paymentUrl, setPaymentUrl] = useState<string>('');
 
   const total = getTotalPrice();
 
@@ -68,6 +75,10 @@ export function CryptoCheckout() {
           response.checkoutLink,
           response.status || InvoiceStatus.NEW
         );
+        setInvoiceAmount(response.amount || total.toString());
+        setInvoiceCurrency(response.currency || 'USD');
+        setPaymentUrl(response.paymentUrl || response.checkoutLink);
+        setShowPaymentModal(true);
         startPolling(response.invoiceId);
       } else {
         setError(response.message || 'Error al crear la factura');
@@ -94,7 +105,9 @@ export function CryptoCheckout() {
             stopPolling();
 
             if (response.status === InvoiceStatus.SETTLED) {
+              setShowPaymentModal(false);
               clearCart();
+              showSuccessModal(id);
             }
           }
         }
@@ -152,43 +165,60 @@ export function CryptoCheckout() {
 
   if (invoiceId && checkoutLink) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle>Estado del Pago</CardTitle>
-          <CardDescription>Completa tu pago con criptomonedas</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col items-center space-y-4">
-            {getStatusIcon()}
-            <p className="text-lg font-medium">{getStatusText()}</p>
-            <p className="text-sm text-muted-foreground">ID: {invoiceId}</p>
-          </div>
-
-          {status === InvoiceStatus.NEW && (
-            <Button
-              onClick={() => window.open(checkoutLink, '_blank')}
-              className="w-full"
-            >
-              Abrir Checkout
-            </Button>
-          )}
-
-          {status === InvoiceStatus.SETTLED && (
-            <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-green-800 text-center">
-                ¡Pago exitoso! Tu pedido ha sido procesado.
-              </p>
+      <>
+        <BTCPayModal
+          isOpen={showPaymentModal}
+          invoiceId={invoiceId}
+          amount={invoiceAmount}
+          currency={invoiceCurrency}
+          paymentUrl={paymentUrl}
+          status={status || InvoiceStatus.NEW}
+          onClose={() => {
+            setShowPaymentModal(false);
+            stopPolling();
+            reset();
+          }}
+        />
+        <Card className="w-full max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle>Estado del Pago</CardTitle>
+            <CardDescription>
+              Completa tu pago con criptomonedas
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col items-center space-y-4">
+              {getStatusIcon()}
+              <p className="text-lg font-medium">{getStatusText()}</p>
+              <p className="text-sm text-muted-foreground">ID: {invoiceId}</p>
             </div>
-          )}
 
-          {(status === InvoiceStatus.EXPIRED ||
-            status === InvoiceStatus.INVALID) && (
-            <Button onClick={reset} className="w-full" variant="outline">
-              Intentar de nuevo
-            </Button>
-          )}
-        </CardContent>
-      </Card>
+            {status === InvoiceStatus.NEW && (
+              <Button
+                onClick={() => setShowPaymentModal(true)}
+                className="w-full"
+              >
+                Ver detalles de pago
+              </Button>
+            )}
+
+            {status === InvoiceStatus.SETTLED && (
+              <div className="p-4 bg-green-50 rounded-lg">
+                <p className="text-sm text-green-800 text-center">
+                  ¡Pago exitoso! Tu pedido ha sido procesado.
+                </p>
+              </div>
+            )}
+
+            {(status === InvoiceStatus.EXPIRED ||
+              status === InvoiceStatus.INVALID) && (
+              <Button onClick={reset} className="w-full" variant="outline">
+                Intentar de nuevo
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </>
     );
   }
 
