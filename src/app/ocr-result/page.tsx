@@ -64,41 +64,68 @@ const OCRResultPage: React.FC = () => {
     setError('');
     try {
       const sourceItems =
-        result.line_items && result.line_items.length > 0
-          ? result.line_items
-          : (((result as unknown as { products?: OCRLineItem[] }).products ||
-              []) as OCRLineItem[]);
+        (result as any).products && (result as any).products.length > 0
+          ? (result as any).products
+          : ((result.line_items && result.line_items.length > 0
+              ? result.line_items
+              : []) as any[]);
+
+      const extractStock = (item: any): number => {
+        const possibleStockFields = [
+          'stock',
+          'quantity',
+          'qty',
+          'unidad',
+          'unidades',
+          'unit',
+          'units',
+          'cantidad',
+          'amount',
+        ];
+
+        for (const field of possibleStockFields) {
+          const value = item[field];
+          if (value !== null && value !== undefined && value !== '') {
+            const num = parseInt(String(value).replace(/[^\d]/g, ''), 10);
+            if (Number.isFinite(num) && num > 0) {
+              return num;
+            }
+          }
+        }
+
+        return 0;
+      };
+
       const products = sourceItems
-        .map((item) => {
+        .map((item: any) => {
           const name =
             (item.name || '').trim().substring(0, 80) || 'Unnamed Product';
-          const description = (
-            item.description ||
-            item.name ||
-            'No description'
-          ).substring(0, 200);
-          const unitPriceStr = String(item.unit_price || '0').replace(
-            /[^\d.-]/g,
-            ''
-          );
-          const price = parseFloat(unitPriceStr) || 0;
-          const quantityStr = String(item.quantity || '1').replace(
-            /[^\d]/g,
-            ''
-          );
-          const stock = parseInt(quantityStr) || 1;
+          const description = (item.description || '').substring(0, 500) || '';
+          const priceStr = String(item.price || '0').replace(/[^\d.-]/g, '');
+          const price = parseFloat(priceStr) || 0;
+          const stock = extractStock(item);
 
           if (!name.trim() || price < 0) {
             return null;
           }
+
+          const productCategories = Array.isArray(item.categories)
+            ? item.categories.filter(
+                (c: any) => typeof c === 'string' && c.trim()
+              )
+            : item.category
+            ? [item.category]
+            : ['Otros'];
 
           return {
             name,
             description,
             price,
             stock,
-            sku: `OCR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            categories: [(item.category || 'General').substring(0, 50)],
+            sku:
+              item.sku ||
+              `OCR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            categories: productCategories,
             images: [],
           };
         })
@@ -202,11 +229,14 @@ const OCRResultPage: React.FC = () => {
       };
 
       const candidateLineItems = [
-        pickArray((ocrResult as any).line_items),
         pickArray((ocrResult as any).products),
+        pickArray((ocrResult as any).line_items),
         pickArray((ocrResult as any).productos),
         pickArray((ocrResult as any).items),
       ].find((arr) => arr.length > 0) as Array<any> | undefined;
+
+      const isNewFormat =
+        (ocrResult as any).products && (ocrResult as any).products.length > 0;
 
       const processedItems: OCRLineItem[] = (candidateLineItems || []).map(
         (item: any) => {
@@ -215,13 +245,18 @@ const OCRResultPage: React.FC = () => {
             item?.description || item?.descripcion || item?.detalles,
             ''
           );
-          const unitPrice = sanitizeNumber(
-            item?.unit_price ?? item?.price,
-            '0.00'
-          );
-          const quantityStr = sanitizeQuantity(
-            item?.quantity ?? item?.qty ?? '1'
-          );
+
+          let unitPrice: string;
+          let quantityStr: string;
+
+          if (isNewFormat) {
+            unitPrice = sanitizeNumber(item?.price ?? '0.00', '0.00');
+            quantityStr = sanitizeQuantity(item?.stock ?? '0');
+          } else {
+            unitPrice = sanitizeNumber(item?.unit_price ?? item?.price, '0.00');
+            quantityStr = sanitizeQuantity(item?.quantity ?? item?.qty ?? '1');
+          }
+
           const quantityNum = parseInt(quantityStr, 10);
           const unitPriceNum = parseFloat(unitPrice);
           const providedTotal = sanitizeNumber(
@@ -259,7 +294,10 @@ const OCRResultPage: React.FC = () => {
             unit_price: unitPrice,
             quantity: quantityStr,
             total_price: finalTotal,
-            category: sanitizeText(item?.category, 'General'),
+            category: sanitizeText(
+              item?.category ?? item?.categories?.[0],
+              'General'
+            ),
           } as OCRLineItem;
         }
       );

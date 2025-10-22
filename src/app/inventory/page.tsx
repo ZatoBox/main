@@ -28,6 +28,7 @@ const InventoryPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingItems, setDeletingItems] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -136,30 +137,26 @@ const InventoryPage: React.FC = () => {
     setError(null);
 
     try {
-      const response = await productsAPI.update(deleteConfirmId, {
-        active: false,
-      });
+      const response = await productsAPI.delete(deleteConfirmId);
 
       if (response.success) {
         setInventoryItems((prevItems) =>
-          prevItems.map((item) =>
-            item.id === deleteConfirmId ? response.product : item
-          )
+          prevItems.filter((item) => item.id !== deleteConfirmId)
         );
         setSelectedItems((prevSelected) =>
           prevSelected.filter((itemId) => itemId !== deleteConfirmId)
         );
         toast({
-          title: 'Producto archivado',
-          description: 'El producto se archivó correctamente.',
+          title: 'Producto eliminado',
+          description: 'El producto se eliminó correctamente.',
         });
         setError(null);
       } else {
-        setError('Error al archivar producto: ' + response.message);
+        setError('Error al eliminar producto: ' + response.message);
       }
     } catch (err) {
       setError(
-        'Error al archivar producto: ' +
+        'Error al eliminar producto: ' +
           (err instanceof Error ? err.message : 'Error desconocido')
       );
     } finally {
@@ -171,6 +168,59 @@ const InventoryPage: React.FC = () => {
   const handleDeleteCancel = () => {
     setDeleteConfirmId(null);
     setIsDeleting(false);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    try {
+      setDeletingItems(true);
+      const deletePromises = selectedItems.map(async (id) => {
+        try {
+          const response = await productsAPI.delete(id);
+          return { success: response.success, id };
+        } catch (error) {
+          return { success: false, id, error };
+        }
+      });
+
+      const results = await Promise.all(deletePromises);
+      const successful = results.filter((r) => r.success);
+      const failed = results.filter((r) => !r.success);
+
+      if (successful.length > 0) {
+        setInventoryItems((prev) =>
+          prev.filter((item) => !successful.some((s) => s.id === item.id))
+        );
+        toast({
+          title: 'Productos eliminados',
+          description: `${successful.length} producto(s) eliminado(s) correctamente.`,
+        });
+      }
+
+      if (failed.length > 0) {
+        toast({
+          title: 'Algunos productos no se eliminaron',
+          description: `${failed.length} producto(s) no pudieron eliminarse.`,
+          variant: 'destructive',
+        });
+      }
+
+      setSelectedItems([]);
+    } catch (err) {
+      toast({
+        title: 'Error al eliminar',
+        description:
+          err instanceof Error
+            ? err.message
+            : 'No se pudieron eliminar los productos seleccionados.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeletingItems(false);
+    }
   };
 
   const handleToggleSelectedStatus = async () => {
@@ -308,6 +358,8 @@ const InventoryPage: React.FC = () => {
         onCreate={() => router.push('/new-product')}
         selectedCount={selectedItems.length}
         onToggleSelectedStatus={handleToggleSelectedStatus}
+        onBulkDelete={handleBulkDelete}
+        deletingItems={deletingItems}
         selectedStatus={
           selectedItems.length > 0 &&
           inventoryItems.some(
