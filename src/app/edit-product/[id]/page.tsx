@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { productsAPI, categoriesAPI } from '@/services/api.service';
+import { productsAPI } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
+import { uploadMultipleImages } from '@/services/upload.service';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { FaRegFolder } from 'react-icons/fa6';
-import { IoMdArrowRoundBack } from 'react-icons/io';
 import ImagesUploader from '@/components/new-product/ImagesUploader';
 import EditHeader from '@/components/edit-product/EditHeader';
 
@@ -18,7 +17,7 @@ const MAX_SIZE = 5 * 1024 * 1024;
 const EditProductPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const id = (params as any)?.id as string | undefined;
 
   const [loading, setLoading] = useState(true);
@@ -28,29 +27,7 @@ const EditProductPage: React.FC = () => {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [productData, setProductData] = useState<any>(null);
   const [togglingStatus, setTogglingStatus] = useState(false);
-
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
-    []
-  );
-  const [loadingCategories, setLoadingCategories] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      setLoadingCategories(true);
-      try {
-        const res = await categoriesAPI.list();
-        if (active && res.success) setCategories(res.categories);
-      } catch {
-      } finally {
-        if (active) setLoadingCategories(false);
-      }
-    };
-    load();
-    return () => {
-      active = false;
-    };
-  }, []);
+  const [unlimitedStock, setUnlimitedStock] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -69,110 +46,93 @@ const EditProductPage: React.FC = () => {
       if (res && res.success && res.product) {
         const product = res.product;
         setProductData(product);
-        setExistingImages(
-          product.medias
-            ?.filter(
-              (m: any) => m.public_url && m.mime_type?.startsWith('image/')
-            )
-            .map((m: any) => m.public_url) || []
-        );
+        setExistingImages(product.images || []);
+        setUnlimitedStock(product.unlimited_stock || false);
       } else {
-        setError('Product not found');
+        setError('Producto no encontrado');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading product');
+      setError(err instanceof Error ? err.message : 'Error al cargar producto');
     } finally {
       setLoading(false);
     }
   };
 
-  const billingOptions = [
-    { label: 'One-time', value: 'once' },
-    { label: 'Monthly', value: 'month' },
-    { label: 'Yearly', value: 'year' },
-  ];
-
   const handleAddFiles = (f: FileList | null) => {
     if (!f) return;
+    const totalImages = existingImages.length + files.length;
     let current = [...files];
     for (const file of Array.from(f)) {
-      if (current.length >= MAX_FILES) break;
+      if (totalImages + current.length >= MAX_FILES) break;
       if (!ALLOWED_TYPES.includes(file.type)) continue;
       if (file.size > MAX_SIZE) continue;
       current.push(file);
     }
-    setFiles(current.slice(0, MAX_FILES));
+    setFiles(current);
   };
 
   const handleRemoveFile = (index: number) =>
     setFiles((prev) => prev.filter((_, i) => i !== index));
 
+  const handleRemoveExistingImage = (index: number) =>
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+
   const onSubmit = async (values: any) => {
     setSaving(true);
     setError(null);
     if (!isAuthenticated) {
-      setError('You must log in to update products');
+      setError('Debes iniciar sesión para actualizar productos');
       setSaving(false);
       return;
     }
 
     try {
-      const prices = [
-        {
-          amount_type: 'fixed',
-          price_currency: 'usd',
-          price_amount: Math.round(Number(values.price) * 100),
-          type: values.billingInterval === 'once' ? 'one_time' : 'recurring',
-          recurring_interval:
-            values.billingInterval === 'once'
-              ? undefined
-              : values.billingInterval,
-          legacy: false,
-          is_archived: false,
-        },
-      ];
+      const newImageUrls: string[] = [];
 
-      const metadata: any = { quantity: Number(values.stock || 0) };
-      if (values.category && String(values.category).trim() !== '')
-        metadata.category = String(values.category).trim();
-      if (values.subcategory && String(values.subcategory).trim() !== '')
-        metadata.subcategory = String(values.subcategory).trim();
-      if (values.tags && String(values.tags).trim() !== '') {
-        const arr = String(values.tags)
-          .split(',')
-          .map((t) => t.trim())
-          .filter((t) => t.length > 0);
-        if (arr.length > 0) metadata.tags = arr.join(',');
+      if (files.length > 0) {
+        try {
+          const urls = await uploadMultipleImages(files);
+          newImageUrls.push(...urls);
+        } catch (uploadError) {
+          console.error('Error uploading images:', uploadError);
+          setError('Error al subir las imágenes');
+          setSaving(false);
+          return;
+        }
       }
 
-      const payload: Record<string, unknown> = {
+      const allImages = [...existingImages, ...newImageUrls].slice(
+        0,
+        MAX_FILES
+      );
+
+      const categories: string[] = [];
+      if (values.category && String(values.category).trim() !== '') {
+        categories.push(String(values.category).trim());
+      }
+
+      const payload: any = {
         name: values.name,
         description:
           values.description && values.description.trim() !== ''
             ? values.description
-            : undefined,
-        recurring_interval:
-          values.billingInterval === 'once' ? null : values.billingInterval,
-        prices,
-        metadata,
+            : null,
+        price: Number(values.price),
+        stock: unlimitedStock ? 0 : Number(values.stock),
+        unlimited_stock: unlimitedStock,
+        categories,
+        sku: values.sku && values.sku.trim() !== '' ? values.sku : null,
+        images: allImages,
       };
 
-      await productsAPI.update(id!, payload as any);
+      await productsAPI.update(id!, payload);
       router.push('/inventory');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error updating product');
+      setError(
+        err instanceof Error ? err.message : 'Error al actualizar producto'
+      );
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleStatusUpdate = (updated: any, archivedValue: boolean) => {
-    if (updated && typeof updated === 'object') {
-      setProductData(updated);
-    } else {
-      setProductData((prev: any) =>
-        prev ? { ...prev, is_archived: archivedValue } : prev
-      );
     }
   };
 
@@ -180,19 +140,17 @@ const EditProductPage: React.FC = () => {
     if (!id || !productData) return;
     setTogglingStatus(true);
     setError(null);
-    const nextArchived = !productData.is_archived;
+    const nextActive = !productData.active;
     try {
-      const response = await productsAPI.update(id, {
-        is_archived: nextArchived,
-      });
+      const response = await productsAPI.update(id, { active: nextActive });
       if (response?.success && response.product) {
-        handleStatusUpdate(response.product, nextArchived);
-      } else {
-        handleStatusUpdate(null, nextArchived);
+        setProductData(response.product);
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Error updating product status'
+        err instanceof Error
+          ? err.message
+          : 'Error al actualizar estado del producto'
       );
     } finally {
       setTogglingStatus(false);
@@ -200,19 +158,17 @@ const EditProductPage: React.FC = () => {
   };
 
   const handleArchiveProduct = async () => {
-    if (!id || !productData || productData.is_archived) return;
+    if (!id || !productData || !productData.active) return;
     setTogglingStatus(true);
     setError(null);
     try {
-      const response = await productsAPI.update(id, { is_archived: true });
+      const response = await productsAPI.update(id, { active: false });
       if (response?.success && response.product) {
-        handleStatusUpdate(response.product, true);
-      } else {
-        handleStatusUpdate(null, true);
+        setProductData(response.product);
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Error updating product status'
+        err instanceof Error ? err.message : 'Error al archivar producto'
       );
     } finally {
       setTogglingStatus(false);
@@ -220,27 +176,28 @@ const EditProductPage: React.FC = () => {
   };
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
+    name: Yup.string().required('El nombre es requerido'),
     price: Yup.number()
-      .typeError('Price must be a number')
-      .positive('Price must be greater than 0')
-      .required('Price is required'),
+      .typeError('El precio debe ser un número')
+      .min(0, 'El precio debe ser 0 o mayor')
+      .required('El precio es requerido'),
     stock: Yup.number()
-      .typeError('Stock must be a number')
-      .integer('Stock must be an integer')
-      .min(0, 'Stock must be 0 or more')
-      .required('Stock is required'),
-    billingInterval: Yup.string()
-      .oneOf(['once', 'month', 'year'])
-      .required('Billing interval is required'),
+      .typeError('El stock debe ser un número')
+      .integer('El stock debe ser un número entero')
+      .min(0, 'El stock debe ser 0 o mayor')
+      .when([], {
+        is: () => !unlimitedStock,
+        then: (schema) => schema.required('El stock es requerido'),
+        otherwise: (schema) => schema.notRequired(),
+      }),
   });
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen  bg-bg-main">
+      <div className="flex items-center justify-center min-h-screen bg-bg-main">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
-          <p className="text-text-secondary">Cargando productos...</p>
+          <p className="text-text-secondary">Cargando producto...</p>
         </div>
       </div>
     );
@@ -248,32 +205,23 @@ const EditProductPage: React.FC = () => {
 
   if (!productData) {
     return (
-      <div className="flex items-center justify-center min-h-screen  bg-bg-main">
+      <div className="flex items-center justify-center min-h-screen bg-bg-main">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
-          <p className="text-text-secondary">Cargando productos...</p>
+          <p className="text-text-secondary">
+            {error || 'Producto no encontrado'}
+          </p>
         </div>
       </div>
     );
   }
 
-  const primaryPrice = productData.prices?.[0];
-  const currentPrice = primaryPrice ? primaryPrice.price_amount / 100 : 0;
-  const currentInterval = productData.recurring_interval || 'once';
-  const currentStock = productData.metadata?.quantity || 0;
-  const currentCategory = productData.metadata?.category || '';
-  const currentSubcategory = productData.metadata?.subcategory || '';
-  const currentTags = productData.metadata?.tags || '';
-
   const initialValues = {
     name: productData.name || '',
     description: productData.description || '',
-    price: String(currentPrice),
-    stock: String(currentStock),
-    billingInterval: currentInterval,
-    category: currentCategory,
-    subcategory: currentSubcategory,
-    tags: currentTags,
+    price: String(productData.price || 0),
+    stock: String(productData.stock || 0),
+    category: productData.categories?.[0] || '',
+    sku: productData.sku || '',
   } as any;
 
   return (
@@ -282,6 +230,9 @@ const EditProductPage: React.FC = () => {
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={onSubmit}
+        enableReinitialize
+        validateOnChange={false}
+        validateOnBlur={false}
       >
         {(formik) => (
           <>
@@ -290,7 +241,7 @@ const EditProductPage: React.FC = () => {
               onSave={() => formik.handleSubmit()}
               onArchive={handleArchiveProduct}
               onToggleStatus={handleToggleStatus}
-              status={productData?.is_archived ? 'inactive' : 'active'}
+              status={productData?.active ? 'active' : 'inactive'}
               saving={saving}
               togglingStatus={togglingStatus}
             />
@@ -298,10 +249,36 @@ const EditProductPage: React.FC = () => {
               <Form>
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                   <div className="space-y-6">
+                    {existingImages.length > 0 && (
+                      <div className="p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]">
+                        <h3 className="mb-3 text-sm font-medium text-black">
+                          Imágenes actuales
+                        </h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {existingImages.map((img, idx) => (
+                            <div key={idx} className="relative group">
+                              <img
+                                src={img}
+                                alt={`Imagen ${idx + 1}`}
+                                className="object-cover w-full h-32 rounded-lg"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveExistingImage(idx)}
+                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <ImagesUploader
                       files={files}
                       onAddFiles={handleAddFiles}
                       onRemove={handleRemoveFile}
+                      isUploading={saving}
                     />
                     <div className="p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]">
                       <div className="space-y-4">
@@ -313,6 +290,7 @@ const EditProductPage: React.FC = () => {
                             name="description"
                             value={formik.values.description}
                             onChange={formik.handleChange}
+                            rows={4}
                             className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
                         </div>
@@ -329,22 +307,11 @@ const EditProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Subcategoría
+                            SKU
                           </label>
                           <input
-                            name="subcategory"
-                            value={formik.values.subcategory}
-                            onChange={formik.handleChange}
-                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
-                          />
-                        </div>
-                        <div>
-                          <label className="block mb-2 text-sm font-medium text-black">
-                            Tags (separados por comas)
-                          </label>
-                          <input
-                            name="tags"
-                            value={formik.values.tags}
+                            name="sku"
+                            value={formik.values.sku}
                             onChange={formik.handleChange}
                             className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
@@ -365,29 +332,11 @@ const EditProductPage: React.FC = () => {
                             onChange={formik.handleChange}
                             className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
-                          <div className="mt-1 text-xs text-red-500">
-                            {formik.errors.name as any}
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block mb-2 text-sm font-medium text-black">
-                            Facturación *
-                          </label>
-                          <select
-                            name="billingInterval"
-                            value={formik.values.billingInterval}
-                            onChange={formik.handleChange}
-                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
-                          >
-                            {billingOptions.map((opt) => (
-                              <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                              </option>
-                            ))}
-                          </select>
-                          <div className="mt-1 text-xs text-red-500">
-                            {formik.errors.billingInterval as any}
-                          </div>
+                          {formik.errors.name && (
+                            <div className="mt-1 text-xs text-red-500">
+                              {formik.errors.name as any}
+                            </div>
+                          )}
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
@@ -397,28 +346,54 @@ const EditProductPage: React.FC = () => {
                             name="price"
                             type="number"
                             step="0.01"
+                            min="0"
                             value={formik.values.price}
                             onChange={formik.handleChange}
                             className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
                           />
-                          <div className="mt-1 text-xs text-red-500">
-                            {formik.errors.price as any}
-                          </div>
+                          {formik.errors.price && (
+                            <div className="mt-1 text-xs text-red-500">
+                              {formik.errors.price as any}
+                            </div>
+                          )}
                         </div>
                         <div>
-                          <label className="block mb-2 text-sm font-medium text-black">
-                            Stock *
+                          <label className="flex items-center mb-3">
+                            <input
+                              type="checkbox"
+                              checked={unlimitedStock}
+                              onChange={(e) => {
+                                setUnlimitedStock(e.target.checked);
+                                if (e.target.checked) {
+                                  formik.setFieldValue('stock', '');
+                                }
+                              }}
+                              className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                            <span className="text-sm font-medium text-black">
+                              Stock Ilimitado
+                            </span>
                           </label>
-                          <input
-                            name="stock"
-                            type="number"
-                            value={formik.values.stock}
-                            onChange={formik.handleChange}
-                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
-                          />
-                          <div className="mt-1 text-xs text-red-500">
-                            {formik.errors.stock as any}
-                          </div>
+                          {!unlimitedStock && (
+                            <>
+                              <label className="block mb-2 text-sm font-medium text-black">
+                                Stock *
+                              </label>
+                              <input
+                                name="stock"
+                                type="number"
+                                min="0"
+                                value={formik.values.stock}
+                                onChange={formik.handleChange}
+                                className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
+                              />
+                              {formik.errors.stock && (
+                                <div className="mt-1 text-xs text-red-500">
+                                  {formik.errors.stock as any}
+                                </div>
+                              )}
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

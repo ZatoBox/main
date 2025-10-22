@@ -4,8 +4,21 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/profile/Header';
 import AvatarUploader from '@/components/profile/AvatarUploader';
+import CryptoStoreSetup from '@/components/profile/CryptoStoreSetup';
 import { profileAPI, authAPI } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
+import {
+  Bitcoin,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Edit,
+  AlertCircle,
+  CheckCircle,
+  AlertTriangle,
+  Lock,
+} from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
   const router = useRouter();
@@ -68,13 +81,7 @@ const ProfilePage: React.FC = () => {
         const oldValue = profileData[field];
 
         if (newValue !== oldValue) {
-          if (
-            field === 'email' ||
-            field === 'phone' ||
-            field === 'address' ||
-            field === 'polar_api_key' ||
-            field === 'polar_organization_id'
-          ) {
+          if (field === 'email' || field === 'phone') {
             payload[field] = newValue || null;
           } else if (newValue) {
             payload[field] = newValue;
@@ -156,102 +163,10 @@ const ProfilePage: React.FC = () => {
 
   const getFieldIcon = (field: string) => {
     const icons = {
-      full_name: (
-        <svg
-          className="w-4 h-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          />
-        </svg>
-      ),
-      email: (
-        <svg
-          className="w-4 h-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-          />
-        </svg>
-      ),
-      phone: (
-        <svg
-          className="w-4 h-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-          />
-        </svg>
-      ),
-      address: (
-        <svg
-          className="w-4 h-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-      ),
-      polar_api_key: (
-        <svg
-          className="w-4 h-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-          />
-        </svg>
-      ),
-      polar_organization_id: (
-        <svg
-          className="w-4 h-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-          />
-        </svg>
-      ),
+      full_name: <User className="w-4 h-4 text-gray-400" />,
+      email: <Mail className="w-4 h-4 text-gray-400" />,
+      phone: <Phone className="w-4 h-4 text-gray-400" />,
+      address: <MapPin className="w-4 h-4 text-gray-400" />,
     };
     return icons[field as keyof typeof icons] || null;
   };
@@ -279,19 +194,7 @@ const ProfilePage: React.FC = () => {
                 onClick={() => startEditing(field)}
                 className="opacity-0 group-hover:opacity-100 transition-opacity text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
               >
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
+                <Edit className="w-3 h-3" />
                 <span>Editar</span>
               </button>
             )}
@@ -310,19 +213,7 @@ const ProfilePage: React.FC = () => {
                 />
                 {isSecureField && (
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    <svg
-                      className="w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                      />
-                    </svg>
+                    <Lock className="w-4 h-4 text-gray-400" />
                   </div>
                 )}
               </div>
@@ -353,19 +244,7 @@ const ProfilePage: React.FC = () => {
                   </div>
                 ) : (
                   <span className="text-gray-400 italic flex items-center space-x-2">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                      />
-                    </svg>
+                    <AlertTriangle className="w-4 h-4" />
                     <span>No está configurado</span>
                   </span>
                 )
@@ -428,19 +307,7 @@ const ProfilePage: React.FC = () => {
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
                   <div className="flex items-center space-x-3">
                     <div className="flex-shrink-0">
-                      <svg
-                        className="w-5 h-5 text-red-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                      <AlertCircle className="w-5 h-5 text-red-400" />
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-red-800">
@@ -456,19 +323,7 @@ const ProfilePage: React.FC = () => {
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
                   <div className="flex items-center space-x-3">
                     <div className="flex-shrink-0">
-                      <svg
-                        className="w-5 h-5 text-green-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                      <CheckCircle className="w-5 h-5 text-green-400" />
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-green-800">
@@ -494,19 +349,7 @@ const ProfilePage: React.FC = () => {
                         {profileData.full_name || 'User'}
                       </h1>
                       <p className="text-gray-600 mb-1 flex items-center justify-center md:justify-start">
-                        <svg
-                          className="w-4 h-4 mr-2 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-                          />
-                        </svg>
+                        <Mail className="w-4 h-4 mr-2 text-gray-400" />
                         {profileData.email || 'No email provided'}
                       </p>
                       {profileData.role && (
@@ -522,19 +365,7 @@ const ProfilePage: React.FC = () => {
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
                   <div className="px-6 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <svg
-                        className="w-5 h-5 mr-2 text-orange-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
+                      <User className="w-5 h-5 mr-2 text-orange-500" />
                       Información Personal
                     </h2>
                   </div>
@@ -548,78 +379,24 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* API Configuration Section */}
+                {/* Crypto Payments Configuration Section */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
                   <div className="px-6 py-4 border-b border-gray-100">
                     <div className="flex items-center justify-between">
                       <div>
                         <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                          <svg
-                            className="w-5 h-5 mr-2 text-orange-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                          </svg>
-                          Configuración API
+                          <Bitcoin className="w-5 h-5 mr-2 text-orange-500" />
+                          Pagos con Crypto
                         </h2>
                         <p className="text-sm text-gray-500 mt-1">
-                          Configura tu integración con Polar
+                          Configura tu tienda BTCPay Server para recibir pagos
+                          en Bitcoin
                         </p>
                       </div>
-                      <a
-                        href="https://www.youtube.com/watch?v=u_FrN7xLQn0"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-2 px-4 py-2 bg-orange-50 text-orange-600 hover:bg-orange-100 text-sm font-medium rounded-lg transition-colors"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <span>Ver Tutorial</span>
-                      </a>
                     </div>
                   </div>
                   <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {renderField(
-                        'polar_api_key',
-                        'Polar API Key',
-                        'password'
-                      )}
-                      {renderField(
-                        'polar_organization_id',
-                        'Polar Organization ID'
-                      )}
-                    </div>
+                    <CryptoStoreSetup />
                   </div>
                 </div>
               </div>

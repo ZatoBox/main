@@ -1,11 +1,10 @@
 import React from 'react';
 import { Product } from '@/types/index';
-import { PolarProduct } from '@/types/polar';
 import ProductCard from '../ProductCard';
 
 interface Props {
-  products: (Product | PolarProduct)[];
-  onProductClick: (p: Product | PolarProduct) => void;
+  products: Product[];
+  onProductClick: (p: Product) => void;
 }
 
 const ProductGrid: React.FC<Props> = ({ products, onProductClick }) => {
@@ -27,13 +26,13 @@ const ProductGrid: React.FC<Props> = ({ products, onProductClick }) => {
             />
           </svg>
         </div>
-        <p className="text-zatobox-600">No se encontraron productos</p>
+        <p className="text-gray-600">No se encontraron productos</p>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 sm:gap-6 animate-stagger grid-cols-[repeat(auto-fit,minmax(260px,1fr))]">
+    <div className="grid gap-4 sm:gap-6 animate-stagger grid-cols-[repeat(auto-fit,minmax(260px,260px))] justify-center">
       {products.map((product, index) => (
         <ProductCard
           key={`${product.id}-${index}`}

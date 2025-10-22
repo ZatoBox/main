@@ -4,14 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-store';
 import { productsAPI, ocrAPI } from '@/services/api.service';
-import {
-  OCRResponse,
-  OCRLineItem,
-  CreateProductRequest,
-  ProductUnity,
-  ProductType,
-  ProductStatus,
-} from '@/types/index';
+import { OCRResponse, OCRLineItem, CreateProductRequest } from '@/types/index';
 import Header from '@/components/ocr-result/Header';
 import FileUploader from '@/components/ocr-result/FileUploader';
 import ResultOverview from '@/components/ocr-result/ResultOverview';
@@ -71,69 +64,84 @@ const OCRResultPage: React.FC = () => {
     setError('');
     try {
       const sourceItems =
-        result.line_items && result.line_items.length > 0
-          ? result.line_items
-          : (((result as unknown as { products?: OCRLineItem[] }).products ||
-              []) as OCRLineItem[]);
-      const polarProducts = sourceItems
-        .map((item) => {
+        (result as any).products && (result as any).products.length > 0
+          ? (result as any).products
+          : ((result.line_items && result.line_items.length > 0
+              ? result.line_items
+              : []) as any[]);
+
+      const extractStock = (item: any): number => {
+        const possibleStockFields = [
+          'stock',
+          'quantity',
+          'qty',
+          'unidad',
+          'unidades',
+          'unit',
+          'units',
+          'cantidad',
+          'amount',
+        ];
+
+        for (const field of possibleStockFields) {
+          const value = item[field];
+          if (value !== null && value !== undefined && value !== '') {
+            const num = parseInt(String(value).replace(/[^\d]/g, ''), 10);
+            if (Number.isFinite(num) && num > 0) {
+              return num;
+            }
+          }
+        }
+
+        return 0;
+      };
+
+      const products = sourceItems
+        .map((item: any) => {
           const name =
             (item.name || '').trim().substring(0, 80) || 'Unnamed Product';
-          const description = (
-            item.description ||
-            item.name ||
-            'No description'
-          ).substring(0, 200);
-          const unitPriceStr = String(item.unit_price || '0').replace(
-            /[^\d.-]/g,
-            ''
-          );
-          const price = parseFloat(unitPriceStr) || 0;
-          const quantityStr = String(item.quantity || '1').replace(
-            /[^\d]/g,
-            ''
-          );
-          const stock = parseInt(quantityStr) || 1;
-          const priceInCents = Math.round(price * 100);
-          const category = (item.category || 'General').substring(0, 50);
+          const description = (item.description || '').substring(0, 500) || '';
+          const priceStr = String(item.price || '0').replace(/[^\d.-]/g, '');
+          const price = parseFloat(priceStr) || 0;
+          const stock = extractStock(item);
 
-          if (!name.trim() || priceInCents < 0) {
+          if (!name.trim() || price < 0) {
             return null;
           }
+
+          const productCategories = Array.isArray(item.categories)
+            ? item.categories.filter(
+                (c: any) => typeof c === 'string' && c.trim()
+              )
+            : item.category
+            ? [item.category]
+            : ['Otros'];
 
           return {
             name,
             description,
-            recurring_interval: null,
-            prices: [
-              {
-                amount_type: 'fixed',
-                price_currency: 'usd',
-                price_amount: priceInCents,
-              },
-            ],
-            metadata: {
-              quantity: stock,
-              category,
-              subcategory: 'OCR Import',
-              tags: 'ocr,imported,invoice',
-            },
+            price,
+            stock,
+            sku:
+              item.sku ||
+              `OCR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            categories: productCategories,
+            images: [],
           };
         })
         .filter(Boolean);
 
-      if (polarProducts.length === 0) {
+      if (products.length === 0) {
         setError('No valid products to create');
         setIsAddingToInventory(false);
         return;
       }
 
-      const response = await productsAPI.createBulk(polarProducts);
-      if (response.success) {
-        router.push('/inventory');
-      } else {
-        setError(response.message || 'Error creating products');
+      for (const product of products) {
+        await productsAPI.create(product);
       }
+
+      router.push('/inventory');
     } catch (err: any) {
       setError(err.message || 'Error adding products to inventory');
     } finally {
@@ -221,11 +229,14 @@ const OCRResultPage: React.FC = () => {
       };
 
       const candidateLineItems = [
-        pickArray((ocrResult as any).line_items),
         pickArray((ocrResult as any).products),
+        pickArray((ocrResult as any).line_items),
         pickArray((ocrResult as any).productos),
         pickArray((ocrResult as any).items),
       ].find((arr) => arr.length > 0) as Array<any> | undefined;
+
+      const isNewFormat =
+        (ocrResult as any).products && (ocrResult as any).products.length > 0;
 
       const processedItems: OCRLineItem[] = (candidateLineItems || []).map(
         (item: any) => {
@@ -234,13 +245,18 @@ const OCRResultPage: React.FC = () => {
             item?.description || item?.descripcion || item?.detalles,
             ''
           );
-          const unitPrice = sanitizeNumber(
-            item?.unit_price ?? item?.price,
-            '0.00'
-          );
-          const quantityStr = sanitizeQuantity(
-            item?.quantity ?? item?.qty ?? '1'
-          );
+
+          let unitPrice: string;
+          let quantityStr: string;
+
+          if (isNewFormat) {
+            unitPrice = sanitizeNumber(item?.price ?? '0.00', '0.00');
+            quantityStr = sanitizeQuantity(item?.stock ?? '0');
+          } else {
+            unitPrice = sanitizeNumber(item?.unit_price ?? item?.price, '0.00');
+            quantityStr = sanitizeQuantity(item?.quantity ?? item?.qty ?? '1');
+          }
+
           const quantityNum = parseInt(quantityStr, 10);
           const unitPriceNum = parseFloat(unitPrice);
           const providedTotal = sanitizeNumber(
@@ -278,7 +294,10 @@ const OCRResultPage: React.FC = () => {
             unit_price: unitPrice,
             quantity: quantityStr,
             total_price: finalTotal,
-            category: sanitizeText(item?.category, 'General'),
+            category: sanitizeText(
+              item?.category ?? item?.categories?.[0],
+              'General'
+            ),
           } as OCRLineItem;
         }
       );
@@ -491,7 +510,8 @@ const OCRResultPage: React.FC = () => {
                     style={{ maxHeight: '500px', objectFit: 'contain' }}
                   />
                   <p className="mt-2 text-xs text-center text-gray-500">
-                    Imagen que muestra las detecciones de YOLO (cuadrículas verdes) y las regiones de la tabla (cuadrículas azules)
+                    Imagen que muestra las detecciones de YOLO (cuadrículas
+                    verdes) y las regiones de la tabla (cuadrículas azules)
                   </p>
                 </div>
               </div>

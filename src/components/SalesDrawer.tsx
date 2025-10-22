@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
+import { X, Minus, Plus, Trash2, ShoppingCart, Loader2 } from 'lucide-react';
+import { checkoutCashOrder } from '@/services/cash-payments.service';
+import { useCashSuccess } from '@/context/cash-success-context';
 
-type PaymentMethod = 'cash' | 'zatoconnect';
+type PaymentMethod = 'cash' | 'crypto';
 
 interface SalesItem {
   id: string | number;
@@ -25,6 +27,7 @@ interface SalesDrawerProps {
   updateCartItemQuantity: (id: string | number, change: number) => void;
   removeCartItem: (id: string | number) => void;
   clearCart: () => void;
+  onPaymentSuccess?: () => void;
 }
 
 const SalesDrawer: React.FC<SalesDrawerProps> = ({
@@ -35,9 +38,15 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
   updateCartItemQuantity,
   removeCartItem,
   clearCart,
+  onPaymentSuccess,
 }) => {
-  const [paymentMethod, setPaymentMethod] =
-    useState<PaymentMethod>('zatoconnect');
+  const { showModal } = useCashSuccess();
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const subtotal = cartItems.reduce((sum, item) => {
     const itemTotal = (item.quantity || 0) * (item.price || 0);
@@ -45,9 +54,44 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
   }, 0);
   const cartAmount = subtotal;
 
-  const handlePaymentClick = () => {
+  const handlePaymentClick = async () => {
     const validCartAmount = isNaN(cartAmount) ? 0 : cartAmount;
-    onNavigateToPayment(validCartAmount, paymentMethod);
+
+    if (paymentMethod === 'cash') {
+      setIsProcessing(true);
+      setMessage(null);
+
+      try {
+        const items = cartItems.map((item) => ({
+          productId: item.polarProductId,
+          quantity: item.quantity,
+          price: item.price,
+        }));
+
+        const response = await checkoutCashOrder({ items });
+
+        if (response.success) {
+          clearCart();
+          showModal(response.order?.id);
+          onClose();
+          onPaymentSuccess?.();
+        } else {
+          setMessage({
+            type: 'error',
+            text: response.message || 'Error al procesar el pago',
+          });
+        }
+      } catch (error: any) {
+        setMessage({
+          type: 'error',
+          text: error.message || 'Error al procesar el pago',
+        });
+      } finally {
+        setIsProcessing(false);
+      }
+    } else {
+      onNavigateToPayment(validCartAmount, paymentMethod);
+    }
   };
 
   return (
@@ -169,10 +213,11 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                 <label className="text-sm font-medium text-black">
                   Payment Method
                 </label>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setPaymentMethod('cash')}
-                    className={`flex-1 py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
+                    disabled={isProcessing}
+                    className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 disabled:opacity-50 ${
                       paymentMethod === 'cash'
                         ? 'bg-green-50 border-green-500 text-green-700'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -181,25 +226,46 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                     Cash
                   </button>
                   <button
-                    onClick={() => setPaymentMethod('zatoconnect')}
-                    className={`flex-1 py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 ${
-                      paymentMethod === 'zatoconnect'
-                        ? 'bg-orange-50 border-orange-500 text-orange-700'
+                    onClick={() => setPaymentMethod('crypto')}
+                    disabled={isProcessing}
+                    className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 disabled:opacity-50 ${
+                      paymentMethod === 'crypto'
+                        ? 'bg-blue-50 border-blue-500 text-blue-700'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
                     }`}
                   >
-                    ZatoConnect
+                    Crypto
                   </button>
                 </div>
               </div>
 
+              {message && (
+                <div
+                  className={`p-3 rounded-lg text-sm font-medium text-center transition-all ${
+                    message.type === 'success'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {message.text}
+                </div>
+              )}
+
               <button
                 onClick={handlePaymentClick}
-                className="w-full py-4 font-medium text-white transition-all duration-300 bg-[#F88612] hover:bg-[#d17110] rounded-lg"
+                disabled={isProcessing}
+                className="w-full py-4 font-medium text-white transition-all duration-300 bg-[#F88612] hover:bg-[#d17110] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {paymentMethod === 'cash'
-                  ? 'Create Cash Order'
-                  : 'Proceed to Payment'}
+                {isProcessing ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Processing...
+                  </>
+                ) : paymentMethod === 'cash' ? (
+                  'Create Cash Order'
+                ) : (
+                  'Pay with Crypto'
+                )}
               </button>
 
               <button

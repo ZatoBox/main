@@ -5,12 +5,35 @@ import HomeHeader from '@/components/home/HomeHeader';
 import ProductGrid from '@/components/home/ProductGrid';
 import HomeStats from '@/components/home/HomeStats';
 import SalesDrawer from '@/components/SalesDrawer';
+import BTCPayModal from '@/components/btcpay/BTCPayModal';
 import { getActiveProducts } from '@/services/api.service';
+import { btcpayAPI } from '@/services/btcpay.service';
+import { useBTCPayCheckout } from '@/hooks/use-btcpay-checkout';
 import type { Product } from '@/types/index';
-import { PolarProduct } from '@/types/polar';
 import { useAuth } from '@/context/auth-store';
-import { mapPolarProductToProduct } from '@/utils/polar.utils';
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io';
+
+const mapProductToProduct = (p: any): Product => {
+  const imageUrls = Array.isArray(p.images)
+    ? p.images.filter(
+        (img: any) => typeof img === 'string' && img.trim() !== ''
+      )
+    : [];
+  return {
+    id: String(p.id ?? ''),
+    name: p.name || 'Unnamed Product',
+    description: p.description || '',
+    price: p.price || 0,
+    stock: p.stock || 0,
+    categories: p.categories || [],
+    images: imageUrls,
+    active: p.active !== false,
+    sku: p.sku || String(p.id),
+    creator_id: p.creator_id || '',
+    created_at: p.created_at || new Date().toISOString(),
+    updated_at: p.updated_at || new Date().toISOString(),
+  };
+};
 
 interface HomePageProps {
   tab?: string;
@@ -22,6 +45,15 @@ const HomePage: React.FC<HomePageProps> = ({
 }) => {
   const { user } = useAuth();
   const { isAuthenticated } = useAuth();
+  const { token } = useAuth();
+  const {
+    isLoading: isBTCPayLoading,
+    showPaymentModal,
+    invoiceData,
+    createInvoice,
+    startPolling,
+    closeModal,
+  } = useBTCPayCheckout();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [paymentTotal, setPaymentTotal] = useState<number>(0);
@@ -30,13 +62,14 @@ const HomePage: React.FC<HomePageProps> = ({
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasXpub, setHasXpub] = useState<boolean | null>(null);
 
-  // 🧭 Paginación
+  // Paginación
   const [page, setPage] = useState(1);
   const [pageSize] = useState(12);
   const [totalProducts, setTotalProducts] = useState(0);
 
-  // 🛒 Carrito
+  // Carrito
   interface CartItem {
     id: string;
     polarProductId: string;
@@ -52,23 +85,21 @@ const HomePage: React.FC<HomePageProps> = ({
 
   const activeSearchTerm = localSearchTerm || externalSearchTerm;
 
-  // ✅ Cargar productos con paginación
+  // Cargar productos con paginación
   const reloadProducts = async () => {
     try {
       setLoading(true);
       setError(null);
 
       const offset = (page - 1) * pageSize;
-      const response = await getActiveProducts({ limit: pageSize, offset });
+      const response = await getActiveProducts();
 
       if (response && response.success && Array.isArray(response.products)) {
         const rows: any[] = response.products;
-        const filtered = rows.filter(
-          (p: any) => !(p.is_archived ?? p.is_archived)
-        );
-        const availableProducts = filtered.map(mapPolarProductToProduct);
+        const filtered = rows.filter((p: any) => p.active === true);
+        const availableProducts = filtered.map(mapProductToProduct);
         setProducts(availableProducts);
-        setTotalProducts(response.total || 0);
+        setTotalProducts(availableProducts.length);
       } else if (response && response.success === false) {
         setProducts([]);
         setError(response.message || 'Error reloading products');
@@ -88,25 +119,40 @@ const HomePage: React.FC<HomePageProps> = ({
     } finally {
       setLoading(false);
     }
+
+    // Verificar si tiene XPUB configurado
+    if (isAuthenticated && token) {
+      try {
+        const xpubResponse = await btcpayAPI.getXpub(token);
+        setHasXpub(!!xpubResponse.xpub);
+      } catch (err) {
+        console.error('Error checking XPUB:', err);
+        setHasXpub(false);
+      }
+    }
   };
 
-  // 📦 Llamada inicial o cuando cambie página
+  // Llamada inicial o cuando cambie página
   useEffect(() => {
     void reloadProducts();
   }, [page]);
 
   const enrichedProducts = useMemo(() => products, [products]);
 
-  // 🔍 Filtro local
+  // Filtro local
   const filteredProducts = useMemo(() => {
-    if (!activeSearchTerm.trim()) return enrichedProducts;
-    return enrichedProducts.filter((product: any) =>
-      product.name.toLowerCase().includes(activeSearchTerm.toLowerCase())
+    let result = enrichedProducts;
+    if (activeSearchTerm.trim()) {
+      result = enrichedProducts.filter((product: any) =>
+        product.name.toLowerCase().includes(activeSearchTerm.toLowerCase())
+      );
+    }
+    return result.sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
     );
   }, [activeSearchTerm, enrichedProducts]);
 
-  const handleProductClick = (productUntyped: Product | PolarProduct) => {
-    const product = productUntyped as Product;
+  const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setIsDrawerOpen(true);
     setCartItems((prevCart) => {
@@ -143,7 +189,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   const handleNavigateToPayment = async (
     total: number,
-    paymentMethod: 'cash' | 'zatoconnect'
+    paymentMethod: string
   ) => {
     if (!user?.id) {
       alert('Please log in to checkout');
@@ -164,28 +210,28 @@ const HomePage: React.FC<HomePageProps> = ({
         const { checkoutCashOrder } = await import(
           '@/services/cash-payments.service'
         );
-        const cashData = { userId: user.id, items, metadata };
-        const response = await checkoutCashOrder(cashData);
-        if (response.success && response.checkout_url) {
-          window.location.href = response.checkout_url;
-        } else {
+        const cashItems = cartItems.map((item) => ({
+          productId: String(item.id),
+          quantity: item.quantity,
+          price: item.price,
+        }));
+        const response = await checkoutCashOrder({
+          items: cashItems,
+        });
+        if (!response.success) {
           throw new Error(response.message || 'Failed to create cash order');
         }
-      } else {
-        const { checkoutPolarCart } = await import(
-          '@/services/payments-service'
-        );
-        const cartData = {
-          userId: user.id,
-          items,
-          successUrl: `${window.location.origin}/success`,
-          metadata,
-        };
-        const response = await checkoutPolarCart(cartData);
-        if (response.success && response.checkout_url) {
-          window.location.href = response.checkout_url;
-        } else {
-          throw new Error(response.message || 'Failed to create checkout');
+      } else if (paymentMethod === 'crypto') {
+        const invoiceId = await createInvoice(total, 'USD', {
+          orderId: `order-${Date.now()}`,
+          itemDesc: `${items.length} productos`,
+        });
+
+        if (invoiceId) {
+          startPolling(invoiceId, () => {
+            clearCart();
+            reloadProducts();
+          });
         }
       }
     } catch (error) {
@@ -225,7 +271,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   const clearCart = () => setCartItems([]);
 
-  // 🌀 Estados de carga / error
+  // Estados de carga / error
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
@@ -304,6 +350,39 @@ const HomePage: React.FC<HomePageProps> = ({
           loading={loading}
         />
 
+        {hasXpub === false && (
+          <div className="mx-4 mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg animate-slide-down">
+            <div className="flex items-start gap-3">
+              <svg
+                className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <div className="flex-1">
+                <h3 className="font-semibold text-yellow-800">
+                  ⚠️ Wallet no configurada
+                </h3>
+                <p className="text-sm text-yellow-700 mt-1">
+                  Para recibir pagos en Bitcoin, debes configurar tu XPUB en tu
+                  perfil.{' '}
+                  <a
+                    href="/profile"
+                    className="font-semibold underline hover:text-yellow-900"
+                  >
+                    Ir a perfil →
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="pt-6 px-4">
           <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div className="mb-6">
@@ -313,7 +392,7 @@ const HomePage: React.FC<HomePageProps> = ({
               />
             </div>
 
-            <div className="p-6 bg-white border rounded-lg border-gray-300 animate-scale-in">
+            <div className="p-6 bg-white border border-gray-300 rounded-lg animate-scale-in">
               <ProductGrid
                 products={filteredProducts}
                 onProductClick={handleProductClick}
@@ -392,7 +471,20 @@ const HomePage: React.FC<HomePageProps> = ({
         updateCartItemQuantity={updateCartItemQuantity}
         removeCartItem={removeFromCart}
         clearCart={clearCart}
+        onPaymentSuccess={reloadProducts}
       />
+
+      {showPaymentModal && invoiceData && (
+        <BTCPayModal
+          isOpen={showPaymentModal}
+          invoiceId={invoiceData.invoiceId}
+          amount={invoiceData.amount}
+          currency={invoiceData.currency}
+          paymentUrl={invoiceData.paymentUrl}
+          status={invoiceData.status}
+          onClose={closeModal}
+        />
+      )}
     </>
   );
 };

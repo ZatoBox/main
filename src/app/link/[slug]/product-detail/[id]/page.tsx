@@ -2,13 +2,51 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { getProductByUserId } from '@/services/api.service';
 import type { Layout, Product } from '@/types';
 import { layoutAPI } from '@/services/api.service';
-import Link from 'next/link';
 import ProductImageGallery from '@/components/web-layout/product-detail/ProductImageGallery';
 import ProductInfo from '@/components/web-layout/product-detail/ProductInfo';
-import { mapPolarProductToProduct } from '@/utils/polar.utils';
+
+const mapProductToProduct = (p: any): Product => {
+  const prices = Array.isArray(p.prices) ? p.prices : [];
+  let price = 0;
+  if (prices.length > 0) {
+    const pr = prices[0] || {};
+    const amt = pr.price_amount ?? pr.priceAmount;
+    const amtType = pr.amount_type ?? pr.amountType;
+    if (typeof amt === 'number') {
+      price = amtType === 'free' ? 0 : amt / 100;
+    }
+  }
+  const imageUrls = Array.isArray(p.medias)
+    ? p.medias
+        .filter(
+          (m: any) =>
+            m &&
+            typeof m.public_url === 'string' &&
+            m.mime_type &&
+            m.mime_type.startsWith('image/')
+        )
+        .map((m: any) => m.public_url)
+    : [];
+  return {
+    id: String(p.id ?? ''),
+    name: p.name || 'Unnamed Product',
+    description: p.description || '',
+    price,
+    stock: p.metadata?.quantity || 0,
+    categories: [],
+    images: imageUrls,
+    active: !p.is_archived,
+    sku: String(p.id),
+    creator_id: '',
+    created_at: p.created_at || p.createdAt || new Date().toISOString(),
+    updated_at:
+      p.modified_at || p.modifiedAt || p.updatedAt || new Date().toISOString(),
+  };
+};
 
 export default function ProductLinkPage() {
   const params = useParams();
@@ -37,7 +75,7 @@ export default function ProductLinkPage() {
               productId
             );
             if (productsResponse.success && productsResponse.product) {
-              const mapped = mapPolarProductToProduct(
+              const mapped = mapProductToProduct(
                 productsResponse.product
               ) as Product;
               setProduct(mapped);
@@ -124,7 +162,6 @@ export default function ProductLinkPage() {
             price={product?.price || 0}
             description={product?.description || ''}
             stock={product?.stock || 0}
-            minStock={product?.min_stock || 0}
           ></ProductInfo>
         </div>
       </div>
