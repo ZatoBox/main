@@ -26,11 +26,34 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
   const [copied, setCopied] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const getBitcoinAddress = (url: string): string => {
+    if (url.startsWith('bitcoin:')) {
+      return url.split('?')[0].replace('bitcoin:', '');
+    }
+    return url;
+  };
+
+  const getBIP21URI = (url: string, amt: string): string => {
+    const address = getBitcoinAddress(url);
+    if (!address) return url;
+
+    if (url.includes('?amount=')) {
+      return url;
+    }
+
+    if (currency === 'BTC' || currency === 'SATS') {
+      return `bitcoin:${address}?amount=${amt}`;
+    }
+
+    return `bitcoin:${address}`;
+  };
+
   useEffect(() => {
     if (isOpen && paymentUrl && canvasRef.current) {
-      generateQR(paymentUrl);
+      const bip21URI = getBIP21URI(paymentUrl, amount);
+      generateQR(bip21URI);
     }
-  }, [isOpen, paymentUrl]);
+  }, [isOpen, paymentUrl, amount, currency]);
 
   const generateQR = async (data: string) => {
     try {
@@ -55,7 +78,8 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(paymentUrl);
+      const address = getBitcoinAddress(paymentUrl);
+      await navigator.clipboard.writeText(address);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
@@ -95,11 +119,11 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/80 z-40 animate-fade-in"
+        className="fixed inset-0 bg-black/80 z-[60] animate-fade-in"
         onClick={onClose}
       />
 
-      <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none p-4">
+      <div className="fixed inset-0 flex items-center justify-center z-[70] pointer-events-none p-4">
         <div
           className="animate-scale-in pointer-events-auto transform transition-all"
           onClick={(e) => e.stopPropagation()}
@@ -137,7 +161,7 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
                   </p>
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-mono text-gray-700 break-all flex-1">
-                      {paymentUrl.replace('bitcoin:', '')}
+                      {getBitcoinAddress(paymentUrl)}
                     </p>
                     <button
                       onClick={handleCopy}

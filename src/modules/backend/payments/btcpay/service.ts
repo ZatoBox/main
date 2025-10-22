@@ -138,6 +138,11 @@ export class BTCPayService {
       );
     }
 
+    const fullInvoice = await this.client.getInvoice(this.storeId, invoice.id);
+    if (fullInvoice.paymentMethods) {
+      invoice.paymentMethods = fullInvoice.paymentMethods;
+    }
+
     await this.repository.saveInvoice(userId, invoice);
     return invoice;
   }

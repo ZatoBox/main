@@ -24,17 +24,18 @@ export async function GET(
     const result = await btcpayService.getInvoiceStatus(invoiceId);
     const invoice = result.invoice;
 
-    const paymentUrl =
-      invoice.paymentMethods?.[0]?.paymentLink ||
-      invoice.paymentMethods?.[0]?.destination ||
-      invoice.checkoutLink;
+    const btcPayment = invoice.paymentMethods?.find(
+      (pm) => pm.paymentMethodId === 'BTC-CHAIN' || pm.paymentMethodId === 'BTC'
+    );
+
+    const paymentUrl = btcPayment?.paymentLink || btcPayment?.destination || '';
 
     return NextResponse.json({
       success: true,
       status: invoice.status,
       invoice: {
         id: invoice.id,
-        amount: invoice.amount,
+        amount: btcPayment?.amount || invoice.amount,
         currency: invoice.currency,
         checkoutLink: invoice.checkoutLink,
         paymentUrl,

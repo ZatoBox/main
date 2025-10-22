@@ -34,17 +34,18 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
       checkout,
     });
 
-    const paymentUrl =
-      invoice.paymentMethods?.[0]?.paymentLink ||
-      invoice.paymentMethods?.[0]?.destination ||
-      invoice.checkoutLink;
+    const btcPayment = invoice.paymentMethods?.find(
+      (pm) => pm.paymentMethodId === 'BTC-CHAIN' || pm.paymentMethodId === 'BTC'
+    );
+
+    const paymentUrl = btcPayment?.paymentLink || btcPayment?.destination || '';
 
     return NextResponse.json({
       success: true,
       invoiceId: invoice.id,
       checkoutLink: invoice.checkoutLink,
       paymentUrl,
-      amount: invoice.amount,
+      amount: btcPayment?.amount || invoice.amount,
       currency: invoice.currency,
       status: invoice.status,
     });

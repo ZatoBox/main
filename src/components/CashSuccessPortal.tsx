@@ -19,11 +19,11 @@ const CashSuccessPortal: React.FC = () => {
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/80 z-40 animate-fade-in"
+        className="fixed inset-0 bg-black/80 z-[60] animate-fade-in"
         onClick={hideModal}
       />
 
-      <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+      <div className="fixed inset-0 flex items-center justify-center z-[70] pointer-events-none">
         <div
           className="animate-scale-in pointer-events-auto transform transition-all"
           onClick={(e) => e.stopPropagation()}
