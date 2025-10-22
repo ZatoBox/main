@@ -144,21 +144,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
           </p>
         )}
 
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold transition-colors duration-300 text-black group-hover:text-zatobox-500">
-              ${(product.price || 0).toFixed(2)}
-            </span>
-          </div>
-
-          {images.length > 0 && (
-            <div className="text-right">
-              <span className="text-xs text-gray-500">
-                {images.length} image{images.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-          )}
+        <div className="flex flex-col pt-2">
+          <span className="text-2xl font-bold transition-colors duration-300 text-black group-hover:text-zatobox-500">
+            ${(product.price || 0).toFixed(2)}
+          </span>
         </div>
+
+        {product.categories && product.categories.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-3">
+            {product.categories.map((category, idx) => (
+              <span
+                key={idx}
+                className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-[#F88612] to-[#d17110] text-white"
+              >
+                {category}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="absolute inset-0 transition-all duration-300 border-2 border-transparent rounded-lg pointer-events-none group-hover:border-zatobox-500/20"></div>
