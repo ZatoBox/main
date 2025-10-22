@@ -141,9 +141,14 @@ const HomePage: React.FC<HomePageProps> = ({
 
   // Filtro local
   const filteredProducts = useMemo(() => {
-    if (!activeSearchTerm.trim()) return enrichedProducts;
-    return enrichedProducts.filter((product: any) =>
-      product.name.toLowerCase().includes(activeSearchTerm.toLowerCase())
+    let result = enrichedProducts;
+    if (activeSearchTerm.trim()) {
+      result = enrichedProducts.filter((product: any) =>
+        product.name.toLowerCase().includes(activeSearchTerm.toLowerCase())
+      );
+    }
+    return result.sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
     );
   }, [activeSearchTerm, enrichedProducts]);
 
