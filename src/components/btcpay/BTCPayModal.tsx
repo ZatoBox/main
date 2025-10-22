@@ -92,12 +92,12 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
       case 'New':
         return {
           text: 'Esperando confirmación…',
-          icon: <Loader2 className="animate-spin text-blue-500" size={24} />,
+          icon: <Loader2 className="animate-spin text-[#F88612]" size={24} />,
         };
       case 'Processing':
         return {
           text: 'Procesando pago…',
-          icon: <Loader2 className="animate-spin text-yellow-500" size={24} />,
+          icon: <Loader2 className="animate-spin text-[#F88612]" size={24} />,
         };
       case 'Settled':
         return {
@@ -107,7 +107,7 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
       default:
         return {
           text: 'Esperando pago…',
-          icon: <Loader2 className="animate-spin text-blue-500" size={24} />,
+          icon: <Loader2 className="animate-spin text-[#F88612]" size={24} />,
         };
     }
   };
@@ -155,8 +155,8 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
                   </p>
                 </div>
 
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-sm text-blue-600 text-center mb-2">
+                <div className="bg-[#FEF9EC] rounded-lg p-4 border border-[#EEB131]">
+                  <p className="text-sm text-[#F88612] text-center mb-2">
                     Dirección de pago
                   </p>
                   <div className="flex items-center gap-2">
@@ -165,13 +165,13 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
                     </p>
                     <button
                       onClick={handleCopy}
-                      className="p-2 hover:bg-blue-100 rounded-lg transition-colors flex-shrink-0"
+                      className="p-2 hover:bg-[#FEF9EC] rounded-lg transition-colors flex-shrink-0"
                       title="Copiar dirección"
                     >
                       {copied ? (
                         <Check size={16} className="text-green-600" />
                       ) : (
-                        <Copy size={16} className="text-blue-600" />
+                        <Copy size={16} className="text-[#F88612]" />
                       )}
                     </button>
                   </div>

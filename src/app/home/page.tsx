@@ -14,16 +14,10 @@ import { useAuth } from '@/context/auth-store';
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io';
 
 const mapProductToProduct = (p: any): Product => {
-  const imageUrls = Array.isArray(p.medias)
-    ? p.medias
-        .filter(
-          (m: any) =>
-            m &&
-            typeof m.public_url === 'string' &&
-            m.mime_type &&
-            m.mime_type.startsWith('image/')
-        )
-        .map((m: any) => m.public_url)
+  const imageUrls = Array.isArray(p.images)
+    ? p.images.filter(
+        (img: any) => typeof img === 'string' && img.trim() !== ''
+      )
     : [];
   return {
     id: String(p.id ?? ''),
