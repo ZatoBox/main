@@ -20,7 +20,7 @@ export function withAuth(
             id?: string;
             user_id?: string;
           }>(token);
-          userId = decoded.sub || decoded.id || decoded.user_id;
+          userId = decoded.sub || decoded.id || decoded.user_id || null;
         } catch (e) {
           console.error('Auth: Failed to decode Bearer token:', e);
           userId = null;
@@ -43,7 +43,7 @@ export function withAuth(
               id?: string;
               user_id?: string;
             }>(token);
-            userId = decoded.sub || decoded.id || decoded.user_id;
+            userId = decoded.sub || decoded.id || decoded.user_id || null;
             console.log(
               'Auth: Cookie token decoded, userId:',
               userId,

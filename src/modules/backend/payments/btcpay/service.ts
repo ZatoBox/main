@@ -77,7 +77,9 @@ export class BTCPayService {
     if (request.currency !== 'BTC') {
       try {
         const rate = await this.client.getBTCRate(request.currency);
-        const amountInBTC = (parseFloat(request.amount) / rate).toFixed(8);
+        const amountInBTC = (parseFloat(String(request.amount)) / rate).toFixed(
+          8
+        );
         amountToUse = amountInBTC;
         currencyToUse = 'BTC';
       } catch (error) {
@@ -117,7 +119,7 @@ export class BTCPayService {
     }
 
     if (userXpub) {
-      enrichedRequest.metadata.userXpub = userXpub;
+      (enrichedRequest.metadata as any).userXpub = userXpub;
     }
 
     console.log(
@@ -127,7 +129,7 @@ export class BTCPayService {
 
     const invoice = await this.client.createInvoice(
       this.storeId,
-      enrichedRequest
+      enrichedRequest as CreateInvoiceRequest
     );
 
     const btcpayUrl = process.env.BTCPAY_URL || '';

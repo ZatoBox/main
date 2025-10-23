@@ -142,57 +142,23 @@ export default function ZatoLinkPage() {
         user?.id ||
         `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      const items = cartItems.map((item) => ({
-        polarProductId: item.polarProductId,
-        priceId: item.priceId,
-        quantity: item.quantity,
-        productData: item.productData,
-      }));
-
-      const metadata = {
-        total_amount: total.toString(),
-        store_slug: slug,
-        store_owner_id: layout.owner_id,
-      };
-
       if (paymentMethod === 'cash') {
         const { checkoutCashOrder } = await import(
           '@/services/cash-payments.service'
         );
 
-        const cashData = {
-          userId: guestId,
-          ownerId: layout.owner_id,
-          items,
-          metadata,
-        };
+        const items = cartItems.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+          price: item.price,
+        }));
 
-        const response = await checkoutCashOrder(cashData);
+        const response = await checkoutCashOrder({ items });
 
-        if (response.success && response.checkout_url) {
-          window.location.href = response.checkout_url;
+        if (response.success && response.order) {
+          window.location.href = '/success';
         } else {
           throw new Error(response.message || 'Failed to create cash order');
-        }
-      } else {
-        const { checkoutPolarCart } = await import(
-          '@/services/payments-service'
-        );
-
-        const cartData = {
-          userId: guestId,
-          ownerId: layout.owner_id,
-          items,
-          successUrl: `${window.location.origin}/success`,
-          metadata,
-        };
-
-        const response = await checkoutPolarCart(cartData);
-
-        if (response.success && response.checkout_url) {
-          window.location.href = response.checkout_url;
-        } else {
-          throw new Error(response.message || 'Failed to create checkout');
         }
       }
     } catch (error) {
