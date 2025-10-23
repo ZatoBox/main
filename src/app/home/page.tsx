@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import HomeHeader from '@/components/home/HomeHeader';
 import ProductGrid from '@/components/home/ProductGrid';
 import HomeStats from '@/components/home/HomeStats';
+import SKUSearchModal from '@/components/home/SKUSearchModal';
 import SalesDrawer from '@/components/SalesDrawer';
 import BTCPayModal from '@/components/btcpay/BTCPayModal';
 import { getActiveProducts } from '@/services/api.service';
@@ -12,6 +13,7 @@ import { useBTCPayCheckout } from '@/hooks/use-btcpay-checkout';
 import type { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io';
+import { ShoppingCart, X } from 'lucide-react';
 
 const mapProductToProduct = (p: any): Product => {
   const imageUrls = Array.isArray(p.images)
@@ -55,6 +57,7 @@ const HomePage: React.FC<HomePageProps> = ({
     closeModal,
   } = useBTCPayCheckout();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isSKUModalOpen, setIsSKUModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [paymentTotal, setPaymentTotal] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
@@ -137,6 +140,22 @@ const HomePage: React.FC<HomePageProps> = ({
     void reloadProducts();
   }, [page]);
 
+  useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsDrawerOpen((prev) => !prev);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
+        e.preventDefault();
+        setIsSKUModalOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeydown);
+    return () => window.removeEventListener('keydown', handleKeydown);
+  }, []);
+
   const enrichedProducts = useMemo(() => products, [products]);
 
   // Filtro local
@@ -155,6 +174,10 @@ const HomePage: React.FC<HomePageProps> = ({
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setIsDrawerOpen(true);
+    addToCart(product, 1);
+  };
+
+  const addToCart = (product: Product, quantity: number) => {
     setCartItems((prevCart) => {
       const pid = String(product.id);
       const polarProductId = (product as any).polar_id || String(product.id);
@@ -162,7 +185,10 @@ const HomePage: React.FC<HomePageProps> = ({
       if (existing) {
         return prevCart.map((item) =>
           item.id === pid
-            ? { ...item, quantity: Math.min(item.quantity + 1, product.stock) }
+            ? {
+                ...item,
+                quantity: Math.min(item.quantity + quantity, product.stock),
+              }
             : item
         );
       } else {
@@ -176,7 +202,7 @@ const HomePage: React.FC<HomePageProps> = ({
             price: product.price,
             priceId: primaryPrice?.id || '',
             stock: product.stock,
-            quantity: 1,
+            quantity: Math.min(quantity, product.stock),
             recurring_interval: (product as any).recurring_interval || null,
             productData: product,
           },
@@ -185,7 +211,14 @@ const HomePage: React.FC<HomePageProps> = ({
     });
   };
 
+  const handleSKUAddToCart = (product: Product, quantity: number) => {
+    addToCart(product, quantity);
+    setIsDrawerOpen(true);
+  };
+
   const handleCloseDrawer = () => setIsDrawerOpen(false);
+
+  const handleToggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
 
   const handleNavigateToPayment = async (
     total: number,
@@ -294,6 +327,10 @@ const HomePage: React.FC<HomePageProps> = ({
           onSearchChange={handleLocalSearchChange}
           onReload={reloadProducts}
           loading={loading}
+          onToggleCart={handleToggleDrawer}
+          onToggleSKU={() => setIsSKUModalOpen(!isSKUModalOpen)}
+          cartItemsCount={cartItems.length}
+          isCartOpen={isDrawerOpen}
         />
         <PolarSetupPrompt
           title="Bienvenido a ZatoBox!"
@@ -348,6 +385,10 @@ const HomePage: React.FC<HomePageProps> = ({
           onSearchChange={handleLocalSearchChange}
           onReload={reloadProducts}
           loading={loading}
+          onToggleCart={handleToggleDrawer}
+          onToggleSKU={() => setIsSKUModalOpen(!isSKUModalOpen)}
+          cartItemsCount={cartItems.length}
+          isCartOpen={isDrawerOpen}
         />
 
         {hasXpub === false && (
@@ -472,6 +513,13 @@ const HomePage: React.FC<HomePageProps> = ({
         removeCartItem={removeFromCart}
         clearCart={clearCart}
         onPaymentSuccess={reloadProducts}
+      />
+
+      <SKUSearchModal
+        isOpen={isSKUModalOpen}
+        onClose={() => setIsSKUModalOpen(false)}
+        products={products}
+        onAddToCart={handleSKUAddToCart}
       />
 
       {showPaymentModal && invoiceData && (

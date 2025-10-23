@@ -183,6 +183,10 @@ export const getProductsByUserId = async (userId: string): Promise<any> => {
   return apiRequest(`/products/user/${userId}`);
 };
 
+export const searchProductBySKU = async (sku: string): Promise<any> => {
+  return apiRequest(`/products/?sku=${encodeURIComponent(sku)}`);
+};
+
 export const getProductByUserId = async (
   userId: string,
   productId: string
