@@ -17,7 +17,7 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
       userId
     );
 
-    const overview = await btcpayService.getWalletOverview();
+    const overview = await btcpayService.getWalletOverview(userId);
 
     return NextResponse.json({
       success: true,
