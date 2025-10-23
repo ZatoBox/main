@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Loader from '@/components/ui/Loader';
 import { authAPI } from '@/services/api.service';
 
 type Props = {
@@ -63,62 +64,59 @@ const AvatarUploader: React.FC<Props> = ({
   };
 
   return (
-    <div className="flex items-center space-x-4">
-      <div className="relative group">
-        <div className="flex items-center justify-center w-32 h-32 rounded-full bg-orange-100 border border-orange-200">
-          {uploading ? (
-            <div className="w-6 h-6 border-2 border-orange-400 border-t-transparent rounded-full animate-spin"></div>
-          ) : imageUrl ? (
-            <img
-              src={imageUrl}
-              alt="Profile"
-              className="object-cover w-32 h-32 rounded-full"
-            />
-          ) : (
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              className="text-orange-400"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
+    <>
+      {uploading && <Loader fullScreen size="large" />}
+      <div className="flex items-center space-x-4">
+        <div className="relative group">
+          <div className="flex items-center justify-center w-32 h-32 rounded-full bg-orange-100 border border-orange-200">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt="Profile"
+                className="object-cover w-32 h-32 rounded-full"
+              />
+            ) : (
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="text-orange-400"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            )}
+          </div>
+
+          {!uploading && (
+            <label className="absolute bottom-0 right-0 w-8 h-8 bg-white border border-orange-300 rounded-full cursor-pointer flex items-center justify-center hover:bg-orange-50 transition-colors shadow-sm">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+                disabled={uploading}
+              />
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="text-orange-500"
+              >
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+                <circle cx="12" cy="13" r="3" />
+              </svg>
+            </label>
           )}
         </div>
-
-        {!uploading && (
-          <label className="absolute bottom-0 right-0 w-8 h-8 bg-white border border-orange-300 rounded-full cursor-pointer flex items-center justify-center hover:bg-orange-50 transition-colors shadow-sm">
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-              disabled={uploading}
-            />
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-orange-500"
-            >
-              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
-              <circle cx="12" cy="13" r="3" />
-            </svg>
-          </label>
-        )}
       </div>
-
-      {uploading && (
-        <div className="text-sm text-orange-500 font-medium">Subiendo...</div>
-      )}
-    </div>
+    </>
   );
 };
 

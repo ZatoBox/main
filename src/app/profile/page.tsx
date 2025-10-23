@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/profile/Header';
 import AvatarUploader from '@/components/profile/AvatarUploader';
 import CryptoStoreSetup from '@/components/profile/CryptoStoreSetup';
+import Loader from '@/components/ui/Loader';
 import { profileAPI, authAPI } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
 import {
@@ -262,40 +263,18 @@ const ProfilePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <>
         <Header onBack={() => router.push('/')} />
-        <div className="px-4 py-6 mx-auto max-w-4xl sm:px-6 lg:px-8">
-          <div className="flex justify-center">
-            <div className="w-full max-w-2xl">
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-                <div className="animate-pulse space-y-8">
-                  <div className="flex items-center space-x-6">
-                    <div className="w-32 h-32 bg-gray-200 rounded-full"></div>
-                    <div className="flex-1 space-y-3">
-                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="space-y-3">
-                        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                        <div className="h-10 bg-gray-200 rounded"></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        <Loader fullScreen size="large" />
+      </>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header onBack={() => router.push('/')} />
+
+      {saving && <Loader fullScreen size="large" />}
 
       <div className="px-4 py-6 mx-auto max-w-4xl sm:px-6 lg:px-8">
         <div className="flex justify-center">

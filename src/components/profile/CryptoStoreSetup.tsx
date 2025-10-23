@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Loader from '@/components/ui/Loader';
 import { btcpayAPI } from '@/services/btcpay.service';
 import { useAuth } from '@/context/auth-store';
+import { Edit, Lock } from 'lucide-react';
 
 interface XpubData {
   xpub: string | null;
@@ -17,6 +19,7 @@ const CryptoStoreSetup: React.FC = () => {
   const [xpubInput, setXpubInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (initialized) {
@@ -43,36 +46,6 @@ const CryptoStoreSetup: React.FC = () => {
     }
   };
 
-  const handleGenerateXpub = async () => {
-    if (!token) {
-      setError('Token no disponible');
-      return;
-    }
-
-    setSaving(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const response = await btcpayAPI.generateWallet(token);
-
-      if (response.success && response.xpub) {
-        setSuccess('XPUB generado automáticamente');
-        setXpubData({
-          xpub: response.xpub,
-          savedAt: new Date().toISOString(),
-        });
-      } else {
-        setError(response.message || 'Error al generar XPUB');
-      }
-    } catch (err) {
-      setError('Error al generar XPUB');
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleSaveXpub = async () => {
     if (!token) {
       setError('Token no disponible');
@@ -95,12 +68,13 @@ const CryptoStoreSetup: React.FC = () => {
       );
 
       if (response.success) {
-        setSuccess('XPUB guardado exitosamente');
+        setSuccess('XPUB actualizado exitosamente');
         setXpubData({
           xpub: xpubInput.trim(),
           savedAt: new Date().toISOString(),
         });
-        setXpubInput('');
+        setIsEditing(false);
+        setTimeout(() => setSuccess(null), 3000);
       } else {
         setError(response.message || 'Error al guardar XPUB');
       }
@@ -112,66 +86,60 @@ const CryptoStoreSetup: React.FC = () => {
     }
   };
 
+  const handleGenerateXpub = async () => {
+    if (!token) {
+      setError('Token no disponible');
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await btcpayAPI.generateWallet(token);
+
+      if (response.success && response.xpub) {
+        setSuccess('XPUB generado automáticamente');
+        setXpubData({
+          xpub: response.xpub,
+          savedAt: new Date().toISOString(),
+        });
+        setIsEditing(false);
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        setError(response.message || 'Error al generar XPUB');
+      }
+    } catch (err) {
+      setError('Error al generar XPUB');
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const startEditing = () => {
+    setXpubInput(xpubData?.xpub || '');
+    setIsEditing(true);
+    setError(null);
+    setSuccess(null);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setXpubInput('');
+    setError(null);
+  };
+
   if (loading) {
-    return (
-      <div className="animate-pulse space-y-4">
-        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-        <div className="h-10 bg-gray-200 rounded"></div>
-        <div className="h-10 bg-gray-200 rounded"></div>
-        <div className="h-10 bg-gray-200 rounded w-1/3"></div>
-      </div>
-    );
-  }
-
-  if (xpubData?.xpub) {
-    return (
-      <div className="space-y-4">
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-          <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0">
-              <svg
-                className="w-5 h-5 text-green-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-green-800">
-                XPUB Configurado
-              </h3>
-              <p className="text-sm text-green-700 mt-1">
-                Tu wallet está lista para recibir pagos en Bitcoin
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 border rounded-lg bg-gray-50">
-          <label className="text-sm font-medium text-gray-700">Tu XPUB</label>
-          <p className="text-gray-900 mt-1 font-mono text-xs break-all">
-            {xpubData.xpub}
-          </p>
-        </div>
-
-        <div className="text-sm text-gray-500">
-          Los pagos en crypto que recibas irán directamente a tu wallet.
-        </div>
-      </div>
-    );
+    return <Loader fullScreen size="large" />;
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      {saving && <Loader fullScreen size="large" />}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <svg
@@ -197,7 +165,7 @@ const CryptoStoreSetup: React.FC = () => {
       )}
 
       {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <svg
@@ -222,79 +190,82 @@ const CryptoStoreSetup: React.FC = () => {
         </div>
       )}
 
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tu XPUB de Bitcoin *
-          </label>
-          <input
-            type="text"
-            value={xpubInput}
-            onChange={(e) => setXpubInput(e.target.value)}
-            placeholder="xpub1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa..."
-            className="w-full p-3 border rounded-lg border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm"
-            disabled={saving}
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Proporciona el XPUB de tu wallet para recibir pagos directamente en
-            ella
-          </p>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={handleSaveXpub}
-            disabled={saving || !xpubInput.trim()}
-            className="flex-1 px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
-          >
-            {saving ? (
-              <>
-                <svg
-                  className="animate-spin w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                <span>Guardando...</span>
-              </>
-            ) : (
-              <span>Guardar XPUB</span>
+      <div className="relative group transition-all duration-200 hover:shadow-sm">
+        <div className="p-4 border rounded-lg bg-white border-gray-200 hover:border-orange-200 transition-colors">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <Lock className="w-4 h-4 text-gray-400" />
+              <label className="text-sm font-medium text-gray-700">
+                XPUB de Bitcoin
+              </label>
+            </div>
+            {!isEditing && (
+              <button
+                onClick={startEditing}
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
+              >
+                <Edit className="w-3 h-3" />
+                <span>Editar</span>
+              </button>
             )}
-          </button>
+          </div>
 
-          <button
-            onClick={handleGenerateXpub}
-            disabled={saving}
-            className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
-          >
-            {saving ? (
-              <>
-                <svg
-                  className="animate-spin w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          {isEditing ? (
+            <div className="space-y-3">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={xpubInput}
+                  onChange={(e) => setXpubInput(e.target.value)}
+                  className="w-full p-3 pr-10 border rounded-lg border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 font-mono text-sm"
+                  placeholder="xpub1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa..."
+                  autoFocus
+                  disabled={saving}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                Proporciona el XPUB de tu wallet para recibir pagos directamente
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={cancelEditing}
+                  disabled={saving}
+                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                <span>Generando...</span>
-              </>
-            ) : (
-              <span>Generar Automático</span>
-            )}
-          </button>
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSaveXpub}
+                  disabled={saving || !xpubInput.trim()}
+                  className="px-4 py-2 bg-orange-500 text-white text-sm rounded-md hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? 'Guardando...' : 'Guardar'}
+                </button>
+                <button
+                  onClick={handleGenerateXpub}
+                  disabled={saving}
+                  className="px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? 'Generando...' : 'Generar'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-gray-900">
+              {xpubData?.xpub ? (
+                <div className="flex items-center space-x-2">
+                  <span className="font-mono text-gray-500 text-xs break-all">
+                    {xpubData.xpub}
+                  </span>
+                  <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full whitespace-nowrap">
+                    Configurado
+                  </span>
+                </div>
+              ) : (
+                <span className="text-gray-400 italic">No configurado</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -323,7 +294,7 @@ const CryptoStoreSetup: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

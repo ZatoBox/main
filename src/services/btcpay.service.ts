@@ -36,29 +36,6 @@ class BTCPayAPIService {
     return response.json();
   }
 
-  async generateWallet(data: any): Promise<{
-    success: boolean;
-    wallet?: any;
-    message?: string;
-  }> {
-    const response = await fetch(`${this.baseUrl}/wallets/BTC/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    return response.json();
-  }
-
-  async getWalletOverview(): Promise<{
-    success: boolean;
-    overview?: any;
-    message?: string;
-  }> {
-    const response = await fetch(`${this.baseUrl}/wallets/BTC/overview`);
-    return response.json();
-  }
-
   async saveXpub(
     data: { xpub: string },
     token?: string
