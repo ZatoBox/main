@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { searchProductBySKU } from '@/services/api.service';
+import { ChevronDown } from 'lucide-react';
 
 interface SKUSearchInputProps {
   products: any[];
@@ -18,7 +19,10 @@ const SKUSearchInput: React.FC<SKUSearchInputProps> = ({
   const [quantityInput, setQuantityInput] = useState('1');
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [searching, setSearching] = useState(false);
+  const [showCommands, setShowCommands] = useState(false);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const skuInputRef = useRef<HTMLInputElement>(null);
+  const quantityInputRef = useRef<HTMLInputElement>(null);
 
   const searchProduct = async (sku: string) => {
     if (!sku.trim()) {
@@ -55,7 +59,7 @@ const SKUSearchInput: React.FC<SKUSearchInputProps> = ({
     if (skuInput.trim()) {
       debounceTimer.current = setTimeout(() => {
         searchProduct(skuInput);
-      }, 300);
+      }, 700);
     } else {
       setSelectedProduct(null);
       setSearching(false);
@@ -88,6 +92,18 @@ const SKUSearchInput: React.FC<SKUSearchInputProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        skuInputRef.current?.focus();
+      } else {
+        if (e.currentTarget === skuInputRef.current) {
+          quantityInputRef.current?.focus();
+        } else {
+          skuInputRef.current?.focus();
+        }
+      }
+    }
     if (e.key === 'Enter') {
       e.preventDefault();
       if (selectedProduct) {
@@ -117,6 +133,7 @@ const SKUSearchInput: React.FC<SKUSearchInputProps> = ({
           SKU (Identificador único del producto.)
         </label>
         <input
+          ref={skuInputRef}
           type="text"
           value={skuInput}
           onChange={(e) => {
@@ -125,8 +142,7 @@ const SKUSearchInput: React.FC<SKUSearchInputProps> = ({
           }}
           onKeyDown={handleKeyDown}
           placeholder="ABC-987"
-          disabled={searching}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-gray-900"
           autoFocus
         />
       </div>
@@ -136,6 +152,7 @@ const SKUSearchInput: React.FC<SKUSearchInputProps> = ({
           Cantidad
         </label>
         <input
+          ref={quantityInputRef}
           type="number"
           value={quantityInput}
           onChange={(e) => setQuantityInput(e.target.value)}
@@ -169,12 +186,14 @@ const SKUSearchInput: React.FC<SKUSearchInputProps> = ({
         <button
           onClick={handleAddToCart}
           disabled={!selectedProduct}
+          tabIndex={-1}
           className="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
         >
           Añadir
         </button>
         <button
           onClick={handleClear}
+          tabIndex={-1}
           className="w-full py-3 bg-gray-300 hover:bg-gray-400 text-gray-900 font-medium rounded-lg transition-colors"
         >
           Limpiar
@@ -190,6 +209,61 @@ const SKUSearchInput: React.FC<SKUSearchInputProps> = ({
       {searching && (
         <div className="text-center text-xs text-gray-400 py-2">
           Buscando...
+        </div>
+      )}
+
+      <button
+        onClick={() => setShowCommands(!showCommands)}
+        tabIndex={-1}
+        className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+      >
+        <span className="text-xs font-medium text-gray-700">Comandos</span>
+        <ChevronDown
+          size={16}
+          className={`text-gray-600 transition-transform ${
+            showCommands ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+
+      {showCommands && (
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-2">
+          <div className="text-xs space-y-1">
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
+                Ctrl/Cmd
+              </kbd>
+              <span className="text-gray-700">+</span>
+              <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
+                U
+              </kbd>
+              <span className="text-gray-600">Abrir búsqueda</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
+                Esc
+              </kbd>
+              <span className="text-gray-600">Cerrar búsqueda</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
+                Tab
+              </kbd>
+              <span className="text-gray-600">Alternar SKU/Cantidad</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
+                Enter
+              </kbd>
+              <span className="text-gray-600">Agregar producto</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
+                Click
+              </kbd>
+              <span className="text-gray-600">Fuera del modal cierra</span>
+            </div>
+          </div>
         </div>
       )}
     </div>
