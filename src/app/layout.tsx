@@ -4,8 +4,10 @@ import { LanguageProvider } from '@/context/language-context';
 import { PluginProvider } from '@/context/plugin-context';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { CashSuccessProvider } from '@/context/cash-success-context';
+import { CryptoSuccessProvider } from '@/context/crypto-success-context';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import CashSuccessPortal from '@/components/CashSuccessPortal';
+import CryptoSuccessPortal from '@/components/CryptoSuccessPortal';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -44,8 +46,11 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <CashSuccessProvider>
-                <LayoutWrapper>{children}</LayoutWrapper>
-                <CashSuccessPortal />
+                <CryptoSuccessProvider>
+                  <LayoutWrapper>{children}</LayoutWrapper>
+                  <CashSuccessPortal />
+                  <CryptoSuccessPortal />
+                </CryptoSuccessProvider>
               </CashSuccessProvider>
             </AuthProvider>
           </LanguageProvider>

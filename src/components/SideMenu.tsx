@@ -15,6 +15,8 @@ import {
   X,
   Scan,
   Store,
+  FileText,
+  RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '../context/auth-store';
 import { usePlugins } from '@/context/plugin-context';
@@ -172,6 +174,20 @@ const SideMenu: React.FC = () => {
       description: 'Integración con sistemas POS',
       pluginId: 'pos-integration',
       alwaysVisible: false,
+    },
+    {
+      name: 'Recibos',
+      icon: FileText,
+      path: '/receipts',
+      description: 'Ver recibos de compra',
+      alwaysVisible: true,
+    },
+    {
+      name: 'Restock',
+      icon: RefreshCw,
+      path: '/restock',
+      description: 'Reabastecer inventario',
+      alwaysVisible: true,
     },
     {
       name: 'Tienda de Plugins',

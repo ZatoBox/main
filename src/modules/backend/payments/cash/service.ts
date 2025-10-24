@@ -41,6 +41,41 @@ export class CashPaymentService {
     }
   }
 
+  private async restockProducts(items: CashOrderItem[]): Promise<void> {
+    const supabase = await createClient();
+
+    for (const item of items) {
+      try {
+        const { data: product, error: fetchError } = await supabase
+          .from('products')
+          .select('stock')
+          .eq('id', item.productId)
+          .single();
+
+        if (fetchError || !product) {
+          throw new Error(`Product not found: ${item.productId}`);
+        }
+
+        const currentStock = product.stock || 0;
+        const newStock = currentStock + item.quantity;
+
+        const { error: updateError } = await supabase
+          .from('products')
+          .update({ stock: newStock })
+          .eq('id', item.productId);
+
+        if (updateError) {
+          throw new Error(`Failed to restock product: ${updateError.message}`);
+        }
+      } catch (error: any) {
+        console.error(
+          `Restock failed for product ${item.productId}:`,
+          error.message
+        );
+      }
+    }
+  }
+
   async processCashPayment(
     userId: string,
     items: Array<{ productId: string; quantity: number; price: number }>,
@@ -48,18 +83,36 @@ export class CashPaymentService {
   ): Promise<CashOrder> {
     let totalAmount = 0;
     const orderItems: CashOrderItem[] = [];
+    const supabase = await createClient();
 
     for (const item of items) {
+      const { data: product } = await supabase
+        .from('products')
+        .select('name, images')
+        .eq('id', item.productId)
+        .single();
+
+      const productName = product?.name || `Product ${item.productId}`;
+      const firstImage =
+        Array.isArray(product?.images) && product.images.length > 0
+          ? product.images[0]
+          : undefined;
       const itemTotal = item.price * item.quantity;
       totalAmount += itemTotal;
 
-      orderItems.push({
+      const orderItem: CashOrderItem = {
         productId: item.productId,
-        productName: `Product ${item.productId}`,
+        productName,
         quantity: item.quantity,
         price: item.price,
         total: itemTotal,
-      });
+      };
+
+      if (firstImage) {
+        orderItem.image = firstImage;
+      }
+
+      orderItems.push(orderItem);
 
       await this.updateProductStock(item.productId, item.quantity);
     }
@@ -78,5 +131,35 @@ export class CashPaymentService {
 
   async getUserOrders(userId: string): Promise<CashOrder[]> {
     return this.repo.getUserOrders(userId);
+  }
+
+  async cancelOrder(
+    orderId: string,
+    userId: string,
+    newStatus: 'cancelled' | 'returned'
+  ): Promise<CashOrder> {
+    const order = await this.repo.getOrderById(orderId);
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    if (order.userId !== userId) {
+      throw new Error('Unauthorized');
+    }
+
+    if (order.status !== 'completed') {
+      throw new Error('Only completed orders can be cancelled or returned');
+    }
+
+    await this.restockProducts(order.items);
+
+    const updatedOrder = await this.repo.updateOrderStatus(orderId, newStatus);
+
+    if (!updatedOrder) {
+      throw new Error('Failed to update order status');
+    }
+
+    return updatedOrder;
   }
 }

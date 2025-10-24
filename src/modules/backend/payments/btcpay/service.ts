@@ -6,6 +6,7 @@ import {
   type BTCPayInvoice,
   type InvoiceWebhookPayload,
 } from './models';
+import { createClient } from '@/utils/supabase/server';
 import crypto from 'crypto';
 
 export class BTCPayService {
@@ -122,11 +123,6 @@ export class BTCPayService {
       (enrichedRequest.metadata as any).userXpub = userXpub;
     }
 
-    console.log(
-      'Creating invoice with request:',
-      JSON.stringify(enrichedRequest, null, 2)
-    );
-
     const invoice = await this.client.createInvoice(
       this.storeId,
       enrichedRequest as CreateInvoiceRequest
@@ -141,8 +137,17 @@ export class BTCPayService {
     }
 
     const fullInvoice = await this.client.getInvoice(this.storeId, invoice.id);
-    if (fullInvoice.paymentMethods) {
-      invoice.paymentMethods = fullInvoice.paymentMethods;
+
+    try {
+      const paymentMethods = await this.client.getInvoicePaymentMethods(
+        this.storeId,
+        invoice.id
+      );
+      if (paymentMethods) {
+        invoice.paymentMethods = paymentMethods;
+      }
+    } catch (error) {
+      console.warn('Failed to get payment methods:', error);
     }
 
     await this.repository.saveInvoice(userId, invoice);
@@ -228,15 +233,157 @@ export class BTCPayService {
       payload.invoiceId,
       InvoiceStatus.PROCESSING
     );
+
+    const storedInvoice = await this.repository.getInvoice(payload.invoiceId);
+    if (!storedInvoice) return;
+
+    const userId = storedInvoice.user_id;
+    const metadata = storedInvoice.metadata || {};
+    const items = metadata.items || [];
+
+    if (!items || items.length === 0) return;
+
+    const supabase = await createClient();
+    const orderItems: any[] = [];
+    let totalAmount = 0;
+
+    for (const item of items) {
+      const productId = item.productId;
+      const quantity = item.quantity || 0;
+      const price = item.price || 0;
+      const itemTotal = price * quantity;
+      totalAmount += itemTotal;
+
+      const orderItem: any = {
+        productId,
+        productName: item.productData?.name || `Product ${productId}`,
+        quantity,
+        price,
+        total: itemTotal,
+      };
+
+      if (item.productData?.image) {
+        orderItem.image = item.productData.image;
+      }
+
+      orderItems.push(orderItem);
+    }
+
+    if (orderItems.length > 0) {
+      const { data: createdOrder, error: createError } = await supabase
+        .from('cash_orders')
+        .insert({
+          user_id: userId,
+          items: orderItems,
+          total_amount: totalAmount,
+          payment_method: 'crypto',
+          status: 'pending',
+          metadata: {
+            paymentType: 'btc',
+            invoiceId: payload.invoiceId,
+            createdAt: new Date().toISOString(),
+          },
+        })
+        .select()
+        .single();
+
+      if (!createError && createdOrder) {
+        const updatedMetadata = {
+          ...(storedInvoice.metadata || {}),
+          orderId: createdOrder.id,
+        };
+        await this.repository.updateInvoiceMetadata(
+          payload.invoiceId,
+          updatedMetadata
+        );
+      }
+    }
   }
 
   private async handlePaymentSettled(
     payload: InvoiceWebhookPayload
   ): Promise<void> {
+    const storedInvoice = await this.repository.getInvoice(payload.invoiceId);
+    if (!storedInvoice) {
+      throw new Error(`Invoice not found: ${payload.invoiceId}`);
+    }
+
     await this.repository.updateInvoiceStatus(
       payload.invoiceId,
       InvoiceStatus.SETTLED
     );
+
+    const supabase = await createClient();
+
+    const { data: order, error: orderError } = await supabase
+      .from('cash_orders')
+      .select('*')
+      .eq('metadata->>invoiceId', payload.invoiceId)
+      .single();
+
+    if (orderError || !order) return;
+
+    const items = order.items || [];
+
+    for (const item of items) {
+      const productId = item.productId;
+      const quantity = item.quantity || 0;
+
+      const { data: product, error: fetchError } = await supabase
+        .from('products')
+        .select('stock')
+        .eq('id', productId)
+        .single();
+
+      if (fetchError || !product) continue;
+
+      const currentStock = product.stock || 0;
+      const newStock = Math.max(0, currentStock - quantity);
+
+      await supabase
+        .from('products')
+        .update({ stock: newStock })
+        .eq('id', productId);
+    }
+
+    await supabase
+      .from('cash_orders')
+      .update({ status: 'completed' })
+      .eq('id', order.id);
+  }
+
+  private async getNextAddressIndex(userId: string): Promise<number> {
+    const { data } = await (await createClient())
+      .from('btc_invoices')
+      .select('metadata')
+      .eq('user_id', userId)
+      .not('metadata->addressIndex', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    return data?.metadata?.addressIndex ? data.metadata.addressIndex + 1 : 0;
+  }
+
+  private deriveAddressFromXpub(xpub: string, index: number): string {
+    const HDKey = require('hdkey');
+    const { address } = require('bitcoinjs-lib').payments;
+
+    const hdkey = HDKey.fromExtendedKey(xpub);
+    const child = hdkey.derive(`m/0/${index}`);
+
+    const network = process.env.BTCPAY_URL?.includes('testnet')
+      ? 'testnet'
+      : 'bitcoin';
+    const isTestnet = network === 'testnet';
+
+    const pubkey = child.publicKey;
+    const payment = address.p2wpkh({
+      pubkey,
+      network: isTestnet ? { bech32: 'tb' } : { bech32: 'bc' },
+    });
+
+    return payment.address;
   }
 
   private async handleInvoiceExpired(
@@ -286,5 +433,92 @@ export class BTCPayService {
       userStore.btcpay_store_id,
       'BTC-CHAIN'
     );
+  }
+
+  async confirmCryptoOrder(userId: string, invoiceId: string): Promise<any> {
+    const supabase = await createClient();
+
+    const storedInvoice = await this.repository.getInvoice(invoiceId);
+    if (!storedInvoice) {
+      throw new Error('Invoice not found');
+    }
+
+    const metadata = storedInvoice.metadata || {};
+    const items = (metadata as any).items || [];
+
+    if (!items || items.length === 0) {
+      throw new Error(
+        `No items found in invoice. Metadata: ${JSON.stringify(metadata)}`
+      );
+    }
+
+    const orderItems: any[] = [];
+    let totalAmount = 0;
+
+    for (const item of items) {
+      const productId = item.productId;
+      const quantity = item.quantity || 0;
+      const price = item.price || 0;
+      const itemTotal = price * quantity;
+      totalAmount += itemTotal;
+
+      const orderItem: any = {
+        productId,
+        productName: item.productData?.name || `Product ${productId}`,
+        quantity,
+        price,
+        total: itemTotal,
+      };
+
+      if (item.productData?.image) {
+        orderItem.image = item.productData.image;
+      }
+
+      orderItems.push(orderItem);
+
+      const { data: product } = await supabase
+        .from('products')
+        .select('stock')
+        .eq('id', productId)
+        .single();
+
+      if (product && product.stock >= quantity) {
+        await supabase
+          .from('products')
+          .update({ stock: product.stock - quantity })
+          .eq('id', productId);
+      }
+    }
+
+    const { data: createdOrder, error: createError } = await supabase
+      .from('cash_orders')
+      .insert({
+        user_id: userId,
+        items: orderItems,
+        total_amount: totalAmount,
+        payment_method: 'crypto',
+        status: 'pending',
+        metadata: {
+          paymentType: 'btc',
+          invoiceId: invoiceId,
+          createdAt: new Date().toISOString(),
+        },
+      })
+      .select()
+      .single();
+
+    if (createError || !createdOrder) {
+      throw new Error(
+        `Failed to create order: ${createError?.message || 'Unknown error'}`
+      );
+    }
+
+    const updatedMetadata = {
+      ...metadata,
+      orderId: createdOrder.id,
+    };
+    await this.repository.updateInvoiceMetadata(invoiceId, updatedMetadata);
+
+    return createdOrder;
   }
 }

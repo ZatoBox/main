@@ -241,13 +241,6 @@ const CryptoStoreSetup: React.FC = () => {
                 >
                   {saving ? 'Guardando...' : 'Guardar'}
                 </button>
-                <button
-                  onClick={handleGenerateXpub}
-                  disabled={saving}
-                  className="px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {saving ? 'Generando...' : 'Generar'}
-                </button>
               </div>
             </div>
           ) : (

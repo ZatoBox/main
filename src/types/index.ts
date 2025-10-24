@@ -397,3 +397,13 @@ export interface CryptoInvoiceResponse {
   status?: CryptoInvoiceStatus;
   message?: string;
 }
+
+/// Receipts
+export interface ReceiptItem {
+  productName: string;
+  quantity: number;
+  price: number;
+  total: number;
+  productId?: string;
+  image?: string;
+}

@@ -88,4 +88,31 @@ export class CashOrderRepository {
       metadata: row.metadata,
     })) as CashOrder[];
   }
+
+  async updateOrderStatus(
+    orderId: string,
+    newStatus: 'completed' | 'cancelled' | 'returned'
+  ): Promise<CashOrder | null> {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from(this.table)
+      .update({ status: newStatus })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (error || !data) return null;
+
+    return {
+      id: data.id,
+      userId: data.user_id,
+      items: data.items,
+      totalAmount: data.total_amount,
+      paymentMethod: data.payment_method,
+      status: data.status,
+      createdAt: data.created_at,
+      metadata: data.metadata,
+    } as CashOrder;
+  }
 }

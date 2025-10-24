@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCartStore } from '@/app/stores/cart-store';
 import { useCheckoutStore } from '@/app/stores/checkout-store';
 import { btcpayAPI } from '@/services/btcpay.service';
+import { confirmCryptoOrder } from '@/services/crypto-payments.service';
 import { InvoiceStatus } from '@/backend/payments/btcpay/models';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +17,7 @@ import {
 } from '@/components/landing/ui/card';
 import { Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import BTCPayModal from '@/components/btcpay/BTCPayModal';
-import { useCashSuccess } from '@/context/cash-success-context';
+import { useCryptoSuccess } from '@/context/crypto-success-context';
 
 export function CryptoCheckout() {
   const { items, getTotalPrice, clearCart } = useCartStore();
@@ -32,7 +33,7 @@ export function CryptoCheckout() {
     setError,
     reset,
   } = useCheckoutStore();
-  const { showModal: showSuccessModal } = useCashSuccess();
+  const { showModal: showSuccessModal } = useCryptoSuccess();
 
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(
     null
@@ -41,6 +42,7 @@ export function CryptoCheckout() {
   const [invoiceAmount, setInvoiceAmount] = useState<string>('');
   const [invoiceCurrency, setInvoiceCurrency] = useState<string>('');
   const [paymentUrl, setPaymentUrl] = useState<string>('');
+  const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
 
   const total = getTotalPrice();
 
@@ -60,6 +62,16 @@ export function CryptoCheckout() {
         metadata: {
           orderId: `order-${Date.now()}`,
           itemDesc: `${items.length} productos`,
+          items: items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price,
+            productData: {
+              name: item.name,
+              image: item.image,
+              price: item.price,
+            },
+          })),
         },
         checkout: {
           speedPolicy: 'MediumSpeed',
@@ -97,7 +109,13 @@ export function CryptoCheckout() {
         if (response.success && response.status) {
           setStatus(response.status);
 
-          if (
+          if (response.status === InvoiceStatus.PROCESSING) {
+            stopPolling();
+            setShowPaymentModal(false);
+            clearCart();
+            const orderId = response.invoice?.metadata?.orderId;
+            showSuccessModal(orderId, id, true);
+          } else if (
             response.status === InvoiceStatus.SETTLED ||
             response.status === InvoiceStatus.EXPIRED ||
             response.status === InvoiceStatus.INVALID
@@ -107,7 +125,8 @@ export function CryptoCheckout() {
             if (response.status === InvoiceStatus.SETTLED) {
               setShowPaymentModal(false);
               clearCart();
-              showSuccessModal(id);
+              const orderId = response.invoice?.metadata?.orderId;
+              showSuccessModal(orderId, id, false);
             }
           }
         }
@@ -123,6 +142,26 @@ export function CryptoCheckout() {
     if (pollingInterval) {
       clearInterval(pollingInterval);
       setPollingInterval(null);
+    }
+  };
+
+  const handleConfirmPayment = async (invoiceId: string) => {
+    setIsConfirmingPayment(true);
+    try {
+      const response = await confirmCryptoOrder(invoiceId);
+
+      if (response.success && response.order) {
+        setShowPaymentModal(false);
+        stopPolling();
+        clearCart();
+        showSuccessModal(response.order.id, invoiceId, true);
+      } else {
+        setError(response.message || 'Error al confirmar el pago');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al confirmar el pago');
+    } finally {
+      setIsConfirmingPayment(false);
     }
   };
 
@@ -173,6 +212,7 @@ export function CryptoCheckout() {
           currency={invoiceCurrency}
           paymentUrl={paymentUrl}
           status={status || InvoiceStatus.NEW}
+          onConfirmPayment={handleConfirmPayment}
           onClose={() => {
             setShowPaymentModal(false);
             stopPolling();

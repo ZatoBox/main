@@ -11,6 +11,7 @@ interface BTCPayModalProps {
   paymentUrl: string;
   status: string;
   onClose: () => void;
+  onConfirmPayment?: (invoiceId: string) => void;
 }
 
 const BTCPayModal: React.FC<BTCPayModalProps> = ({
@@ -21,9 +22,11 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
   paymentUrl,
   status,
   onClose,
+  onConfirmPayment,
 }) => {
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const getBitcoinAddress = (url: string): string => {
@@ -50,10 +53,9 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
 
   useEffect(() => {
     if (isOpen && paymentUrl && canvasRef.current) {
-      const bip21URI = getBIP21URI(paymentUrl, amount);
-      generateQR(bip21URI);
+      generateQR(paymentUrl);
     }
-  }, [isOpen, paymentUrl, amount, currency]);
+  }, [isOpen, paymentUrl]);
 
   const generateQR = async (data: string) => {
     try {
@@ -78,12 +80,22 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
 
   const handleCopy = async () => {
     try {
-      const address = getBitcoinAddress(paymentUrl);
-      await navigator.clipboard.writeText(address);
+      await navigator.clipboard.writeText(paymentUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('Error copying to clipboard:', error);
+    }
+  };
+
+  const handleConfirmPayment = async () => {
+    if (onConfirmPayment) {
+      setIsConfirming(true);
+      try {
+        await onConfirmPayment(invoiceId);
+      } finally {
+        setIsConfirming(false);
+      }
     }
   };
 
@@ -189,6 +201,23 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
                 <p className="mb-1">Escanea el código QR para pagar</p>
                 <p className="text-xs text-gray-400">ID: {invoiceId}</p>
               </div>
+
+              {status === 'New' && (
+                <button
+                  onClick={handleConfirmPayment}
+                  disabled={isConfirming}
+                  className="w-full py-3 px-4 bg-[#F88612] text-white font-medium rounded-lg hover:bg-[#d17110] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                >
+                  {isConfirming ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Confirmando...
+                    </>
+                  ) : (
+                    'Confirmar Pago'
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
