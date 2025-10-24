@@ -86,6 +86,24 @@ export class BTCPayRepository {
     if (error) throw new Error(`Failed to update invoice: ${error.message}`);
   }
 
+  async updateInvoiceMetadata(
+    invoiceId: string,
+    metadata: Record<string, any>
+  ): Promise<void> {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from('btcpay_invoices')
+      .update({
+        metadata,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('invoice_id', invoiceId);
+
+    if (error)
+      throw new Error(`Failed to update invoice metadata: ${error.message}`);
+  }
+
   async getUserInvoices(userId: string): Promise<StoredInvoice[]> {
     const supabase = await createClient();
 

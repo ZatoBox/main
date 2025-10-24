@@ -44,12 +44,6 @@ export function withAuth(
               user_id?: string;
             }>(token);
             userId = decoded.sub || decoded.id || decoded.user_id || null;
-            console.log(
-              'Auth: Cookie token decoded, userId:',
-              userId,
-              'decoded:',
-              decoded
-            );
           } catch (e) {
             console.error('JWT decode error:', e);
             userId = null;

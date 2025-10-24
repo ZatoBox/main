@@ -9,6 +9,7 @@ import SalesDrawer from '@/components/SalesDrawer';
 import BTCPayModal from '@/components/btcpay/BTCPayModal';
 import { getActiveProducts } from '@/services/api.service';
 import { btcpayAPI } from '@/services/btcpay.service';
+import { confirmCryptoOrder } from '@/services/crypto-payments.service';
 import { useBTCPayCheckout } from '@/hooks/use-btcpay-checkout';
 import type { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
@@ -257,7 +258,17 @@ const HomePage: React.FC<HomePageProps> = ({
       } else if (paymentMethod === 'crypto') {
         const invoiceId = await createInvoice(total, 'USD', {
           orderId: `order-${Date.now()}`,
-          itemDesc: `${items.length} productos`,
+          itemDesc: `${cartItems.length} productos`,
+          items: cartItems.map((item) => ({
+            productId: String(item.id),
+            quantity: item.quantity,
+            price: item.price,
+            productData: {
+              name: item.name,
+              image: item.productData?.images?.[0] || '',
+              price: item.price,
+            },
+          })),
         });
 
         if (invoiceId) {
@@ -530,6 +541,14 @@ const HomePage: React.FC<HomePageProps> = ({
           currency={invoiceData.currency}
           paymentUrl={invoiceData.paymentUrl}
           status={invoiceData.status}
+          onConfirmPayment={async (invoiceId: string) => {
+            const response = await confirmCryptoOrder(invoiceId);
+            if (response.success && response.order) {
+              closeModal();
+              setCartItems([]);
+              reloadProducts();
+            }
+          }}
           onClose={closeModal}
         />
       )}
