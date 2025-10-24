@@ -35,6 +35,7 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
     '/polar-products',
     '/profile',
     '/receipts',
+    '/restock',
     '/smart-inventory',
     '/success',
     '/swagger',
