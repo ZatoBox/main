@@ -60,9 +60,10 @@ async function getUserId(req: NextRequest): Promise<string | null> {
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
+    const { orderId } = await params;
     const userId = await getUserId(request);
 
     if (!userId) {
@@ -86,7 +87,7 @@ export async function PATCH(
     }
 
     const updatedOrder = await cashService.cancelOrder(
-      params.orderId,
+      orderId,
       userId,
       status as 'cancelled' | 'returned'
     );
