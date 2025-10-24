@@ -50,10 +50,9 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
 
   useEffect(() => {
     if (isOpen && paymentUrl && canvasRef.current) {
-      const bip21URI = getBIP21URI(paymentUrl, amount);
-      generateQR(bip21URI);
+      generateQR(paymentUrl);
     }
-  }, [isOpen, paymentUrl, amount, currency]);
+  }, [isOpen, paymentUrl]);
 
   const generateQR = async (data: string) => {
     try {
@@ -78,8 +77,7 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
 
   const handleCopy = async () => {
     try {
-      const address = getBitcoinAddress(paymentUrl);
-      await navigator.clipboard.writeText(address);
+      await navigator.clipboard.writeText(paymentUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {

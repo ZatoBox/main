@@ -1,6 +1,5 @@
 // Receipts Components
 export { default as ReceiptsHeader } from './ReceiptsHeader';
-export { default as ReceiptsTabs } from './ReceiptsTabs';
 export { default as ReceiptCard } from './ReceiptCard';
 export { default as ReceiptsGrid } from './ReceiptsGrid';
 export { default as ReceiptsFilters } from './ReceiptsFilters';

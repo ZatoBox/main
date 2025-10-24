@@ -134,7 +134,11 @@ const ReceiptCard: React.FC<Props> = ({
               <div>
                 <p className="text-xs text-[#9CA3AF] mb-1">Método</p>
                 <p className="text-sm font-medium text-[#1F2937]">
-                  {paymentMethod === 'cash' ? 'Efectivo' : paymentMethod}
+                  {paymentMethod === 'cash'
+                    ? 'Efectivo'
+                    : paymentMethod === 'crypto'
+                    ? 'Criptomoneda'
+                    : paymentMethod}
                 </p>
               </div>
               <div>
@@ -271,7 +275,11 @@ const ReceiptCard: React.FC<Props> = ({
               <div>
                 <p className="text-xs text-[#9CA3AF]">Método de Pago</p>
                 <p className="text-sm font-semibold text-[#000000]">
-                  {paymentMethod === 'cash' ? 'Efectivo' : paymentMethod}
+                  {paymentMethod === 'cash'
+                    ? 'Efectivo'
+                    : paymentMethod === 'crypto'
+                    ? 'Criptomoneda'
+                    : paymentMethod}
                 </p>
               </div>
               <div className="text-right">

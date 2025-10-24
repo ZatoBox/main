@@ -60,6 +60,16 @@ export function CryptoCheckout() {
         metadata: {
           orderId: `order-${Date.now()}`,
           itemDesc: `${items.length} productos`,
+          items: items.map((item) => ({
+            productId: item.id,
+            quantity: item.quantity,
+            price: item.price,
+            productData: {
+              name: item.name,
+              image: item.image,
+              price: item.price,
+            },
+          })),
         },
         checkout: {
           speedPolicy: 'MediumSpeed',

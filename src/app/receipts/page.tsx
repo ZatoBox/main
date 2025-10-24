@@ -4,44 +4,35 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-store';
 import { ordersAPI } from '@/services/api.service';
+import type { ReceiptItem } from '@/types';
 import ReceiptsHeader from '@/components/receipts/ReceiptsHeader';
-import ReceiptsTabs from '@/components/receipts/ReceiptsTabs';
 import ReceiptsFilters from '@/components/receipts/ReceiptsFilters';
 import ReceiptsGrid from '@/components/receipts/ReceiptsGrid';
 import ReceiptsStats from '@/components/receipts/ReceiptsStats';
-import CryptoReceiptsPlaceholder from '@/components/receipts/CryptoReceiptsPlaceholder';
 
-interface ReceiptItem {
-  product_name: string;
-  quantity: number;
-  unit_price: number;
-  total: number;
-}
-
-interface CashOrder {
+interface Receipt {
   id: string;
-  user_id: string;
-  items: ReceiptItem[];
-  total_amount: number;
-  payment_method: string;
+  receiptNumber: string;
+  date: string;
+  total: number;
+  itemCount: number;
+  paymentMethod: string;
   status: string;
-  created_at: string;
-  metadata: { [key: string]: any };
+  items: ReceiptItem[];
 }
 
 const ReceiptsPage: React.FC = () => {
   const router = useRouter();
   const { isAuthenticated, initialized } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'cash' | 'crypto'>('cash');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [cashReceipts, setCashReceipts] = useState<any[]>([]);
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCashOrders = async () => {
+    const fetchAllOrders = async () => {
       if (!initialized) return;
 
       if (!isAuthenticated) {
@@ -55,38 +46,35 @@ const ReceiptsPage: React.FC = () => {
         const data = await ordersAPI.getCashOrders();
 
         if (data.success && Array.isArray(data.orders)) {
-          // Transformar datos para los recibos
-          const receipts = data.orders
-            .filter((order: any) => order.payment_method === 'cash')
-            .map((order: any) => ({
-              id: order.id,
-              receiptNumber: order.id.slice(0, 8).toUpperCase(),
-              date: order.created_at,
-              total: order.total_amount,
-              itemCount: Array.isArray(order.items) ? order.items.length : 0,
-              paymentMethod: order.payment_method,
-              status: order.status,
-              items: Array.isArray(order.items) ? order.items : [],
-            }));
+          const allReceipts = data.orders.map((order: any) => ({
+            id: order.id,
+            receiptNumber: order.id.slice(0, 8).toUpperCase(),
+            date: order.created_at,
+            total: order.total_amount,
+            itemCount: Array.isArray(order.items) ? order.items.length : 0,
+            paymentMethod: order.payment_method,
+            status: order.status,
+            items: Array.isArray(order.items) ? order.items : [],
+          }));
 
-          setCashReceipts(receipts);
+          setReceipts(allReceipts);
           setError(null);
         } else {
-          setCashReceipts([]);
+          setReceipts([]);
         }
       } catch (err: any) {
         console.error('Error loading receipts:', err);
-        setCashReceipts([]);
+        setReceipts([]);
         setError(err?.message || 'Error al cargar recibos');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCashOrders();
+    fetchAllOrders();
   }, [isAuthenticated, initialized]);
 
-  const filteredReceipts = cashReceipts.filter((receipt) => {
+  const filteredReceipts = receipts.filter((receipt) => {
     const matchesSearch =
       receipt.receiptNumber.includes(searchTerm) ||
       receipt.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -97,12 +85,8 @@ const ReceiptsPage: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Calcular estadísticas
-  const totalAmount = cashReceipts.reduce(
-    (sum, receipt) => sum + receipt.total,
-    0
-  );
-  const completedReceipts = cashReceipts.filter(
+  const totalAmount = receipts.reduce((sum, receipt) => sum + receipt.total, 0);
+  const completedReceipts = receipts.filter(
     (r) => r.status === 'completed'
   ).length;
 
@@ -152,38 +136,26 @@ const ReceiptsPage: React.FC = () => {
     <div className="min-h-screen bg-bg-main">
       <ReceiptsHeader onBack={() => router.push('/home')} />
 
-      <ReceiptsTabs activeTab={activeTab} onTabChange={setActiveTab} />
-
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="py-6">
-          {activeTab === 'cash' && (
-            <>
-              <ReceiptsStats
-                totalReceipts={cashReceipts.length}
-                totalAmount={totalAmount}
-                completedReceipts={completedReceipts}
-              />
+          <ReceiptsStats
+            totalReceipts={receipts.length}
+            totalAmount={totalAmount}
+            completedReceipts={completedReceipts}
+          />
 
-              <div className="mt-6">
-                <ReceiptsFilters
-                  searchTerm={searchTerm}
-                  onSearchChange={setSearchTerm}
-                  statusFilter={statusFilter}
-                  onStatusChange={setStatusFilter}
-                />
-              </div>
+          <div className="mt-6">
+            <ReceiptsFilters
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              statusFilter={statusFilter}
+              onStatusChange={setStatusFilter}
+            />
+          </div>
 
-              <div className="mt-6">
-                <ReceiptsGrid receipts={filteredReceipts} loading={loading} />
-              </div>
-            </>
-          )}
-
-          {activeTab === 'crypto' && (
-            <div className="mt-6">
-              <CryptoReceiptsPlaceholder />
-            </div>
-          )}
+          <div className="mt-6">
+            <ReceiptsGrid receipts={filteredReceipts} loading={loading} />
+          </div>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import {
   type BTCPayInvoice,
   type InvoiceWebhookPayload,
 } from './models';
+import { createClient } from '@/utils/supabase/server';
 import crypto from 'crypto';
 
 export class BTCPayService {
@@ -141,8 +142,17 @@ export class BTCPayService {
     }
 
     const fullInvoice = await this.client.getInvoice(this.storeId, invoice.id);
-    if (fullInvoice.paymentMethods) {
-      invoice.paymentMethods = fullInvoice.paymentMethods;
+
+    try {
+      const paymentMethods = await this.client.getInvoicePaymentMethods(
+        this.storeId,
+        invoice.id
+      );
+      if (paymentMethods) {
+        invoice.paymentMethods = paymentMethods;
+      }
+    } catch (error) {
+      console.warn('Failed to get payment methods:', error);
     }
 
     await this.repository.saveInvoice(userId, invoice);
@@ -233,10 +243,92 @@ export class BTCPayService {
   private async handlePaymentSettled(
     payload: InvoiceWebhookPayload
   ): Promise<void> {
+    const storedInvoice = await this.repository.getInvoice(payload.invoiceId);
+    if (!storedInvoice) {
+      throw new Error(`Invoice not found: ${payload.invoiceId}`);
+    }
+
     await this.repository.updateInvoiceStatus(
       payload.invoiceId,
       InvoiceStatus.SETTLED
     );
+
+    const userId = storedInvoice.user_id;
+    const metadata = storedInvoice.metadata || {};
+    const items = metadata.items || [];
+
+    if (!items || items.length === 0) {
+      return;
+    }
+
+    const supabase = await createClient();
+
+    const orderItems: any[] = [];
+    let totalAmount = 0;
+
+    for (const item of items) {
+      const productId = item.productId;
+      const quantity = item.quantity || 0;
+      const price = item.price || 0;
+      const itemTotal = price * quantity;
+      totalAmount += itemTotal;
+
+      const { data: product, error: fetchError } = await supabase
+        .from('products')
+        .select('stock')
+        .eq('id', productId)
+        .single();
+
+      if (fetchError || !product) {
+        console.error(`Product not found: ${productId}`);
+        continue;
+      }
+
+      const currentStock = product.stock || 0;
+      const newStock = Math.max(0, currentStock - quantity);
+
+      const { error: updateError } = await supabase
+        .from('products')
+        .update({ stock: newStock })
+        .eq('id', productId);
+
+      if (updateError) {
+        console.error(
+          `Failed to update stock for product ${productId}:`,
+          updateError.message
+        );
+        continue;
+      }
+
+      const orderItem: any = {
+        productId,
+        productName: item.productData?.name || `Product ${productId}`,
+        quantity,
+        price,
+        total: itemTotal,
+      };
+
+      if (item.productData?.image) {
+        orderItem.image = item.productData.image;
+      }
+
+      orderItems.push(orderItem);
+    }
+
+    if (orderItems.length > 0) {
+      await supabase.from('cash_orders').insert({
+        user_id: userId,
+        items: orderItems,
+        total_amount: totalAmount,
+        payment_method: 'crypto',
+        status: 'completed',
+        metadata: {
+          paymentType: 'btc',
+          invoiceId: payload.invoiceId,
+          createdAt: new Date().toISOString(),
+        },
+      });
+    }
   }
 
   private async handleInvoiceExpired(

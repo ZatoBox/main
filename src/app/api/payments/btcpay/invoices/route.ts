@@ -35,25 +35,41 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     });
 
     const btcPayment = invoice.paymentMethods?.find(
-      (pm) => pm.paymentMethodId === 'BTC-CHAIN' || pm.paymentMethodId === 'BTC'
+      (pm: any) =>
+        pm.paymentMethodId === 'BTC-CHAIN' || pm.paymentMethodId === 'BTC'
     );
 
-    const paymentUrl = btcPayment?.paymentLink || btcPayment?.destination || '';
+    let paymentUrl = '';
+    if (btcPayment?.destination && btcPayment?.amount) {
+      paymentUrl = `bitcoin:${btcPayment.destination}?amount=${btcPayment.amount}`;
+    } else {
+      paymentUrl = invoice.checkoutLink || '';
+    }
 
     return NextResponse.json({
       success: true,
       invoiceId: invoice.id,
       checkoutLink: invoice.checkoutLink,
-      paymentUrl,
+      paymentUrl: paymentUrl,
       amount: btcPayment?.amount || invoice.amount,
       currency: invoice.currency,
       status: invoice.status,
     });
   } catch (error: any) {
+    console.error('BTCPay invoice creation error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      fullError: error,
+    });
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to create invoice',
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          'Failed to create invoice',
+        details: error.response?.data,
       },
       { status: 500 }
     );

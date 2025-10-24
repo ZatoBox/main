@@ -92,9 +92,20 @@ export class BTCPayClient {
   }
 
   async getInvoice(storeId: string, invoiceId: string): Promise<BTCPayInvoice> {
-    return this.request<BTCPayInvoice>(
+    const invoice = await this.request<BTCPayInvoice>(
       'GET',
       `/api/v1/stores/${storeId}/invoices/${invoiceId}`
+    );
+    return invoice;
+  }
+
+  async getInvoicePaymentMethods(
+    storeId: string,
+    invoiceId: string
+  ): Promise<any> {
+    return this.request<any>(
+      'GET',
+      `/api/v1/stores/${storeId}/invoices/${invoiceId}/payment-methods`
     );
   }
 
