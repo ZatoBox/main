@@ -48,18 +48,36 @@ export class CashPaymentService {
   ): Promise<CashOrder> {
     let totalAmount = 0;
     const orderItems: CashOrderItem[] = [];
+    const supabase = await createClient();
 
     for (const item of items) {
+      const { data: product } = await supabase
+        .from('products')
+        .select('name, images')
+        .eq('id', item.productId)
+        .single();
+
+      const productName = product?.name || `Product ${item.productId}`;
+      const firstImage =
+        Array.isArray(product?.images) && product.images.length > 0
+          ? product.images[0]
+          : undefined;
       const itemTotal = item.price * item.quantity;
       totalAmount += itemTotal;
 
-      orderItems.push({
+      const orderItem: CashOrderItem = {
         productId: item.productId,
-        productName: `Product ${item.productId}`,
+        productName,
         quantity: item.quantity,
         price: item.price,
         total: itemTotal,
-      });
+      };
+
+      if (firstImage) {
+        orderItem.image = firstImage;
+      }
+
+      orderItems.push(orderItem);
 
       await this.updateProductStock(item.productId, item.quantity);
     }

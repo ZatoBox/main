@@ -338,3 +338,7 @@ export const categoriesAPI = {
   getById: (id: string): Promise<{ success: boolean; category: Category }> =>
     apiRequest(`/categories/${id}`),
 };
+
+export const ordersAPI = {
+  getCashOrders: (): Promise<any> => apiRequest('/orders'),
+};

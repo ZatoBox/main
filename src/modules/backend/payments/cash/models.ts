@@ -4,6 +4,7 @@ export interface CashOrderItem {
   quantity: number;
   price: number;
   total: number;
+  image?: string;
 }
 
 export interface CashOrder {
