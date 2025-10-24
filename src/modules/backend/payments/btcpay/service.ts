@@ -329,6 +329,73 @@ export class BTCPayService {
         },
       });
     }
+
+    const userXpub = metadata.userXpub;
+    const invoiceAmount = storedInvoice.amount;
+
+    if (userXpub && invoiceAmount) {
+      try {
+        const pullPayment = await this.client.createPullPayment(this.storeId, {
+          name: `Payout for invoice ${payload.invoiceId}`,
+          amount: invoiceAmount,
+          currency: 'BTC',
+          paymentMethods: ['BTC-CHAIN'],
+        });
+
+        const addressIndex = await this.getNextAddressIndex(userId);
+        const address = this.deriveAddressFromXpub(userXpub, addressIndex);
+
+        if (address) {
+          const payout = await this.client.createPayout(
+            this.storeId,
+            pullPayment.id,
+            {
+              destination: address,
+              amount: invoiceAmount,
+              paymentMethod: 'BTC-CHAIN',
+            }
+          );
+
+          await this.client.approvePayout(this.storeId, payout.id);
+        }
+      } catch (error) {
+        console.error('Failed to create payout:', error);
+      }
+    }
+  }
+
+  private async getNextAddressIndex(userId: string): Promise<number> {
+    const { data } = await (await createClient())
+      .from('btc_invoices')
+      .select('metadata')
+      .eq('user_id', userId)
+      .not('metadata->addressIndex', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    return data?.metadata?.addressIndex ? data.metadata.addressIndex + 1 : 0;
+  }
+
+  private deriveAddressFromXpub(xpub: string, index: number): string {
+    const HDKey = require('hdkey');
+    const { address } = require('bitcoinjs-lib').payments;
+
+    const hdkey = HDKey.fromExtendedKey(xpub);
+    const child = hdkey.derive(`m/0/${index}`);
+
+    const network = process.env.BTCPAY_URL?.includes('testnet')
+      ? 'testnet'
+      : 'bitcoin';
+    const isTestnet = network === 'testnet';
+
+    const pubkey = child.publicKey;
+    const payment = address.p2wpkh({
+      pubkey,
+      network: isTestnet ? { bech32: 'tb' } : { bech32: 'bc' },
+    });
+
+    return payment.address;
   }
 
   private async handleInvoiceExpired(

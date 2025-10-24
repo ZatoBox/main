@@ -61,7 +61,7 @@ export function CryptoCheckout() {
           orderId: `order-${Date.now()}`,
           itemDesc: `${items.length} productos`,
           items: items.map((item) => ({
-            productId: item.id,
+            productId: item.productId,
             quantity: item.quantity,
             price: item.price,
             productData: {

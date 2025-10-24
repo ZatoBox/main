@@ -182,6 +182,18 @@ export class BTCPayClient {
     );
   }
 
+  async createPayout(
+    storeId: string,
+    pullPaymentId: string,
+    data: any
+  ): Promise<Payout> {
+    return this.request<Payout>(
+      'POST',
+      `/api/v1/pull-payments/${pullPaymentId}/payouts`,
+      data
+    );
+  }
+
   async cancelPayout(storeId: string, payoutId: string): Promise<void> {
     return this.request<void>(
       'POST',
