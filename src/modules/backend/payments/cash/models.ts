@@ -13,7 +13,7 @@ export interface CashOrder {
   items: CashOrderItem[];
   totalAmount: number;
   paymentMethod: 'cash';
-  status: 'completed';
+  status: 'completed' | 'cancelled' | 'returned';
   createdAt: string;
   metadata?: Record<string, any>;
 }

@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, Eye, Printer, FileText, Package } from 'lucide-react';
+import {
+  Download,
+  Eye,
+  Printer,
+  FileText,
+  Package,
+  Undo,
+  X,
+} from 'lucide-react';
 import PrintableReceiptModal from './PrintableReceiptModal';
 import type { ReceiptItem } from '@/types';
 
@@ -14,6 +22,7 @@ interface Props {
   paymentMethod: string;
   status: string;
   items: ReceiptItem[];
+  onStatusChange?: (newStatus: string) => void;
 }
 
 const ReceiptCard: React.FC<Props> = ({
@@ -25,15 +34,44 @@ const ReceiptCard: React.FC<Props> = ({
   paymentMethod,
   status,
   items,
+  onStatusChange,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>(
     {}
   );
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState(status);
 
   const handleImageError = (idx: number) => {
     setImageErrors((prev) => ({ ...prev, [idx]: true }));
+  };
+
+  const handleCancelOrder = async (newStatus: 'cancelled' | 'returned') => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/checkout/cash/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update order');
+      }
+
+      setCurrentStatus(newStatus);
+      onStatusChange?.(newStatus);
+    } catch (error) {
+      console.error('Error updating order:', error);
+      alert('Error al actualizar el pedido: ' + (error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formattedDate = new Date(date).toLocaleDateString('es-ES', {
@@ -100,13 +138,13 @@ const ReceiptCard: React.FC<Props> = ({
                 </p>
               </div>
               <div>
-                <p className="text-xs text-[#9CA3AF] mb-1">Estado</p>
+                <p className="text-xs text-[#9CA3AF]">Estado</p>
                 <span
                   className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                    status
+                    currentStatus
                   )}`}
                 >
-                  {getStatusLabel(status)}
+                  {getStatusLabel(currentStatus)}
                 </span>
               </div>
             </div>
@@ -240,16 +278,16 @@ const ReceiptCard: React.FC<Props> = ({
                 <p className="text-xs text-[#9CA3AF]">Estado</p>
                 <p
                   className={`text-sm font-semibold ${
-                    status === 'completed'
+                    currentStatus === 'completed'
                       ? 'text-[#A94D14]'
-                      : status === 'pending'
+                      : currentStatus === 'pending'
                       ? 'text-[#92400E]'
                       : 'text-[#991B1B]'
                   }`}
                 >
-                  {status === 'completed'
+                  {currentStatus === 'completed'
                     ? 'Completado'
-                    : status === 'pending'
+                    : currentStatus === 'pending'
                     ? 'Pendiente'
                     : 'Cancelado'}
                 </p>
@@ -279,6 +317,27 @@ const ReceiptCard: React.FC<Props> = ({
                 <Download size={16} />
                 <span className="hidden sm:inline">Descargar</span>
               </button>
+
+              {currentStatus === 'completed' && (
+                <>
+                  <button
+                    onClick={() => handleCancelOrder('returned')}
+                    disabled={isLoading}
+                    className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Undo size={16} />
+                    <span className="hidden sm:inline">Devolución</span>
+                  </button>
+                  <button
+                    onClick={() => handleCancelOrder('cancelled')}
+                    disabled={isLoading}
+                    className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-white text-[#991B1B] border border-[#FEE2E2] hover:bg-[#FEE2E2] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <X size={16} />
+                    <span className="hidden sm:inline">Cancelar</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
