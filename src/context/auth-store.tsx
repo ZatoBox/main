@@ -99,6 +99,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       try {
         const res = await authAPI.register(data);
         set({ token: undefined, user: res.user || null, loading: false });
+        return res;
       } catch (e: any) {
         set({
           error: e?.message || 'Error al registrar',
@@ -170,7 +171,10 @@ export const useAuth = () => {
     role: RoleUser.GUEST,
   };
 
-  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const urlParams =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : null;
   const isGuestLink = urlParams?.get('role') === 'guest';
   const effectiveUser = isGuestLink ? guestUser : user;
 

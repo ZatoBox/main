@@ -1,38 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import crypto from 'crypto';
-import nodemailer from 'nodemailer';
 import { render } from '@react-email/render';
 import VerificationEmail from '@/emails/VerificationEmail';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { full_name, email, password, phone } = body;
-
-    if (!email || !full_name || !password) {
+    const { userId } = body;
+    if (!userId) {
       return NextResponse.json(
-        { success: false, message: 'Missing required fields' },
+        { success: false, message: 'userId required' },
         { status: 400 },
       );
     }
 
     const supabase = await createClient();
 
-    const { data: existing } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
+    const { data: verification } = await supabase
+      .from('email_verifications')
+      .select('metadata, created_at')
+      .eq('user_id', userId)
+      .eq('used', false)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single();
 
-    if (existing) {
+    if (!verification || !verification.metadata) {
       return NextResponse.json(
-        { success: false, message: 'Email already exists' },
-        { status: 409 },
+        { success: false, message: 'Verification session not found' },
+        { status: 404 },
       );
     }
 
-    const code = String(100000 + crypto.randomInt(900000));
+    const lastTime = new Date(verification.created_at).getTime();
+    const now = Date.now();
+    const diff = Math.floor((now - lastTime) / 1000);
+    const limitSeconds = 60;
+    if (diff < limitSeconds) {
+      const retryAfter = limitSeconds - diff;
+      return NextResponse.json(
+        { success: false, message: 'Too many requests', retryAfter },
+        { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+      );
+    }
+
     const secret = process.env.EMAIL_VERIFICATION_SECRET;
     if (!secret) {
       return NextResponse.json(
@@ -41,37 +54,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    let registrationData;
+    try {
+      const parts = verification.metadata.split(':');
+      const iv = Buffer.from(parts[0], 'hex');
+      const encryptedText = parts[1];
+      const key = crypto.scryptSync(secret, 'salt', 32);
+      const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+      let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
+      registrationData = JSON.parse(decrypted);
+    } catch (e) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid verification data' },
+        { status: 400 },
+      );
+    }
+
+    const targetEmail = registrationData.email;
+    if (!targetEmail) {
+      return NextResponse.json(
+        { success: false, message: 'Email not found' },
+        { status: 400 },
+      );
+    }
+
+    const code = String(100000 + crypto.randomInt(900000));
     const codeHash = crypto
       .createHmac('sha256', secret)
       .update(code)
       .digest('hex');
     const expiresAt = new Date(Date.now() + 1000 * 60 * 15).toISOString();
-    const tempUserId = crypto.randomUUID();
 
-    const registrationData = {
-      full_name,
-      email,
-      password,
-      phone: phone || null,
-    };
-
-    const key = crypto.scryptSync(secret, 'salt', 32);
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-    let encryptedData = cipher.update(
-      JSON.stringify(registrationData),
-      'utf8',
-      'hex',
-    );
-    encryptedData += cipher.final('hex');
-    const encryptedWithIv = iv.toString('hex') + ':' + encryptedData;
+    await supabase
+      .from('email_verifications')
+      .update({ used: true })
+      .eq('user_id', userId)
+      .eq('used', false);
 
     await supabase.from('email_verifications').insert({
-      user_id: tempUserId,
+      user_id: userId,
       code_hash: codeHash,
       expires_at: expiresAt,
       used: false,
-      metadata: encryptedWithIv,
+      metadata: verification.metadata,
     });
 
     const siteUrl = process.env.SITE_URL || '';
@@ -116,7 +142,7 @@ export async function POST(req: NextRequest) {
 
     const mailOptions = {
       from: fromAddress,
-      to: email,
+      to: targetEmail,
       subject: 'Verifica tu correo',
       html,
     } as any;
@@ -151,14 +177,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      tempUserId,
-      message: 'Verification code sent',
-    });
-  } catch (err: any) {
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: err?.message || 'Registration failed' },
+      { success: false, message: error.message || 'Failed' },
       { status: 500 },
     );
   }

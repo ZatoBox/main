@@ -248,7 +248,7 @@ const CryptoStoreSetup: React.FC = () => {
               {xpubData?.xpub ? (
                 <div className="flex items-center space-x-2">
                   <span className="font-mono text-gray-500 text-xs break-all">
-                    {xpubData.xpub}
+                    *****
                   </span>
                   <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full whitespace-nowrap">
                     Configurado
