@@ -9,6 +9,7 @@ export interface UserItem {
   phone?: string | null;
   profile_image?: string | null;
   premium_up_to?: string | null;
+  modules?: Record<string, boolean>;
 }
 
 export interface LoginRequest {

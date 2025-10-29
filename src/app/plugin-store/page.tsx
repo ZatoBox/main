@@ -28,7 +28,7 @@ interface IPlugin {
 const PluginStorePage: React.FC = () => {
   const router = useRouter();
   const { token } = useAuth();
-  const { isPluginActive, togglePlugin } = usePlugins();
+  const { isPluginActive, togglePlugin, activePlugins } = usePlugins();
   const [plugins, setPlugins] = useState<IPlugin[]>([]);
   const [filteredPlugins, setFilteredPlugins] = useState<IPlugin[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -40,7 +40,7 @@ const PluginStorePage: React.FC = () => {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState<'success' | 'info'>(
-    'info'
+    'info',
   );
 
   const categories = [
@@ -54,7 +54,6 @@ const PluginStorePage: React.FC = () => {
     { id: 'developer', name: 'Herramientas para Desarrolladores', icon: '🛠️' },
   ];
 
-  // Mock data for plugins
   const mockPlugins: IPlugin[] = [
     {
       id: 'ocr-module',
@@ -77,6 +76,46 @@ const PluginStorePage: React.FC = () => {
       ],
       screenshot:
         'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop',
+    },
+    {
+      id: 'receipts',
+      name: 'Recibos',
+      description: 'Gestión y visualización de recibos de compra',
+      category: 'productivity',
+      icon: '🧾',
+      status: 'active',
+      version: '1.0.0',
+      author: 'ZatoBox Team',
+      rating: 4.5,
+      installs: 420,
+      price: 'free',
+      features: [
+        'Almacenamiento de recibos',
+        'Búsqueda por cliente',
+        'Exportar PDF',
+      ],
+      screenshot:
+        'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=400&h=300&fit=crop',
+    },
+    {
+      id: 'restock',
+      name: 'Restock',
+      description: 'Automatiza reabastecimiento y alertas de stock',
+      category: 'inventory',
+      icon: '�',
+      status: 'active',
+      version: '1.0.0',
+      author: 'ZatoBox Team',
+      rating: 4.6,
+      installs: 300,
+      price: 'free',
+      features: [
+        'Alertas de bajo stock',
+        'Sugerencias de reorden',
+        'Pedidos automáticos',
+      ],
+      screenshot:
+        'https://images.unsplash.com/photo-1517148815978-75f6acaaff07?w=400&h=300&fit=crop',
     },
     {
       id: 'smart-inventory',
@@ -218,7 +257,6 @@ const PluginStorePage: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Simulate loading
     setTimeout(() => {
       const syncedPlugins = mockPlugins.map((plugin) => {
         if (
@@ -241,31 +279,27 @@ const PluginStorePage: React.FC = () => {
       setFilteredPlugins(syncedPlugins);
       setLoading(false);
     }, 1000);
-  }, [isPluginActive]);
+  }, [activePlugins]);
 
   useEffect(() => {
     let filtered = plugins;
-
-    // Filter by category
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(
-        (plugin) => plugin.category === selectedCategory
+        (plugin) => plugin.category === selectedCategory,
       );
     }
 
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(
         (plugin) =>
           plugin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          plugin.description.toLowerCase().includes(searchQuery.toLowerCase())
+          plugin.description.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
     setFilteredPlugins(filtered);
   }, [plugins, selectedCategory, searchQuery]);
 
-  // Functions for horizontal scrolling
   const checkScrollButtons = () => {
     if (categoriesRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = categoriesRef.current;
@@ -286,32 +320,25 @@ const PluginStorePage: React.FC = () => {
     }
   };
 
-  // Effect to check scroll buttons on mount and resize
   useEffect(() => {
     checkScrollButtons();
     window.addEventListener('resize', checkScrollButtons);
-
-    // Check scroll buttons after a short delay to ensure DOM is ready
     const timeoutId = setTimeout(checkScrollButtons, 100);
-
     return () => {
       window.removeEventListener('resize', checkScrollButtons);
       clearTimeout(timeoutId);
     };
   }, []);
 
-  // Effect to update scroll buttons when filtered plugins change
   useEffect(() => {
     const timeoutId = setTimeout(checkScrollButtons, 50);
     return () => clearTimeout(timeoutId);
   }, [filteredPlugins]);
 
-  // Function to show notification
   const showPluginNotification = (
     message: string,
-    type: 'success' | 'info'
+    type: 'success' | 'info',
   ) => {
-    // Only show notifications when explicitly called, not automatically
     setNotificationMessage(message);
     setNotificationType(type);
     setShowNotification(true);
@@ -327,16 +354,13 @@ const PluginStorePage: React.FC = () => {
       return;
     }
 
-    // Get current plugin info
     const plugin = plugins.find((p) => p.id === pluginId);
     if (!plugin) {
       return;
     }
 
-    // Toggle plugin status using context
-    togglePlugin(pluginId);
+    await togglePlugin(pluginId);
 
-    // Update local state to reflect the change
     setPlugins((prev) =>
       prev.map((p) => {
         if (p.id === pluginId) {
@@ -347,10 +371,8 @@ const PluginStorePage: React.FC = () => {
           };
         }
         return p;
-      })
+      }),
     );
-
-    // Plugin status updated successfully
   };
 
   const getStatusBadge = (status: string) => {
@@ -420,8 +442,7 @@ const PluginStorePage: React.FC = () => {
                 Tienda de Plugins
               </h1>
               <p className="hidden m-4 text-xs sm:text-sm text-text-secondary lg:block truncate">
-                Explora la creciente colección de módulos comerciales en
-                ZatoBox
+                Explora la creciente colección de módulos comerciales en ZatoBox
               </p>
             </div>
           </div>

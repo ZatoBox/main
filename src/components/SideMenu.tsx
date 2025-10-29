@@ -19,14 +19,12 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '../context/auth-store';
-import { usePlugins } from '@/context/plugin-context';
 import { btcpayAPI } from '@/services/btcpay.service';
 
 const SideMenu: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout, token } = useAuth();
-  const { isPluginActive } = usePlugins();
   const [showLogout, setShowLogout] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
@@ -38,13 +36,12 @@ const SideMenu: React.FC = () => {
   useEffect(() => {
     try {
       setHoverSupported(
-        window.matchMedia && window.matchMedia('(hover: hover)').matches
+        window.matchMedia && window.matchMedia('(hover: hover)').matches,
       );
     } catch {
       setHoverSupported(true);
     }
 
-    // Verificar XPUB
     if (token) {
       btcpayAPI
         .getXpub(token)
@@ -73,68 +70,64 @@ const SideMenu: React.FC = () => {
     return () => document.removeEventListener('click', handleDocClick);
   }, [hoverSupported]);
 
-  // Initialize visible items on component mount
   useEffect(() => {
     const initialVisibleItems = new Set<string>();
     menuItems.forEach((item) => {
       const shouldBeVisible =
-        item.alwaysVisible || (item.pluginId && isPluginActive(item.pluginId));
+        item.alwaysVisible ||
+        (item.pluginId && user?.modules?.[item.pluginId]);
       if (shouldBeVisible) {
         initialVisibleItems.add(item.path);
       }
     });
     setVisibleItems(initialVisibleItems);
-  }, []);
+  }, [user]);
 
-  // Effect to handle menu item animations when plugins change
   useEffect(() => {
-    const newVisibleItems = new Set<string>();
+    setVisibleItems((prevVisible) => {
+      const newVisibleItems = new Set<string>();
+      menuItems.forEach((item) => {
+        const shouldBeVisible =
+          item.alwaysVisible ||
+          (item.pluginId && user?.modules?.[item.pluginId]);
+        if (shouldBeVisible) newVisibleItems.add(item.path);
+      });
 
-    menuItems.forEach((item) => {
-      const shouldBeVisible =
-        item.alwaysVisible || (item.pluginId && isPluginActive(item.pluginId));
-      if (shouldBeVisible) {
-        newVisibleItems.add(item.path);
+      const addedItems = Array.from(newVisibleItems).filter(
+        (path) => !prevVisible.has(path),
+      );
+      const removedItems = Array.from(prevVisible).filter(
+        (path) => !newVisibleItems.has(path),
+      );
+
+      if (removedItems.length > 0) {
+        setAnimatingItems((prev) => new Set([...prev, ...removedItems]));
+
+        setTimeout(() => {
+          setVisibleItems(newVisibleItems);
+          setAnimatingItems((prev) => {
+            const newSet = new Set(prev);
+            removedItems.forEach((item) => newSet.delete(item));
+            return newSet;
+          });
+        }, 300);
+
+        return prevVisible;
       }
+
+      if (addedItems.length > 0) {
+        setTimeout(() => {
+          setAnimatingItems((prev) => {
+            const newSet = new Set(prev);
+            addedItems.forEach((item) => newSet.delete(item));
+            return newSet;
+          });
+        }, 50);
+      }
+
+      return newVisibleItems;
     });
-
-    // Find items that are being added
-    const addedItems = Array.from(newVisibleItems).filter(
-      (path) => !visibleItems.has(path)
-    );
-    // Find items that are being removed
-    const removedItems = Array.from(visibleItems).filter(
-      (path) => !newVisibleItems.has(path)
-    );
-
-    // Animate out items that are being removed
-    if (removedItems.length > 0) {
-      setAnimatingItems((prev) => new Set([...prev, ...removedItems]));
-
-      setTimeout(() => {
-        setVisibleItems(newVisibleItems);
-        setAnimatingItems((prev) => {
-          const newSet = new Set(prev);
-          removedItems.forEach((item) => newSet.delete(item));
-          return newSet;
-        });
-      }, 300); // Match the CSS transition duration
-    } else {
-      // Immediately show new items
-      setVisibleItems(newVisibleItems);
-    }
-
-    // Animate in new items
-    if (addedItems.length > 0) {
-      setTimeout(() => {
-        setAnimatingItems((prev) => {
-          const newSet = new Set(prev);
-          addedItems.forEach((item) => newSet.delete(item));
-          return newSet;
-        });
-      }, 50); // Small delay for smooth animation
-    }
-  }, [isPluginActive]); // Removed visibleItems from dependencies to prevent infinite loop
+  }, [user]);
 
   const menuItems = [
     {
@@ -180,14 +173,16 @@ const SideMenu: React.FC = () => {
       icon: FileText,
       path: '/receipts',
       description: 'Ver recibos de compra',
-      alwaysVisible: true,
+      pluginId: 'receipts',
+      alwaysVisible: false,
     },
     {
       name: 'Restock',
       icon: RefreshCw,
       path: '/restock',
       description: 'Reabastecer inventario',
-      alwaysVisible: true,
+      pluginId: 'restock',
+      alwaysVisible: false,
     },
     {
       name: 'Tienda de Plugins',
@@ -207,7 +202,6 @@ const SideMenu: React.FC = () => {
 
   const handleNavigation = (path: string) => {
     router.push(path);
-    // Close mobile menu after navigation
     setIsMobileMenuOpen(false);
   };
 
@@ -221,17 +215,14 @@ const SideMenu: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Component to render menu items
   const renderMenuItems = (items: any[], className: string = '') => {
     return items
       .filter((item) => {
-        // Always show items that are always visible
         if (item.alwaysVisible) {
           return true;
         }
-        // Show items that have a pluginId only if the plugin is active
         if (item.pluginId) {
-          return isPluginActive(item.pluginId);
+          return user?.modules?.[item.pluginId];
         }
         return true;
       })
@@ -243,9 +234,8 @@ const SideMenu: React.FC = () => {
         const isNewItem =
           !visibleItems.has(item.path) &&
           (item.alwaysVisible ||
-            (item.pluginId && isPluginActive(item.pluginId)));
+            (item.pluginId && user?.modules?.[item.pluginId]));
 
-        // Don't render if not visible and not animating
         if (!isVisible && !isAnimating && !isNewItem) {
           return null;
         }
@@ -257,8 +247,8 @@ const SideMenu: React.FC = () => {
               isVisible && !isAnimating
                 ? 'opacity-100 translate-y-0 scale-100 animate-menu-item-bounce'
                 : isAnimating
-                ? 'opacity-0 translate-y-2 scale-95 animate-menu-item-out'
-                : 'opacity-0 translate-y-2 scale-95'
+                  ? 'opacity-0 translate-y-2 scale-95 animate-menu-item-out'
+                  : 'opacity-0 translate-y-2 scale-95'
             } ${isNewItem ? 'animate-menu-item-in' : ''} ${
               isActive ? 'active' : ''
             }`}
@@ -274,7 +264,7 @@ const SideMenu: React.FC = () => {
                   ? 'bg-[#FEF9EC] text-[#F88612] border border-[#EEB131] shadow-sm'
                   : 'text-text-secondary hover:bg-gray-50 hover:text-text-primary hover:shadow-sm'
               } ${
-                item.pluginId && isPluginActive(item.pluginId)
+                item.pluginId && user?.modules?.[item.pluginId]
                   ? 'plugin-indicator'
                   : ''
               }`}
@@ -310,14 +300,13 @@ const SideMenu: React.FC = () => {
           </div>
         );
       })
-      .filter(Boolean); // Remove null items
+      .filter(Boolean);
   };
 
   return (
     <>
       {user?.role === 'guest' ? null : (
         <>
-          {/* Mobile Menu Button */}
           <div className="fixed z-50 md:hidden top-4 left-4">
             <button
               onClick={toggleMobileMenu}
@@ -331,7 +320,6 @@ const SideMenu: React.FC = () => {
             </button>
           </div>
 
-          {/* Mobile Menu Overlay */}
           {isMobileMenuOpen && (
             <div
               className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
@@ -339,13 +327,11 @@ const SideMenu: React.FC = () => {
             />
           )}
 
-          {/* Mobile Menu Sidebar */}
           <div
             className={`md:hidden fixed inset-y-0 left-0 w-64 bg-white border-r border-[#CBD5E1] z-50 transform transition-transform duration-300 ease-in-out ${
               isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
-            {/* Logo/Brand */}
             <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
               <div
                 onClick={() => router.push('/home')}
@@ -359,7 +345,6 @@ const SideMenu: React.FC = () => {
               </div>
             </div>
 
-            {/* Main Navigation */}
             <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto sidebar-menu-container">
               {renderMenuItems(menuItems)}
             </nav>
@@ -370,7 +355,7 @@ const SideMenu: React.FC = () => {
                   onClick={() =>
                     window.open(
                       'https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform',
-                      '_blank'
+                      '_blank',
                     )
                   }
                   className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-[#F88612] text-white gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-white hover:border-[#F88612] hover:text-[#F88612]"
@@ -404,9 +389,7 @@ const SideMenu: React.FC = () => {
             </div>
           </div>
 
-          {/* Desktop Side Menu */}
           <div className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-white md:border-r md:border-[#CBD5E1] md:z-40">
-            {/* Logo/Brand */}
             <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
               <div
                 onClick={() => router.push('/home')}
@@ -420,7 +403,6 @@ const SideMenu: React.FC = () => {
               </div>
             </div>
 
-            {/* Main Navigation */}
             <nav className="flex-1 px-4 py-6 space-y-2 sidebar-menu-container">
               {renderMenuItems(menuItems)}
             </nav>
@@ -431,7 +413,7 @@ const SideMenu: React.FC = () => {
                   onClick={() =>
                     window.open(
                       'https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform',
-                      '_blank'
+                      '_blank',
                     )
                   }
                   className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-[#F88612] text-white gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-white hover:border-[#F88612] hover:text-[#F88612]"
