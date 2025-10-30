@@ -84,7 +84,7 @@ const PluginCard: React.FC<PluginCardProps> = ({
               onClick={() => onToggle(plugin.id)}
               className='w-full px-4 py-2 font-medium text-green-800 transition-colors bg-green-100 rounded-lg hover:bg-green-200'
             >
-              {plugin.status === 'active' ? 'Deactivate' : 'Activate'}
+              {plugin.status === 'active' ? 'Desactivar' : 'Activar'}
             </button>
           )}
         </div>
