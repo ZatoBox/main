@@ -102,7 +102,7 @@ const PluginStorePage: React.FC = () => {
       name: 'Restock',
       description: 'Automatiza reabastecimiento y alertas de stock',
       category: 'inventory',
-      icon: '�',
+      icon: '📦',
       status: 'active',
       version: '1.0.0',
       author: 'ZatoBox Team',
@@ -115,7 +115,7 @@ const PluginStorePage: React.FC = () => {
         'Pedidos automáticos',
       ],
       screenshot:
-        'https://images.unsplash.com/photo-1517148815978-75f6acaaff07?w=400&h=300&fit=crop',
+        'https://assets.bwbx.io/images/users/iqjWHBFdfxIU/ifqONX8Chb7o/v1/715x-1.jpg',
     },
     {
       id: 'smart-inventory',
