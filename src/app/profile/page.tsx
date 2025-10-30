@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/profile/Header';
 import AvatarUploader from '@/components/profile/AvatarUploader';
 import CryptoStoreSetup from '@/components/profile/CryptoStoreSetup';
-import Loader from '@/components/ui/Loader';
 import { profileAPI, authAPI } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
 import {
@@ -264,10 +263,12 @@ const ProfilePage: React.FC = () => {
 
   if (loading) {
     return (
-      <>
-        <Header onBack={() => router.push('/')} />
-        <Loader fullScreen size="large" />
-      </>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-gray-300"></div>
+          <p className="text-gray-500">Cargando perfil...</p>
+        </div>
+      </div>
     );
   }
 
@@ -275,7 +276,14 @@ const ProfilePage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Header onBack={() => router.push('/')} />
 
-      {saving && <Loader fullScreen size="large" />}
+      {saving && (
+        <div className="fixed inset-0 pointer-events-none flex items-start justify-center pt-8">
+          <div className="flex items-center space-x-3 px-4 py-2 bg-white/90 border border-gray-200 rounded-lg shadow-sm">
+            <div className="w-4 h-4 border-b-2 rounded-full animate-spin border-gray-400"></div>
+            <span className="text-sm text-gray-700">Guardando...</span>
+          </div>
+        </div>
+      )}
 
       <div className="px-4 py-6 mx-auto max-w-4xl sm:px-6 lg:px-8">
         <div className="flex justify-center">

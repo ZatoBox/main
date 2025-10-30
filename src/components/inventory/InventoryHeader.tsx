@@ -85,7 +85,7 @@ const InventoryHeader: React.FC<Props> = ({
                   <button
                     onClick={onBulkDelete}
                     disabled={deletingItems}
-                    className="flex items-center justify-center space-x-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 rounded-full transition-all duration-200 shadow-md hover:shadow-lg hover:from-red-600 hover:to-red-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center justify-center space-x-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 rounded-[10px] transition-all duration-200 shadow-md hover:shadow-lg hover:from-red-600 hover:to-red-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <svg
                       className={`w-5 h-5 ${
@@ -126,7 +126,7 @@ const InventoryHeader: React.FC<Props> = ({
             )}
             <button
               onClick={onCreate}
-              className={`relative px-6 py-2.5 text-sm font-semibold rounded-full transition-all duration-200
+              className={`relative px-6 py-2.5 text-sm font-semibold rounded-[10px] transition-all duration-200
                        flex items-center justify-center space-x-2 group
                        bg-gradient-to-r from-[#F88612] to-[#d17110]
                        hover:from-[#d17110] hover:to-[#b85a0a]

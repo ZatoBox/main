@@ -306,6 +306,7 @@ const InventoryPage: React.FC = () => {
       status: p.active ? 'active' : 'inactive',
       stock: p.stock,
       price: p.price,
+      imageUrl: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : undefined,
     };
   });
 
