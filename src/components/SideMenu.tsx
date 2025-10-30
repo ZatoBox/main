@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   Package,
@@ -19,63 +19,20 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '../context/auth-store';
-import { btcpayAPI } from '@/services/btcpay.service';
 
 const SideMenu: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout, token } = useAuth();
-  const [showLogout, setShowLogout] = useState(false);
+  const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
   const [animatingItems, setAnimatingItems] = useState<Set<string>>(new Set());
-  const userInfoRef = useRef<HTMLDivElement | null>(null);
-  const [hoverSupported, setHoverSupported] = useState<boolean>(true);
-  const [hasXpub, setHasXpub] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    try {
-      setHoverSupported(
-        window.matchMedia && window.matchMedia('(hover: hover)').matches,
-      );
-    } catch {
-      setHoverSupported(true);
-    }
-
-    if (token) {
-      btcpayAPI
-        .getXpub(token)
-        .then((resp) => {
-          setHasXpub(!!resp.xpub);
-        })
-        .catch(() => {
-          setHasXpub(false);
-        });
-    }
-  }, [token]);
-
-  useEffect(() => {
-    if (hoverSupported) return;
-    const handleDocClick = (e: MouseEvent) => {
-      const target = e.target as Node | null;
-      if (
-        userInfoRef.current &&
-        target &&
-        !userInfoRef.current.contains(target)
-      ) {
-        setShowLogout(false);
-      }
-    };
-    document.addEventListener('click', handleDocClick);
-    return () => document.removeEventListener('click', handleDocClick);
-  }, [hoverSupported]);
 
   useEffect(() => {
     const initialVisibleItems = new Set<string>();
     menuItems.forEach((item) => {
       const shouldBeVisible =
-        item.alwaysVisible ||
-        (item.pluginId && user?.modules?.[item.pluginId]);
+        item.alwaysVisible || (item.pluginId && user?.modules?.[item.pluginId]);
       if (shouldBeVisible) {
         initialVisibleItems.add(item.path);
       }
@@ -191,13 +148,6 @@ const SideMenu: React.FC = () => {
       description: 'Buscar módulos',
       alwaysVisible: true,
     },
-    {
-      name: 'Perfil',
-      icon: User,
-      path: '/profile',
-      description: 'Gestionar cuenta',
-      alwaysVisible: true,
-    },
   ];
 
   const handleNavigation = (path: string) => {
@@ -289,13 +239,6 @@ const SideMenu: React.FC = () => {
                   {item.description}
                 </div>
               </div>
-              {item.path === '/profile' && hasXpub === false && (
-                <div className="ml-2 flex-shrink-0">
-                  <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
-                    !
-                  </span>
-                </div>
-              )}
             </button>
           </div>
         );
@@ -367,25 +310,23 @@ const SideMenu: React.FC = () => {
             </div>
 
             <div className="px-4 py-4 border-t border-[#CBD5E1]">
-              <div className="flex items-center p-3 space-x-3 rounded-lg hover:bg-gray-50">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]">
-                  <User size={16} className="text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate text-black">
-                    {user?.full_name || 'User'}
+              <button
+                onClick={() => handleNavigation('/profile')}
+                className="w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-300 group text-text-secondary hover:bg-gray-50 hover:text-text-primary hover:shadow-sm"
+              >
+                <User
+                  size={20}
+                  className="mr-3 transition-all duration-300 text-text-secondary group-hover:text-text-primary group-hover:scale-105"
+                />
+                <div className="flex-1">
+                  <div className="font-medium transition-colors duration-300 text-text-primary">
+                    Perfil
                   </div>
-                  <div className="text-xs truncate text-black">
-                    {user?.role === 'admin' ? 'Administrator' : 'User'}
+                  <div className="text-xs transition-colors duration-300 text-[#475569]">
+                    Gestionar cuenta
                   </div>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="p-2 transition-colors rounded-lg text-white hover:bg-[#FEF9EC] hover:text-[#F88612] hover:border hover:border-[#EEB131]"
-                >
-                  <LogOut size={16} />
-                </button>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -425,67 +366,23 @@ const SideMenu: React.FC = () => {
             </div>
 
             <div className="px-4 py-4 border-t border-[#CBD5E1]">
-              <div
-                ref={userInfoRef}
-                className="relative cursor-pointer"
-                onMouseEnter={
-                  hoverSupported ? () => setShowLogout(true) : undefined
-                }
-                onMouseLeave={
-                  hoverSupported ? () => setShowLogout(false) : undefined
-                }
-                onClick={
-                  !hoverSupported
-                    ? () => setShowLogout((prev) => !prev)
-                    : undefined
-                }
+              <button
+                onClick={() => handleNavigation('/profile')}
+                className="w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-300 group text-text-secondary hover:bg-gray-50 hover:text-text-primary hover:shadow-sm"
               >
-                <div
-                  className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 ease-in-out ${
-                    showLogout
-                      ? 'bg-[#FEF9EC]  border-[#EEB131] shadow-sm'
-                      : 'hover:bg-[#FEF9EC]'
-                  }`}
-                >
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F88612]">
-                    <User size={16} className="text-white" />
+                <User
+                  size={20}
+                  className="mr-3 transition-all duration-300 text-text-secondary group-hover:text-text-primary group-hover:scale-105"
+                />
+                <div className="flex-1">
+                  <div className="font-medium transition-colors duration-300 text-text-primary">
+                    Perfil
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate text-black">
-                      {user?.full_name || 'User'}
-                    </div>
-                    <div className="text-xs truncate text-black">
-                      {user?.role === 'admin' ? 'Administrator' : 'User'}
-                    </div>
-                  </div>
-
-                  <div
-                    className={`transition-all duration-300 ease-in-out ${
-                      showLogout
-                        ? 'opacity-100 translate-x-0'
-                        : 'opacity-0 translate-x-2'
-                    }`}
-                  >
-                    <LogOut size={16} className="text-white" />
+                  <div className="text-xs transition-colors duration-300 text-[#475569]">
+                    Gestionar cuenta
                   </div>
                 </div>
-
-                <div
-                  className={`absolute inset-0 flex items-center justify-center rounded-lg transition-all duration-300 ease-in-out ${
-                    showLogout
-                      ? 'opacity-100 bg-[#FEF9EC] text-[#F88612] shadow-lg transform scale-100'
-                      : 'opacity-0 bg-transparent transform scale-95 pointer-events-none'
-                  }`}
-                >
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center space-x-2 text-sm font-medium"
-                  >
-                    <LogOut size={16} className="text-[#F88612]" />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              </div>
+              </button>
             </div>
           </div>
         </>
