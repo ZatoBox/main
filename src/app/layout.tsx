@@ -5,6 +5,7 @@ import { PluginProvider } from '@/context/plugin-context';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { CashSuccessProvider } from '@/context/cash-success-context';
 import { CryptoSuccessProvider } from '@/context/crypto-success-context';
+import { OCRProvider } from '@/context/ocr-context';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import CashSuccessPortal from '@/components/CashSuccessPortal';
 import CryptoSuccessPortal from '@/components/CryptoSuccessPortal';
@@ -43,17 +44,19 @@ export default function RootLayout({
     <html lang="es" className={`${GeistSans.variable}`}>
       <body className="antialiased">
         <PluginProvider>
-          <LanguageProvider>
-            <AuthProvider>
-              <CashSuccessProvider>
-                <CryptoSuccessProvider>
-                  <LayoutWrapper>{children}</LayoutWrapper>
-                  <CashSuccessPortal />
-                  <CryptoSuccessPortal />
-                </CryptoSuccessProvider>
-              </CashSuccessProvider>
-            </AuthProvider>
-          </LanguageProvider>
+          <OCRProvider>
+            <LanguageProvider>
+              <AuthProvider>
+                <CashSuccessProvider>
+                  <CryptoSuccessProvider>
+                    <LayoutWrapper>{children}</LayoutWrapper>
+                    <CashSuccessPortal />
+                    <CryptoSuccessPortal />
+                  </CryptoSuccessProvider>
+                </CashSuccessProvider>
+              </AuthProvider>
+            </LanguageProvider>
+          </OCRProvider>
         </PluginProvider>
       </body>
     </html>

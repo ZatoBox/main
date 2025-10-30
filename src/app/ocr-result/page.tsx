@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-store';
+import { useOCR } from '@/context/ocr-context';
 import { productsAPI, ocrAPI } from '@/services/api.service';
 import { OCRResponse, OCRLineItem, CreateProductRequest } from '@/types/index';
 import Header from '@/components/ocr-result/Header';
@@ -14,6 +15,7 @@ import ActionsBar from '@/components/ocr-result/ActionsBar';
 const OCRResultPage: React.FC = () => {
   const router = useRouter();
   const { token } = useAuth();
+  const { isOnCooldown, remainingTime, setCooldown } = useOCR();
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<OCRResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,26 +28,11 @@ const OCRResultPage: React.FC = () => {
     rotation_correction: true,
     confidence_threshold: 0.25,
   });
-  const [systemStatus, setSystemStatus] = useState<any>(null);
-  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
-  const [nowTs, setNowTs] = useState<number>(Date.now());
 
-  useEffect(() => {
-    if (!cooldownUntil) return;
-    const id = setInterval(() => setNowTs(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [cooldownUntil]);
-
-  const processAnotherDisabled = cooldownUntil ? nowTs < cooldownUntil : false;
-  const remainingMs =
-    processAnotherDisabled && cooldownUntil ? cooldownUntil - nowTs : 0;
-  const remainingLabel = (() => {
-    if (!processAnotherDisabled) return 'Process Another';
-    const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
-    const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
-    const s = String(totalSec % 60).padStart(2, '0');
-    return `Process Another (${m}:${s})`;
-  })();
+  const processAnotherDisabled = isOnCooldown;
+  const remainingLabel = isOnCooldown
+    ? `Process Another (${remainingTime})`
+    : 'Process Another';
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -111,11 +98,11 @@ const OCRResultPage: React.FC = () => {
 
           const productCategories = Array.isArray(item.categories)
             ? item.categories.filter(
-                (c: any) => typeof c === 'string' && c.trim()
+                (c: any) => typeof c === 'string' && c.trim(),
               )
             : item.category
-            ? [item.category]
-            : ['Otros'];
+              ? [item.category]
+              : ['Otros'];
 
           return {
             name,
@@ -215,7 +202,7 @@ const OCRResultPage: React.FC = () => {
       const buildAutoDescription = (
         name: string,
         quantity: string,
-        unitPrice: string
+        unitPrice: string,
       ) => {
         const safeName = sanitizeText(name, 'Producto');
         const qtyNum = parseInt(quantity, 10);
@@ -243,7 +230,7 @@ const OCRResultPage: React.FC = () => {
           const name = sanitizeText(item?.name, 'Unnamed Product');
           let description = sanitizeText(
             item?.description || item?.descripcion || item?.detalles,
-            ''
+            '',
           );
 
           let unitPrice: string;
@@ -261,7 +248,7 @@ const OCRResultPage: React.FC = () => {
           const unitPriceNum = parseFloat(unitPrice);
           const providedTotal = sanitizeNumber(
             item?.total_price ?? item?.total ?? item?.price,
-            ''
+            '',
           );
           const computedTotal =
             Number.isFinite(unitPriceNum) && Number.isFinite(quantityNum)
@@ -296,10 +283,10 @@ const OCRResultPage: React.FC = () => {
             total_price: finalTotal,
             category: sanitizeText(
               item?.category ?? item?.categories?.[0],
-              'General'
+              'General',
             ),
           } as OCRLineItem;
-        }
+        },
       );
 
       const metadataSource = (() => {
@@ -321,7 +308,7 @@ const OCRResultPage: React.FC = () => {
             if (key in (ocrResult as any)) acc[key] = (ocrResult as any)[key];
             return acc;
           },
-          {}
+          {},
         );
         return collected;
       })();
@@ -330,14 +317,14 @@ const OCRResultPage: React.FC = () => {
         const value = parseFloat(
           typeof current.total_price === 'number'
             ? String(current.total_price)
-            : current.total_price || '0'
+            : current.total_price || '0',
         );
         return acc + (Number.isFinite(value) ? value : 0);
       }, 0);
       const subtotalFromModel = sanitizeNumber(metadataSource?.subtotal, '');
       const ivaFromModel = sanitizeNumber(
         metadataSource?.iva ?? metadataSource?.tax,
-        ''
+        '',
       );
       const totalFromModel = sanitizeNumber(metadataSource?.total, '');
       const subtotal = subtotalFromModel || subtotalFromItems.toFixed(2);
@@ -378,12 +365,21 @@ const OCRResultPage: React.FC = () => {
 
       setResult(normalized);
       if (normalized.success) {
-        setCooldownUntil(Date.now() + 5 * 60 * 1000);
+        setCooldown(Date.now() + 5 * 60 * 1000);
       }
     } catch (err: any) {
-      setError(
-        `Error procesando documento: ${err.message}. Por favor intenta de nuevo.`
-      );
+      const errorMessage = err.message || '';
+      if (
+        errorMessage.includes('429') ||
+        errorMessage.includes('Too Many Requests')
+      ) {
+        setCooldown(Date.now() + 5 * 60 * 1000);
+        setError('');
+      } else {
+        setError(
+          `Error procesando documento: ${errorMessage}. Por favor intenta de nuevo.`,
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -401,7 +397,7 @@ const OCRResultPage: React.FC = () => {
         ({
           ...(prev || result || { success: true }),
           line_items: items,
-        } as OCRResponse)
+        }) as OCRResponse,
     );
   };
 
@@ -426,7 +422,7 @@ const OCRResultPage: React.FC = () => {
     setIsEditing(false);
     setEditedResult(null);
     const fileInput = document.getElementById(
-      'file-upload'
+      'file-upload',
     ) as HTMLInputElement;
     if (fileInput) fileInput.value = '';
   };
@@ -459,9 +455,18 @@ const OCRResultPage: React.FC = () => {
             />
 
             <div className="text-center">
+              {isOnCooldown && (
+                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg pointer-events-none">
+                  <div className="flex items-center justify-center">
+                    <span className="text-yellow-700">
+                      ⏳ Espera {remainingTime} antes de procesar otro documento
+                    </span>
+                  </div>
+                </div>
+              )}
               <button
                 onClick={handleUpload}
-                disabled={!file || loading}
+                disabled={!file || loading || isOnCooldown}
                 className="flex items-center px-8 py-4 mx-auto font-medium text-white transition-colors rounded-md bg-[#F88612] md:px-10 md:py-5 hover:bg-[#A94D14] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
@@ -490,8 +495,8 @@ const OCRResultPage: React.FC = () => {
             <ItemsTable
               items={
                 (isEditing
-                  ? editedResult?.line_items ?? []
-                  : result?.line_items ?? []) as OCRLineItem[]
+                  ? (editedResult?.line_items ?? [])
+                  : (result?.line_items ?? [])) as OCRLineItem[]
               }
               isEditing={isEditing}
               onChange={handleTableChange}
