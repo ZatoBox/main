@@ -19,6 +19,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Lock,
+  LogOut,
 } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
@@ -29,10 +30,10 @@ const ProfilePage: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<Record<string, any>>({});
   const [editingFields, setEditingFields] = useState<Record<string, boolean>>(
-    {}
+    {},
   );
   const [editValues, setEditValues] = useState<Record<string, string>>({});
-  const { user, initialized, setUser } = useAuth();
+  const { user, initialized, setUser, logout } = useAuth();
 
   useEffect(() => {
     let canceled = false;
@@ -115,7 +116,7 @@ const ProfilePage: React.FC = () => {
 
   const handleImageUpdated = async (
     newImageUrl: string | null,
-    updatedUser?: any
+    updatedUser?: any,
   ) => {
     if (updatedUser) {
       setProfileData(updatedUser);
@@ -159,7 +160,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const hasChanges = Object.keys(editingFields).some(
-    (field) => editingFields[field]
+    (field) => editingFields[field],
   );
 
   const getFieldIcon = (field: string) => {
@@ -376,6 +377,28 @@ const ProfilePage: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <CryptoStoreSetup />
+                  </div>
+                </div>
+
+                {/* Account Section */}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Lock className="w-5 h-5 mr-2 text-orange-500" />
+                      Cuenta
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <button
+                      onClick={() => {
+                        logout();
+                        router.push('/login');
+                      }}
+                      className="w-full flex items-center justify-center px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      <LogOut className="w-5 h-5 mr-2" />
+                      Cerrar Sesión
+                    </button>
                   </div>
                 </div>
               </div>
