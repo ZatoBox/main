@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Loader from '@/components/ui/Loader';
 import { btcpayAPI } from '@/services/btcpay.service';
 import { useAuth } from '@/context/auth-store';
 import { Edit, Lock } from 'lucide-react';
@@ -132,12 +131,23 @@ const CryptoStoreSetup: React.FC = () => {
   };
 
   if (loading) {
-    return <Loader fullScreen size="large" />;
+    return (
+      <div className="flex items-center justify-center py-10">
+        <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-gray-400"></div>
+      </div>
+    );
   }
 
   return (
     <>
-      {saving && <Loader fullScreen size="large" />}
+      {saving && (
+        <div className="fixed inset-0 pointer-events-none flex items-start justify-center pt-8">
+          <div className="flex items-center space-x-3 px-4 py-2 bg-white/90 border border-gray-200 rounded-lg shadow-sm">
+            <div className="w-4 h-4 border-b-2 rounded-full animate-spin border-gray-400"></div>
+            <span className="text-sm text-gray-700">Guardando...</span>
+          </div>
+        </div>
+      )}
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
           <div className="flex items-center space-x-3">
@@ -248,7 +258,7 @@ const CryptoStoreSetup: React.FC = () => {
               {xpubData?.xpub ? (
                 <div className="flex items-center space-x-2">
                   <span className="font-mono text-gray-500 text-xs break-all">
-                    {xpubData.xpub}
+                    ******
                   </span>
                   <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full whitespace-nowrap">
                     Configurado

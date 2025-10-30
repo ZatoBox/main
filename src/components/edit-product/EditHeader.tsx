@@ -77,7 +77,7 @@ const EditHeader: React.FC<Props> = ({
             <button
               onClick={onSave}
               disabled={saving}
-              className={`relative px-6 py-2.5 text-sm font-semibold rounded-full transition-all duration-200
+              className={`relative px-6 py-2.5 text-sm font-semibold rounded-[10px] transition-all duration-200
                        flex items-center justify-center space-x-2 group
                        bg-gradient-to-r from-[#F88612] to-[#d17110]
                        hover:from-[#d17110] hover:to-[#b85a0a]
