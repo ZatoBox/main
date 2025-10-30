@@ -338,6 +338,18 @@ const ProfilePage: React.FC = () => {
                         </span>
                       )}
                     </div>
+                    <div className="hidden md:flex self-end">
+                      <button
+                        onClick={() => {
+                          logout();
+                          router.push('/login');
+                        }}
+                        className="flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Cerrar Sesión
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -381,7 +393,7 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 {/* Account Section */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm md:hidden">
                   <div className="px-6 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                       <Lock className="w-5 h-5 mr-2 text-orange-500" />
