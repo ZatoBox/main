@@ -46,16 +46,26 @@ const ReceiptsPage: React.FC = () => {
         const data = await ordersAPI.getCashOrders();
 
         if (data.success && Array.isArray(data.orders)) {
-          const allReceipts = data.orders.map((order: any) => ({
-            id: order.id,
-            receiptNumber: order.id.slice(0, 8).toUpperCase(),
-            date: order.created_at,
-            total: order.total_amount,
-            itemCount: Array.isArray(order.items) ? order.items.length : 0,
-            paymentMethod: order.payment_method,
-            status: order.status,
-            items: Array.isArray(order.items) ? order.items : [],
-          }));
+          const allReceipts = data.orders.map((order: any) => {
+            const metaType = order.metadata?.paymentType;
+            const method = order.payment_method === 'cash'
+              ? 'cash'
+              : metaType === 'lightning'
+              ? 'lightning'
+              : metaType === 'btc'
+              ? 'bitcoin'
+              : 'bitcoin';
+            return {
+              id: order.id,
+              receiptNumber: order.id.slice(0, 8).toUpperCase(),
+              date: order.created_at,
+              total: order.total_amount,
+              itemCount: Array.isArray(order.items) ? order.items.length : 0,
+              paymentMethod: method,
+              status: order.status,
+              items: Array.isArray(order.items) ? order.items : [],
+            } as Receipt;
+          });
 
           setReceipts(allReceipts);
           setError(null);
@@ -73,6 +83,37 @@ const ReceiptsPage: React.FC = () => {
 
     fetchAllOrders();
   }, [isAuthenticated, initialized]);
+
+  useEffect(() => {
+    const autoCancelExpiredCrypto = async () => {
+      const now = Date.now();
+      const updates: Promise<void>[] = [];
+      receipts.forEach((r) => {
+        if (r.paymentMethod !== 'cash' && r.status === 'pending') {
+          const created = new Date(r.date).getTime();
+          if (now - created > 24 * 60 * 60 * 1000) {
+            updates.push(
+              fetch(`/api/checkout/crypto/${r.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'cancelled' }),
+              })
+                .then(() => {
+                  setReceipts((prev) =>
+                    prev.map((x) =>
+                      x.id === r.id ? { ...x, status: 'cancelled' } : x
+                    )
+                  );
+                })
+                .catch(() => {})
+            );
+          }
+        }
+      });
+      if (updates.length > 0) await Promise.all(updates);
+    };
+    if (receipts.length > 0) autoCancelExpiredCrypto();
+  }, [receipts]);
 
   const filteredReceipts = receipts.filter((receipt) => {
     const matchesSearch =
