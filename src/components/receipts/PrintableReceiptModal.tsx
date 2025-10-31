@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import { X, Printer, Download } from 'lucide-react';
+import { buildReceiptHtml } from '@/utils/print-receipt';
 import type { ReceiptItem } from '@/types';
 
 interface Props {
@@ -28,20 +29,38 @@ const PrintableReceiptModal: React.FC<Props> = ({
   const printRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = () => {
-    if (printRef.current) {
-      const printWindow = window.open('', '', 'height=600,width=800');
-      if (printWindow) {
-        printWindow.document.write(printRef.current.innerHTML);
-        printWindow.document.close();
-        printWindow.print();
-      }
-    }
+    const html = buildReceiptHtml({
+      receiptNumber,
+      date,
+      total,
+      items,
+      status,
+    });
+    const w = window.open('', '', 'height=800,width=700');
+    if (!w) return;
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    w.onload = () => w.print();
   };
 
   const handleDownloadPDF = () => {
-    // Esta es una función placeholder.
-    console.log('Descargando PDF...');
-    handlePrint();
+    const html = buildReceiptHtml({
+      receiptNumber,
+      date,
+      total,
+      items,
+      status,
+    });
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `recibo-${receiptNumber}.html`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   };
 
   if (!open) return null;

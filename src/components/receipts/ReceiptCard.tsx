@@ -12,6 +12,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import PrintableReceiptModal from './PrintableReceiptModal';
+import { buildReceiptHtml } from '@/utils/print-receipt';
 import type { ReceiptItem } from '@/types';
 
 interface Props {
@@ -321,14 +322,97 @@ const ReceiptCard: React.FC<Props> = ({
             {/* Actions */}
             <div className="flex flex-wrap gap-2 pt-4 border-t border-[#E5E7EB]">
               <button
-                onClick={() => setShowPrintModal(true)}
+                onClick={() => {
+                  const html = buildReceiptHtml({
+                    receiptNumber,
+                    date: formattedDate,
+                    total,
+                    items,
+                    status: currentStatus,
+                  });
+                  const iframe = document.createElement('iframe');
+                  iframe.style.position = 'fixed';
+                  iframe.style.right = '0';
+                  iframe.style.bottom = '0';
+                  iframe.style.width = '0';
+                  iframe.style.height = '0';
+                  iframe.style.border = 'none';
+                  document.body.appendChild(iframe);
+                  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                  if (iframeDoc) {
+                    iframeDoc.open();
+                    iframeDoc.write(html);
+                    iframeDoc.close();
+                    setTimeout(() => {
+                      iframe.contentWindow?.print();
+                      setTimeout(() => document.body.removeChild(iframe), 500);
+                    }, 250);
+                  }
+                }}
                 className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB] hover:border-[#D1D5DB]"
               >
                 <Eye size={16} />
                 <span className="hidden sm:inline">Ver</span>
               </button>
               <button
-                onClick={() => setShowPrintModal(true)}
+                onClick={async () => {
+                  const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+                    import('jspdf'),
+                    import('html2canvas'),
+                  ]);
+                  const html = buildReceiptHtml({
+                    receiptNumber,
+                    date: formattedDate,
+                    total,
+                    items,
+                    status: currentStatus,
+                  });
+                  const iframe = document.createElement('iframe');
+                  iframe.style.position = 'fixed';
+                  iframe.style.right = '0';
+                  iframe.style.bottom = '0';
+                  iframe.style.width = '800px';
+                  iframe.style.height = '600px';
+                  iframe.style.border = 'none';
+                  iframe.style.opacity = '0';
+                  iframe.style.pointerEvents = 'none';
+                  document.body.appendChild(iframe);
+                  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                  if (iframeDoc) {
+                    iframeDoc.open();
+                    iframeDoc.write(html);
+                    iframeDoc.close();
+                    await new Promise((resolve) => setTimeout(resolve, 800));
+                    const element = iframeDoc.querySelector('.card') as HTMLElement;
+                    if (element) {
+                      const canvas = await html2canvas(element, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        windowWidth: element.scrollWidth,
+                        windowHeight: element.scrollHeight,
+                      });
+                      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                      const pdf = new jsPDF('p', 'mm', 'a4');
+                      const imgWidth = 210;
+                      const pageHeight = 297;
+                      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                      let heightLeft = imgHeight;
+                      let position = 0;
+                      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                      heightLeft -= pageHeight;
+                      while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                      }
+                      pdf.save(`recibo-${receiptNumber}.pdf`);
+                    }
+                    document.body.removeChild(iframe);
+                  }
+                }}
                 className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-[#F88612] text-white hover:bg-[#E07A0A] shadow-sm hover:shadow-md"
               >
                 <Download size={16} />
