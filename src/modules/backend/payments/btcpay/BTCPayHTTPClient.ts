@@ -6,7 +6,6 @@ export class BTCPayHTTPClient {
   private userId?: string;
 
   constructor(apiUrl: string, apiKey: string, userId?: string) {
-    // Ensure URL has protocol
     let cleanUrl = apiUrl.trim().replace(/\/$/, '');
     if (!cleanUrl.match(/^https?:\/\//)) {
       cleanUrl = `https://${cleanUrl}`;

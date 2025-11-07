@@ -18,7 +18,7 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     );
 
     const body = await req.json();
-    const { publicKey } = body;
+    const { publicKey, storeName, lightningConnectionString } = body;
 
     if (!publicKey || typeof publicKey !== 'string' || !publicKey.trim()) {
       return NextResponse.json(
@@ -27,11 +27,21 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
       );
     }
 
-    await btcpayService.saveUserXpub(userId, publicKey.trim());
+    const result = await btcpayService.configureUserStore(userId, {
+      publicKey: publicKey.trim(),
+      storeName: typeof storeName === 'string' ? storeName : undefined,
+      lightningConnectionString:
+        typeof lightningConnectionString === 'string' && lightningConnectionString.trim()
+          ? lightningConnectionString.trim()
+          : null,
+    });
 
     return NextResponse.json({
       success: true,
-      message: 'XPUB saved successfully',
+      storeId: result.storeId,
+      xpub: result.xpub,
+      webhookCreated: result.webhookCreated,
+      xpubChanged: result.xpubChanged,
     });
   } catch (error: any) {
     return NextResponse.json(
@@ -59,11 +69,25 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
       userId
     );
 
-    const userXpub = await btcpayService.getUserXpub(userId);
+    const store = await btcpayService.getUserStore(userId);
+    let xpub: string | null = null;
+    if (store?.xpub) {
+      try {
+        xpub = await btcpayService.getUserXpub(userId);
+      } catch (error) {
+        xpub = null;
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      xpub: userXpub || null,
+      xpub,
+      store:
+        store && {
+          id: store.btcpay_store_id,
+          name: store.store_name,
+          webhookConfigured: Boolean(store.webhook_secret),
+        },
     });
   } catch (error: any) {
     return NextResponse.json(

@@ -10,6 +10,8 @@ import type {
   CreatePullPaymentRequest,
   PullPayment,
   Payout,
+  UpdateOnChainPaymentMethodRequest,
+  UpdateLightningPaymentMethodRequest,
 } from './models';
 import { BTCPayHTTPClient } from './BTCPayHTTPClient';
 
@@ -116,6 +118,30 @@ export class BTCPayClient {
     return this.request<BTCPayWebhook>(
       'POST',
       `/api/v1/stores/${storeId}/webhooks`,
+      data
+    );
+  }
+
+  async setOnChainPaymentMethod(
+    storeId: string,
+    cryptoCode: string,
+    data: UpdateOnChainPaymentMethodRequest
+  ): Promise<void> {
+    await this.request<void>(
+      'PUT',
+      `/api/v1/stores/${storeId}/payment-methods/onchain/${cryptoCode}`,
+      data
+    );
+  }
+
+  async setLightningPaymentMethod(
+    storeId: string,
+    cryptoCode: string,
+    data: UpdateLightningPaymentMethodRequest
+  ): Promise<void> {
+    await this.request<void>(
+      'PUT',
+      `/api/v1/stores/${storeId}/payment-methods/lightning/${cryptoCode}`,
       data
     );
   }
