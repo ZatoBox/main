@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@noble/ciphers": "^2.0.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -42,6 +43,7 @@
     "@types/hdkey": "^2.1.0",
     "axios": "^1.7.7",
     "bcryptjs": "^3.0.2",
+    "bip84": "^0.2.9",
     "bitcoinjs-lib": "^7.0.0",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.7.0",

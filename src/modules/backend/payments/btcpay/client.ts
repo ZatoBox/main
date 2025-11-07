@@ -11,7 +11,7 @@ import type {
   PullPayment,
   Payout,
 } from './models';
-import { TorGatewayClient } from './tor-gateway-client';
+import { BTCPayHTTPClient } from './BTCPayHTTPClient';
 
 interface BTCPayClientConfig {
   apiUrl: string;
@@ -24,13 +24,13 @@ export class BTCPayClient {
   private apiUrl: string;
   private apiKey: string;
   private storeId?: string;
-  private btcpayClient: TorGatewayClient;
+  private btcpayClient: BTCPayHTTPClient;
 
   constructor(config: BTCPayClientConfig) {
     this.apiUrl = config.apiUrl.replace(/\/$/, '');
     this.apiKey = config.apiKey;
     this.storeId = config.storeId;
-    this.btcpayClient = new TorGatewayClient(
+    this.btcpayClient = new BTCPayHTTPClient(
       this.apiUrl,
       this.apiKey,
       config.userId

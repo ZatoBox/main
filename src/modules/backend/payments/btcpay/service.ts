@@ -8,6 +8,8 @@ import {
 } from './models';
 import { createClient } from '@/utils/supabase/server';
 import crypto from 'crypto';
+import { encryptXpub, decryptXpub } from '@/utils/zpub-encryption';
+import { convertToXpub } from '@/utils/xpub-converter';
 
 export class BTCPayService {
   private client: BTCPayClient;
@@ -25,8 +27,7 @@ export class BTCPayService {
     }
   }
 
-  async saveUserXpub(userId: string, xpub: string): Promise<void> {
-    // Ensure user store exists, create if not
+  async saveUserXpub(userId: string, publicKey: string): Promise<void> {
     let userStore = await this.repository.getUserStore(userId);
     if (!userStore) {
       await this.repository.saveUserStore(userId, {
@@ -34,13 +35,22 @@ export class BTCPayService {
         store_name: `User Store ${userId.substring(0, 8)}`,
       });
     }
-    // Now update the xpub
-    await this.repository.updateUserStoreXpub(userId, xpub);
+    const xpub = convertToXpub(publicKey);
+    const encryptedXpub = encryptXpub(xpub);
+    await this.repository.updateUserStoreXpub(userId, encryptedXpub);
   }
 
   async getUserXpub(userId: string): Promise<string | null> {
     const userStore = await this.repository.getUserStore(userId);
-    return userStore?.xpub || null;
+    if (!userStore?.xpub) {
+      return null;
+    }
+    try {
+      return decryptXpub(userStore.xpub);
+    } catch (error) {
+      console.error('Failed to decrypt xpub:', error);
+      return null;
+    }
   }
 
   async generateUserWallet(userId: string): Promise<{ xpub: string }> {
@@ -54,7 +64,6 @@ export class BTCPayService {
       throw new Error('Failed to generate XPUB');
     }
 
-    // Ensure user store exists, create if not
     let userStore = await this.repository.getUserStore(userId);
     if (!userStore) {
       await this.repository.saveUserStore(userId, {
@@ -63,7 +72,8 @@ export class BTCPayService {
       });
     }
 
-    await this.repository.updateUserStoreXpub(userId, wallet.xpub);
+    const encryptedXpub = encryptXpub(wallet.xpub);
+    await this.repository.updateUserStoreXpub(userId, encryptedXpub);
 
     return { xpub: wallet.xpub };
   }
@@ -88,40 +98,29 @@ export class BTCPayService {
       }
     }
 
+    const metadata = request.metadata || {};
+    const paymentType = metadata.paymentType || 'btc';
+    const paymentMethods = paymentType === 'lightning'
+      ? ['BTC-LightningNetwork']
+      : ['BTC-CHAIN'];
+
     const enrichedRequest = {
       amount: amountToUse,
       currency: currencyToUse,
       metadata: {
-        ...request.metadata,
+        ...metadata,
         userId,
         timestamp: new Date().toISOString(),
       },
       checkout: {
         speedPolicy: 'MediumSpeed',
-        paymentMethods: ['BTC-CHAIN'],
+        paymentMethods,
         expirationMinutes: 15,
         monitoringMinutes: 24,
         ...request.checkout,
       },
     };
 
-    let userXpub = await this.getUserXpub(userId);
-
-    if (!userXpub) {
-      try {
-        const wallet = await this.generateUserWallet(userId);
-        userXpub = wallet.xpub;
-      } catch (error) {
-        console.warn(
-          'Failed to auto-generate wallet, continuing without XPUB',
-          error
-        );
-      }
-    }
-
-    if (userXpub) {
-      (enrichedRequest.metadata as any).userXpub = userXpub;
-    }
 
     const invoice = await this.client.createInvoice(
       this.storeId,
@@ -278,11 +277,11 @@ export class BTCPayService {
           total_amount: totalAmount,
           payment_method: 'crypto',
           status: 'pending',
-          metadata: {
-            paymentType: 'btc',
-            invoiceId: payload.invoiceId,
-            createdAt: new Date().toISOString(),
-          },
+        metadata: {
+          paymentType: storedInvoice.metadata?.paymentType || 'btc',
+          invoiceId: payload.invoiceId,
+          createdAt: new Date().toISOString(),
+        },
         })
         .select()
         .single();
@@ -499,7 +498,7 @@ export class BTCPayService {
         payment_method: 'crypto',
         status: 'pending',
         metadata: {
-          paymentType: 'btc',
+          paymentType: storedInvoice.metadata?.paymentType || 'btc',
           invoiceId: invoiceId,
           createdAt: new Date().toISOString(),
         },

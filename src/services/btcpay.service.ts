@@ -37,7 +37,7 @@ class BTCPayAPIService {
   }
 
   async saveXpub(
-    data: { xpub: string },
+    data: { publicKey: string },
     token?: string
   ): Promise<{
     success: boolean;

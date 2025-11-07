@@ -18,16 +18,16 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     );
 
     const body = await req.json();
-    const { xpub } = body;
+    const { publicKey } = body;
 
-    if (!xpub || typeof xpub !== 'string' || !xpub.trim()) {
+    if (!publicKey || typeof publicKey !== 'string' || !publicKey.trim()) {
       return NextResponse.json(
-        { success: false, message: 'Valid XPUB is required' },
+        { success: false, message: 'Valid public key is required' },
         { status: 400 }
       );
     }
 
-    await btcpayService.saveUserXpub(userId, xpub.trim());
+    await btcpayService.saveUserXpub(userId, publicKey.trim());
 
     return NextResponse.json({
       success: true,

@@ -15,7 +15,7 @@ const CryptoStoreSetup: React.FC = () => {
   const [xpubData, setXpubData] = useState<XpubData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [xpubInput, setXpubInput] = useState('');
+  const [publicKeyInput, setPublicKeyInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -51,8 +51,8 @@ const CryptoStoreSetup: React.FC = () => {
       return;
     }
 
-    if (!xpubInput.trim()) {
-      setError('El XPUB no puede estar vacío');
+    if (!publicKeyInput.trim()) {
+      setError('La clave pública no puede estar vacía');
       return;
     }
 
@@ -62,18 +62,19 @@ const CryptoStoreSetup: React.FC = () => {
 
     try {
       const response = await btcpayAPI.saveXpub(
-        { xpub: xpubInput.trim() },
+        { publicKey: publicKeyInput.trim() },
         token
       );
 
       if (response.success) {
         setSuccess('XPUB actualizado exitosamente');
         setXpubData({
-          xpub: xpubInput.trim(),
+          xpub: response.xpub || null,
           savedAt: new Date().toISOString(),
         });
         setIsEditing(false);
         setTimeout(() => setSuccess(null), 3000);
+        loadUserXpub();
       } else {
         setError(response.message || 'Error al guardar XPUB');
       }
@@ -118,7 +119,7 @@ const CryptoStoreSetup: React.FC = () => {
   };
 
   const startEditing = () => {
-    setXpubInput(xpubData?.xpub || '');
+    setPublicKeyInput(xpubData?.xpub || '');
     setIsEditing(true);
     setError(null);
     setSuccess(null);
@@ -126,7 +127,7 @@ const CryptoStoreSetup: React.FC = () => {
 
   const cancelEditing = () => {
     setIsEditing(false);
-    setXpubInput('');
+    setPublicKeyInput('');
     setError(null);
   };
 
@@ -225,16 +226,16 @@ const CryptoStoreSetup: React.FC = () => {
               <div className="relative">
                 <input
                   type="text"
-                  value={xpubInput}
-                  onChange={(e) => setXpubInput(e.target.value)}
+                  value={publicKeyInput}
+                  onChange={(e) => setPublicKeyInput(e.target.value)}
                   className="w-full p-3 pr-10 border rounded-lg border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 font-mono text-sm"
-                  placeholder="xpub1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa..."
+                  placeholder="xpub... o zpub... (se convertirá automáticamente)"
                   autoFocus
                   disabled={saving}
                 />
               </div>
               <p className="text-xs text-gray-500">
-                Proporciona el XPUB de tu wallet para recibir pagos directamente
+                Proporciona el XPUB, ZPUB o YPUB de tu wallet. Se convertirá automáticamente a XPUB.
               </p>
               <div className="flex justify-end space-x-3">
                 <button
@@ -246,7 +247,7 @@ const CryptoStoreSetup: React.FC = () => {
                 </button>
                 <button
                   onClick={handleSaveXpub}
-                  disabled={saving || !xpubInput.trim()}
+                  disabled={saving || !publicKeyInput.trim()}
                   className="px-4 py-2 bg-orange-500 text-white text-sm rounded-md hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Guardando...' : 'Guardar'}
@@ -290,8 +291,8 @@ const CryptoStoreSetup: React.FC = () => {
           <div>
             <h4 className="font-medium text-blue-800 mb-1">¿Qué hace esto?</h4>
             <p className="text-blue-700">
-              Al proporcionar tu XPUB, cualquier pago en Bitcoin que recibas irá
-              directamente a tu wallet. Nosotros solo procesamos y monitoreamos
+              Al proporcionar tu XPUB, ZPUB o YPUB, cualquier pago en Bitcoin que recibas irá
+              directamente a tu wallet. Se convertirá automáticamente a XPUB para su uso. Nosotros solo procesamos y monitoreamos
               la transacción, pero nunca tenemos acceso a tus fondos.
             </p>
           </div>
