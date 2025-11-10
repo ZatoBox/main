@@ -8,6 +8,7 @@ interface Product {
   status: string;
   stock: number;
   price: number;
+  imageUrl?: string;
 }
 
 interface Props {
@@ -27,35 +28,32 @@ const InventoryCard: React.FC<Props> = ({
 }) => {
   return (
     <div
-      onClick={() => onEdit(item.id)}
+      onClick={() => onSelect(item.id, selected ? false : true)}
       className={`p-4 border rounded-lg shadow-sm border-zatobox-200 transition-colors cursor-pointer hover:bg-[#FEF9EC] group ${
         selected ? 'bg-[#FBEFCA]' : 'bg-[#FFFFFF]'
       } ${item.status !== 'active' ? 'opacity-60' : ''}`}
     >
       <div className='flex items-start space-x-3'>
-        <input
-          type='checkbox'
-          checked={selected}
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => onSelect(item.id, e.target.checked)}
-          className='
-                  w-4 h-4 rounded border border-[#767676] bg-white
-                  appearance-none
-                  checked:bg-[#EEB131]
-                  focus:outline-none focus:ring-2 focus:ring-[#CBD5E1]
-                '
-        />
-
-        <div className='flex items-center justify-center flex-shrink-0 w-12 h-12 bg-zatobox-100 rounded-lg'>
-          <Package size={24} className='text-[#E28E18]' />
+        <div className='flex items-center justify-center flex-shrink-0 w-12 h-12 bg-zatobox-100 rounded-lg overflow-hidden'>
+          {item.imageUrl ? (
+            <img src={item.imageUrl} alt={item.name} className='w-full h-full object-cover' />
+          ) : (
+            <Package size={24} className='text-[#E28E18]' />
+          )}
         </div>
 
         <div className='flex-1 min-w-0'>
           <div className='flex items-start justify-between'>
             <div className='flex-1'>
-              <h3 className='text-sm font-medium truncate text-zatobox-900 group-hover:underline hover:underline'>
+              <button
+                className='inline text-sm font-medium truncate text-zatobox-900 hover:underline text-left max-w-max'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(item.id);
+                }}
+              >
                 {item.name}
-              </h3>
+              </button>
               <p className='text-sm text-[#000000]'>{item.category}</p>
 
               <div className='flex items-center mt-2 space-x-4'>

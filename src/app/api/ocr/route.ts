@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processImageFile, sendBulk } from '@/../backend/OCR/handlers';
+import { processImageFile, sendBulk } from '@/backend/OCR/handlers';
 
 export async function GET() {
   return NextResponse.json({ message: 'ZatoBox OCR API con Gemini' });

@@ -3,18 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Package } from 'lucide-react';
-import {
-  productsAPI,
-  categoriesAPI,
-  getAllProductsIncludingArchived,
-} from '@/services/api.service';
+import { productsAPI } from '@/services/api.service';
 import { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import InventoryHeader from '@/components/inventory/InventoryHeader';
 import InventoryFilters from '@/components/inventory/InventoryFilters';
 import InventoryGrid from '@/components/inventory/InventoryGrid';
 import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
-import { mapPolarProductToProduct } from '@/utils/polar.utils';
 import { useToast } from '@/hooks/use-toast';
 
 const InventoryPage: React.FC = () => {
@@ -33,7 +28,7 @@ const InventoryPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isArchivingSelected, setIsArchivingSelected] = useState(false);
+  const [deletingItems, setDeletingItems] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -43,36 +38,28 @@ const InventoryPage: React.FC = () => {
       }
 
       if (!isAuthenticated) {
-        setError('You must log in to view inventory');
+        setError('Debes iniciar sesión para ver el inventario');
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        const response = await getAllProductsIncludingArchived();
+        const response = await productsAPI.list(true);
         if (response && response.success && Array.isArray(response.products)) {
-          const rows: any[] = response.products;
-          const availableProducts = rows.map(mapPolarProductToProduct);
-          setInventoryItems(availableProducts);
+          setInventoryItems(response.products);
           setError(null);
         } else if (response && response.success === false) {
           setInventoryItems([]);
-          setError(response.message || 'Error loading inventory');
+          setError(response.message || 'Error al cargar inventario');
         } else {
           setInventoryItems([]);
           setError(null);
         }
       } catch (err: any) {
-        const errorMessage = err?.message || '';
-        if (errorMessage.toLowerCase().includes('api key')) {
-          setInventoryItems([]);
-          setError('polar_not_configured');
-        } else {
-          console.error('Error loading inventory:', err);
-          setInventoryItems([]);
-          setError('Error loading inventory');
-        }
+        console.error('Error loading inventory:', err);
+        setInventoryItems([]);
+        setError(err?.message || 'Error al cargar inventario');
       } finally {
         setLoading(false);
       }
@@ -86,9 +73,21 @@ const InventoryPage: React.FC = () => {
     const loadCats = async () => {
       setLoadingCategories(true);
       try {
-        const res = await categoriesAPI.list();
-        if (active && (res as any).success)
-          setCategories((res as any).categories);
+        const uniqueCategories = new Set<string>();
+        inventoryItems.forEach((item) => {
+          if (Array.isArray(item.categories)) {
+            item.categories.forEach((cat) => {
+              if (cat && typeof cat === 'string') {
+                uniqueCategories.add(cat);
+              }
+            });
+          }
+        });
+        const catArray = Array.from(uniqueCategories).map((name, idx) => ({
+          id: `cat-${idx}`,
+          name,
+        }));
+        if (active) setCategories(catArray);
       } finally {
         if (active) setLoadingCategories(false);
       }
@@ -97,7 +96,7 @@ const InventoryPage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [inventoryItems]);
 
   const handleSelectAll = (ids: string[], checked: boolean) => {
     if (checked) {
@@ -138,28 +137,27 @@ const InventoryPage: React.FC = () => {
     setError(null);
 
     try {
-      const response = await productsAPI.update(deleteConfirmId, {
-        is_archived: true,
-      });
+      const response = await productsAPI.delete(deleteConfirmId);
 
       if (response.success) {
-        const updatedProduct = mapPolarProductToProduct(response.product);
         setInventoryItems((prevItems) =>
-          prevItems.map((item) =>
-            item.id === deleteConfirmId ? (updatedProduct as Product) : item
-          )
+          prevItems.filter((item) => item.id !== deleteConfirmId)
         );
         setSelectedItems((prevSelected) =>
           prevSelected.filter((itemId) => itemId !== deleteConfirmId)
         );
+        toast({
+          title: 'Producto eliminado',
+          description: 'El producto se eliminó correctamente.',
+        });
         setError(null);
       } else {
-        setError('Error deleting product: ' + response.message);
+        setError('Error al eliminar producto: ' + response.message);
       }
     } catch (err) {
       setError(
-        'Error deleting product: ' +
-          (err instanceof Error ? err.message : 'Unknown error')
+        'Error al eliminar producto: ' +
+          (err instanceof Error ? err.message : 'Error desconocido')
       );
     } finally {
       setIsDeleting(false);
@@ -172,83 +170,123 @@ const InventoryPage: React.FC = () => {
     setIsDeleting(false);
   };
 
-  const handleArchiveSelected = async () => {
-    if (selectedItems.length === 0 || isArchivingSelected) {
+  const handleBulkDelete = async () => {
+    if (selectedItems.length === 0) {
       return;
     }
 
-    setIsArchivingSelected(true);
     try {
-      const response = await productsAPI.archiveBulk(selectedItems);
-      const successfulIds = Array.isArray(response?.results)
-        ? response.results
-            .filter((r: any) => r && typeof r.id === 'string')
-            .map((r: any) => r.id)
-        : [];
-      const updatedMap = new Map<string, Product>();
-      if (Array.isArray(response?.results)) {
-        response.results.forEach((r: any) => {
-          if (r && typeof r.id === 'string' && r.product) {
-            const mapped = mapPolarProductToProduct(r.product) as Product;
-            updatedMap.set(r.id, mapped);
-          }
-        });
-      }
-      if (updatedMap.size > 0) {
+      setDeletingItems(true);
+      const deletePromises = selectedItems.map(async (id) => {
+        try {
+          const response = await productsAPI.delete(id);
+          return { success: response.success, id };
+        } catch (error) {
+          return { success: false, id, error };
+        }
+      });
+
+      const results = await Promise.all(deletePromises);
+      const successful = results.filter((r) => r.success);
+      const failed = results.filter((r) => !r.success);
+
+      if (successful.length > 0) {
         setInventoryItems((prev) =>
-          prev.map((item) => {
-            const next = updatedMap.get(item.id);
-            return next ? next : item;
-          })
+          prev.filter((item) => !successful.some((s) => s.id === item.id))
         );
-      }
-      if (successfulIds.length > 0) {
         toast({
-          title: 'Productos archivados',
-          description: `${successfulIds.length} productos archivados correctamente.`,
+          title: 'Productos eliminados',
+          description: `${successful.length} producto(s) eliminado(s) correctamente.`,
         });
       }
-      const errorsCount = Array.isArray(response?.errors)
-        ? response.errors.length
-        : 0;
-      if (errorsCount > 0) {
+
+      if (failed.length > 0) {
         toast({
-          title: 'Algunos productos no se archivaron',
-          description: 'Intenta de nuevo más tarde.',
+          title: 'Algunos productos no se eliminaron',
+          description: `${failed.length} producto(s) no pudieron eliminarse.`,
           variant: 'destructive',
         });
       }
-      setSelectedItems((prev) =>
-        prev.filter((id) => !successfulIds.includes(id))
-      );
+
+      setSelectedItems([]);
     } catch (err) {
       toast({
-        title: 'Error al archivar',
+        title: 'Error al eliminar',
         description:
           err instanceof Error
             ? err.message
-            : 'No se pudieron archivar los productos seleccionados.',
+            : 'No se pudieron eliminar los productos seleccionados.',
         variant: 'destructive',
       });
     } finally {
-      setIsArchivingSelected(false);
+      setDeletingItems(false);
     }
   };
 
-  const categoryIdMap: Record<string, string> = Object.fromEntries(
-    categories.map((c) => [c.id, c.name])
-  );
-  const nameToId: Record<string, string> = Object.fromEntries(
-    categories.map((c) => [c.name, c.id])
-  );
+  const handleToggleSelectedStatus = async () => {
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    try {
+      const updates = selectedItems.map(async (id) => {
+        const currentItem = inventoryItems.find((item) => item.id === id);
+        const newStatus = !currentItem?.active;
+
+        try {
+          const response = await productsAPI.update(id, { active: newStatus });
+          return { success: true, id, product: response.product };
+        } catch (error) {
+          return { success: false, id, error };
+        }
+      });
+
+      const results = await Promise.all(updates);
+      const successful = results.filter((r) => r.success);
+      const failed = results.filter((r) => !r.success);
+
+      if (successful.length > 0) {
+        setInventoryItems((prev) =>
+          prev.map((item) => {
+            const update = successful.find((s) => s.id === item.id);
+            return update && update.product ? update.product : item;
+          })
+        );
+        toast({
+          title: 'Estado actualizado',
+          description: `${successful.length} productos actualizados correctamente.`,
+        });
+      }
+
+      if (failed.length > 0) {
+        toast({
+          title: 'Algunos productos no se actualizaron',
+          description: `${failed.length} productos no pudieron actualizarse.`,
+          variant: 'destructive',
+        });
+      }
+
+      setSelectedItems([]);
+    } catch (err) {
+      toast({
+        title: 'Error al actualizar',
+        description:
+          err instanceof Error
+            ? err.message
+            : 'No se pudieron actualizar los productos seleccionados.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const filteredItems = inventoryItems.filter((item) => {
-    const ids = Array.isArray((item as any).category_ids)
-      ? (item as any).category_ids
+    const itemCategories = Array.isArray(item.categories)
+      ? item.categories
       : [];
-    const targetId = categoryFilter === 'all' ? null : nameToId[categoryFilter];
-    const matchesCategory = !targetId || ids.includes(targetId);
-    const matchesStatus =
-      statusFilter === 'all' || item.status === statusFilter;
+    const matchesCategory =
+      categoryFilter === 'all' || itemCategories.includes(categoryFilter);
+    const itemStatus = item.active ? 'active' : 'inactive';
+    const matchesStatus = statusFilter === 'all' || itemStatus === statusFilter;
     const matchesSearch = item.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -256,30 +294,19 @@ const InventoryPage: React.FC = () => {
   });
 
   const uiItems = filteredItems.map((p) => {
-    const ids = Array.isArray((p as any).category_ids)
-      ? (p as any).category_ids
-      : [];
-    const names = ids
-      .map((id: string) => categoryIdMap[id])
-      .filter(Boolean) as string[];
-
-    const polarMetadata = (p as any).metadata;
-    const polarCategory = polarMetadata?.category;
-
-    let categoryDisplay = 'Uncategorized';
-    if (polarCategory && typeof polarCategory === 'string') {
-      categoryDisplay = polarCategory;
-    } else if (names.length > 0) {
-      categoryDisplay = names.join(', ');
-    }
+    const categoryDisplay =
+      Array.isArray(p.categories) && p.categories.length > 0
+        ? p.categories.join(', ')
+        : 'Sin categoría';
 
     return {
       id: p.id,
       name: p.name,
       category: categoryDisplay,
-      status: p.status ?? 'inactive',
+      status: p.active ? 'active' : 'inactive',
       stock: p.stock,
       price: p.price,
+      imageUrl: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : undefined,
     };
   });
 
@@ -287,28 +314,9 @@ const InventoryPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen  bg-bg-main">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-gray-300"></div>
           <p className="text-text-secondary">Cargando productos...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (error === 'polar_not_configured') {
-    const PolarSetupPrompt = require('@/components/PolarSetupPrompt').default;
-    return (
-      <div className="min-h-screen bg-bg-main">
-        <InventoryHeader
-          onBack={() => router.push('/')}
-          onCreate={() => router.push('/new-product')}
-          selectedCount={selectedItems.length}
-          onArchiveSelected={handleArchiveSelected}
-          archivingSelected={isArchivingSelected}
-        />
-        <PolarSetupPrompt
-          title="Configuración de Inventario Requerida"
-          subtitle="Configura tus credenciales de API de Polar para gestionar tu inventario y rastrear los niveles de stock de productos."
-        />
       </div>
     );
   }
@@ -350,8 +358,15 @@ const InventoryPage: React.FC = () => {
         onBack={() => router.push('/')}
         onCreate={() => router.push('/new-product')}
         selectedCount={selectedItems.length}
-        onArchiveSelected={handleArchiveSelected}
-        archivingSelected={isArchivingSelected}
+        onToggleSelectedStatus={handleToggleSelectedStatus}
+        onBulkDelete={handleBulkDelete}
+        deletingItems={deletingItems}
+        selectedStatus={
+          selectedItems.length > 0 &&
+          inventoryItems.some(
+            (item) => selectedItems.includes(item.id) && item.active
+          )
+        }
       />
 
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -409,7 +424,7 @@ const InventoryPage: React.FC = () => {
           />
 
           {filteredItems.length === 0 && (
-            <div className="p-12 text-center border rounded-lg shadow-sm bg-bg-surface border-divider">
+            <div className="p-12 text-center border border-gray-300 rounded-lg shadow-sm bg-bg-surface border-divider">
               <Package size={48} className="mx-auto mb-4 text-gray-300" />
               <h3 className="mb-2 text-lg font-medium text-text-primary">
                 No se encontraron elementos

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { InventoryService } from '@/../backend/back/inventory/service';
+import { InventoryService } from '@/backend/back/inventory/service';
 
 const service = new InventoryService();
 

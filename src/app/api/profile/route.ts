@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthService } from '@/../backend/auth/service';
+import { AuthService } from '@/backend/auth/service';
 
 const service = new AuthService();
 
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     if (!token)
       return NextResponse.json(
         { success: false, message: 'Missing token' },
-        { status: 401 }
+        { status: 401 },
       );
     const user = await service.verifyToken(token);
     const out = await service.getProfileUser(String(user.id));
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   } catch (e: any) {
     return NextResponse.json(
       { success: false, message: String(e?.message ?? e) },
-      { status: 401 }
+      { status: 401 },
     );
   }
 }
@@ -37,16 +37,17 @@ export async function PATCH(req: NextRequest) {
     if (!token)
       return NextResponse.json(
         { success: false, message: 'Missing token' },
-        { status: 401 }
+        { status: 401 },
       );
     const user = await service.verifyToken(token);
     const body = await req.json();
     const res = await service.updateProfile(String(user.id), body || {});
     return NextResponse.json(res);
   } catch (e: any) {
+    console.error('PATCH /api/profile error:', e);
     return NextResponse.json(
       { success: false, message: String(e?.message ?? e) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -57,7 +58,7 @@ export async function DELETE(req: NextRequest) {
     if (!token)
       return NextResponse.json(
         { success: false, message: 'Missing token' },
-        { status: 401 }
+        { status: 401 },
       );
     const user = await service.verifyToken(token);
     const res = await service.deleteUser(String(user.id));
@@ -65,7 +66,7 @@ export async function DELETE(req: NextRequest) {
   } catch (e: any) {
     return NextResponse.json(
       { success: false, message: String(e?.message ?? e) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

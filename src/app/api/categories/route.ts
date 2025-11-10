@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { CategoryService } from '@/../backend/back/category/service';
+import { CategoryService } from '@/backend/back/category/service';
 
 const service = new CategoryService();
 
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   } catch (err: any) {
     return NextResponse.json(
       { success: false, message: String(err?.message ?? err) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

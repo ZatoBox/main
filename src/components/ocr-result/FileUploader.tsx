@@ -29,7 +29,7 @@ const FileUploader: React.FC<Props> = ({ fileName, onChange }) => {
             <p className='text-base font-medium md:text-lg text-[#888888]'>
               {fileName
                 ? `Selected: ${fileName}`
-                : 'Click to select an invoice'}
+                : 'Seleccionar un archivo'}
             </p>
             <p className='mt-2 text-xs md:text-sm text-[#888888]'>
               PNG, WEBP, JPG, JPEG (max 5MB)

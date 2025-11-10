@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthService } from '@/../backend/auth/service';
-import { UserRepository } from '@/../backend/auth/repository';
+import { AuthService } from '@/backend/auth/service';
+import { UserRepository } from '@/backend/auth/repository';
 
 const service = new AuthService(new UserRepository());
 

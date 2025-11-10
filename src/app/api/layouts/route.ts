@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { LayoutService } from '@/../backend/back/layout/service';
+import { LayoutService } from '@/backend/back/layout/service';
 
 const service = new LayoutService();
 

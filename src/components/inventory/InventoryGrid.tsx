@@ -9,6 +9,7 @@ interface Product {
   status: string;
   stock: number;
   price: number;
+  imageUrl?: string;
 }
 
 interface Props {
@@ -88,32 +89,43 @@ const InventoryGrid: React.FC<Props> = ({
             {items.map((item) => (
               <tr
                 key={item.id}
-                onClick={() => onEditProduct(item.id)}
+                onClick={() =>
+                  onSelectItem(
+                    item.id,
+                    selectedItems.includes(item.id) ? false : true
+                  )
+                }
                 className={`transition-colors cursor-pointer hover:bg-[#FEF9EC] group ${
                   selectedItems.includes(item.id)
                     ? 'bg-[#FEF9EC]'
                     : 'bg-[#FFFFFF]'
                 } ${item.status !== 'active' ? 'opacity-60' : ''}`}
               >
+                <td className="px-4 py-4"></td>
                 <td className="px-4 py-4">
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.includes(item.id)}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => onSelectItem(item.id, e.target.checked)}
-                    className="w-4 h-4 rounded border border-[#767676] bg-white appearance-none checked:bg-[#EEB131] focus:outline-none focus:ring-2 focus:ring-[#CBD5E1]"
-                  />
-                </td>
-                <td className="px-4 py-4">
-                  <div className="flex items-center justify-center w-10 h-10 bg-[#FBEFCA] rounded-lg">
-                    <Package size={20} className="text-zatobox-600" />
+                  <div className="flex items-center justify-center w-10 h-10 bg-[#FBEFCA] rounded-lg overflow-hidden">
+                    {item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Package size={20} className="text-zatobox-600" />
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-4">
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium text-[#374151] hover:underline group-hover:underline">
+                    <button
+                      className="inline text-sm font-medium text-[#374151] hover:underline text-left max-w-max"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditProduct(item.id);
+                      }}
+                    >
                       {item.name}
-                    </span>
+                    </button>
                     <span
                       className={`text-xs ${
                         item.status === 'active'
