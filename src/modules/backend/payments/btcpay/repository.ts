@@ -173,6 +173,35 @@ export class BTCPayRepository {
     return data;
   }
 
+  async updateUserStore(
+    userId: string,
+    updates: {
+      btcpay_store_id?: string;
+      store_name?: string;
+      xpub?: string;
+      webhook_secret?: string;
+    }
+  ): Promise<UserStore> {
+    const supabase = await createClient();
+
+    const filteredUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([, value]) => value !== undefined)
+    );
+
+    const { data, error } = await supabase
+      .from('user_btcpay_stores')
+      .update({
+        ...filteredUpdates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) throw new Error(`Failed to update user store: ${error.message}`);
+    return data;
+  }
+
   async getUserStore(userId: string): Promise<UserStore | null> {
     const supabase = await createClient();
 

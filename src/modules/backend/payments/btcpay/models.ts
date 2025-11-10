@@ -116,6 +116,20 @@ export interface CreateWebhookRequest {
     specificEvents?: string[];
   };
   secret?: string;
+  automaticRedelivery?: boolean;
+}
+
+export interface UpdateOnChainPaymentMethodRequest {
+  derivationScheme: string;
+  label?: string;
+  enabled?: boolean;
+  accountNumber?: number;
+}
+
+export interface UpdateLightningPaymentMethodRequest {
+  connectionString: string;
+  label?: string;
+  enabled?: boolean;
 }
 
 export interface WalletOverview {

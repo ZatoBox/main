@@ -51,6 +51,7 @@ const HomePage: React.FC<HomePageProps> = ({
   const { token } = useAuth();
   const {
     isLoading: isBTCPayLoading,
+    error: btcpayError,
     showPaymentModal,
     invoiceData,
     createInvoice,
@@ -67,6 +68,7 @@ const HomePage: React.FC<HomePageProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasXpub, setHasXpub] = useState<boolean | null>(null);
+  const [userXpub, setUserXpub] = useState<string | null>(null);
 
   // Paginación
   const [page, setPage] = useState(1);
@@ -129,9 +131,11 @@ const HomePage: React.FC<HomePageProps> = ({
       try {
         const xpubResponse = await btcpayAPI.getXpub(token);
         setHasXpub(!!xpubResponse.xpub);
+        setUserXpub(xpubResponse.xpub || null);
       } catch (err) {
         console.error('Error checking XPUB:', err);
         setHasXpub(false);
+        setUserXpub(null);
       }
     }
   };
@@ -230,6 +234,8 @@ const HomePage: React.FC<HomePageProps> = ({
       return;
     }
 
+    setPaymentMethod(paymentMethod);
+
     try {
       const items = cartItems.map((item) => ({
         polarProductId: item.polarProductId,
@@ -269,18 +275,51 @@ const HomePage: React.FC<HomePageProps> = ({
               price: item.price,
             },
           })),
+          paymentType: 'btc',
         });
 
-        if (invoiceId) {
-          startPolling(invoiceId, () => {
-            clearCart();
-            reloadProducts();
-          });
+        if (!invoiceId) {
+          const errorMsg = btcpayError || 'Error al crear el invoice de Bitcoin. Por favor intenta de nuevo.';
+          alert(errorMsg);
+          return;
         }
+
+        startPolling(invoiceId, () => {
+          clearCart();
+          reloadProducts();
+        });
+      } else if (paymentMethod === 'lightning') {
+        const invoiceId = await createInvoice(total, 'USD', {
+          orderId: `order-${Date.now()}`,
+          itemDesc: `${cartItems.length} productos`,
+          items: cartItems.map((item) => ({
+            productId: String(item.id),
+            quantity: item.quantity,
+            price: item.price,
+            productData: {
+              name: item.name,
+              image: item.productData?.images?.[0] || '',
+              price: item.price,
+            },
+          })),
+          paymentType: 'lightning',
+        });
+
+        if (!invoiceId) {
+          const errorMsg = btcpayError || 'Error al crear el invoice de Lightning. Por favor intenta de nuevo.';
+          alert(errorMsg);
+          return;
+        }
+
+        startPolling(invoiceId, () => {
+          clearCart();
+          reloadProducts();
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Checkout error:', error);
-      alert('Failed to create checkout. Please try again.');
+      const errorMessage = error?.message || 'Failed to create checkout. Please try again.';
+      alert(errorMessage);
     }
   };
 
@@ -541,6 +580,8 @@ const HomePage: React.FC<HomePageProps> = ({
           currency={invoiceData.currency}
           paymentUrl={invoiceData.paymentUrl}
           status={invoiceData.status}
+          paymentType={paymentMethod === 'lightning' ? 'lightning' : 'btc'}
+          userXpub={paymentMethod === 'lightning' ? userXpub || undefined : undefined}
           onConfirmPayment={async (invoiceId: string) => {
             const response = await confirmCryptoOrder(invoiceId);
             if (response.success && response.order) {

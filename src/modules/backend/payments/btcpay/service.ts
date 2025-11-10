@@ -8,64 +8,214 @@ import {
 } from './models';
 import { createClient } from '@/utils/supabase/server';
 import crypto from 'crypto';
+import { encryptXpub, decryptXpub } from '@/utils/zpub-encryption';
+import { convertToXpub } from '@/utils/xpub-converter';
 
 export class BTCPayService {
   private client: BTCPayClient;
   private repository: BTCPayRepository;
   private userId?: string;
-  private storeId: string;
+  private defaultStoreId?: string;
 
   constructor(apiUrl: string, apiKey: string, userId?: string) {
     this.client = new BTCPayClient({ apiUrl, apiKey, userId });
     this.repository = new BTCPayRepository();
     this.userId = userId;
-    this.storeId = process.env.BTCPAY_STORE_ID || '';
-    if (!this.storeId) {
-      throw new Error('BTCPAY_STORE_ID is not configured');
-    }
+    this.defaultStoreId = process.env.BTCPAY_STORE_ID || undefined;
   }
 
-  async saveUserXpub(userId: string, xpub: string): Promise<void> {
-    // Ensure user store exists, create if not
-    let userStore = await this.repository.getUserStore(userId);
-    if (!userStore) {
-      await this.repository.saveUserStore(userId, {
-        btcpay_store_id: this.storeId,
-        store_name: `User Store ${userId.substring(0, 8)}`,
+  private getLightningConnectionString(): string {
+    const primaryNode = process.env.LN_PRIMARY_NODE;
+    const fallbackNode = process.env.LN_FALLBACK_NODE;
+    const trustedNode = process.env.LN_TRUSTED_NODE;
+
+    return trustedNode || primaryNode || fallbackNode || '';
+  }
+
+  async configureUserStore(
+    userId: string,
+    params: {
+      publicKey: string;
+      storeName?: string;
+      lightningConnectionString?: string | null;
+    }
+  ): Promise<{
+    storeId: string;
+    xpub: string;
+    webhookCreated: boolean;
+    xpubChanged: boolean;
+  }> {
+    const storeName =
+      params.storeName?.trim() || `User Store ${userId.substring(0, 8)}`;
+    const normalizedKey = params.publicKey?.trim();
+    if (!normalizedKey) {
+      throw new Error('Public key is required');
+    }
+    let xpub: string;
+    try {
+      xpub = convertToXpub(normalizedKey);
+    } catch (error) {
+      throw new Error('Invalid extended public key');
+    }
+    const encryptedXpub = encryptXpub(xpub);
+    const { storeId, store } = await this.ensureStore(userId, storeName);
+    let previousXpub: string | null = null;
+    if (store?.xpub) {
+      try {
+        previousXpub = decryptXpub(store.xpub);
+      } catch (error) {
+        previousXpub = null;
+      }
+    }
+    await this.client.setOnChainPaymentMethod(storeId, 'BTC', {
+      derivationScheme: xpub,
+      enabled: true,
+      label: storeName,
+    });
+    await this.repository.updateUserStore(userId, {
+      xpub: encryptedXpub,
+      btcpay_store_id: storeId,
+      store_name: storeName,
+    });
+    const webhookResult = await this.ensureWebhook(
+      userId,
+      storeId,
+      store?.webhook_secret
+    );
+
+    const lnConnectionString =
+      params.lightningConnectionString || this.getLightningConnectionString();
+    if (lnConnectionString) {
+      await this.client.setLightningPaymentMethod(storeId, 'BTC', {
+        connectionString: lnConnectionString,
+        enabled: true,
+        label: storeName,
       });
     }
-    // Now update the xpub
-    await this.repository.updateUserStoreXpub(userId, xpub);
+
+    return {
+      storeId,
+      xpub,
+      webhookCreated: webhookResult.created,
+      xpubChanged: previousXpub !== null && previousXpub !== xpub,
+    };
+  }
+
+  async saveUserXpub(
+    userId: string,
+    publicKey: string,
+    storeName?: string,
+    lightningConnectionString?: string | null
+  ): Promise<void> {
+    const lnConnectionString =
+      lightningConnectionString || this.getLightningConnectionString();
+    await this.configureUserStore(userId, {
+      publicKey,
+      storeName,
+      lightningConnectionString: lnConnectionString,
+    });
   }
 
   async getUserXpub(userId: string): Promise<string | null> {
     const userStore = await this.repository.getUserStore(userId);
-    return userStore?.xpub || null;
+    if (!userStore?.xpub) {
+      return null;
+    }
+    try {
+      return decryptXpub(userStore.xpub);
+    } catch (error) {
+      console.error('Failed to decrypt xpub:', error);
+      return null;
+    }
   }
 
-  async generateUserWallet(userId: string): Promise<{ xpub: string }> {
-    const wallet = await this.client.generateWallet(this.storeId, 'BTC-CHAIN', {
+  async generateUserWallet(
+    userId: string,
+    storeName?: string
+  ): Promise<{ xpub: string; storeId: string }> {
+    const name = storeName?.trim() || `User Store ${userId.substring(0, 8)}`;
+    const { storeId, store } = await this.ensureStore(userId, name);
+    const wallet = await this.client.generateWallet(storeId, 'BTC-CHAIN', {
       savePrivateKeys: false,
       importKeysToRPC: false,
       wordCount: 12,
     });
-
     if (!wallet.xpub) {
       throw new Error('Failed to generate XPUB');
     }
+    const encryptedXpub = encryptXpub(wallet.xpub);
+    await this.repository.updateUserStore(userId, {
+      xpub: encryptedXpub,
+      btcpay_store_id: storeId,
+      store_name: name,
+    });
+    await this.client.setOnChainPaymentMethod(storeId, 'BTC', {
+      derivationScheme: wallet.xpub,
+      enabled: true,
+      label: name,
+    });
 
-    // Ensure user store exists, create if not
-    let userStore = await this.repository.getUserStore(userId);
-    if (!userStore) {
-      await this.repository.saveUserStore(userId, {
-        btcpay_store_id: this.storeId,
-        store_name: `User Store ${userId.substring(0, 8)}`,
+    const lnConnectionString = this.getLightningConnectionString();
+    if (lnConnectionString) {
+      await this.client.setLightningPaymentMethod(storeId, 'BTC', {
+        connectionString: lnConnectionString,
+        enabled: true,
+        label: name,
       });
     }
 
-    await this.repository.updateUserStoreXpub(userId, wallet.xpub);
+    await this.ensureWebhook(userId, storeId, store?.webhook_secret);
+    return { xpub: wallet.xpub, storeId };
+  }
 
-    return { xpub: wallet.xpub };
+  private async ensureStore(userId: string, storeName: string) {
+    let userStore = await this.repository.getUserStore(userId);
+    let storeId = userStore?.btcpay_store_id;
+    if (!storeId) {
+      const store = await this.client.createStore({
+        name: storeName,
+        defaultCurrency: 'BTC',
+      });
+      storeId = store.id;
+      userStore = await this.repository.saveUserStore(userId, {
+        btcpay_store_id: storeId,
+        store_name: storeName,
+      });
+    } else if (storeName && userStore?.store_name !== storeName) {
+      await this.client.updateStore(storeId, { name: storeName });
+      userStore = await this.repository.updateUserStore(userId, {
+        store_name: storeName,
+      });
+    }
+    if (!storeId) {
+      throw new Error('Unable to determine BTCPay store id');
+    }
+    return { storeId, store: userStore };
+  }
+
+  private async ensureWebhook(
+    userId: string,
+    storeId: string,
+    existingSecret?: string | null
+  ) {
+    if (existingSecret) {
+      return { secret: existingSecret, created: false };
+    }
+    const webhookUrl = process.env.BTCPAY_WEBHOOK_URL;
+    if (!webhookUrl) {
+      throw new Error('BTCPAY_WEBHOOK_URL is not configured');
+    }
+    const secret = crypto.randomBytes(32).toString('hex');
+    await this.client.createWebhook(storeId, {
+      url: webhookUrl,
+      secret,
+      authorizedEvents: { everything: true },
+      automaticRedelivery: true,
+    });
+    await this.repository.updateUserStore(userId, {
+      webhook_secret: secret,
+    });
+    return { secret, created: true };
   }
 
   async createInvoice(
@@ -74,6 +224,12 @@ export class BTCPayService {
   ): Promise<BTCPayInvoice> {
     let amountToUse = request.amount;
     let currencyToUse = request.currency;
+
+    const userStore = await this.repository.getUserStore(userId);
+    const storeId = userStore?.btcpay_store_id || this.defaultStoreId;
+    if (!storeId) {
+      throw new Error('BTCPay store not configured for this user');
+    }
 
     if (request.currency !== 'BTC') {
       try {
@@ -88,43 +244,30 @@ export class BTCPayService {
       }
     }
 
+    const metadata = request.metadata || {};
+    const paymentType = metadata.paymentType || 'btc';
+    const paymentMethods =
+      paymentType === 'lightning' ? ['BTC-LightningNetwork'] : ['BTC-CHAIN'];
+
     const enrichedRequest = {
       amount: amountToUse,
       currency: currencyToUse,
       metadata: {
-        ...request.metadata,
+        ...metadata,
         userId,
         timestamp: new Date().toISOString(),
       },
       checkout: {
         speedPolicy: 'MediumSpeed',
-        paymentMethods: ['BTC-CHAIN'],
+        paymentMethods,
         expirationMinutes: 15,
         monitoringMinutes: 24,
         ...request.checkout,
       },
     };
 
-    let userXpub = await this.getUserXpub(userId);
-
-    if (!userXpub) {
-      try {
-        const wallet = await this.generateUserWallet(userId);
-        userXpub = wallet.xpub;
-      } catch (error) {
-        console.warn(
-          'Failed to auto-generate wallet, continuing without XPUB',
-          error
-        );
-      }
-    }
-
-    if (userXpub) {
-      (enrichedRequest.metadata as any).userXpub = userXpub;
-    }
-
     const invoice = await this.client.createInvoice(
-      this.storeId,
+      storeId,
       enrichedRequest as CreateInvoiceRequest
     );
 
@@ -136,11 +279,9 @@ export class BTCPayService {
       );
     }
 
-    const fullInvoice = await this.client.getInvoice(this.storeId, invoice.id);
-
     try {
       const paymentMethods = await this.client.getInvoicePaymentMethods(
-        this.storeId,
+        storeId,
         invoice.id
       );
       if (paymentMethods) {
@@ -279,7 +420,7 @@ export class BTCPayService {
           payment_method: 'crypto',
           status: 'pending',
           metadata: {
-            paymentType: 'btc',
+            paymentType: storedInvoice.metadata?.paymentType || 'btc',
             invoiceId: payload.invoiceId,
             createdAt: new Date().toISOString(),
           },
@@ -499,7 +640,7 @@ export class BTCPayService {
         payment_method: 'crypto',
         status: 'pending',
         metadata: {
-          paymentType: 'btc',
+          paymentType: storedInvoice.metadata?.paymentType || 'btc',
           invoiceId: invoiceId,
           createdAt: new Date().toISOString(),
         },

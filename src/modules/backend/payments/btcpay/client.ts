@@ -10,8 +10,10 @@ import type {
   CreatePullPaymentRequest,
   PullPayment,
   Payout,
+  UpdateOnChainPaymentMethodRequest,
+  UpdateLightningPaymentMethodRequest,
 } from './models';
-import { TorGatewayClient } from './tor-gateway-client';
+import { BTCPayHTTPClient } from './BTCPayHTTPClient';
 
 interface BTCPayClientConfig {
   apiUrl: string;
@@ -24,13 +26,13 @@ export class BTCPayClient {
   private apiUrl: string;
   private apiKey: string;
   private storeId?: string;
-  private btcpayClient: TorGatewayClient;
+  private btcpayClient: BTCPayHTTPClient;
 
   constructor(config: BTCPayClientConfig) {
     this.apiUrl = config.apiUrl.replace(/\/$/, '');
     this.apiKey = config.apiKey;
     this.storeId = config.storeId;
-    this.btcpayClient = new TorGatewayClient(
+    this.btcpayClient = new BTCPayHTTPClient(
       this.apiUrl,
       this.apiKey,
       config.userId
@@ -116,6 +118,30 @@ export class BTCPayClient {
     return this.request<BTCPayWebhook>(
       'POST',
       `/api/v1/stores/${storeId}/webhooks`,
+      data
+    );
+  }
+
+  async setOnChainPaymentMethod(
+    storeId: string,
+    cryptoCode: string,
+    data: UpdateOnChainPaymentMethodRequest
+  ): Promise<void> {
+    await this.request<void>(
+      'PUT',
+      `/api/v1/stores/${storeId}/payment-methods/onchain/${cryptoCode}`,
+      data
+    );
+  }
+
+  async setLightningPaymentMethod(
+    storeId: string,
+    cryptoCode: string,
+    data: UpdateLightningPaymentMethodRequest
+  ): Promise<void> {
+    await this.request<void>(
+      'PUT',
+      `/api/v1/stores/${storeId}/payment-methods/lightning/${cryptoCode}`,
       data
     );
   }

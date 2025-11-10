@@ -5,7 +5,7 @@ import { X, Minus, Plus, Trash2, ShoppingCart, Loader2 } from 'lucide-react';
 import { checkoutCashOrder } from '@/services/cash-payments.service';
 import { useCashSuccess } from '@/context/cash-success-context';
 
-type PaymentMethod = 'cash' | 'crypto';
+type PaymentMethod = 'cash' | 'crypto' | 'lightning';
 
 interface SalesItem {
   id: string | number;
@@ -213,7 +213,7 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                 <label className="text-sm font-medium text-black">
                   Payment Method
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => setPaymentMethod('cash')}
                     disabled={isProcessing}
@@ -234,7 +234,18 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
                     }`}
                   >
-                    Crypto
+                    Bitcoin
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod('lightning')}
+                    disabled={isProcessing}
+                    className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 disabled:opacity-50 ${
+                      paymentMethod === 'lightning'
+                        ? 'bg-yellow-50 border-yellow-500 text-yellow-700'
+                        : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    Lightning
                   </button>
                 </div>
               </div>
@@ -263,8 +274,10 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                   </>
                 ) : paymentMethod === 'cash' ? (
                   'Create Cash Order'
+                ) : paymentMethod === 'lightning' ? (
+                  'Pay with Lightning'
                 ) : (
-                  'Pay with Crypto'
+                  'Pay with Bitcoin'
                 )}
               </button>
 
