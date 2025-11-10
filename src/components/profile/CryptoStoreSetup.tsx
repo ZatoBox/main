@@ -68,13 +68,10 @@ const CryptoStoreSetup: React.FC = () => {
 
       if (response.success) {
         setSuccess('XPUB actualizado exitosamente');
-        setXpubData({
-          xpub: response.xpub || null,
-          savedAt: new Date().toISOString(),
-        });
         setIsEditing(false);
+        setPublicKeyInput('');
         setTimeout(() => setSuccess(null), 3000);
-        loadUserXpub();
+        await loadUserXpub();
       } else {
         setError(response.message || 'Error al guardar XPUB');
       }
@@ -235,7 +232,8 @@ const CryptoStoreSetup: React.FC = () => {
                 />
               </div>
               <p className="text-xs text-gray-500">
-                Proporciona el XPUB, ZPUB o YPUB de tu wallet. Se convertirá automáticamente a XPUB.
+                Proporciona el XPUB, ZPUB o YPUB de tu wallet. Se convertirá
+                automáticamente a XPUB.
               </p>
               <div className="flex justify-end space-x-3">
                 <button
@@ -291,9 +289,11 @@ const CryptoStoreSetup: React.FC = () => {
           <div>
             <h4 className="font-medium text-blue-800 mb-1">¿Qué hace esto?</h4>
             <p className="text-blue-700">
-              Al proporcionar tu XPUB, ZPUB o YPUB, cualquier pago en Bitcoin que recibas irá
-              directamente a tu wallet. Se convertirá automáticamente a XPUB para su uso. Nosotros solo procesamos y monitoreamos
-              la transacción, pero nunca tenemos acceso a tus fondos.
+              Al proporcionar tu XPUB, ZPUB o YPUB, cualquier pago en Bitcoin
+              que recibas irá directamente a tu wallet. Se convertirá
+              automáticamente a XPUB para su uso. Nosotros solo procesamos y
+              monitoreamos la transacción, pero nunca tenemos acceso a tus
+              fondos.
             </p>
           </div>
         </div>
