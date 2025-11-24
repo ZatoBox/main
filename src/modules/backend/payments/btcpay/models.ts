@@ -8,7 +8,6 @@ export enum InvoiceStatus {
 
 export enum PaymentMethodType {
   BTC_CHAIN = 'BTC-CHAIN',
-  BTC_LN = 'BTC-LN',
 }
 
 export interface BTCPayInvoiceMetadata {
@@ -124,12 +123,6 @@ export interface UpdateOnChainPaymentMethodRequest {
   label?: string;
   enabled?: boolean;
   accountNumber?: number;
-}
-
-export interface UpdateLightningPaymentMethodRequest {
-  connectionString: string;
-  label?: string;
-  enabled?: boolean;
 }
 
 export interface WalletOverview {

@@ -24,20 +24,11 @@ export class BTCPayService {
     this.defaultStoreId = process.env.BTCPAY_STORE_ID || undefined;
   }
 
-  private getLightningConnectionString(): string {
-    const primaryNode = process.env.LN_PRIMARY_NODE;
-    const fallbackNode = process.env.LN_FALLBACK_NODE;
-    const trustedNode = process.env.LN_TRUSTED_NODE;
-
-    return trustedNode || primaryNode || fallbackNode || '';
-  }
-
   async configureUserStore(
     userId: string,
     params: {
       publicKey: string;
       storeName?: string;
-      lightningConnectionString?: string | null;
     }
   ): Promise<{
     storeId: string;
@@ -83,16 +74,6 @@ export class BTCPayService {
       store?.webhook_secret
     );
 
-    const lnConnectionString =
-      params.lightningConnectionString || this.getLightningConnectionString();
-    if (lnConnectionString) {
-      await this.client.setLightningPaymentMethod(storeId, 'BTC', {
-        connectionString: lnConnectionString,
-        enabled: true,
-        label: storeName,
-      });
-    }
-
     return {
       storeId,
       xpub,
@@ -104,15 +85,11 @@ export class BTCPayService {
   async saveUserXpub(
     userId: string,
     publicKey: string,
-    storeName?: string,
-    lightningConnectionString?: string | null
+    storeName?: string
   ): Promise<void> {
-    const lnConnectionString =
-      lightningConnectionString || this.getLightningConnectionString();
     await this.configureUserStore(userId, {
       publicKey,
       storeName,
-      lightningConnectionString: lnConnectionString,
     });
   }
 
@@ -154,15 +131,6 @@ export class BTCPayService {
       enabled: true,
       label: name,
     });
-
-    const lnConnectionString = this.getLightningConnectionString();
-    if (lnConnectionString) {
-      await this.client.setLightningPaymentMethod(storeId, 'BTC', {
-        connectionString: lnConnectionString,
-        enabled: true,
-        label: name,
-      });
-    }
 
     await this.ensureWebhook(userId, storeId, store?.webhook_secret);
     return { xpub: wallet.xpub, storeId };
@@ -259,9 +227,7 @@ export class BTCPayService {
     }
 
     const metadata = request.metadata || {};
-    const paymentType = metadata.paymentType || 'btc';
-    const paymentMethods =
-      paymentType === 'lightning' ? ['BTC-LightningNetwork'] : ['BTC-CHAIN'];
+    const paymentMethods = ['BTC-CHAIN'];
 
     const enrichedRequest = {
       amount: amountToUse,

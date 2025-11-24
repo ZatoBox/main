@@ -48,13 +48,7 @@ const ReceiptsPage: React.FC = () => {
         if (data.success && Array.isArray(data.orders)) {
           const allReceipts = data.orders.map((order: any) => {
             const metaType = order.metadata?.paymentType;
-            const method = order.payment_method === 'cash'
-              ? 'cash'
-              : metaType === 'lightning'
-              ? 'lightning'
-              : metaType === 'btc'
-              ? 'bitcoin'
-              : 'bitcoin';
+            const method = order.payment_method === 'cash' ? 'cash' : 'bitcoin';
             return {
               id: order.id,
               receiptNumber: order.id.slice(0, 8).toUpperCase(),

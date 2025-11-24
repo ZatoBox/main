@@ -8,7 +8,6 @@ import {
   Package,
   Banknote,
   Bitcoin,
-  Zap,
   RotateCcw,
 } from 'lucide-react';
 import PrintableReceiptModal from './PrintableReceiptModal';
@@ -41,7 +40,7 @@ const ReceiptCard: React.FC<Props> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>(
-    {},
+    {}
   );
   const [isLoading, setIsLoading] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(status);
@@ -151,18 +150,12 @@ const ReceiptCard: React.FC<Props> = ({
                     <span>BITCOIN</span>
                   </div>
                 )}
-                {paymentMethod === 'lightning' && (
-                  <div className="flex items-center gap-2 text-sm font-semibold uppercase text-[#FFBD00]">
-                    <Zap size={14} />
-                    <span>LIGHTNING</span>
-                  </div>
-                )}
               </div>
               <div>
                 <p className="text-xs text-[#9CA3AF]">Estado</p>
                 <span
                   className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                    currentStatus,
+                    currentStatus
                   )}`}
                 >
                   {getStatusLabel(currentStatus)}
@@ -295,8 +288,8 @@ const ReceiptCard: React.FC<Props> = ({
                   {paymentMethod === 'cash'
                     ? 'Efectivo'
                     : paymentMethod === 'crypto'
-                      ? 'Criptomoneda'
-                      : paymentMethod}
+                    ? 'Criptomoneda'
+                    : paymentMethod}
                 </p>
               </div>
               <div className="text-right">
@@ -306,15 +299,15 @@ const ReceiptCard: React.FC<Props> = ({
                     currentStatus === 'completed'
                       ? 'text-[#A94D14]'
                       : currentStatus === 'pending'
-                        ? 'text-[#92400E]'
-                        : 'text-[#991B1B]'
+                      ? 'text-[#92400E]'
+                      : 'text-[#991B1B]'
                   }`}
                 >
                   {currentStatus === 'completed'
                     ? 'Completado'
                     : currentStatus === 'pending'
-                      ? 'Pendiente'
-                      : 'Cancelado'}
+                    ? 'Pendiente'
+                    : 'Cancelado'}
                 </p>
               </div>
             </div>
@@ -338,7 +331,8 @@ const ReceiptCard: React.FC<Props> = ({
                   iframe.style.height = '0';
                   iframe.style.border = 'none';
                   document.body.appendChild(iframe);
-                  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                  const iframeDoc =
+                    iframe.contentDocument || iframe.contentWindow?.document;
                   if (iframeDoc) {
                     iframeDoc.open();
                     iframeDoc.write(html);
@@ -356,10 +350,8 @@ const ReceiptCard: React.FC<Props> = ({
               </button>
               <button
                 onClick={async () => {
-                  const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
-                    import('jspdf'),
-                    import('html2canvas'),
-                  ]);
+                  const [{ default: jsPDF }, { default: html2canvas }] =
+                    await Promise.all([import('jspdf'), import('html2canvas')]);
                   const html = buildReceiptHtml({
                     receiptNumber,
                     date: formattedDate,
@@ -377,13 +369,16 @@ const ReceiptCard: React.FC<Props> = ({
                   iframe.style.opacity = '0';
                   iframe.style.pointerEvents = 'none';
                   document.body.appendChild(iframe);
-                  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                  const iframeDoc =
+                    iframe.contentDocument || iframe.contentWindow?.document;
                   if (iframeDoc) {
                     iframeDoc.open();
                     iframeDoc.write(html);
                     iframeDoc.close();
                     await new Promise((resolve) => setTimeout(resolve, 800));
-                    const element = iframeDoc.querySelector('.card') as HTMLElement;
+                    const element = iframeDoc.querySelector(
+                      '.card'
+                    ) as HTMLElement;
                     if (element) {
                       const canvas = await html2canvas(element, {
                         scale: 2,
@@ -397,15 +392,30 @@ const ReceiptCard: React.FC<Props> = ({
                       const pdf = new jsPDF('p', 'mm', 'a4');
                       const imgWidth = 210;
                       const pageHeight = 297;
-                      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                      const imgHeight =
+                        (canvas.height * imgWidth) / canvas.width;
                       let heightLeft = imgHeight;
                       let position = 0;
-                      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                      pdf.addImage(
+                        imgData,
+                        'JPEG',
+                        0,
+                        position,
+                        imgWidth,
+                        imgHeight
+                      );
                       heightLeft -= pageHeight;
                       while (heightLeft >= 0) {
                         position = heightLeft - imgHeight;
                         pdf.addPage();
-                        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                        pdf.addImage(
+                          imgData,
+                          'JPEG',
+                          0,
+                          position,
+                          imgWidth,
+                          imgHeight
+                        );
                         heightLeft -= pageHeight;
                       }
                       pdf.save(`recibo-${receiptNumber}.pdf`);

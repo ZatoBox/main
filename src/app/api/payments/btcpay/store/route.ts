@@ -18,17 +18,12 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     );
 
     const body = await req.json();
-    const { publicKey, storeName, lightningConnectionString } = body;
+    const { publicKey, storeName } = body;
 
     if (publicKey && typeof publicKey === 'string' && publicKey.trim()) {
       const result = await btcpayService.configureUserStore(userId, {
         publicKey: publicKey.trim(),
         storeName: typeof storeName === 'string' ? storeName : undefined,
-        lightningConnectionString:
-          typeof lightningConnectionString === 'string' &&
-          lightningConnectionString.trim()
-            ? lightningConnectionString.trim()
-            : null,
       });
 
       return NextResponse.json({
