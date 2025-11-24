@@ -179,3 +179,29 @@ export interface Payout {
     | 'Completed'
     | 'Cancelled';
 }
+
+export interface CreateOnChainTransactionRequest {
+  destinations: {
+    destination: string;
+    amount?: string;
+    subtractFromAmount?: boolean;
+  }[];
+  feeRate: number;
+  proceedWithPayjoin?: boolean;
+  proceedWithBroadcast?: boolean;
+  noChange?: boolean;
+  rbf?: boolean;
+  selectedInputs?: string[];
+}
+
+export interface OnChainTransactionResponse {
+  transactionHash: string;
+  comment: string;
+  amount: string;
+  blockHeight: number;
+  confirmations: number;
+  fee: string;
+  timestamp: number;
+  status: string;
+  labels: any;
+}

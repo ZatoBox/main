@@ -11,6 +11,8 @@ import type {
   PullPayment,
   Payout,
   UpdateOnChainPaymentMethodRequest,
+  CreateOnChainTransactionRequest,
+  OnChainTransactionResponse,
 } from './models';
 import { BTCPayHTTPClient } from './BTCPayHTTPClient';
 
@@ -222,6 +224,18 @@ export class BTCPayClient {
       'POST',
       `/api/v1/stores/${storeId}/payouts/${payoutId}/cancel`,
       {}
+    );
+  }
+
+  async createOnChainTransaction(
+    storeId: string,
+    cryptoCode: string,
+    data: CreateOnChainTransactionRequest
+  ): Promise<OnChainTransactionResponse> {
+    return this.request<OnChainTransactionResponse>(
+      'POST',
+      `/api/v1/stores/${storeId}/payment-methods/onchain/${cryptoCode}/wallet/transactions`,
+      data
     );
   }
 

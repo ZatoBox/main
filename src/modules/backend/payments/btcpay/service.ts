@@ -254,9 +254,12 @@ export class BTCPayService {
     let currencyToUse = request.currency;
 
     const userStore = await this.repository.getUserStore(userId);
-    const storeId = userStore?.btcpay_store_id || this.defaultStoreId;
+    const storeId = userStore?.btcpay_store_id;
+
     if (!storeId) {
-      throw new Error('BTCPay store not configured for this user');
+      throw new Error(
+        'BTCPay store not configured for this user. Please set up your wallet first.'
+      );
     }
 
     if (request.currency !== 'BTC') {
@@ -599,6 +602,36 @@ export class BTCPayService {
     return this.client.getWalletOverview(
       userStore.btcpay_store_id,
       'BTC-CHAIN'
+    );
+  }
+
+  async sendFunds(
+    userId: string,
+    request: {
+      destination: string;
+      amount?: string;
+      feeRate: number;
+      subtractFromAmount?: boolean;
+    }
+  ) {
+    const userStore = await this.repository.getUserStore(userId);
+    if (!userStore) {
+      throw new Error('User store not found');
+    }
+
+    return this.client.createOnChainTransaction(
+      userStore.btcpay_store_id,
+      'BTC',
+      {
+        destinations: [
+          {
+            destination: request.destination,
+            amount: request.amount,
+            subtractFromAmount: request.subtractFromAmount,
+          },
+        ],
+        feeRate: request.feeRate,
+      }
     );
   }
 

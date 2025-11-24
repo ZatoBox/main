@@ -5,6 +5,7 @@ import { btcpayAPI } from '@/services/btcpay.service';
 import { useAuth } from '@/context/auth-store';
 import { Bitcoin, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import StoreSetupModal from './StoreSetupModal';
+import WalletSendFunds from './WalletSendFunds';
 
 const CryptoStoreSetup: React.FC = () => {
   const { token, initialized } = useAuth();
@@ -189,12 +190,8 @@ const CryptoStoreSetup: React.FC = () => {
       </div>
 
       {storeId && (
-        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
-          <iframe
-            src={`/api/payments/btcpay-proxy/stores/${storeId}/onchain/BTC`}
-            className="w-full h-[800px] border-0"
-            title="BTCPay Store Setup"
-          />
+        <div className="mt-8">
+          <WalletSendFunds token={token!} onSuccess={loadStore} />
         </div>
       )}
     </div>
