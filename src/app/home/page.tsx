@@ -279,34 +279,9 @@ const HomePage: React.FC<HomePageProps> = ({
         });
 
         if (!invoiceId) {
-          const errorMsg = btcpayError || 'Error al crear el invoice de Bitcoin. Por favor intenta de nuevo.';
-          alert(errorMsg);
-          return;
-        }
-
-        startPolling(invoiceId, () => {
-          clearCart();
-          reloadProducts();
-        });
-      } else if (paymentMethod === 'lightning') {
-        const invoiceId = await createInvoice(total, 'USD', {
-          orderId: `order-${Date.now()}`,
-          itemDesc: `${cartItems.length} productos`,
-          items: cartItems.map((item) => ({
-            productId: String(item.id),
-            quantity: item.quantity,
-            price: item.price,
-            productData: {
-              name: item.name,
-              image: item.productData?.images?.[0] || '',
-              price: item.price,
-            },
-          })),
-          paymentType: 'lightning',
-        });
-
-        if (!invoiceId) {
-          const errorMsg = btcpayError || 'Error al crear el invoice de Lightning. Por favor intenta de nuevo.';
+          const errorMsg =
+            btcpayError ||
+            'Error al crear el invoice de Bitcoin. Por favor intenta de nuevo.';
           alert(errorMsg);
           return;
         }
@@ -318,7 +293,8 @@ const HomePage: React.FC<HomePageProps> = ({
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
-      const errorMessage = error?.message || 'Failed to create checkout. Please try again.';
+      const errorMessage =
+        error?.message || 'Failed to create checkout. Please try again.';
       alert(errorMessage);
     }
   };
@@ -580,8 +556,6 @@ const HomePage: React.FC<HomePageProps> = ({
           currency={invoiceData.currency}
           paymentUrl={invoiceData.paymentUrl}
           status={invoiceData.status}
-          paymentType={paymentMethod === 'lightning' ? 'lightning' : 'btc'}
-          userXpub={paymentMethod === 'lightning' ? userXpub || undefined : undefined}
           onConfirmPayment={async (invoiceId: string) => {
             const response = await confirmCryptoOrder(invoiceId);
             if (response.success && response.order) {

@@ -85,7 +85,7 @@ export const translations = {
         bitcoin: {
           title: 'En Desarrollo: Pago En Bitcoin',
           description:
-            'Transacciona en Bitcoin y Lightning Network para quienes quieran ir más allá.',
+            'Transacciona en Bitcoin para quienes quieran ir más allá.',
         },
         automation: {
           title: 'Próximamente: Módulos de automatización',
@@ -221,7 +221,7 @@ export const translations = {
         {
           question: '¿Puedo integrar mis pasarelas de pago?',
           answer:
-            'Sí. ZatoBox soporta pagos con Stripe, PayPal y Mercado Pago. Además, pronto podrás aceptar Bitcoin y Lightning Network.',
+            'Sí. ZatoBox soporta pagos con Stripe, PayPal y Mercado Pago. Además, pronto podrás aceptar Bitcoin.',
         },
         {
           question: '¿Qué incluye el plan gratis?',
@@ -354,8 +354,7 @@ export const translations = {
         },
         bitcoin: {
           title: 'In Development: Bitcoin Payment',
-          description:
-            'Transact in Bitcoin and Lightning Network for those who want to go further.',
+          description: 'Transact in Bitcoin for those who want to go further.',
         },
         automation: {
           title: 'Coming Soon: Automation Modules',
@@ -491,7 +490,7 @@ export const translations = {
         {
           question: 'Can I integrate my payment gateways?',
           answer:
-            "Yes. ZatoBox supports payments with Stripe, PayPal and Mercado Pago. Additionally, you'll soon be able to accept Bitcoin and Lightning Network.",
+            "Yes. ZatoBox supports payments with Stripe, PayPal and Mercado Pago. Additionally, you'll soon be able to accept Bitcoin.",
         },
         {
           question: 'What does the free plan include?',

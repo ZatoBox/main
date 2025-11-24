@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { BTCPayService } from '@/backend/payments/btcpay/service';
+import { BTCPayService } from '@/modules/backend/payments/btcpay/service';
 import { withAuth } from '@/app/api/middleware/auth';
 
 export const POST = withAuth(async (req: NextRequest, userId: string) => {
@@ -17,28 +17,33 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
       userId
     );
 
-    const existingXpub = await btcpayService.getUserXpub(userId);
-    if (existingXpub) {
+    const body = await req.json();
+    const { destination, amount, feeRate, subtractFromAmount } = body;
+
+    if (!destination || !feeRate) {
       return NextResponse.json(
-        { success: false, message: 'User already has an XPUB' },
+        { success: false, message: 'Destination and feeRate are required' },
         { status: 400 }
       );
     }
 
-    const wallet = await btcpayService.generateUserWallet(userId);
+    const transaction = await btcpayService.sendFunds(userId, {
+      destination,
+      amount,
+      feeRate,
+      subtractFromAmount,
+    });
 
     return NextResponse.json({
       success: true,
-      xpub: wallet.xpub,
-      mnemonic: wallet.mnemonic,
-      message: 'XPUB generated successfully',
+      transaction,
     });
   } catch (error: any) {
-    console.error('Wallet generation error:', error);
+    console.error('Error sending funds:', error);
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to generate wallet',
+        message: error.message || 'Failed to send funds',
       },
       { status: 500 }
     );

@@ -34,31 +34,16 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
       checkout,
     });
 
-    const paymentType = metadata?.paymentType || 'btc';
-    
     let paymentUrl = '';
-    let btcPayment: any = null;
-    let lightningPayment: any = null;
-    
-    if (paymentType === 'lightning') {
-      lightningPayment = invoice.paymentMethods?.find(
-        (pm: any) => pm.paymentMethodId === 'BTC-LightningNetwork'
-      );
-      if (lightningPayment?.paymentLink) {
-        paymentUrl = lightningPayment.paymentLink;
-      } else {
-        paymentUrl = invoice.checkoutLink || '';
-      }
+    const btcPayment = invoice.paymentMethods?.find(
+      (pm: any) =>
+        pm.paymentMethodId === 'BTC-CHAIN' || pm.paymentMethodId === 'BTC'
+    );
+
+    if (btcPayment?.destination && btcPayment?.amount) {
+      paymentUrl = `bitcoin:${btcPayment.destination}?amount=${btcPayment.amount}`;
     } else {
-      btcPayment = invoice.paymentMethods?.find(
-        (pm: any) =>
-          pm.paymentMethodId === 'BTC-CHAIN' || pm.paymentMethodId === 'BTC'
-      );
-      if (btcPayment?.destination && btcPayment?.amount) {
-        paymentUrl = `bitcoin:${btcPayment.destination}?amount=${btcPayment.amount}`;
-      } else {
-        paymentUrl = invoice.checkoutLink || '';
-      }
+      paymentUrl = invoice.checkoutLink || '';
     }
 
     return NextResponse.json({
@@ -66,7 +51,7 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
       invoiceId: invoice.id,
       checkoutLink: invoice.checkoutLink,
       paymentUrl: paymentUrl,
-      amount: btcPayment?.amount || lightningPayment?.amount || invoice.amount,
+      amount: btcPayment?.amount || invoice.amount,
       currency: invoice.currency,
       status: invoice.status,
     });
@@ -84,9 +69,13 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     let errorMessage = 'Failed to create invoice';
 
     if (error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN') {
-      errorMessage = `Cannot resolve BTCPay Server hostname (${error.hostname || 'unknown'}). Please verify BTCPAY_URL in environment variables is correct.`;
+      errorMessage = `Cannot resolve BTCPay Server hostname (${
+        error.hostname || 'unknown'
+      }). Please verify BTCPAY_URL in environment variables is correct.`;
     } else if (statusCode === 502 || statusCode === 503) {
-      errorMessage = error.response?.data?.message || 'BTCPay Server is currently unavailable. Please try again in a few moments.';
+      errorMessage =
+        error.response?.data?.message ||
+        'BTCPay Server is currently unavailable. Please try again in a few moments.';
     } else if (statusCode === 504) {
       errorMessage = 'Request timeout. Please try again.';
     } else if (error.response?.data?.message) {

@@ -18,31 +18,42 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     );
 
     const body = await req.json();
-    const { publicKey, storeName, lightningConnectionString } = body;
+    const { publicKey, storeName, createStore } = body;
 
-    if (!publicKey || typeof publicKey !== 'string' || !publicKey.trim()) {
-      return NextResponse.json(
-        { success: false, message: 'Valid public key is required' },
-        { status: 400 }
-      );
+    if (publicKey && typeof publicKey === 'string' && publicKey.trim()) {
+      const result = await btcpayService.configureUserStore(userId, {
+        publicKey: publicKey.trim(),
+        storeName: typeof storeName === 'string' ? storeName : undefined,
+      });
+
+      return NextResponse.json({
+        success: true,
+        storeId: result.storeId,
+        xpub: result.xpub,
+        webhookCreated: result.webhookCreated,
+        xpubChanged: result.xpubChanged,
+      });
+    } else if (createStore === true) {
+      const result = await btcpayService.ensureUserStore(userId);
+      return NextResponse.json({
+        success: true,
+        storeId: result.storeId,
+        webhookCreated: true,
+      });
+    } else {
+      const store = await btcpayService.getUserStore(userId);
+      if (store?.btcpay_store_id) {
+        return NextResponse.json({
+          success: true,
+          storeId: store.btcpay_store_id,
+        });
+      } else {
+        return NextResponse.json({
+          success: false,
+          message: 'Store not configured',
+        });
+      }
     }
-
-    const result = await btcpayService.configureUserStore(userId, {
-      publicKey: publicKey.trim(),
-      storeName: typeof storeName === 'string' ? storeName : undefined,
-      lightningConnectionString:
-        typeof lightningConnectionString === 'string' && lightningConnectionString.trim()
-          ? lightningConnectionString.trim()
-          : null,
-    });
-
-    return NextResponse.json({
-      success: true,
-      storeId: result.storeId,
-      xpub: result.xpub,
-      webhookCreated: result.webhookCreated,
-      xpubChanged: result.xpubChanged,
-    });
   } catch (error: any) {
     return NextResponse.json(
       {
@@ -82,12 +93,11 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
     return NextResponse.json({
       success: true,
       xpub,
-      store:
-        store && {
-          id: store.btcpay_store_id,
-          name: store.store_name,
-          webhookConfigured: Boolean(store.webhook_secret),
-        },
+      store: store && {
+        id: store.btcpay_store_id,
+        name: store.store_name,
+        webhookConfigured: Boolean(store.webhook_secret),
+      },
     });
   } catch (error: any) {
     return NextResponse.json(
