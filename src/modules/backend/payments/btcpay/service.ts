@@ -168,6 +168,13 @@ export class BTCPayService {
     return { xpub: wallet.xpub, storeId };
   }
 
+  async ensureUserStore(userId: string): Promise<{ storeId: string }> {
+    const name = `User Store ${userId.substring(0, 8)}`;
+    const { storeId, store } = await this.ensureStore(userId, name);
+    await this.ensureWebhook(userId, storeId, store?.webhook_secret);
+    return { storeId };
+  }
+
   private async ensureStore(userId: string, storeName: string) {
     let userStore = await this.repository.getUserStore(userId);
     let storeId = userStore?.btcpay_store_id;
@@ -198,23 +205,30 @@ export class BTCPayService {
     storeId: string,
     existingSecret?: string | null
   ) {
-    if (existingSecret) {
+    const globalSecret = process.env.BTCPAY_WEBHOOK_SECRET;
+
+    if (existingSecret && (!globalSecret || existingSecret === globalSecret)) {
       return { secret: existingSecret, created: false };
     }
+
     const webhookUrl = process.env.BTCPAY_WEBHOOK_URL;
     if (!webhookUrl) {
       throw new Error('BTCPAY_WEBHOOK_URL is not configured');
     }
-    const secret = crypto.randomBytes(32).toString('hex');
+
+    const secret = globalSecret || crypto.randomBytes(32).toString('hex');
+
     await this.client.createWebhook(storeId, {
       url: webhookUrl,
       secret,
       authorizedEvents: { everything: true },
       automaticRedelivery: true,
     });
+
     await this.repository.updateUserStore(userId, {
       webhook_secret: secret,
     });
+
     return { secret, created: true };
   }
 

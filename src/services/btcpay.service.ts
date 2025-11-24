@@ -60,6 +60,25 @@ class BTCPayAPIService {
     return response.json();
   }
 
+  async ensureStore(token?: string): Promise<{
+    success: boolean;
+    storeId?: string;
+    message?: string;
+  }> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const response = await fetch(`${this.baseUrl}/store`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({}),
+    });
+
+    return response.json();
+  }
+
   async getXpub(token?: string): Promise<{
     success: boolean;
     xpub?: string | null;
