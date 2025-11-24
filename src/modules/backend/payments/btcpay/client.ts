@@ -133,6 +133,16 @@ export class BTCPayClient {
     );
   }
 
+  async deleteOnChainPaymentMethod(
+    storeId: string,
+    cryptoCode: string
+  ): Promise<void> {
+    await this.request<void>(
+      'DELETE',
+      `/api/v1/stores/${storeId}/payment-methods/onchain/${cryptoCode}`
+    );
+  }
+
   async getWebhooks(storeId: string): Promise<BTCPayWebhook[]> {
     return this.request<BTCPayWebhook[]>(
       'GET',

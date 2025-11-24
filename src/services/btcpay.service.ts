@@ -117,6 +117,7 @@ class BTCPayAPIService {
   async generateWallet(token?: string): Promise<{
     success: boolean;
     xpub?: string;
+    mnemonic?: string;
     message?: string;
   }> {
     const headers: Record<string, string> = {

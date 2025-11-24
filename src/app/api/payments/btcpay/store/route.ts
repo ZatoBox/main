@@ -18,7 +18,7 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     );
 
     const body = await req.json();
-    const { publicKey, storeName } = body;
+    const { publicKey, storeName, createStore } = body;
 
     if (publicKey && typeof publicKey === 'string' && publicKey.trim()) {
       const result = await btcpayService.configureUserStore(userId, {
@@ -33,13 +33,26 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
         webhookCreated: result.webhookCreated,
         xpubChanged: result.xpubChanged,
       });
-    } else {
+    } else if (createStore === true) {
       const result = await btcpayService.ensureUserStore(userId);
       return NextResponse.json({
         success: true,
         storeId: result.storeId,
         webhookCreated: true,
       });
+    } else {
+      const store = await btcpayService.getUserStore(userId);
+      if (store?.btcpay_store_id) {
+        return NextResponse.json({
+          success: true,
+          storeId: store.btcpay_store_id,
+        });
+      } else {
+        return NextResponse.json({
+          success: false,
+          message: 'Store not configured',
+        });
+      }
     }
   } catch (error: any) {
     return NextResponse.json(

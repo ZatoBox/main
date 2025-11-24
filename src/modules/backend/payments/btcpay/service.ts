@@ -109,31 +109,77 @@ export class BTCPayService {
   async generateUserWallet(
     userId: string,
     storeName?: string
-  ): Promise<{ xpub: string; storeId: string }> {
+  ): Promise<{ xpub: string; storeId: string; mnemonic?: string }> {
     const name = storeName?.trim() || `User Store ${userId.substring(0, 8)}`;
     const { storeId, store } = await this.ensureStore(userId, name);
-    const wallet = await this.client.generateWallet(storeId, 'BTC-CHAIN', {
-      savePrivateKeys: false,
-      importKeysToRPC: false,
-      wordCount: 12,
-    });
-    if (!wallet.xpub) {
-      throw new Error('Failed to generate XPUB');
+
+    let wallet;
+    try {
+      wallet = await this.client.generateWallet(storeId, 'BTC-CHAIN', {
+        savePrivateKeys: false,
+        importKeysToRPC: false,
+        wordCount: 12,
+      });
+    } catch (error: any) {
+      console.warn(
+        'Failed to generate wallet, attempting to reset payment method:',
+        error.message
+      );
+      try {
+        await this.client.deleteOnChainPaymentMethod(storeId, 'BTC');
+        wallet = await this.client.generateWallet(storeId, 'BTC-CHAIN', {
+          savePrivateKeys: false,
+          importKeysToRPC: false,
+          wordCount: 12,
+        });
+      } catch (retryError: any) {
+        console.error('Retry failed:', retryError);
+        throw new Error(
+          `Failed to generate wallet: ${retryError.message || 'Unknown error'}`
+        );
+      }
     }
-    const encryptedXpub = encryptXpub(wallet.xpub);
+
+    console.log(
+      'BTCPay generateWallet response:',
+      JSON.stringify(wallet, null, 2)
+    );
+
+    const xpub =
+      wallet.xpub ||
+      wallet.accountHDKey ||
+      wallet.derivationScheme ||
+      wallet.config?.accountDerivation ||
+      wallet.config?.accountOriginal;
+    const mnemonic = wallet.mnemonic || wallet.words;
+
+    if (!xpub) {
+      console.error('No xpub found in wallet response:', wallet);
+      throw new Error(
+        'Failed to generate XPUB - no derivation scheme found in response'
+      );
+    }
+
+    const encryptedXpub = encryptXpub(xpub);
     await this.repository.updateUserStore(userId, {
       xpub: encryptedXpub,
       btcpay_store_id: storeId,
       store_name: name,
     });
+
     await this.client.setOnChainPaymentMethod(storeId, 'BTC', {
-      derivationScheme: wallet.xpub,
+      derivationScheme: xpub,
       enabled: true,
       label: name,
     });
 
     await this.ensureWebhook(userId, storeId, store?.webhook_secret);
-    return { xpub: wallet.xpub, storeId };
+
+    return {
+      xpub,
+      storeId,
+      mnemonic,
+    };
   }
 
   async ensureUserStore(userId: string): Promise<{ storeId: string }> {
