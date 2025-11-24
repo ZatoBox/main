@@ -69,7 +69,7 @@ export class UserRepository {
         modules,
         created_at,
         last_updated
-      `,
+      `
       )
       .eq('email', email)
       .limit(1);
@@ -92,7 +92,7 @@ export class UserRepository {
           premium_up_to,
           created_at,
           last_updated
-          `,
+          `
         )
         .eq('email', email)
         .limit(1);
@@ -128,7 +128,7 @@ export class UserRepository {
         modules,
         created_at,
         last_updated
-      `,
+      `
       )
       .eq('id', user_id)
       .limit(1);
@@ -151,7 +151,7 @@ export class UserRepository {
           premium_up_to,
           created_at,
           last_updated
-          `,
+          `
         )
         .eq('id', user_id)
         .limit(1);
@@ -195,7 +195,7 @@ export class UserRepository {
 
   async updateProfile(
     user_id: string,
-    updates: Record<string, any>,
+    updates: Record<string, any>
   ): Promise<UserItem> {
     const supabase = createAdminClient();
     const now = getCurrentTimeWithTimezone('UTC');
@@ -234,7 +234,7 @@ export class UserRepository {
         modules,
         created_at,
         last_updated
-      `,
+      `
       )
       .single();
 
@@ -294,7 +294,7 @@ export class UserRepository {
         modules,
         created_at,
         last_updated
-      `,
+      `
       )
       .single();
     if (
@@ -318,7 +318,7 @@ export class UserRepository {
           premium_up_to,
           created_at,
           last_updated
-          `,
+          `
         )
         .single();
       if (result.error) throw result.error;
