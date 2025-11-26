@@ -17,6 +17,7 @@ import {
   Store,
   FileText,
   RefreshCw,
+  ArrowRight,
 } from 'lucide-react';
 import { useAuth } from '../context/auth-store';
 
@@ -51,10 +52,10 @@ const SideMenu: React.FC = () => {
       });
 
       const addedItems = Array.from(newVisibleItems).filter(
-        (path) => !prevVisible.has(path),
+        (path) => !prevVisible.has(path)
       );
       const removedItems = Array.from(prevVisible).filter(
-        (path) => !newVisibleItems.has(path),
+        (path) => !newVisibleItems.has(path)
       );
 
       if (removedItems.length > 0) {
@@ -197,8 +198,8 @@ const SideMenu: React.FC = () => {
               isVisible && !isAnimating
                 ? 'opacity-100 translate-y-0 scale-100 animate-menu-item-bounce'
                 : isAnimating
-                  ? 'opacity-0 translate-y-2 scale-95 animate-menu-item-out'
-                  : 'opacity-0 translate-y-2 scale-95'
+                ? 'opacity-0 translate-y-2 scale-95 animate-menu-item-out'
+                : 'opacity-0 translate-y-2 scale-95'
             } ${isNewItem ? 'animate-menu-item-in' : ''} ${
               isActive ? 'active' : ''
             }`}
@@ -298,13 +299,27 @@ const SideMenu: React.FC = () => {
                   onClick={() =>
                     window.open(
                       'https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform',
-                      '_blank',
+                      '_blank'
                     )
                   }
-                  className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-[#F88612] text-white gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-white hover:border-[#F88612] hover:text-[#F88612]"
+                  className="relative w-[223px] h-[115px] bg-[#F3F5F7] border-2 border-[#CBD5E1] rounded-xl p-3 flex flex-col items-start text-left overflow-hidden group hover:border-[#F88612] transition-colors duration-300"
                 >
-                  <Sparkles size={16} className="text-current" />
-                  <span className="font-medium">Feedback</span>
+                  <span className="text-black font-semibold text-xs leading-tight mb-1">
+                    Queremos tu opinión
+                  </span>
+                  <span className="text-[#6A7282] text-[11px] leading-tight mb-auto pr-4">
+                    Estamos mejorando tu experiencia y tu opinión es clave
+                    ayúdanos a construir la próxima mejora
+                  </span>
+                  <div className="flex items-center gap-1 text-[#F88612] mt-1 z-10">
+                    <ArrowRight size={14} />
+                    <span className="font-bold text-xs">Dejar feedback</span>
+                  </div>
+                  <img
+                    src="/images/feedback-geometric-shape.svg"
+                    alt=""
+                    className="absolute bottom-0 right-0"
+                  />
                 </button>
               </div>
             </div>
@@ -354,13 +369,27 @@ const SideMenu: React.FC = () => {
                   onClick={() =>
                     window.open(
                       'https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform',
-                      '_blank',
+                      '_blank'
                     )
                   }
-                  className="w-48 h-11 max-w-full flex items-center justify-center rounded-[8px] border border-[#CBD5E1] bg-[#F88612] text-white gap-2 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-white hover:border-[#F88612] hover:text-[#F88612]"
+                  className="relative w-[223px] h-[115px] bg-[#F3F5F7] border-2 border-[#CBD5E1] rounded-xl p-3 flex flex-col items-start text-left overflow-hidden group hover:border-[#F88612] transition-colors duration-300"
                 >
-                  <Sparkles size={16} className="text-current" />
-                  <span className="font-medium">Feedback</span>
+                  <span className="text-black font-semibold text-xs leading-tight mb-1">
+                    Queremos tu opinión
+                  </span>
+                  <span className="text-[#6A7282] text-[11px] leading-tight mb-auto pr-4">
+                    Estamos mejorando tu experiencia y tu opinión es clave
+                    ayúdanos a construir la próxima mejora
+                  </span>
+                  <div className="flex items-center gap-1 text-[#F88612] mt-1 z-10">
+                    <ArrowRight size={14} />
+                    <span className="font-bold text-xs">Dejar feedback</span>
+                  </div>
+                  <img
+                    src="/images/feedback-geometric-shape.svg"
+                    alt=""
+                    className="absolute bottom-0 right-0"
+                  />
                 </button>
               </div>
             </div>
