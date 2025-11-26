@@ -18,6 +18,7 @@ import {
   FileText,
   RefreshCw,
   ArrowRight,
+  Wallet,
 } from 'lucide-react';
 import { useAuth } from '../context/auth-store';
 
@@ -140,6 +141,14 @@ const SideMenu: React.FC = () => {
       path: '/restock',
       description: 'Reabastecer inventario',
       pluginId: 'restock',
+      alwaysVisible: false,
+    },
+    {
+      name: 'Wallet',
+      icon: Wallet,
+      path: '/wallet-withdraw',
+      description: 'Gestiona tus fondos',
+      pluginId: 'wallet',
       alwaysVisible: false,
     },
     {

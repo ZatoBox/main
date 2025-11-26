@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
 import { useAuth } from '@/context/auth-store';
 import { usePlugins } from '@/context/plugin-context';
 import PluginGrid from '@/components/plugin-store/PluginGrid';
@@ -14,7 +14,7 @@ interface IPlugin {
   name: string;
   description: string;
   category: string;
-  icon: string;
+  icon: React.ReactNode | string;
   status: 'active' | 'inactive' | 'coming-soon' | 'maintenance';
   version: string;
   author: string;
@@ -40,7 +40,7 @@ const PluginStorePage: React.FC = () => {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState<'success' | 'info'>(
-    'info',
+    'info'
   );
 
   const categories = [
@@ -254,6 +254,22 @@ const PluginStorePage: React.FC = () => {
         'Acceso basado en roles',
       ],
     },
+    {
+      id: 'wallet',
+      name: 'Wallet',
+      description: 'Gestiona tus fondos',
+      category: 'sales',
+      icon: <Wallet />,
+      status: 'inactive',
+      version: '1.0.0',
+      author: 'ZatoBox Team',
+      rating: 0,
+      installs: 0,
+      price: 'free',
+      features: ['Gestiona tus fondos', 'Retiros', 'Historial'],
+      screenshot:
+        'https://i.pinimg.com/736x/f1/5e/71/f15e71b099330088cfd2902f56280782.jpg',
+    },
   ];
 
   useEffect(() => {
@@ -285,7 +301,7 @@ const PluginStorePage: React.FC = () => {
     let filtered = plugins;
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(
-        (plugin) => plugin.category === selectedCategory,
+        (plugin) => plugin.category === selectedCategory
       );
     }
 
@@ -293,7 +309,7 @@ const PluginStorePage: React.FC = () => {
       filtered = filtered.filter(
         (plugin) =>
           plugin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          plugin.description.toLowerCase().includes(searchQuery.toLowerCase()),
+          plugin.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -337,7 +353,7 @@ const PluginStorePage: React.FC = () => {
 
   const showPluginNotification = (
     message: string,
-    type: 'success' | 'info',
+    type: 'success' | 'info'
   ) => {
     setNotificationMessage(message);
     setNotificationType(type);
@@ -371,7 +387,7 @@ const PluginStorePage: React.FC = () => {
           };
         }
         return p;
-      }),
+      })
     );
   };
 

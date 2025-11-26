@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/profile/Header';
 import AvatarUploader from '@/components/profile/AvatarUploader';
-import CryptoStoreSetup from '@/components/profile/CryptoStoreSetup';
 import { profileAPI, authAPI } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
 import {
@@ -29,7 +28,7 @@ const ProfilePage: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<Record<string, any>>({});
   const [editingFields, setEditingFields] = useState<Record<string, boolean>>(
-    {},
+    {}
   );
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const { user, initialized, setUser, logout } = useAuth();
@@ -115,7 +114,7 @@ const ProfilePage: React.FC = () => {
 
   const handleImageUpdated = async (
     newImageUrl: string | null,
-    updatedUser?: any,
+    updatedUser?: any
   ) => {
     if (updatedUser) {
       setProfileData(updatedUser);
@@ -149,7 +148,6 @@ const ProfilePage: React.FC = () => {
   };
 
   const updateEditValue = (field: string, value: string) => {
-    // For phone field, only allow numeric values
     if (field === 'phone') {
       const numericValue = value.replace(/[^0-9+\-\s()]/g, '');
       setEditValues((prev) => ({ ...prev, [field]: numericValue }));
@@ -159,7 +157,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const hasChanges = Object.keys(editingFields).some(
-    (field) => editingFields[field],
+    (field) => editingFields[field]
   );
 
   const getFieldIcon = (field: string) => {
@@ -324,7 +322,6 @@ const ProfilePage: React.FC = () => {
               )}
 
               <div className="space-y-8">
-                {/* User Header Section */}
                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100">
                   <div className="flex flex-col items-center space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-8">
                     <AvatarUploader
@@ -361,7 +358,6 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Personal Information Section */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
                   <div className="px-6 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -379,28 +375,6 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Crypto Payments Configuration Section */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-                  <div className="px-6 py-4 border-b border-gray-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                          <Bitcoin className="w-5 h-5 mr-2 text-orange-500" />
-                          Pagos con Crypto
-                        </h2>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Configura tu tienda BTCPay Server para recibir pagos
-                          en Bitcoin
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <CryptoStoreSetup />
-                  </div>
-                </div>
-
-                {/* Account Section */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm md:hidden">
                   <div className="px-6 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center">
