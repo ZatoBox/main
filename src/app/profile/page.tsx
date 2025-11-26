@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/profile/Header';
 import AvatarUploader from '@/components/profile/AvatarUploader';
 import { profileAPI, authAPI } from '@/services/api.service';
+import Loader from '@/components/ui/Loader';
 import { useAuth } from '@/context/auth-store';
 import {
   Bitcoin,
@@ -260,14 +261,7 @@ const ProfilePage: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-gray-300"></div>
-          <p className="text-gray-500">Cargando perfil...</p>
-        </div>
-      </div>
-    );
+    return <Loader text="Cargando perfil..." />;
   }
 
   return (

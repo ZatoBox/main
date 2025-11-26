@@ -9,6 +9,7 @@ import {
   Loader2,
   X,
 } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 import { productsAPI } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
 import type { Product } from '@/types';
@@ -196,9 +197,11 @@ const RestockPage: React.FC = () => {
               )}
 
               {isLoading ? (
-                <div className="flex justify-center items-center py-12">
-                  <Loader2 className="animate-spin text-[#F88612]" size={32} />
-                </div>
+                <Loader
+                  fullScreen={false}
+                  className="py-12"
+                  text="Cargando productos..."
+                />
               ) : (
                 <div className="space-y-4">
                   <div className="space-y-2">

@@ -8,6 +8,7 @@ import { usePlugins } from '@/context/plugin-context';
 import PluginGrid from '@/components/plugin-store/PluginGrid';
 import FeaturedSection from '@/components/plugin-store/FeaturedSection';
 import PluginNotification from '@/components/plugin-store/PluginNotification';
+import Loader from '@/components/ui/Loader';
 
 interface IPlugin {
   id: string;
@@ -435,16 +436,7 @@ const PluginStorePage: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-bg-main">
-        <div className="text-center">
-          <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
-          <p className="text-sm sm:text-base text-text-secondary">
-            Cargando tienda de plugins...
-          </p>
-        </div>
-      </div>
-    );
+    return <Loader text="Cargando tienda de plugins..." />;
   }
 
   return (

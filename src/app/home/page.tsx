@@ -15,6 +15,7 @@ import type { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io';
 import { ShoppingCart, X } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 
 const mapProductToProduct = (p: any): Product => {
   const imageUrls = Array.isArray(p.images)
@@ -332,16 +333,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   // Estados de carga / error
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary animate-pulse-glow"></div>
-          <p className="text-text-secondary animate-slide-in-left">
-            Loading products...
-          </p>
-        </div>
-      </div>
-    );
+    return <Loader text="Loading products..." />;
   }
 
   if (error === 'polar_not_configured') {

@@ -11,6 +11,7 @@ import InventoryFilters from '@/components/inventory/InventoryFilters';
 import InventoryGrid from '@/components/inventory/InventoryGrid';
 import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
 import { useToast } from '@/hooks/use-toast';
+import Loader from '@/components/ui/Loader';
 
 const InventoryPage: React.FC = () => {
   const router = useRouter();
@@ -306,19 +307,15 @@ const InventoryPage: React.FC = () => {
       status: p.active ? 'active' : 'inactive',
       stock: p.stock,
       price: p.price,
-      imageUrl: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : undefined,
+      imageUrl:
+        Array.isArray(p.images) && p.images.length > 0
+          ? p.images[0]
+          : undefined,
     };
   });
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen  bg-bg-main">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-gray-300"></div>
-          <p className="text-text-secondary">Cargando productos...</p>
-        </div>
-      </div>
-    );
+    return <Loader text="Cargando productos..." />;
   }
 
   if (error) {
