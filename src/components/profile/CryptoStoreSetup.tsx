@@ -3,16 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { btcpayAPI } from '@/services/btcpay.service';
 import { useAuth } from '@/context/auth-store';
-import {
-  Bitcoin,
-  CheckCircle,
-  AlertCircle,
-  Loader2,
-  Eye,
-  Lock,
-} from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2, AlertTriangle } from 'lucide-react';
 import StoreSetupModal from './StoreSetupModal';
-import SeedPhraseModal from './SeedPhraseModal';
 
 const CryptoStoreSetup: React.FC = () => {
   const { token, initialized } = useAuth();
@@ -21,9 +13,6 @@ const CryptoStoreSetup: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSetupModal, setShowSetupModal] = useState(false);
-  const [showSeedModal, setShowSeedModal] = useState(false);
-  const [seedPhrase, setSeedPhrase] = useState<string[]>([]);
-  const [masterFingerprint, setMasterFingerprint] = useState<string>('');
 
   useEffect(() => {
     if (initialized && token) {
@@ -60,22 +49,6 @@ const CryptoStoreSetup: React.FC = () => {
     loadStore();
   };
 
-  const handleViewSeedPhrase = async () => {
-    try {
-      const response = await btcpayAPI.getWalletDetails(token!);
-      if (response.success && response.mnemonic) {
-        setSeedPhrase(response.mnemonic);
-        setMasterFingerprint(response.masterFingerprint || '');
-        setShowSeedModal(true);
-      } else {
-        setError(response.message || 'No se pudo obtener la frase semilla');
-      }
-    } catch (err) {
-      console.error('Error fetching seed phrase:', err);
-      setError('Error al obtener la frase semilla');
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-10">
@@ -110,65 +83,82 @@ const CryptoStoreSetup: React.FC = () => {
     return (
       <>
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-6">
-            <div className="flex items-start space-x-4">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+            <h3 className="text-lg font-bold text-red-900 mb-2">
+              Asegura tu frase de recuperación
+            </h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              La frase de recuperación es una copia de seguridad que te permite
+              restaurar tu billetera en caso de que el servidor falle. Si la
+              pierdes o la anotas de forma incorrecta, podrías perder
+              permanentemente el acceso a tus fondos. No la fotografíes. No la
+              almacenes digitalmente. La frase de recuperación también se
+              almacenará en el servidor como una hot wallet, en caso de
+              cualquier cosa NO podrás volver a ver tu frase semilla en la
+              sección Perfil.
+            </p>
+          </div>
+
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
+            <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                  <Bitcoin className="w-6 h-6 text-orange-600" />
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-orange-600" />
                 </div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Configura tu Store de Bitcoin
+              <div>
+                <h3 className="text-base font-bold text-orange-600 mb-2">
+                  Consejo de seguridad
                 </h3>
-                <p className="text-gray-700 mb-4">
-                  Para comenzar a recibir pagos en Bitcoin, necesitas configurar
-                  tu tienda y crear una wallet. Este proceso es rápido y seguro.
+                <p className="text-sm text-orange-900 leading-relaxed">
+                  Dado que las hot wallets están más expuestas a riesgos, te
+                  recomendamos mantener solo montos bajos para operaciones
+                  diarias y transferir periódicamente los fondos a tu billetera
+                  fría para maximizar tu seguridad. Esto reduce el riesgo en
+                  caso de que tu servidor o dispositivo sea comprometido.
                 </p>
-                <div className="bg-white/60 border border-orange-200 rounded-lg p-4 mb-4">
-                  <p className="text-sm font-medium text-gray-900 mb-2">
-                    ¿Qué incluye?
-                  </p>
-                  <ul className="space-y-2 text-sm text-gray-700">
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                      <span>Creación de tu tienda personal en BTCPay</span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                      <span>Generación de wallet hot con SegWit</span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                      <span>12 palabras de recuperación seguras</span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                      <span>Configuración automática de pagos</span>
-                    </li>
-                  </ul>
-                </div>
-                <button
-                  onClick={() => setShowSetupModal(true)}
-                  className="w-full sm:w-auto px-6 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors shadow-sm hover:shadow-md"
-                >
-                  Termina de settear tu store
-                </button>
               </div>
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
-              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-900">
-                <p className="font-medium mb-1">Importante</p>
-                <p className="text-blue-800">
-                  Todos los pagos en Bitcoin que recibas irán automáticamente a
-                  esta wallet. Asegúrate de guardar las palabras de recuperación
-                  en un lugar seguro.
+          <div className="rounded-xl p-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Configura tu Store de Bitcoin
+              </h3>
+              <p className="text-gray-700 mb-4">
+                Para comenzar a recibir pagos en Bitcoin, necesitas configurar
+                tu tienda y crear una wallet. Este proceso es rápido y seguro.
+              </p>
+              <div className="bg-white/60 border border-orange-200 rounded-lg p-4 mb-4">
+                <p className="text-sm font-medium text-gray-900 mb-2">
+                  ¿Qué incluye?
                 </p>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    <span>Creación de tu tienda personal en BTCPay</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    <span>Generación de wallet hot con SegWit</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    <span>12 palabras de recuperación seguras</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    <span>Configuración automática de pagos</span>
+                  </li>
+                </ul>
               </div>
+              <button
+                onClick={() => setShowSetupModal(true)}
+                className="w-full sm:w-auto px-6 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors shadow-sm hover:shadow-md"
+              >
+                Termina de settear tu store
+              </button>
             </div>
           </div>
         </div>
@@ -199,46 +189,6 @@ const CryptoStoreSetup: React.FC = () => {
           </div>
         </div>
       </div>
-
-      <div className="bg-orange-50 border border-orange-100 rounded-lg p-4">
-        <div className="flex items-start space-x-3">
-          <Bitcoin className="w-5 h-5 text-orange-500 mt-0.5" />
-          <div>
-            <h3 className="font-medium text-orange-900">
-              Configuración de Bitcoin
-            </h3>
-            <p className="text-sm text-orange-800 mt-1">
-              Puedes gestionar tu wallet de Bitcoin directamente aquí. Esta es
-              tu tienda personal.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <button
-        onClick={handleViewSeedPhrase}
-        className="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50/30 transition-all group"
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
-            <Lock className="w-5 h-5 text-orange-600" />
-          </div>
-          <div className="text-left">
-            <p className="font-semibold text-gray-900">Ver mi frase semilla</p>
-            <p className="text-sm text-gray-500">
-              Accede a tu frase de recuperación
-            </p>
-          </div>
-        </div>
-        <Eye className="w-5 h-5 text-gray-400 group-hover:text-orange-600 transition-colors" />
-      </button>
-
-      <SeedPhraseModal
-        isOpen={showSeedModal}
-        onClose={() => setShowSeedModal(false)}
-        seedPhrase={seedPhrase}
-        masterFingerprint={masterFingerprint}
-      />
     </div>
   );
 };
