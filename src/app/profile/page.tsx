@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/profile/Header';
 import AvatarUploader from '@/components/profile/AvatarUploader';
+import CryptoStoreSetup from '@/components/profile/CryptoStoreSetup';
 import { profileAPI, authAPI } from '@/services/api.service';
 import Loader from '@/components/ui/Loader';
 import { useAuth } from '@/context/auth-store';
@@ -366,6 +367,26 @@ const ProfilePage: React.FC = () => {
                       {renderField('phone', 'Número de Teléfono')}
                       <div className="md:col-span-2"></div>
                     </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                          <Bitcoin className="w-5 h-5 mr-2 text-orange-500" />
+                          Pagos con Crypto
+                        </h2>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Configura tu tienda BTCPay Server para recibir pagos
+                          en Bitcoin
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <CryptoStoreSetup />
                   </div>
                 </div>
 

@@ -3,9 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { btcpayAPI } from '@/services/btcpay.service';
 import { useAuth } from '@/context/auth-store';
-import { Bitcoin, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import {
+  Bitcoin,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  Eye,
+  Lock,
+} from 'lucide-react';
 import StoreSetupModal from './StoreSetupModal';
-import WalletSendFunds from './WalletSendFunds';
+import SeedPhraseModal from './SeedPhraseModal';
 
 const CryptoStoreSetup: React.FC = () => {
   const { token, initialized } = useAuth();
@@ -14,6 +21,9 @@ const CryptoStoreSetup: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSetupModal, setShowSetupModal] = useState(false);
+  const [showSeedModal, setShowSeedModal] = useState(false);
+  const [seedPhrase, setSeedPhrase] = useState<string[]>([]);
+  const [masterFingerprint, setMasterFingerprint] = useState<string>('');
 
   useEffect(() => {
     if (initialized && token) {
@@ -48,6 +58,22 @@ const CryptoStoreSetup: React.FC = () => {
 
   const handleSetupComplete = () => {
     loadStore();
+  };
+
+  const handleViewSeedPhrase = async () => {
+    try {
+      const response = await btcpayAPI.getWalletDetails(token!);
+      if (response.success && response.mnemonic) {
+        setSeedPhrase(response.mnemonic);
+        setMasterFingerprint(response.masterFingerprint || '');
+        setShowSeedModal(true);
+      } else {
+        setError(response.message || 'No se pudo obtener la frase semilla');
+      }
+    } catch (err) {
+      console.error('Error fetching seed phrase:', err);
+      setError('Error al obtener la frase semilla');
+    }
   };
 
   if (loading) {
@@ -189,11 +215,30 @@ const CryptoStoreSetup: React.FC = () => {
         </div>
       </div>
 
-      {storeId && (
-        <div className="mt-8">
-          <WalletSendFunds token={token!} onSuccess={loadStore} />
+      <button
+        onClick={handleViewSeedPhrase}
+        className="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50/30 transition-all group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
+            <Lock className="w-5 h-5 text-orange-600" />
+          </div>
+          <div className="text-left">
+            <p className="font-semibold text-gray-900">Ver mi frase semilla</p>
+            <p className="text-sm text-gray-500">
+              Accede a tu frase de recuperación
+            </p>
+          </div>
         </div>
-      )}
+        <Eye className="w-5 h-5 text-gray-400 group-hover:text-orange-600 transition-colors" />
+      </button>
+
+      <SeedPhraseModal
+        isOpen={showSeedModal}
+        onClose={() => setShowSeedModal(false)}
+        seedPhrase={seedPhrase}
+        masterFingerprint={masterFingerprint}
+      />
     </div>
   );
 };

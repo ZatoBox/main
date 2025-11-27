@@ -136,6 +136,53 @@ class BTCPayAPIService {
 
     return response.json();
   }
+
+  async getWalletDetails(token?: string): Promise<{
+    success: boolean;
+    mnemonic?: string[];
+    masterFingerprint?: string;
+    message?: string;
+  }> {
+    const headers: Record<string, string> = {};
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${this.baseUrl}/wallet/details`, {
+      headers,
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: `Error: ${response.status} ${response.statusText}`,
+      };
+    }
+
+    return response.json();
+  }
+
+  async getWalletOverview(token: string): Promise<{
+    success: boolean;
+    overview?: {
+      balance: string;
+      unconfirmedBalance: string;
+      confirmedBalance?: string;
+    };
+    message?: string;
+  }> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const response = await fetch(`${this.baseUrl}/wallets/BTC/overview`, {
+      headers,
+    });
+
+    return response.json();
+  }
+
   async sendFunds(
     token: string,
     data: {

@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { btcpayAPI } from '@/services/btcpay.service';
 import {
   Loader2,
-  Send,
   CheckCircle,
   AlertCircle,
   ArrowRight,
@@ -26,6 +25,22 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successTx, setSuccessTx] = useState<string | null>(null);
+  const [balance, setBalance] = useState<string>('0.00000000');
+
+  React.useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const res = await btcpayAPI.getWalletOverview(token);
+        if (res.success && res.overview) {
+          setBalance(res.overview.balance);
+        }
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+      }
+    };
+
+    fetchBalance();
+  }, [token]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +75,6 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
     <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden">
       <div className="border-b border-[#E2E8F0] px-8 py-5 flex items-center justify-between bg-[#F8FAFC]">
         <h2 className="text-lg font-bold text-[#1E293B] flex items-center gap-2">
-          <Send size={20} className="text-[#F88612]" />
           Enviar Fondos
         </h2>
         <div className="flex items-center gap-2 text-sm text-[#10B981] bg-[#ECFDF5] px-3 py-1 rounded-full border border-[#A7F3D0]">
@@ -101,6 +115,22 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
           className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12"
         >
           <div className="lg:col-span-2 space-y-6">
+            <div className="relative w-full md:w-1/2 h-32 rounded-2xl overflow-hidden shadow-sm">
+              <img
+                src="/images/balance-background.svg"
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="relative z-10 h-full flex flex-col justify-center px-8 text-white">
+                <span className="text-sm font-medium opacity-90">
+                  Balance Total
+                </span>
+                <span className="text-3xl font-bold mt-1 tracking-tight">
+                  {balance} BTC
+                </span>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-[#1E293B]">
                 Dirección de Destino
