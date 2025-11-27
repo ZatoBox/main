@@ -15,6 +15,15 @@ const PluginCard: React.FC<PluginCardProps> = ({
 }) => {
   return (
     <div className="w-full min-w-0 overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl">
+      {plugin.screenshot && (
+        <div className="h-32 sm:h-40 overflow-hidden bg-gray-100 border-b border-gray-100">
+          <img
+            src={plugin.screenshot}
+            alt={plugin.name}
+            className="object-cover w-full h-full"
+          />
+        </div>
+      )}
       <div className="p-4 sm:p-6">
         <div className="flex items-start gap-2 sm:gap-3 mb-3">
           <span className="text-xl sm:text-2xl flex-shrink-0">

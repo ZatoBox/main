@@ -32,7 +32,12 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
       try {
         const res = await btcpayAPI.getWalletOverview(token);
         if (res.success && res.overview) {
-          setBalance(res.overview.balance);
+          const rawBalance = res.overview.balance;
+          const numericBalance = parseFloat(rawBalance);
+          const formattedBalance = !isNaN(numericBalance)
+            ? numericBalance.toFixed(8)
+            : '0.00000000'; 
+          setBalance(formattedBalance);
         }
       } catch (error) {
         console.error('Error fetching balance:', error);
