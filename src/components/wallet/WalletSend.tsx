@@ -11,6 +11,7 @@ import {
   Clock,
   Turtle,
 } from 'lucide-react';
+import TransactionHelpModal from './TransactionHelpModal';
 
 interface WalletSendProps {
   token: string;
@@ -26,6 +27,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const [successTx, setSuccessTx] = useState<string | null>(null);
   const [balance, setBalance] = useState<string>('0.00000000');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   React.useEffect(() => {
     const fetchBalance = async () => {
@@ -36,7 +38,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
           const numericBalance = parseFloat(rawBalance);
           const formattedBalance = !isNaN(numericBalance)
             ? numericBalance.toFixed(8)
-            : '0.00000000'; 
+            : '0.00000000';
           setBalance(formattedBalance);
         }
       } catch (error) {
@@ -167,17 +169,28 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
                   BTC
                 </div>
               </div>
-              <div className="flex items-center justify-between text-xs text-[#64748B] px-1">
-                <span>Dejar vacío para enviar el máximo disponible</span>
-                <label className="flex items-center gap-2 cursor-pointer hover:text-[#F88612] transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={subtractFees}
-                    onChange={(e) => setSubtractFees(e.target.checked)}
-                    className="rounded border-gray-300 text-[#F88612] focus:ring-[#F88612]"
-                  />
-                  Restar comisión del monto
-                </label>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs text-[#64748B] px-1">
+                  <span>Dejar vacío para enviar el máximo disponible</span>
+                  <label className="flex items-center gap-2 cursor-pointer hover:text-[#F88612] transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={subtractFees}
+                      onChange={(e) => setSubtractFees(e.target.checked)}
+                      className="rounded border-gray-300 text-[#F88612] focus:ring-[#F88612]"
+                    />
+                    Restar comisión del monto
+                  </label>
+                </div>
+                <div className="px-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    className="text-xs text-[#64748B] hover:text-[#F88612] transition-colors underline"
+                  >
+                    ¿No ves tu transacción?
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -298,6 +311,11 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
           </div>
         </form>
       </div>
+
+      <TransactionHelpModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };
