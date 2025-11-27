@@ -453,11 +453,11 @@ const OCRResultPage: React.FC = () => {
   }
 
   return (
-    <div className="flex items-start justify-center min-h-screen p-6  md:mt-32 mt-24">
-      <div className="w-full max-w-5xl">
+    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <Header />
         {!result ? (
           <div className="p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]">
-            <Header />
             <FileUploader
               fileName={file?.name ?? null}
               onChange={(f) => {

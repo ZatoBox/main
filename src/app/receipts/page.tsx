@@ -162,11 +162,11 @@ const ReceiptsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg-main">
-      <ReceiptsHeader onBack={() => router.push('/home')} />
+    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <ReceiptsHeader onBack={() => router.push('/home')} />
 
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="py-6">
+        <div>
           <ReceiptsStats
             totalReceipts={receipts.length}
             totalAmount={totalAmount}
