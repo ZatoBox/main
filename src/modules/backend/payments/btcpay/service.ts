@@ -738,4 +738,24 @@ export class BTCPayService {
 
     return createdOrder;
   }
+
+  async deleteUserStore(userId: string): Promise<void> {
+    const userStore = await this.repository.getUserStore(userId);
+    if (!userStore) {
+      throw new Error('User store not found');
+    }
+
+    try {
+      if (userStore.btcpay_store_id) {
+        await this.client.deleteStore(userStore.btcpay_store_id);
+      }
+    } catch (error: any) {
+      console.warn(
+        'Failed to delete store from BTCPay (might already be deleted):',
+        error.message
+      );
+    }
+
+    await this.repository.deleteUserStore(userId);
+  }
 }

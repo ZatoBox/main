@@ -3,6 +3,7 @@ import type {
   BTCPayInvoice,
   InvoiceStatus,
 } from '@/backend/payments/btcpay/models';
+import axios from 'axios';
 
 class BTCPayAPIService {
   private baseUrl = '/api/payments/btcpay';
@@ -208,6 +209,28 @@ class BTCPayAPIService {
     });
 
     return response.json();
+  }
+
+  async deleteStore(token: string): Promise<{
+    success: boolean;
+    message?: string;
+  }> {
+    try {
+      const response = await axios.delete(`${this.baseUrl}/store/delete`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          'Failed to delete store',
+      };
+    }
   }
 }
 

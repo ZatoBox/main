@@ -3,8 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import { btcpayAPI } from '@/services/btcpay.service';
 import { useAuth } from '@/context/auth-store';
-import { CheckCircle, AlertCircle, Loader2, AlertTriangle } from 'lucide-react';
+import {
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  AlertTriangle,
+  Trash2,
+} from 'lucide-react';
 import StoreSetupModal from './StoreSetupModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const CryptoStoreSetup: React.FC = () => {
   const { token, initialized } = useAuth();
@@ -13,6 +29,9 @@ const CryptoStoreSetup: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSetupModal, setShowSetupModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteReconfirm, setShowDeleteReconfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (initialized && token) {
@@ -47,6 +66,26 @@ const CryptoStoreSetup: React.FC = () => {
 
   const handleSetupComplete = () => {
     loadStore();
+  };
+
+  const handleDeleteStore = async () => {
+    try {
+      setIsDeleting(true);
+      const res = await btcpayAPI.deleteStore(token!);
+      if (res.success) {
+        setHasWallet(false);
+        setStoreId(null);
+        setShowDeleteReconfirm(false);
+        // Reload to reset state completely
+        window.location.reload();
+      } else {
+        setError(res.message || 'Error al eliminar la store');
+      }
+    } catch (err) {
+      setError('Error al eliminar la store');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (loading) {
@@ -151,6 +190,79 @@ const CryptoStoreSetup: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <div className="flex justify-end pt-4">
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span>Eliminar Store y Wallet</span>
+        </button>
+      </div>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará tu tienda y tu wallet del servidor. Perderás
+              el acceso a los fondos si no tienes tu frase de recuperación.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault();
+                setShowDeleteConfirm(false);
+                setShowDeleteReconfirm(true);
+              }}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              Continuar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={showDeleteReconfirm}
+        onOpenChange={setShowDeleteReconfirm}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-black">
+              ¡Confirmación Final!
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción es IRREVERSIBLE. Se borrarán todos los datos de tu
+              tienda y wallet de nuestra base de datos y del servidor de pagos.
+              ¿Confirmas que quieres eliminar todo permanentemente?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault();
+                handleDeleteStore();
+              }}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Eliminando...
+                </>
+              ) : (
+                'Sí, eliminar todo'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
