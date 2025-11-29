@@ -8,7 +8,7 @@ function isPublic(pathname: string) {
   return PUBLIC_PATHS.has(pathname);
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (
     pathname.startsWith('/_next') ||
