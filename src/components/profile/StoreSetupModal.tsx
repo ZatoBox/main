@@ -8,6 +8,7 @@ import {
   Store,
   Shield,
   AlertTriangle,
+  AlertCircle,
 } from 'lucide-react';
 
 interface StoreSetupModalProps {
@@ -21,6 +22,7 @@ type SetupStep =
   | 'intro'
   | 'creating-store'
   | 'creating-wallet'
+  | 'security-warning'
   | 'show-mnemonic'
   | 'complete';
 
@@ -34,6 +36,7 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
+  const [fingerprint, setFingerprint] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -86,8 +89,11 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
       if (data.mnemonic) {
         setMnemonic(data.mnemonic.split(' '));
       }
+      if (data.fingerprint) {
+        setFingerprint(data.fingerprint);
+      }
 
-      setCurrentStep('show-mnemonic');
+      setCurrentStep('security-warning');
     } catch (err: any) {
       setError(err.message || 'Error al crear la wallet');
     } finally {
@@ -213,6 +219,63 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
           </div>
         );
 
+      case 'security-warning':
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 flex items-center justify-center mb-4">
+                <AlertCircle className="w-16 h-16 text-orange-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Asegura tu frase de recuperación
+              </h2>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+              <p className="text-sm text-gray-600 leading-relaxed">
+                La frase de recuperación es una copia de seguridad que te
+                permite restaurar tu billetera en caso de que el servidor falle.
+                Si la pierdes o la anotas de forma incorrecta, podrías perder
+                permanentemente el acceso a tus fondos. No la fotografíes. No la
+                almacenes digitalmente. La frase de recuperación también se
+                almacenará en el servidor como una hot wallet, en caso de
+                cualquier cosa NO podrás volver a ver tu frase semilla en la
+                sección Perfil.
+              </p>
+            </div>
+
+            <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
+              <div className="flex flex-col items-center text-center gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-orange-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-orange-600 mb-2">
+                    Consejo de seguridad
+                  </h3>
+                  <p className="text-sm text-orange-900 leading-relaxed">
+                    Dado que las hot wallets están más expuestas a riesgos, te
+                    recomendamos mantener solo montos bajos para operaciones
+                    diarias y transferir periódicamente los fondos a tu
+                    billetera fría para maximizar tu seguridad. Esto reduce el
+                    riesgo en caso de que tu servidor o dispositivo sea
+                    comprometido.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setCurrentStep('show-mnemonic')}
+              className="w-full py-4 bg-orange-500 text-white font-bold text-lg rounded-xl hover:bg-orange-600 transition-colors shadow-sm"
+            >
+              Entendido, mostrar frase
+            </button>
+          </div>
+        );
+
       case 'show-mnemonic':
         const firstColumn = mnemonic.slice(0, 6);
         const secondColumn = mnemonic.slice(6, 12);
@@ -279,6 +342,19 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
                   </div>
                 </div>
               </div>
+
+              {fingerprint && (
+                <div className="flex flex-col items-center justify-center space-y-2">
+                  <span className="text-base text-gray-500 font-medium">
+                    Master Fingerprint
+                  </span>
+                  <div className="px-4 py-2 rounded-lg">
+                    <code className="text-lg font-mono text-gray-900 tracking-wider">
+                      {fingerprint.toUpperCase()}
+                    </code>
+                  </div>
+                </div>
+              )}
 
               <div className="text-center text-sm text-gray-500 leading-relaxed space-y-2 max-w-lg mx-auto">
                 <p>

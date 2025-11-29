@@ -83,44 +83,6 @@ const CryptoStoreSetup: React.FC = () => {
     return (
       <>
         <div className="space-y-6">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-            <h3 className="text-lg font-bold text-red-900 mb-2">
-              Asegura tu frase de recuperación
-            </h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              La frase de recuperación es una copia de seguridad que te permite
-              restaurar tu billetera en caso de que el servidor falle. Si la
-              pierdes o la anotas de forma incorrecta, podrías perder
-              permanentemente el acceso a tus fondos. No la fotografíes. No la
-              almacenes digitalmente. La frase de recuperación también se
-              almacenará en el servidor como una hot wallet, en caso de
-              cualquier cosa NO podrás volver a ver tu frase semilla en la
-              sección Perfil.
-            </p>
-          </div>
-
-          <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-orange-600" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-orange-600 mb-2">
-                  Consejo de seguridad
-                </h3>
-                <p className="text-sm text-orange-900 leading-relaxed">
-                  Dado que las hot wallets están más expuestas a riesgos, te
-                  recomendamos mantener solo montos bajos para operaciones
-                  diarias y transferir periódicamente los fondos a tu billetera
-                  fría para maximizar tu seguridad. Esto reduce el riesgo en
-                  caso de que tu servidor o dispositivo sea comprometido.
-                </p>
-              </div>
-            </div>
-          </div>
-
           <div className="rounded-xl p-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
