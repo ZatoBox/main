@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { BTCPayService } from '@/backend/payments/btcpay/service';
 import { withAuth } from '@/app/api/middleware/auth';
 
-export const POST = withAuth(async (req: NextRequest, userId: string) => {
+export const DELETE = withAuth(async (req: NextRequest, userId: string) => {
   try {
     if (!process.env.BTCPAY_URL || !process.env.BTCPAY_API_KEY) {
       return NextResponse.json(
@@ -17,29 +17,18 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
       userId
     );
 
-    const existingXpub = await btcpayService.getUserXpub(userId);
-    if (existingXpub) {
-      return NextResponse.json(
-        { success: false, message: 'User already has an XPUB' },
-        { status: 400 }
-      );
-    }
-
-    const wallet = await btcpayService.generateUserWallet(userId);
+    await btcpayService.deleteUserStore(userId);
 
     return NextResponse.json({
       success: true,
-      xpub: wallet.xpub,
-      mnemonic: wallet.mnemonic,
-      fingerprint: wallet.fingerprint,
-      message: 'XPUB generated successfully',
+      message: 'Store deleted successfully',
     });
   } catch (error: any) {
-    console.error('Wallet generation error:', error);
+    console.error('Store deletion error:', error);
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to generate wallet',
+        message: error.message || 'Failed to delete store',
       },
       { status: 500 }
     );

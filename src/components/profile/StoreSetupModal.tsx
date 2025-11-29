@@ -7,9 +7,8 @@ import {
   Wallet,
   Store,
   Shield,
-  Copy,
-  Check,
   AlertTriangle,
+  AlertCircle,
 } from 'lucide-react';
 
 interface StoreSetupModalProps {
@@ -23,6 +22,7 @@ type SetupStep =
   | 'intro'
   | 'creating-store'
   | 'creating-wallet'
+  | 'security-warning'
   | 'show-mnemonic'
   | 'complete';
 
@@ -36,7 +36,7 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
-  const [copiedMnemonic, setCopiedMnemonic] = useState(false);
+  const [fingerprint, setFingerprint] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -89,22 +89,15 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
       if (data.mnemonic) {
         setMnemonic(data.mnemonic.split(' '));
       }
+      if (data.fingerprint) {
+        setFingerprint(data.fingerprint);
+      }
 
-      setCurrentStep('show-mnemonic');
+      setCurrentStep('security-warning');
     } catch (err: any) {
       setError(err.message || 'Error al crear la wallet');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCopyMnemonic = async () => {
-    try {
-      await navigator.clipboard.writeText(mnemonic.join(' '));
-      setCopiedMnemonic(true);
-      setTimeout(() => setCopiedMnemonic(false), 2000);
-    } catch (error) {
-      console.error('Error copying mnemonic:', error);
     }
   };
 
@@ -226,79 +219,180 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
           </div>
         );
 
-      case 'show-mnemonic':
+      case 'security-warning':
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                <AlertTriangle className="w-8 h-8 text-red-600" />
+              <div className="mx-auto w-16 h-16 flex items-center justify-center mb-4">
+                <AlertCircle className="w-16 h-16 text-orange-500" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Palabras de Recuperación
+                Asegura tu frase de recuperación
               </h2>
-              <p className="text-gray-600">
-                Guarda estas 12 palabras en un lugar seguro. Son la única forma
-                de recuperar tu wallet.
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+              <p className="text-sm text-gray-600 leading-relaxed">
+                La frase de recuperación es una copia de seguridad que te
+                permite restaurar tu billetera en caso de que el servidor falle.
+                Si la pierdes o la anotas de forma incorrecta, podrías perder
+                permanentemente el acceso a tus fondos. No la fotografíes. No la
+                almacenes digitalmente. La frase de recuperación también se
+                almacenará en el servidor como una hot wallet, en caso de
+                cualquier cosa NO podrás volver a ver tu frase semilla en la
+                sección Perfil.
               </p>
             </div>
 
-            <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
-              <div className="flex items-start space-x-3 mb-4">
-                <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-red-900">
-                  <p className="font-bold mb-1">⚠️ MUY IMPORTANTE</p>
-                  <ul className="space-y-1 text-red-800">
-                    <li>• Nunca compartas estas palabras con nadie</li>
-                    <li>• Guárdalas en un lugar seguro offline</li>
-                    <li>• Si las pierdes, perderás acceso a tus fondos</li>
-                  </ul>
+            <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
+              <div className="flex flex-col items-center text-center gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-orange-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-orange-600 mb-2">
+                    Consejo de seguridad
+                  </h3>
+                  <p className="text-sm text-orange-900 leading-relaxed">
+                    Dado que las hot wallets están más expuestas a riesgos, te
+                    recomendamos mantener solo montos bajos para operaciones
+                    diarias y transferir periódicamente los fondos a tu
+                    billetera fría para maximizar tu seguridad. Esto reduce el
+                    riesgo en caso de que tu servidor o dispositivo sea
+                    comprometido.
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                {mnemonic.map((word, index) => (
-                  <div
-                    key={index}
-                    className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center"
-                  >
-                    <span className="text-xs text-gray-500 block mb-1">
-                      {index + 1}
-                    </span>
-                    <span className="font-mono font-medium text-gray-900">
-                      {word}
-                    </span>
-                  </div>
-                ))}
-              </div>
+            <button
+              onClick={() => setCurrentStep('show-mnemonic')}
+              className="w-full py-4 bg-orange-500 text-white font-bold text-lg rounded-xl hover:bg-orange-600 transition-colors shadow-sm"
+            >
+              Entendido, mostrar frase
+            </button>
+          </div>
+        );
 
+      case 'show-mnemonic':
+        const firstColumn = mnemonic.slice(0, 6);
+        const secondColumn = mnemonic.slice(6, 12);
+
+        return (
+          <div className="flex flex-col h-full">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-center rounded-t-2xl z-10 ">
+              <h2 className="text-xl font-bold text-gray-900">
+                Asegura tu frase de recuperación
+              </h2>
               <button
-                onClick={handleCopyMnemonic}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={onClose}
+                className="absolute right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
-                {copiedMnemonic ? (
-                  <>
-                    <Check className="w-4 h-4 text-green-600" />
-                    <span className="text-green-600 font-medium">Copiado</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 text-gray-600" />
-                    <span className="text-gray-700 font-medium">
-                      Copiar Palabras
-                    </span>
-                  </>
-                )}
+                <X size={20} className="text-gray-500" />
               </button>
             </div>
 
-            <button
-              onClick={handleComplete}
-              className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
-            >
-              He guardado mis palabras de forma segura
-            </button>
+            <div className="p-6 space-y-8">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <AlertTriangle className="w-16 h-16 text-[#F88612]" />
+
+                <div className="space-y-1 max-w-lg mx-auto">
+                  <p className="text-gray-900 text-base">
+                    La combinación de palabras que ves a continuación se llama
+                    frase de recuperación. La frase de recuperación te permite
+                    Escríbela en un papel o metal en el orden exacto: acceder y
+                    restaurar tu billetera.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <div className="grid grid-cols-2 gap-x-12 gap-y-0 w-full max-w-md">
+                  <div className="flex flex-col">
+                    {firstColumn.map((word, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center py-3 border-b border-gray-200"
+                      >
+                        <span className="text-lg text-gray-300 w-8 font-medium">
+                          {index + 1}.
+                        </span>
+                        <span className="text-xl text-gray-900 font-normal">
+                          {word}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-col">
+                    {secondColumn.map((word, index) => (
+                      <div
+                        key={index + 6}
+                        className="flex items-center py-3 border-b border-gray-200"
+                      >
+                        <span className="text-lg text-gray-300 w-8 font-medium">
+                          {index + 7}.
+                        </span>
+                        <span className="text-xl text-gray-900 font-normal">
+                          {word}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {fingerprint && (
+                <div className="flex flex-col items-center justify-center space-y-2">
+                  <span className="text-base text-gray-500 font-medium">
+                    Master Fingerprint
+                  </span>
+                  <div className="px-4 py-2 rounded-lg">
+                    <code className="text-lg font-mono text-gray-900 tracking-wider">
+                      {fingerprint.toUpperCase()}
+                    </code>
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center text-sm text-gray-500 leading-relaxed space-y-2 max-w-lg mx-auto">
+                <p>
+                  La frase de recuperación es una copia de seguridad que te
+                  permite restaurar tu billetera en caso de que el servidor
+                  falle. Si la pierdes o la anotas de forma incorrecta, podrías
+                  perder permanentemente el acceso a tus fondos. No la
+                  fotografíes. No la almacenes digitalmente. La frase de
+                  recuperación también se almacenará en el servidor como una hot
+                  wallet.
+                </p>
+              </div>
+
+              <div className="bg-[#FFF9EC] border border-[#FFE0B2] rounded-xl p-6 space-y-3">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center border-2 border-[#A94D14]">
+                    <AlertTriangle className="w-6 h-6 text-[#A94D14]" />
+                  </div>
+                  <h3 className="font-bold text-[#F88612]">
+                    Consejo de seguridad
+                  </h3>
+                </div>
+                <p className="text-center text-sm text-gray-700 leading-relaxed">
+                  Dado que las hot wallet están más expuestas a riesgos, te
+                  recomendamos mantener solo montos bajos para operaciones
+                  diarias y transferir periódicamente los fondos a tu billetera
+                  fría para maximizar tu seguridad. Esto reduce el riesgo en
+                  caso de que tu servidor o dispositivo sea comprometido.
+                </p>
+              </div>
+
+              <button
+                onClick={handleComplete}
+                className="w-full py-4 bg-[#F88612] text-white font-bold text-lg rounded-xl hover:bg-[#E67300] transition-colors shadow-sm"
+              >
+                Hecho
+              </button>
+            </div>
           </div>
         );
 
@@ -334,7 +428,11 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
           className="animate-scale-in pointer-events-auto transform transition-all"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div
+            className={`relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto ${
+              currentStep === 'show-mnemonic' ? 'p-0' : 'p-8'
+            }`}
+          >
             {currentStep !== 'show-mnemonic' && currentStep !== 'complete' && (
               <button
                 onClick={onClose}

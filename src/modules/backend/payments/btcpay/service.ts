@@ -109,7 +109,12 @@ export class BTCPayService {
   async generateUserWallet(
     userId: string,
     storeName?: string
-  ): Promise<{ xpub: string; storeId: string; mnemonic?: string }> {
+  ): Promise<{
+    xpub: string;
+    storeId: string;
+    mnemonic?: string;
+    fingerprint?: string;
+  }> {
     const name = storeName?.trim() || `User Store ${userId.substring(0, 8)}`;
     const { storeId, store } = await this.ensureStore(userId, name);
 
@@ -175,10 +180,22 @@ export class BTCPayService {
 
     await this.ensureWebhook(userId, storeId, store?.webhook_secret);
 
+    const HDKey = require('hdkey');
+    let fingerprint: string | undefined;
+    try {
+      const hd = HDKey.fromExtendedKey(xpub);
+      if (hd.identifier) {
+        fingerprint = hd.identifier.slice(0, 4).toString('hex');
+      }
+    } catch (e) {
+      console.warn('Failed to derive fingerprint from xpub:', e);
+    }
+
     return {
       xpub,
       storeId,
       mnemonic,
+      fingerprint,
     };
   }
 
@@ -720,5 +737,25 @@ export class BTCPayService {
     await this.repository.updateInvoiceMetadata(invoiceId, updatedMetadata);
 
     return createdOrder;
+  }
+
+  async deleteUserStore(userId: string): Promise<void> {
+    const userStore = await this.repository.getUserStore(userId);
+    if (!userStore) {
+      throw new Error('User store not found');
+    }
+
+    try {
+      if (userStore.btcpay_store_id) {
+        await this.client.deleteStore(userStore.btcpay_store_id);
+      }
+    } catch (error: any) {
+      console.warn(
+        'Failed to delete store from BTCPay (might already be deleted):',
+        error.message
+      );
+    }
+
+    await this.repository.deleteUserStore(userId);
   }
 }

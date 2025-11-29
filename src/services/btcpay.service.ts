@@ -3,6 +3,7 @@ import type {
   BTCPayInvoice,
   InvoiceStatus,
 } from '@/backend/payments/btcpay/models';
+import axios from 'axios';
 
 class BTCPayAPIService {
   private baseUrl = '/api/payments/btcpay';
@@ -136,6 +137,53 @@ class BTCPayAPIService {
 
     return response.json();
   }
+
+  async getWalletDetails(token?: string): Promise<{
+    success: boolean;
+    mnemonic?: string[];
+    masterFingerprint?: string;
+    message?: string;
+  }> {
+    const headers: Record<string, string> = {};
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${this.baseUrl}/wallet/details`, {
+      headers,
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: `Error: ${response.status} ${response.statusText}`,
+      };
+    }
+
+    return response.json();
+  }
+
+  async getWalletOverview(token: string): Promise<{
+    success: boolean;
+    overview?: {
+      balance: string;
+      unconfirmedBalance: string;
+      confirmedBalance?: string;
+    };
+    message?: string;
+  }> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const response = await fetch(`${this.baseUrl}/wallets/BTC/overview`, {
+      headers,
+    });
+
+    return response.json();
+  }
+
   async sendFunds(
     token: string,
     data: {
@@ -161,6 +209,28 @@ class BTCPayAPIService {
     });
 
     return response.json();
+  }
+
+  async deleteStore(token: string): Promise<{
+    success: boolean;
+    message?: string;
+  }> {
+    try {
+      const response = await axios.delete(`${this.baseUrl}/store/delete`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          'Failed to delete store',
+      };
+    }
   }
 }
 
