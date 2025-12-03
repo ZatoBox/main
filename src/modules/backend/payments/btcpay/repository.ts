@@ -251,4 +251,15 @@ export class BTCPayRepository {
 
     if (error) throw new Error(`Failed to update xpub: ${error.message}`);
   }
+
+  async deleteUserStore(userId: string): Promise<void> {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from('user_btcpay_stores')
+      .delete()
+      .eq('user_id', userId);
+
+    if (error) throw new Error(`Failed to delete user store: ${error.message}`);
+  }
 }

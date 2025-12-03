@@ -3,9 +3,13 @@ import { createClient } from '@/utils/supabase/server';
 import { jwtDecode } from 'jwt-decode';
 
 export function withAuth(
-  handler: (req: NextRequest, userId: string) => Promise<NextResponse>
+  handler: (
+    req: NextRequest,
+    userId: string,
+    ...args: any[]
+  ) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest) => {
+  return async (req: NextRequest, ...args: any[]) => {
     try {
       const authHeader = req.headers.get('authorization');
       const cookieHeader = req.headers.get('cookie');
@@ -70,7 +74,7 @@ export function withAuth(
       }
 
       req.headers.set('x-user-id', userId);
-      return handler(req, userId);
+      return handler(req, userId, ...args);
     } catch (error) {
       return NextResponse.json(
         { success: false, message: 'Authentication error' },

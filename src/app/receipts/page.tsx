@@ -9,6 +9,7 @@ import ReceiptsHeader from '@/components/receipts/ReceiptsHeader';
 import ReceiptsFilters from '@/components/receipts/ReceiptsFilters';
 import ReceiptsGrid from '@/components/receipts/ReceiptsGrid';
 import ReceiptsStats from '@/components/receipts/ReceiptsStats';
+import Loader from '@/components/ui/Loader';
 
 interface Receipt {
   id: string;
@@ -48,13 +49,7 @@ const ReceiptsPage: React.FC = () => {
         if (data.success && Array.isArray(data.orders)) {
           const allReceipts = data.orders.map((order: any) => {
             const metaType = order.metadata?.paymentType;
-            const method = order.payment_method === 'cash'
-              ? 'cash'
-              : metaType === 'lightning'
-              ? 'lightning'
-              : metaType === 'btc'
-              ? 'bitcoin'
-              : 'bitcoin';
+            const method = order.payment_method === 'cash' ? 'cash' : 'bitcoin';
             return {
               id: order.id,
               receiptNumber: order.id.slice(0, 8).toUpperCase(),
@@ -132,14 +127,7 @@ const ReceiptsPage: React.FC = () => {
   ).length;
 
   if (loading && initialized && isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-bg-main">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-[#F88612]"></div>
-          <p className="text-text-secondary">Cargando recibos...</p>
-        </div>
-      </div>
-    );
+    return <Loader text="Cargando recibos..." />;
   }
 
   if (error && initialized && isAuthenticated) {
@@ -174,11 +162,11 @@ const ReceiptsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg-main">
-      <ReceiptsHeader onBack={() => router.push('/home')} />
+    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <ReceiptsHeader onBack={() => router.push('/home')} />
 
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="py-6">
+        <div>
           <ReceiptsStats
             totalReceipts={receipts.length}
             totalAmount={totalAmount}

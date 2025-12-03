@@ -11,6 +11,7 @@ import FileUploader from '@/components/ocr-result/FileUploader';
 import ResultOverview from '@/components/ocr-result/ResultOverview';
 import ItemsTable from '@/components/ocr-result/ItemsTable';
 import ActionsBar from '@/components/ocr-result/ActionsBar';
+import Loader from '@/components/ui/Loader';
 
 const OCRResultPage: React.FC = () => {
   const router = useRouter();
@@ -19,6 +20,7 @@ const OCRResultPage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<OCRResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editedResult, setEditedResult] = useState<OCRResponse | null>(null);
@@ -28,6 +30,13 @@ const OCRResultPage: React.FC = () => {
     rotation_correction: true,
     confidence_threshold: 0.25,
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const processAnotherDisabled = isOnCooldown;
   const remainingLabel = isOnCooldown
@@ -98,11 +107,11 @@ const OCRResultPage: React.FC = () => {
 
           const productCategories = Array.isArray(item.categories)
             ? item.categories.filter(
-                (c: any) => typeof c === 'string' && c.trim(),
+                (c: any) => typeof c === 'string' && c.trim()
               )
             : item.category
-              ? [item.category]
-              : ['Otros'];
+            ? [item.category]
+            : ['Otros'];
 
           return {
             name,
@@ -202,7 +211,7 @@ const OCRResultPage: React.FC = () => {
       const buildAutoDescription = (
         name: string,
         quantity: string,
-        unitPrice: string,
+        unitPrice: string
       ) => {
         const safeName = sanitizeText(name, 'Producto');
         const qtyNum = parseInt(quantity, 10);
@@ -230,7 +239,7 @@ const OCRResultPage: React.FC = () => {
           const name = sanitizeText(item?.name, 'Unnamed Product');
           let description = sanitizeText(
             item?.description || item?.descripcion || item?.detalles,
-            '',
+            ''
           );
 
           let unitPrice: string;
@@ -248,7 +257,7 @@ const OCRResultPage: React.FC = () => {
           const unitPriceNum = parseFloat(unitPrice);
           const providedTotal = sanitizeNumber(
             item?.total_price ?? item?.total ?? item?.price,
-            '',
+            ''
           );
           const computedTotal =
             Number.isFinite(unitPriceNum) && Number.isFinite(quantityNum)
@@ -283,10 +292,10 @@ const OCRResultPage: React.FC = () => {
             total_price: finalTotal,
             category: sanitizeText(
               item?.category ?? item?.categories?.[0],
-              'General',
+              'General'
             ),
           } as OCRLineItem;
-        },
+        }
       );
 
       const metadataSource = (() => {
@@ -308,7 +317,7 @@ const OCRResultPage: React.FC = () => {
             if (key in (ocrResult as any)) acc[key] = (ocrResult as any)[key];
             return acc;
           },
-          {},
+          {}
         );
         return collected;
       })();
@@ -317,14 +326,14 @@ const OCRResultPage: React.FC = () => {
         const value = parseFloat(
           typeof current.total_price === 'number'
             ? String(current.total_price)
-            : current.total_price || '0',
+            : current.total_price || '0'
         );
         return acc + (Number.isFinite(value) ? value : 0);
       }, 0);
       const subtotalFromModel = sanitizeNumber(metadataSource?.subtotal, '');
       const ivaFromModel = sanitizeNumber(
         metadataSource?.iva ?? metadataSource?.tax,
-        '',
+        ''
       );
       const totalFromModel = sanitizeNumber(metadataSource?.total, '');
       const subtotal = subtotalFromModel || subtotalFromItems.toFixed(2);
@@ -377,7 +386,7 @@ const OCRResultPage: React.FC = () => {
         setError('');
       } else {
         setError(
-          `Error procesando documento: ${errorMessage}. Por favor intenta de nuevo.`,
+          `Error procesando documento: ${errorMessage}. Por favor intenta de nuevo.`
         );
       }
     } finally {
@@ -397,7 +406,7 @@ const OCRResultPage: React.FC = () => {
         ({
           ...(prev || result || { success: true }),
           line_items: items,
-        }) as OCRResponse,
+        } as OCRResponse)
     );
   };
 
@@ -422,7 +431,7 @@ const OCRResultPage: React.FC = () => {
     setIsEditing(false);
     setEditedResult(null);
     const fileInput = document.getElementById(
-      'file-upload',
+      'file-upload'
     ) as HTMLInputElement;
     if (fileInput) fileInput.value = '';
   };
@@ -439,12 +448,16 @@ const OCRResultPage: React.FC = () => {
     setIsEditing(false);
   };
 
+  if (pageLoading) {
+    return <Loader text="Cargando OCR..." />;
+  }
+
   return (
-    <div className="flex items-start justify-center min-h-screen p-6  md:mt-32 mt-24">
-      <div className="w-full max-w-5xl">
+    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <Header />
         {!result ? (
           <div className="p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]">
-            <Header />
             <FileUploader
               fileName={file?.name ?? null}
               onChange={(f) => {
@@ -495,8 +508,8 @@ const OCRResultPage: React.FC = () => {
             <ItemsTable
               items={
                 (isEditing
-                  ? (editedResult?.line_items ?? [])
-                  : (result?.line_items ?? [])) as OCRLineItem[]
+                  ? editedResult?.line_items ?? []
+                  : result?.line_items ?? []) as OCRLineItem[]
               }
               isEditing={isEditing}
               onChange={handleTableChange}

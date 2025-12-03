@@ -10,8 +10,6 @@ interface BTCPayModalProps {
   currency: string;
   paymentUrl: string;
   status: string;
-  paymentType?: 'btc' | 'lightning';
-  userXpub?: string;
   onClose: () => void;
   onConfirmPayment?: (invoiceId: string) => void;
 }
@@ -23,8 +21,6 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
   currency,
   paymentUrl,
   status,
-  paymentType = 'btc',
-  userXpub,
   onClose,
   onConfirmPayment,
 }) => {
@@ -57,12 +53,11 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
 
   useEffect(() => {
     if (isOpen && canvasRef.current) {
-      const qrData = paymentType === 'lightning' && userXpub ? userXpub : paymentUrl;
-      if (qrData) {
-        generateQR(qrData);
+      if (paymentUrl) {
+        generateQR(paymentUrl);
       }
     }
-  }, [isOpen, paymentUrl, paymentType, userXpub]);
+  }, [isOpen, paymentUrl]);
 
   const generateQR = async (data: string) => {
     try {
@@ -87,8 +82,7 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
 
   const handleCopy = async () => {
     try {
-      const textToCopy = paymentType === 'lightning' && userXpub ? userXpub : paymentUrl;
-      await navigator.clipboard.writeText(textToCopy);
+      await navigator.clipboard.writeText(paymentUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
@@ -158,7 +152,7 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
 
             <div className="flex flex-col items-center space-y-6">
               <h2 className="text-2xl font-bold text-center text-gray-900">
-                {paymentType === 'lightning' ? 'Pago con Lightning' : 'Pago con Bitcoin'}
+                Pago con Bitcoin
               </h2>
 
               <div className="bg-white p-4 rounded-xl border-2 border-gray-200">
@@ -177,16 +171,16 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
 
                 <div className="bg-[#FEF9EC] rounded-lg p-4 border border-[#EEB131]">
                   <p className="text-sm text-[#F88612] text-center mb-2">
-                    {paymentType === 'lightning' && userXpub ? 'XPUB del Usuario' : 'Dirección de pago'}
+                    Dirección de pago
                   </p>
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-mono text-gray-700 break-all flex-1">
-                      {paymentType === 'lightning' && userXpub ? userXpub : getBitcoinAddress(paymentUrl)}
+                      {getBitcoinAddress(paymentUrl)}
                     </p>
                     <button
                       onClick={handleCopy}
                       className="p-2 hover:bg-[#FEF9EC] rounded-lg transition-colors flex-shrink-0"
-                      title={paymentType === 'lightning' ? 'Copiar XPUB' : 'Copiar dirección'}
+                      title={'Copiar dirección'}
                     >
                       {copied ? (
                         <Check size={16} className="text-green-600" />

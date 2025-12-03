@@ -8,7 +8,6 @@ export enum InvoiceStatus {
 
 export enum PaymentMethodType {
   BTC_CHAIN = 'BTC-CHAIN',
-  BTC_LN = 'BTC-LN',
 }
 
 export interface BTCPayInvoiceMetadata {
@@ -126,12 +125,6 @@ export interface UpdateOnChainPaymentMethodRequest {
   accountNumber?: number;
 }
 
-export interface UpdateLightningPaymentMethodRequest {
-  connectionString: string;
-  label?: string;
-  enabled?: boolean;
-}
-
 export interface WalletOverview {
   balance: string;
   unconfirmedBalance: string;
@@ -185,4 +178,30 @@ export interface Payout {
     | 'InProgress'
     | 'Completed'
     | 'Cancelled';
+}
+
+export interface CreateOnChainTransactionRequest {
+  destinations: {
+    destination: string;
+    amount?: string;
+    subtractFromAmount?: boolean;
+  }[];
+  feeRate: number;
+  proceedWithPayjoin?: boolean;
+  proceedWithBroadcast?: boolean;
+  noChange?: boolean;
+  rbf?: boolean;
+  selectedInputs?: string[];
+}
+
+export interface OnChainTransactionResponse {
+  transactionHash: string;
+  comment: string;
+  amount: string;
+  blockHeight: number;
+  confirmations: number;
+  fee: string;
+  timestamp: number;
+  status: string;
+  labels: any;
 }
