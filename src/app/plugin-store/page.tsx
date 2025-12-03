@@ -1,20 +1,20 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronRight, Wallet } from 'lucide-react';
 import { useAuth } from '@/context/auth-store';
 import { usePlugins } from '@/context/plugin-context';
 import PluginGrid from '@/components/plugin-store/PluginGrid';
-import FeaturedSection from '@/components/plugin-store/FeaturedSection';
 import PluginNotification from '@/components/plugin-store/PluginNotification';
+import Loader from '@/components/ui/Loader';
 
 interface IPlugin {
   id: string;
   name: string;
   description: string;
   category: string;
-  icon: string;
+  icon: React.ReactNode | string;
   status: 'active' | 'inactive' | 'coming-soon' | 'maintenance';
   version: string;
   author: string;
@@ -28,33 +28,17 @@ interface IPlugin {
 const PluginStorePage: React.FC = () => {
   const router = useRouter();
   const { token } = useAuth();
-  const { isPluginActive, togglePlugin } = usePlugins();
+  const { isPluginActive, togglePlugin, activePlugins } = usePlugins();
   const [plugins, setPlugins] = useState<IPlugin[]>([]);
   const [filteredPlugins, setFilteredPlugins] = useState<IPlugin[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const categoriesRef = useRef<HTMLDivElement>(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState<'success' | 'info'>(
     'info'
   );
 
-  const categories = [
-    { id: 'all', name: 'Descubrir', icon: '🌟' },
-    { id: 'productivity', name: 'Archivos y Productividad', icon: '📁' },
-    { id: 'inventory', name: 'Inventario', icon: '📦' },
-    { id: 'sales', name: 'Ventas', icon: '💰' },
-    { id: 'analytics', name: 'Analítica', icon: '📊' },
-    { id: 'automation', name: 'Automatización', icon: '⚡' },
-    { id: 'integrations', name: 'Integraciones', icon: '🔗' },
-    { id: 'developer', name: 'Herramientas para Desarrolladores', icon: '🛠️' },
-  ];
-
-  // Mock data for plugins
   const mockPlugins: IPlugin[] = [
     {
       id: 'ocr-module',
@@ -79,154 +63,66 @@ const PluginStorePage: React.FC = () => {
         'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop',
     },
     {
-      id: 'smart-inventory',
-      name: 'Gestor de Inventario Inteligente',
-      description:
-        'Seguimiento avanzado de inventario con predicciones de stock impulsadas por IA y alertas',
-      category: 'inventory',
-      icon: '🧠',
-      status: 'coming-soon',
-      version: '2.1.0',
+      id: 'receipts',
+      name: 'Recibos',
+      description: 'Gestión y visualización de recibos de compra',
+      category: 'productivity',
+      icon: '🧾',
+      status: 'active',
+      version: '1.0.0',
       author: 'ZatoBox Team',
-      rating: 0,
-      installs: 0,
-      price: 'premium',
+      rating: 4.5,
+      installs: 420,
+      price: 'free',
       features: [
-        'Predicciones de IA',
-        'Alertas de bajo stock',
-        'Pronóstico de demanda',
-        'Reordenamiento automatizado',
+        'Almacenamiento de recibos',
+        'Búsqueda por cliente',
+        'Exportar PDF',
       ],
       screenshot:
-        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=400&h=300&fit=crop',
     },
     {
-      id: 'advanced-analytics',
-      name: 'Panel de Control de Analítica Avanzada',
-      description:
-        'Analítica empresarial integral con información y generación de informes en tiempo real',
-      category: 'analytics',
-      icon: '📈',
-      status: 'coming-soon',
-      version: '1.0.0',
-      author: 'ZatoBox Team',
-      rating: 0,
-      installs: 0,
-      price: 'premium',
-      features: [
-        'Paneles de control en tiempo real',
-        'Informes personalizados',
-        'Visualización de datos',
-        'Capacidades de exportación',
-      ],
-    },
-    {
-      id: 'pos-integration',
-      name: 'Integración de Sistemas POS',
-      description:
-        'Conéctese con sistemas POS populares para una sincronización de datos sin problemas',
-      category: 'integrations',
-      icon: '💳',
-      status: 'coming-soon',
-      version: '1.0.0',
-      author: 'ZatoBox Team',
-      rating: 4.7,
-      installs: 850,
-      price: 'free',
-      features: [
-        'Soporte para múltiples POS',
-        'Sincronización en tiempo real',
-        'Procesamiento de pagos',
-        'Impresión de recibos',
-      ],
-    },
-    {
-      id: 'email-automation',
-      name: 'Automatización de Email Marketing',
-      description:
-        'Automatice las comunicaciones con los clientes y las campañas de marketing',
-      category: 'automation',
-      icon: '📧',
-      status: 'coming-soon',
-      version: '1.0.0',
-      author: 'ZatoBox Team',
-      rating: 0,
-      installs: 0,
-      price: 'premium',
-      features: [
-        'Plantillas de email',
-        'Campañas automatizadas',
-        'Segmentación de clientes',
-        'Seguimiento de rendimiento',
-      ],
-    },
-    {
-      id: 'mobile-app',
-      name: 'Aplicación Móvil',
-      description:
-        'Aplicación móvil nativa para gestionar su negocio sobre la marcha',
-      category: 'productivity',
-      icon: '📱',
-      status: 'coming-soon',
-      version: '1.0.0',
-      author: 'ZatoBox Team',
-      rating: 0,
-      installs: 0,
-      price: 'free',
-      features: [
-        'Modo fuera de línea',
-        'Notificaciones push',
-        'Escaneo de códigos de barras',
-        'Acciones rápidas',
-      ],
-    },
-    {
-      id: 'api-gateway',
-      name: 'Pasarela API',
-      description:
-        'Herramientas para desarrolladores para integraciones personalizadas y conexiones de terceros',
-      category: 'developer',
-      icon: '🔌',
-      status: 'coming-soon',
-      version: '1.0.0',
-      author: 'ZatoBox Team',
-      rating: 0,
-      installs: 0,
-      price: 'premium',
-      features: ['REST API', 'Webhooks', 'Soporte OAuth', 'Límites de tasa'],
-    },
-    {
-      id: 'multi-store',
-      name: 'Gestor de Múltiples Tiendas',
-      description:
-        'Administre múltiples ubicaciones de tiendas desde un solo panel',
+      id: 'restock',
+      name: 'Restock',
+      description: 'Automatiza reabastecimiento y alertas de stock',
       category: 'inventory',
-      icon: '🏪',
-      status: 'coming-soon',
+      icon: '📦',
+      status: 'active',
       version: '1.0.0',
       author: 'ZatoBox Team',
-      rating: 0,
-      installs: 0,
-      price: 'premium',
+      rating: 4.6,
+      installs: 300,
+      price: 'free',
       features: [
-        'Gestión de tiendas',
-        'Sincronización de inventario',
-        'Informes centralizados',
-        'Acceso basado en roles',
+        'Alertas de bajo stock',
+        'Sugerencias de reorden',
+        'Pedidos automáticos',
       ],
+      screenshot:
+        'https://assets.bwbx.io/images/users/iqjWHBFdfxIU/ifqONX8Chb7o/v1/715x-1.jpg',
+    },
+    {
+      id: 'wallet',
+      name: 'Wallet',
+      description: 'Gestiona tus fondos y realiza pagos',
+      category: 'sales',
+      icon: <Wallet size={24} />,
+      status: 'inactive',
+      version: '1.0.0',
+      author: 'ZatoBox Team',
+      rating: 4.9,
+      installs: 1500,
+      price: 'free',
+      features: ['Gestiona tus fondos', 'Retiros', 'Historial'],
+      screenshot:
+        'https://i.pinimg.com/736x/f1/5e/71/f15e71b099330088cfd2902f56280782.jpg',
     },
   ];
 
   useEffect(() => {
-    // Simulate loading
     setTimeout(() => {
       const syncedPlugins = mockPlugins.map((plugin) => {
-        if (
-          plugin.status === 'coming-soon' ||
-          plugin.status === 'maintenance'
-        ) {
-          return plugin;
-        }
         return {
           ...plugin,
           status: (isPluginActive(plugin.id) ? 'active' : 'inactive') as
@@ -241,19 +137,11 @@ const PluginStorePage: React.FC = () => {
       setFilteredPlugins(syncedPlugins);
       setLoading(false);
     }, 1000);
-  }, [isPluginActive]);
+  }, [activePlugins]);
 
   useEffect(() => {
     let filtered = plugins;
 
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(
-        (plugin) => plugin.category === selectedCategory
-      );
-    }
-
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(
         (plugin) =>
@@ -263,55 +151,12 @@ const PluginStorePage: React.FC = () => {
     }
 
     setFilteredPlugins(filtered);
-  }, [plugins, selectedCategory, searchQuery]);
+  }, [plugins, searchQuery]);
 
-  // Functions for horizontal scrolling
-  const checkScrollButtons = () => {
-    if (categoriesRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = categoriesRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
-    }
-  };
-
-  const scrollLeft = () => {
-    if (categoriesRef.current) {
-      categoriesRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-    }
-  };
-
-  const scrollRight = () => {
-    if (categoriesRef.current) {
-      categoriesRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-    }
-  };
-
-  // Effect to check scroll buttons on mount and resize
-  useEffect(() => {
-    checkScrollButtons();
-    window.addEventListener('resize', checkScrollButtons);
-
-    // Check scroll buttons after a short delay to ensure DOM is ready
-    const timeoutId = setTimeout(checkScrollButtons, 100);
-
-    return () => {
-      window.removeEventListener('resize', checkScrollButtons);
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
-  // Effect to update scroll buttons when filtered plugins change
-  useEffect(() => {
-    const timeoutId = setTimeout(checkScrollButtons, 50);
-    return () => clearTimeout(timeoutId);
-  }, [filteredPlugins]);
-
-  // Function to show notification
   const showPluginNotification = (
     message: string,
     type: 'success' | 'info'
   ) => {
-    // Only show notifications when explicitly called, not automatically
     setNotificationMessage(message);
     setNotificationType(type);
     setShowNotification(true);
@@ -327,16 +172,13 @@ const PluginStorePage: React.FC = () => {
       return;
     }
 
-    // Get current plugin info
     const plugin = plugins.find((p) => p.id === pluginId);
     if (!plugin) {
       return;
     }
 
-    // Toggle plugin status using context
-    togglePlugin(pluginId);
+    await togglePlugin(pluginId);
 
-    // Update local state to reflect the change
     setPlugins((prev) =>
       prev.map((p) => {
         if (p.id === pluginId) {
@@ -349,8 +191,6 @@ const PluginStorePage: React.FC = () => {
         return p;
       })
     );
-
-    // Plugin status updated successfully
   };
 
   const getStatusBadge = (status: string) => {
@@ -397,123 +237,45 @@ const PluginStorePage: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-bg-main">
-        <div className="text-center">
-          <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
-          <p className="text-sm sm:text-base text-text-secondary">
-            Cargando tienda de plugins...
-          </p>
-        </div>
-      </div>
-    );
+    return <Loader text="Cargando tienda de plugins..." />;
   }
 
   return (
-    <div className="min-h-screen bg-bg-main">
-      {/* Header */}
-      <div className="bg-white border-b border-[#CBD5E1] ">
-        <div className="px-3 mx-auto max-w-7xl sm:px-6 lg:px-8 w-full min-w-0">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-              <h1 className="text-xl  font-bold text-text-primary truncate">
-                Tienda de Plugins
-              </h1>
-              <p className="hidden m-4 text-xs sm:text-sm text-text-secondary lg:block truncate">
-                Explora la creciente colección de módulos comerciales en
-                ZatoBox
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-3 py-4 mx-auto max-w-7xl sm:px-6 sm:py-8 lg:px-8 lg:py-8 w-full min-w-0">
-        {/* Search and Filters */}
-        <div className="mb-6 sm:mb-8">
-          {/* Category Tabs with Horizontal Scroll */}
-          <div className="relative mb-4 sm:mb-6">
-            <div className="relative">
-              {/* Left Arrow */}
-              {canScrollLeft && (
-                <button
-                  onClick={scrollLeft}
-                  className="absolute left-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110"
-                >
-                  <ChevronLeft size={16} className="text-text-primary" />
-                </button>
-              )}
-
-              {/* Right Arrow */}
-              {canScrollRight && (
-                <button
-                  onClick={scrollRight}
-                  className="absolute right-0 z-10 flex items-center justify-center w-8 h-8 transition-all duration-200 transform -translate-y-1/2 bg-white border rounded-full shadow-lg top-1/2 border-divider hover:bg-gray-50 hover:scale-110"
-                >
-                  <ChevronRight size={16} className="text-text-primary" />
-                </button>
-              )}
-
-              {/* Categories Container */}
-              <div
-                ref={categoriesRef}
-                onScroll={checkScrollButtons}
-                className="flex gap-2 sm:gap-3 px-1 py-1 overflow-x-auto scrollbar-hide category-scroll-container w-full min-w-0"
-                style={{
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none',
-                }}
-              >
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`flex-shrink-0 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap category-tab ${
-                      selectedCategory === category.id
-                        ? 'active shadow-md transform scale-105'
-                        : 'bg-gray-100 text-text-secondary hover:bg-gray-200 hover:shadow-sm'
-                    }`}
-                  >
-                    <span className="mr-1 sm:mr-2">{category.icon}</span>
-                    <span className="hidden sm:inline">{category.name}</span>
-                    <span className="sm:hidden">
-                      {category.name.split(' ')[0]}
-                    </span>
-                  </button>
-                ))}
+    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-sm text-[#64748B]">
+                <span>Herramientas</span>
+                <ChevronRight size={14} />
+                <span className="text-[#F88612] font-medium">Plugins</span>
               </div>
-
-              {/* Gradient Overlay for Right Edge */}
-              <div className="absolute top-0 bottom-0 right-0 w-6 sm:w-8 pointer-events-none bg-gradient-to-l from-white to-transparent"></div>
+              <div>
+                <h1 className="text-2xl font-bold text-[#1E293B]">
+                  Tienda de Plugins
+                </h1>
+                <p className="text-[#64748B]">
+                  Explora y gestiona los módulos comerciales de ZatoBox
+                </p>
+              </div>
             </div>
-          </div>
 
-          {/* Search Section */}
-          <div className="animate-slide-in-left">
-            <div className="relative group">
+            <div className="relative w-full md:w-80">
               <Search
-                size={16}
-                className="absolute transform -translate-y-1/2 left-3 sm:left-4 top-1/2 text-gray-400 group-focus-within:text-zatobox-500 transition-colors duration-200"
+                size={20}
+                className="absolute transform -translate-y-1/2 left-3 top-1/2 text-gray-400"
               />
               <input
                 type="text"
-                placeholder="Search plugins..."
+                placeholder="Buscar plugins..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full py-3 sm:py-4 pl-10 sm:pl-12 pr-4 text-sm transition-all duration-300 border rounded-xl border-gray-200 focus:ring-2 focus:ring-zatobox-500/20 focus:border-zatobox-500 bg-white text-gray-900 placeholder-gray-400 hover:border-gray-300 hover:shadow-sm focus:shadow-md"
+                className="w-full py-2.5 pl-10 pr-4 text-sm bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#F88612]/20 focus:border-[#F88612] outline-none transition-all placeholder-gray-400"
               />
             </div>
           </div>
         </div>
-
-        {selectedCategory === 'all' && (
-          <FeaturedSection
-            plugins={filteredPlugins}
-            getStatusBadge={getStatusBadge}
-            getPriceBadge={getPriceBadge}
-            onToggle={handlePluginToggle}
-          />
-        )}
 
         <PluginGrid
           plugins={filteredPlugins}
@@ -522,20 +284,16 @@ const PluginStorePage: React.FC = () => {
           getPriceBadge={getPriceBadge}
         />
 
-        {/* Empty State */}
         {filteredPlugins.length === 0 && (
-          <div className="py-8 sm:py-12 text-center">
-            <div className="mb-4 text-4xl sm:text-6xl">🔍</div>
-            <h3 className="mb-2 text-lg sm:text-xl font-semibold text-text-primary">
+          <div className="py-12 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <div className="mb-4 text-4xl">🔍</div>
+            <h3 className="mb-2 text-lg font-semibold text-[#1E293B]">
               No se encontraron plugins
             </h3>
-            <p className="text-sm sm:text-base text-text-secondary">
-              Intenta ajustar tu búsqueda o criterios de filtrado
-            </p>
+            <p className="text-[#64748B]">Intenta ajustar tu búsqueda</p>
           </div>
         )}
 
-        {/* Plugin Change Notification */}
         {showNotification && (
           <PluginNotification
             message={notificationMessage}

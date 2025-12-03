@@ -234,7 +234,7 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
                     }`}
                   >
-                    Crypto
+                    Bitcoin
                   </button>
                 </div>
               </div>
@@ -264,7 +264,7 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                 ) : paymentMethod === 'cash' ? (
                   'Create Cash Order'
                 ) : (
-                  'Pay with Crypto'
+                  'Pay with Bitcoin'
                 )}
               </button>
 

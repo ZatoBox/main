@@ -10,8 +10,11 @@ import type {
   CreatePullPaymentRequest,
   PullPayment,
   Payout,
+  UpdateOnChainPaymentMethodRequest,
+  CreateOnChainTransactionRequest,
+  OnChainTransactionResponse,
 } from './models';
-import { TorGatewayClient } from './tor-gateway-client';
+import { BTCPayHTTPClient } from './BTCPayHTTPClient';
 
 interface BTCPayClientConfig {
   apiUrl: string;
@@ -24,13 +27,13 @@ export class BTCPayClient {
   private apiUrl: string;
   private apiKey: string;
   private storeId?: string;
-  private btcpayClient: TorGatewayClient;
+  private btcpayClient: BTCPayHTTPClient;
 
   constructor(config: BTCPayClientConfig) {
     this.apiUrl = config.apiUrl.replace(/\/$/, '');
     this.apiKey = config.apiKey;
     this.storeId = config.storeId;
-    this.btcpayClient = new TorGatewayClient(
+    this.btcpayClient = new BTCPayHTTPClient(
       this.apiUrl,
       this.apiKey,
       config.userId
@@ -120,6 +123,28 @@ export class BTCPayClient {
     );
   }
 
+  async setOnChainPaymentMethod(
+    storeId: string,
+    cryptoCode: string,
+    data: UpdateOnChainPaymentMethodRequest
+  ): Promise<void> {
+    await this.request<void>(
+      'PUT',
+      `/api/v1/stores/${storeId}/payment-methods/onchain/${cryptoCode}`,
+      data
+    );
+  }
+
+  async deleteOnChainPaymentMethod(
+    storeId: string,
+    cryptoCode: string
+  ): Promise<void> {
+    await this.request<void>(
+      'DELETE',
+      `/api/v1/stores/${storeId}/payment-methods/onchain/${cryptoCode}`
+    );
+  }
+
   async getWebhooks(storeId: string): Promise<BTCPayWebhook[]> {
     return this.request<BTCPayWebhook[]>(
       'GET',
@@ -199,6 +224,18 @@ export class BTCPayClient {
       'POST',
       `/api/v1/stores/${storeId}/payouts/${payoutId}/cancel`,
       {}
+    );
+  }
+
+  async createOnChainTransaction(
+    storeId: string,
+    cryptoCode: string,
+    data: CreateOnChainTransactionRequest
+  ): Promise<OnChainTransactionResponse> {
+    return this.request<OnChainTransactionResponse>(
+      'POST',
+      `/api/v1/stores/${storeId}/payment-methods/onchain/${cryptoCode}/wallet/transactions`,
+      data
     );
   }
 

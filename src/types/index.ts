@@ -26,6 +26,7 @@ export interface User {
   premium_up_to?: string;
   created_at?: string;
   last_updated?: string;
+  modules?: Record<string, boolean>;
 }
 
 export interface AuthResponse {

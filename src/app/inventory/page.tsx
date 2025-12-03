@@ -11,6 +11,7 @@ import InventoryFilters from '@/components/inventory/InventoryFilters';
 import InventoryGrid from '@/components/inventory/InventoryGrid';
 import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
 import { useToast } from '@/hooks/use-toast';
+import Loader from '@/components/ui/Loader';
 
 const InventoryPage: React.FC = () => {
   const router = useRouter();
@@ -306,18 +307,15 @@ const InventoryPage: React.FC = () => {
       status: p.active ? 'active' : 'inactive',
       stock: p.stock,
       price: p.price,
+      imageUrl:
+        Array.isArray(p.images) && p.images.length > 0
+          ? p.images[0]
+          : undefined,
     };
   });
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen  bg-bg-main">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-gray-300"></div>
-          <p className="text-text-secondary">Cargando productos...</p>
-        </div>
-      </div>
-    );
+    return <Loader text="Cargando productos..." />;
   }
 
   if (error) {
@@ -352,94 +350,96 @@ const InventoryPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg-main">
-      <InventoryHeader
-        onBack={() => router.push('/')}
-        onCreate={() => router.push('/new-product')}
-        selectedCount={selectedItems.length}
-        onToggleSelectedStatus={handleToggleSelectedStatus}
-        onBulkDelete={handleBulkDelete}
-        deletingItems={deletingItems}
-        selectedStatus={
-          selectedItems.length > 0 &&
-          inventoryItems.some(
-            (item) => selectedItems.includes(item.id) && item.active
-          )
-        }
-      />
-
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <InventoryFilters
-          categories={['all', ...categories.map((c) => c.name)]}
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
+    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <InventoryHeader
+          onBack={() => router.push('/')}
+          onCreate={() => router.push('/new-product')}
+          selectedCount={selectedItems.length}
+          onToggleSelectedStatus={handleToggleSelectedStatus}
+          onBulkDelete={handleBulkDelete}
+          deletingItems={deletingItems}
+          selectedStatus={
+            selectedItems.length > 0 &&
+            inventoryItems.some(
+              (item) => selectedItems.includes(item.id) && item.active
+            )
+          }
         />
 
-        <div className="px-0 py-6 mx-auto max-w-7xl sm:px-0 lg:px-0">
-          {error && (
-            <div className="p-4 mb-4 border border-red-200 rounded-lg bg-red-50">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="w-5 h-5 text-red-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Error</h3>
-                  <div className="mt-2 text-sm text-red-700">{error}</div>
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      onClick={() => setError(null)}
-                      className="bg-red-50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 hover:bg-red-100"
+        <div>
+          <InventoryFilters
+            categories={['all', ...categories.map((c) => c.name)]}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
+
+          <div className="mt-6">
+            {error && (
+              <div className="p-4 mb-4 border border-red-200 rounded-xl bg-red-50">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="w-5 h-5 text-red-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
                     >
-                      Descartar
-                    </button>
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">Error</h3>
+                    <div className="mt-2 text-sm text-red-700">{error}</div>
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setError(null)}
+                        className="bg-red-50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 hover:bg-red-100"
+                      >
+                        Descartar
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <InventoryGrid
-            items={uiItems}
-            selectedItems={selectedItems}
-            onSelectItem={handleSelectItem}
-            onEditProduct={handleEditProduct}
-            onDeleteClick={handleDeleteClick}
-            onSelectAll={handleSelectAll}
-          />
+            <InventoryGrid
+              items={uiItems}
+              selectedItems={selectedItems}
+              onSelectItem={handleSelectItem}
+              onEditProduct={handleEditProduct}
+              onDeleteClick={handleDeleteClick}
+              onSelectAll={handleSelectAll}
+            />
 
-          {filteredItems.length === 0 && (
-            <div className="p-12 text-center border border-gray-300 rounded-lg shadow-sm bg-bg-surface border-divider">
-              <Package size={48} className="mx-auto mb-4 text-gray-300" />
-              <h3 className="mb-2 text-lg font-medium text-text-primary">
-                No se encontraron elementos
-              </h3>
-              <p className="text-text-secondary">
-                Intenta ajustar los filtros o crear un nuevo elemento.
-              </p>
-            </div>
-          )}
+            {filteredItems.length === 0 && (
+              <div className="p-12 text-center border border-gray-200 rounded-2xl shadow-sm bg-white">
+                <Package size={48} className="mx-auto mb-4 text-gray-300" />
+                <h3 className="mb-2 text-lg font-medium text-gray-900">
+                  No se encontraron elementos
+                </h3>
+                <p className="text-gray-500">
+                  Intenta ajustar los filtros o crear un nuevo elemento.
+                </p>
+              </div>
+            )}
 
-          <DeleteConfirmModal
-            open={!!deleteConfirmId}
-            onCancel={handleDeleteCancel}
-            onConfirm={handleDeleteConfirm}
-            loading={isDeleting}
-          />
+            <DeleteConfirmModal
+              open={!!deleteConfirmId}
+              onCancel={handleDeleteCancel}
+              onConfirm={handleDeleteConfirm}
+              loading={isDeleting}
+            />
+          </div>
         </div>
       </div>
     </div>

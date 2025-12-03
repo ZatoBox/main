@@ -8,7 +8,9 @@ import {
   CheckCircle2,
   Loader2,
   X,
+  ChevronRight,
 } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 import { productsAPI } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
 import type { Product } from '@/types';
@@ -159,15 +161,22 @@ const RestockPage: React.FC = () => {
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   return (
-    <div className="min-h-screen bg-bg-main">
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#000000] mb-2">
-            Reabastecer Inventario
-          </h1>
-          <p className="text-[#9CA3AF]">
-            Busca productos y agrega cantidades al stock
-          </p>
+    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-sm text-[#64748B]">
+            <span>Inventario</span>
+            <ChevronRight size={14} />
+            <span className="text-[#F88612] font-medium">Restock</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-[#1E293B]">
+              Reabastecer Inventario
+            </h1>
+            <p className="text-[#64748B]">
+              Busca productos y agrega cantidades al stock
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -196,9 +205,11 @@ const RestockPage: React.FC = () => {
               )}
 
               {isLoading ? (
-                <div className="flex justify-center items-center py-12">
-                  <Loader2 className="animate-spin text-[#F88612]" size={32} />
-                </div>
+                <Loader
+                  fullScreen={false}
+                  className="py-12"
+                  text="Cargando productos..."
+                />
               ) : (
                 <div className="space-y-4">
                   <div className="space-y-2">

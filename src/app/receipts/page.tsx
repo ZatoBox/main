@@ -9,6 +9,7 @@ import ReceiptsHeader from '@/components/receipts/ReceiptsHeader';
 import ReceiptsFilters from '@/components/receipts/ReceiptsFilters';
 import ReceiptsGrid from '@/components/receipts/ReceiptsGrid';
 import ReceiptsStats from '@/components/receipts/ReceiptsStats';
+import Loader from '@/components/ui/Loader';
 
 interface Receipt {
   id: string;
@@ -46,16 +47,20 @@ const ReceiptsPage: React.FC = () => {
         const data = await ordersAPI.getCashOrders();
 
         if (data.success && Array.isArray(data.orders)) {
-          const allReceipts = data.orders.map((order: any) => ({
-            id: order.id,
-            receiptNumber: order.id.slice(0, 8).toUpperCase(),
-            date: order.created_at,
-            total: order.total_amount,
-            itemCount: Array.isArray(order.items) ? order.items.length : 0,
-            paymentMethod: order.payment_method,
-            status: order.status,
-            items: Array.isArray(order.items) ? order.items : [],
-          }));
+          const allReceipts = data.orders.map((order: any) => {
+            const metaType = order.metadata?.paymentType;
+            const method = order.payment_method === 'cash' ? 'cash' : 'bitcoin';
+            return {
+              id: order.id,
+              receiptNumber: order.id.slice(0, 8).toUpperCase(),
+              date: order.created_at,
+              total: order.total_amount,
+              itemCount: Array.isArray(order.items) ? order.items.length : 0,
+              paymentMethod: method,
+              status: order.status,
+              items: Array.isArray(order.items) ? order.items : [],
+            } as Receipt;
+          });
 
           setReceipts(allReceipts);
           setError(null);
@@ -74,6 +79,37 @@ const ReceiptsPage: React.FC = () => {
     fetchAllOrders();
   }, [isAuthenticated, initialized]);
 
+  useEffect(() => {
+    const autoCancelExpiredCrypto = async () => {
+      const now = Date.now();
+      const updates: Promise<void>[] = [];
+      receipts.forEach((r) => {
+        if (r.paymentMethod !== 'cash' && r.status === 'pending') {
+          const created = new Date(r.date).getTime();
+          if (now - created > 24 * 60 * 60 * 1000) {
+            updates.push(
+              fetch(`/api/checkout/crypto/${r.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'cancelled' }),
+              })
+                .then(() => {
+                  setReceipts((prev) =>
+                    prev.map((x) =>
+                      x.id === r.id ? { ...x, status: 'cancelled' } : x
+                    )
+                  );
+                })
+                .catch(() => {})
+            );
+          }
+        }
+      });
+      if (updates.length > 0) await Promise.all(updates);
+    };
+    if (receipts.length > 0) autoCancelExpiredCrypto();
+  }, [receipts]);
+
   const filteredReceipts = receipts.filter((receipt) => {
     const matchesSearch =
       receipt.receiptNumber.includes(searchTerm) ||
@@ -91,14 +127,7 @@ const ReceiptsPage: React.FC = () => {
   ).length;
 
   if (loading && initialized && isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-bg-main">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-[#F88612]"></div>
-          <p className="text-text-secondary">Cargando recibos...</p>
-        </div>
-      </div>
-    );
+    return <Loader text="Cargando recibos..." />;
   }
 
   if (error && initialized && isAuthenticated) {
@@ -133,11 +162,11 @@ const ReceiptsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg-main">
-      <ReceiptsHeader onBack={() => router.push('/home')} />
+    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <ReceiptsHeader onBack={() => router.push('/home')} />
 
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="py-6">
+        <div>
           <ReceiptsStats
             totalReceipts={receipts.length}
             totalAmount={totalAmount}

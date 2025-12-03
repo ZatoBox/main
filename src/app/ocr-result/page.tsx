@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-store';
+import { useOCR } from '@/context/ocr-context';
 import { productsAPI, ocrAPI } from '@/services/api.service';
 import { OCRResponse, OCRLineItem, CreateProductRequest } from '@/types/index';
 import Header from '@/components/ocr-result/Header';
@@ -10,13 +11,16 @@ import FileUploader from '@/components/ocr-result/FileUploader';
 import ResultOverview from '@/components/ocr-result/ResultOverview';
 import ItemsTable from '@/components/ocr-result/ItemsTable';
 import ActionsBar from '@/components/ocr-result/ActionsBar';
+import Loader from '@/components/ui/Loader';
 
 const OCRResultPage: React.FC = () => {
   const router = useRouter();
   const { token } = useAuth();
+  const { isOnCooldown, remainingTime, setCooldown } = useOCR();
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<OCRResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editedResult, setEditedResult] = useState<OCRResponse | null>(null);
@@ -26,26 +30,18 @@ const OCRResultPage: React.FC = () => {
     rotation_correction: true,
     confidence_threshold: 0.25,
   });
-  const [systemStatus, setSystemStatus] = useState<any>(null);
-  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
-  const [nowTs, setNowTs] = useState<number>(Date.now());
 
   useEffect(() => {
-    if (!cooldownUntil) return;
-    const id = setInterval(() => setNowTs(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [cooldownUntil]);
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const processAnotherDisabled = cooldownUntil ? nowTs < cooldownUntil : false;
-  const remainingMs =
-    processAnotherDisabled && cooldownUntil ? cooldownUntil - nowTs : 0;
-  const remainingLabel = (() => {
-    if (!processAnotherDisabled) return 'Process Another';
-    const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
-    const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
-    const s = String(totalSec % 60).padStart(2, '0');
-    return `Process Another (${m}:${s})`;
-  })();
+  const processAnotherDisabled = isOnCooldown;
+  const remainingLabel = isOnCooldown
+    ? `Process Another (${remainingTime})`
+    : 'Process Another';
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -378,12 +374,21 @@ const OCRResultPage: React.FC = () => {
 
       setResult(normalized);
       if (normalized.success) {
-        setCooldownUntil(Date.now() + 5 * 60 * 1000);
+        setCooldown(Date.now() + 5 * 60 * 1000);
       }
     } catch (err: any) {
-      setError(
-        `Error procesando documento: ${err.message}. Por favor intenta de nuevo.`
-      );
+      const errorMessage = err.message || '';
+      if (
+        errorMessage.includes('429') ||
+        errorMessage.includes('Too Many Requests')
+      ) {
+        setCooldown(Date.now() + 5 * 60 * 1000);
+        setError('');
+      } else {
+        setError(
+          `Error procesando documento: ${errorMessage}. Por favor intenta de nuevo.`
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -443,12 +448,16 @@ const OCRResultPage: React.FC = () => {
     setIsEditing(false);
   };
 
+  if (pageLoading) {
+    return <Loader text="Cargando OCR..." />;
+  }
+
   return (
-    <div className="flex items-start justify-center min-h-screen p-6  md:mt-32 mt-24">
-      <div className="w-full max-w-5xl">
+    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <Header />
         {!result ? (
           <div className="p-8 bg-white border rounded-lg shadow-sm md:p-10 animate-fadeIn border-[#EFEFEF]">
-            <Header />
             <FileUploader
               fileName={file?.name ?? null}
               onChange={(f) => {
@@ -459,9 +468,18 @@ const OCRResultPage: React.FC = () => {
             />
 
             <div className="text-center">
+              {isOnCooldown && (
+                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg pointer-events-none">
+                  <div className="flex items-center justify-center">
+                    <span className="text-yellow-700">
+                      ⏳ Espera {remainingTime} antes de procesar otro documento
+                    </span>
+                  </div>
+                </div>
+              )}
               <button
                 onClick={handleUpload}
-                disabled={!file || loading}
+                disabled={!file || loading || isOnCooldown}
                 className="flex items-center px-8 py-4 mx-auto font-medium text-white transition-colors rounded-md bg-[#F88612] md:px-10 md:py-5 hover:bg-[#A94D14] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (

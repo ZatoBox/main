@@ -9,6 +9,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import ImagesUploader from '@/components/new-product/ImagesUploader';
 import EditHeader from '@/components/edit-product/EditHeader';
+import Loader from '@/components/ui/Loader';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 const MAX_FILES = 4;
@@ -193,14 +194,7 @@ const EditProductPage: React.FC = () => {
   });
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-bg-main">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary"></div>
-          <p className="text-text-secondary">Cargando producto...</p>
-        </div>
-      </div>
-    );
+    return <Loader text="Cargando producto..." />;
   }
 
   if (!productData) {

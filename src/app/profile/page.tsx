@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/profile/Header';
 import AvatarUploader from '@/components/profile/AvatarUploader';
 import CryptoStoreSetup from '@/components/profile/CryptoStoreSetup';
-import Loader from '@/components/ui/Loader';
 import { profileAPI, authAPI } from '@/services/api.service';
+import Loader from '@/components/ui/Loader';
 import { useAuth } from '@/context/auth-store';
 import {
   Bitcoin,
@@ -19,6 +19,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Lock,
+  LogOut,
 } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
@@ -32,7 +33,7 @@ const ProfilePage: React.FC = () => {
     {}
   );
   const [editValues, setEditValues] = useState<Record<string, string>>({});
-  const { user, initialized, setUser } = useAuth();
+  const { user, initialized, setUser, logout } = useAuth();
 
   useEffect(() => {
     let canceled = false;
@@ -149,7 +150,6 @@ const ProfilePage: React.FC = () => {
   };
 
   const updateEditValue = (field: string, value: string) => {
-    // For phone field, only allow numeric values
     if (field === 'phone') {
       const numericValue = value.replace(/[^0-9+\-\s()]/g, '');
       setEditValues((prev) => ({ ...prev, [field]: numericValue }));
@@ -262,19 +262,21 @@ const ProfilePage: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <>
-        <Header onBack={() => router.push('/')} />
-        <Loader fullScreen size="large" />
-      </>
-    );
+    return <Loader text="Cargando perfil..." />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header onBack={() => router.push('/')} />
 
-      {saving && <Loader fullScreen size="large" />}
+      {saving && (
+        <div className="fixed inset-0 pointer-events-none flex items-start justify-center pt-8">
+          <div className="flex items-center space-x-3 px-4 py-2 bg-white/90 border border-gray-200 rounded-lg shadow-sm">
+            <div className="w-4 h-4 border-b-2 rounded-full animate-spin border-gray-400"></div>
+            <span className="text-sm text-gray-700">Guardando...</span>
+          </div>
+        </div>
+      )}
 
       <div className="px-4 py-6 mx-auto max-w-4xl sm:px-6 lg:px-8">
         <div className="flex justify-center">
@@ -315,7 +317,6 @@ const ProfilePage: React.FC = () => {
               )}
 
               <div className="space-y-8">
-                {/* User Header Section */}
                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100">
                   <div className="flex flex-col items-center space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-8">
                     <AvatarUploader
@@ -337,10 +338,21 @@ const ProfilePage: React.FC = () => {
                         </span>
                       )}
                     </div>
+                    <div className="hidden md:flex self-end">
+                      <button
+                        onClick={() => {
+                          logout();
+                          router.push('/login');
+                        }}
+                        className="flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Cerrar Sesión
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Personal Information Section */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
                   <div className="px-6 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -358,7 +370,6 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Crypto Payments Configuration Section */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
                   <div className="px-6 py-4 border-b border-gray-100">
                     <div className="flex items-center justify-between">
@@ -376,6 +387,27 @@ const ProfilePage: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <CryptoStoreSetup />
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm md:hidden">
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Lock className="w-5 h-5 mr-2 text-orange-500" />
+                      Cuenta
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <button
+                      onClick={() => {
+                        logout();
+                        router.push('/login');
+                      }}
+                      className="w-full flex items-center justify-center px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      <LogOut className="w-5 h-5 mr-2" />
+                      Cerrar Sesión
+                    </button>
                   </div>
                 </div>
               </div>

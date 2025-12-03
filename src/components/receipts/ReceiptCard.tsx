@@ -4,13 +4,14 @@ import React, { useState } from 'react';
 import {
   Download,
   Eye,
-  Printer,
   FileText,
   Package,
-  Undo,
-  X,
+  Banknote,
+  Bitcoin,
+  RotateCcw,
 } from 'lucide-react';
 import PrintableReceiptModal from './PrintableReceiptModal';
+import { buildReceiptHtml } from '@/utils/print-receipt';
 import type { ReceiptItem } from '@/types';
 
 interface Props {
@@ -48,15 +49,19 @@ const ReceiptCard: React.FC<Props> = ({
     setImageErrors((prev) => ({ ...prev, [idx]: true }));
   };
 
-  const handleCancelOrder = async (newStatus: 'cancelled' | 'returned') => {
+  const handleRefund = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/checkout/cash/${id}`, {
+      const endpoint =
+        paymentMethod === 'cash'
+          ? `/api/checkout/cash/${id}`
+          : `/api/checkout/crypto/${id}`;
+      const response = await fetch(endpoint, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: 'cancelled' }),
       });
 
       if (!response.ok) {
@@ -64,8 +69,8 @@ const ReceiptCard: React.FC<Props> = ({
         throw new Error(error.message || 'Failed to update order');
       }
 
-      setCurrentStatus(newStatus);
-      onStatusChange?.(newStatus);
+      setCurrentStatus('cancelled');
+      onStatusChange?.('cancelled');
     } catch (error) {
       console.error('Error updating order:', error);
       alert('Error al actualizar el pedido: ' + (error as Error).message);
@@ -83,13 +88,13 @@ const ReceiptCard: React.FC<Props> = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-[#FBEFCA] text-[#A94D14]';
+        return 'bg-[#D1FAE5] text-[#065F46] rounded-[20px]';
       case 'pending':
-        return 'bg-[#FEF3C7] text-[#92400E]';
+        return 'bg-[#FEF3C7] text-[#92400E] rounded-[20px]';
       case 'cancelled':
-        return 'bg-[#FEE2E2] text-[#991B1B]';
+        return 'bg-[#FEE2E2] text-[#991B1B] rounded-[20px]';
       default:
-        return 'bg-[#F3F4F6] text-[#374151]';
+        return 'bg-[#F3F4F6] text-[#374151] rounded-[20px]';
     }
   };
 
@@ -133,13 +138,18 @@ const ReceiptCard: React.FC<Props> = ({
               </div>
               <div>
                 <p className="text-xs text-[#9CA3AF] mb-1">Método</p>
-                <p className="text-sm font-medium text-[#1F2937]">
-                  {paymentMethod === 'cash'
-                    ? 'Efectivo'
-                    : paymentMethod === 'crypto'
-                    ? 'Criptomoneda'
-                    : paymentMethod}
-                </p>
+                {paymentMethod === 'cash' && (
+                  <div className="flex items-center gap-2 text-sm font-semibold uppercase text-[#10B981]">
+                    <Banknote size={14} />
+                    <span>EFECTIVO</span>
+                  </div>
+                )}
+                {paymentMethod === 'bitcoin' && (
+                  <div className="flex items-center gap-2 text-sm font-semibold uppercase text-[#F88612]">
+                    <Bitcoin size={14} />
+                    <span>BITCOIN</span>
+                  </div>
+                )}
               </div>
               <div>
                 <p className="text-xs text-[#9CA3AF]">Estado</p>
@@ -305,46 +315,128 @@ const ReceiptCard: React.FC<Props> = ({
             {/* Actions */}
             <div className="flex flex-wrap gap-2 pt-4 border-t border-[#E5E7EB]">
               <button
-                onClick={() => setShowPrintModal(true)}
+                onClick={() => {
+                  const html = buildReceiptHtml({
+                    receiptNumber,
+                    date: formattedDate,
+                    total,
+                    items,
+                    status: currentStatus,
+                  });
+                  const iframe = document.createElement('iframe');
+                  iframe.style.position = 'fixed';
+                  iframe.style.right = '0';
+                  iframe.style.bottom = '0';
+                  iframe.style.width = '0';
+                  iframe.style.height = '0';
+                  iframe.style.border = 'none';
+                  document.body.appendChild(iframe);
+                  const iframeDoc =
+                    iframe.contentDocument || iframe.contentWindow?.document;
+                  if (iframeDoc) {
+                    iframeDoc.open();
+                    iframeDoc.write(html);
+                    iframeDoc.close();
+                    setTimeout(() => {
+                      iframe.contentWindow?.print();
+                      setTimeout(() => document.body.removeChild(iframe), 500);
+                    }, 250);
+                  }
+                }}
                 className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB] hover:border-[#D1D5DB]"
               >
                 <Eye size={16} />
                 <span className="hidden sm:inline">Ver</span>
               </button>
               <button
-                onClick={() => setShowPrintModal(true)}
-                className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB] hover:border-[#D1D5DB]"
-              >
-                <Printer size={16} />
-                <span className="hidden sm:inline">Imprimir</span>
-              </button>
-              <button
-                onClick={() => setShowPrintModal(true)}
+                onClick={async () => {
+                  const [{ default: jsPDF }, { default: html2canvas }] =
+                    await Promise.all([import('jspdf'), import('html2canvas')]);
+                  const html = buildReceiptHtml({
+                    receiptNumber,
+                    date: formattedDate,
+                    total,
+                    items,
+                    status: currentStatus,
+                  });
+                  const iframe = document.createElement('iframe');
+                  iframe.style.position = 'fixed';
+                  iframe.style.right = '0';
+                  iframe.style.bottom = '0';
+                  iframe.style.width = '800px';
+                  iframe.style.height = '600px';
+                  iframe.style.border = 'none';
+                  iframe.style.opacity = '0';
+                  iframe.style.pointerEvents = 'none';
+                  document.body.appendChild(iframe);
+                  const iframeDoc =
+                    iframe.contentDocument || iframe.contentWindow?.document;
+                  if (iframeDoc) {
+                    iframeDoc.open();
+                    iframeDoc.write(html);
+                    iframeDoc.close();
+                    await new Promise((resolve) => setTimeout(resolve, 800));
+                    const element = iframeDoc.querySelector(
+                      '.card'
+                    ) as HTMLElement;
+                    if (element) {
+                      const canvas = await html2canvas(element, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        windowWidth: element.scrollWidth,
+                        windowHeight: element.scrollHeight,
+                      });
+                      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                      const pdf = new jsPDF('p', 'mm', 'a4');
+                      const imgWidth = 210;
+                      const pageHeight = 297;
+                      const imgHeight =
+                        (canvas.height * imgWidth) / canvas.width;
+                      let heightLeft = imgHeight;
+                      let position = 0;
+                      pdf.addImage(
+                        imgData,
+                        'JPEG',
+                        0,
+                        position,
+                        imgWidth,
+                        imgHeight
+                      );
+                      heightLeft -= pageHeight;
+                      while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        pdf.addPage();
+                        pdf.addImage(
+                          imgData,
+                          'JPEG',
+                          0,
+                          position,
+                          imgWidth,
+                          imgHeight
+                        );
+                        heightLeft -= pageHeight;
+                      }
+                      pdf.save(`recibo-${receiptNumber}.pdf`);
+                    }
+                    document.body.removeChild(iframe);
+                  }
+                }}
                 className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-[#F88612] text-white hover:bg-[#E07A0A] shadow-sm hover:shadow-md"
               >
                 <Download size={16} />
                 <span className="hidden sm:inline">Descargar</span>
               </button>
-
-              {currentStatus === 'completed' && (
-                <>
-                  <button
-                    onClick={() => handleCancelOrder('returned')}
-                    disabled={isLoading}
-                    className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Undo size={16} />
-                    <span className="hidden sm:inline">Devolución</span>
-                  </button>
-                  <button
-                    onClick={() => handleCancelOrder('cancelled')}
-                    disabled={isLoading}
-                    className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-white text-[#991B1B] border border-[#FEE2E2] hover:bg-[#FEE2E2] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <X size={16} />
-                    <span className="hidden sm:inline">Cancelar</span>
-                  </button>
-                </>
+              {currentStatus !== 'cancelled' && (
+                <button
+                  onClick={handleRefund}
+                  disabled={isLoading}
+                  className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <RotateCcw size={16} />
+                  <span className="hidden sm:inline">Reembolsar</span>
+                </button>
               )}
             </div>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowLeft, FileText } from 'lucide-react';
+import { ArrowLeft, FileText, ChevronRight } from 'lucide-react';
 
 interface Props {
   onBack: () => void;
@@ -10,21 +10,26 @@ interface Props {
 
 const ReceiptsHeader: React.FC<Props> = ({ onBack, title = 'Recibos' }) => {
   return (
-    <div className="border-b bg-white border-[#E5E7EB]">
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-4">
+    <div className="flex flex-col gap-6 mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-sm text-[#64748B]">
+            <span>Finanzas</span>
+            <ChevronRight size={14} />
+            <span className="text-[#F88612] font-medium">Recibos</span>
+          </div>
+          <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="p-2 transition-colors rounded-full hover:bg-[#F3F4F6] md:hidden"
+              className="p-2 -ml-2 transition-colors rounded-full hover:bg-gray-100 md:hidden"
             >
-              <ArrowLeft size={20} className="text-[#374151]" />
+              <ArrowLeft size={20} className="text-gray-600" />
             </button>
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg">
-                <FileText size={20} className="text-[#F88612]" />
-              </div>
-              <h1 className="text-xl font-bold text-[#000000]">{title}</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-[#1E293B]">{title}</h1>
+              <p className="text-[#64748B]">
+                Historial de transacciones y comprobantes
+              </p>
             </div>
           </div>
         </div>

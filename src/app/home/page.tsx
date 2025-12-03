@@ -15,6 +15,7 @@ import type { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io';
 import { ShoppingCart, X } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 
 const mapProductToProduct = (p: any): Product => {
   const imageUrls = Array.isArray(p.images)
@@ -51,6 +52,7 @@ const HomePage: React.FC<HomePageProps> = ({
   const { token } = useAuth();
   const {
     isLoading: isBTCPayLoading,
+    error: btcpayError,
     showPaymentModal,
     invoiceData,
     createInvoice,
@@ -67,6 +69,7 @@ const HomePage: React.FC<HomePageProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasXpub, setHasXpub] = useState<boolean | null>(null);
+  const [userXpub, setUserXpub] = useState<string | null>(null);
 
   // Paginación
   const [page, setPage] = useState(1);
@@ -129,9 +132,11 @@ const HomePage: React.FC<HomePageProps> = ({
       try {
         const xpubResponse = await btcpayAPI.getXpub(token);
         setHasXpub(!!xpubResponse.xpub);
+        setUserXpub(xpubResponse.xpub || null);
       } catch (err) {
         console.error('Error checking XPUB:', err);
         setHasXpub(false);
+        setUserXpub(null);
       }
     }
   };
@@ -230,6 +235,8 @@ const HomePage: React.FC<HomePageProps> = ({
       return;
     }
 
+    setPaymentMethod(paymentMethod);
+
     try {
       const items = cartItems.map((item) => ({
         polarProductId: item.polarProductId,
@@ -269,18 +276,27 @@ const HomePage: React.FC<HomePageProps> = ({
               price: item.price,
             },
           })),
+          paymentType: 'btc',
         });
 
-        if (invoiceId) {
-          startPolling(invoiceId, () => {
-            clearCart();
-            reloadProducts();
-          });
+        if (!invoiceId) {
+          const errorMsg =
+            btcpayError ||
+            'Error al crear el invoice de Bitcoin. Por favor intenta de nuevo.';
+          alert(errorMsg);
+          return;
         }
+
+        startPolling(invoiceId, () => {
+          clearCart();
+          reloadProducts();
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Checkout error:', error);
-      alert('Failed to create checkout. Please try again.');
+      const errorMessage =
+        error?.message || 'Failed to create checkout. Please try again.';
+      alert(errorMessage);
     }
   };
 
@@ -317,16 +333,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   // Estados de carga / error
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-primary animate-pulse-glow"></div>
-          <p className="text-text-secondary animate-slide-in-left">
-            Loading products...
-          </p>
-        </div>
-      </div>
-    );
+    return <Loader text="Loading products..." />;
   }
 
   if (error === 'polar_not_configured') {
@@ -387,56 +394,56 @@ const HomePage: React.FC<HomePageProps> = ({
   return (
     <>
       <div
-        className={`transition-all duration-300 ${
+        className={`min-h-screen bg-[#F8F9FA] p-6 md:p-8 transition-all duration-300 ${
           isDrawerOpen ? 'md:pr-[22rem] lg:pr-[26rem] xl:pr-[28rem]' : ''
         }`}
       >
-        <HomeHeader
-          searchValue={localSearchTerm}
-          onSearchChange={handleLocalSearchChange}
-          onReload={reloadProducts}
-          loading={loading}
-          onToggleCart={handleToggleDrawer}
-          onToggleSKU={() => setIsSKUModalOpen(!isSKUModalOpen)}
-          cartItemsCount={cartItems.length}
-          isCartOpen={isDrawerOpen}
-        />
+        <div className="max-w-7xl mx-auto space-y-8">
+          <HomeHeader
+            searchValue={localSearchTerm}
+            onSearchChange={handleLocalSearchChange}
+            onReload={reloadProducts}
+            loading={loading}
+            onToggleCart={handleToggleDrawer}
+            onToggleSKU={() => setIsSKUModalOpen(!isSKUModalOpen)}
+            cartItemsCount={cartItems.length}
+            isCartOpen={isDrawerOpen}
+          />
 
-        {hasXpub === false && (
-          <div className="mx-4 mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg animate-slide-down">
-            <div className="flex items-start gap-3">
-              <svg
-                className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <div className="flex-1">
-                <h3 className="font-semibold text-yellow-800">
-                  ⚠️ Wallet no configurada
-                </h3>
-                <p className="text-sm text-yellow-700 mt-1">
-                  Para recibir pagos en Bitcoin, debes configurar tu XPUB en tu
-                  perfil.{' '}
-                  <a
-                    href="/profile"
-                    className="font-semibold underline hover:text-yellow-900"
-                  >
-                    Ir a perfil →
-                  </a>
-                </p>
+          {hasXpub === false && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl animate-slide-down">
+              <div className="flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-yellow-800">
+                    ⚠️ Wallet no configurada
+                  </h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Para recibir pagos en Bitcoin, debes configurar tu XPUB en
+                    tu perfil.{' '}
+                    <a
+                      href="/profile"
+                      className="font-semibold underline hover:text-yellow-900"
+                    >
+                      Ir a perfil →
+                    </a>
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="pt-6 px-4">
-          <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div>
             <div className="mb-6">
               <HomeStats
                 count={filteredProducts.length}
@@ -444,7 +451,7 @@ const HomePage: React.FC<HomePageProps> = ({
               />
             </div>
 
-            <div className="p-6 bg-white border border-gray-300 rounded-lg animate-scale-in">
+            <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-sm animate-scale-in">
               <ProductGrid
                 products={filteredProducts}
                 onProductClick={handleProductClick}
@@ -458,7 +465,7 @@ const HomePage: React.FC<HomePageProps> = ({
                   className="
                     px-4 py-2 
                     duration-300
-                    hover:text-zatobox-500 
+                    hover:text-[#F88612] 
                     disabled:opacity-50 
                     disabled:hover:text-inherit
                     group
@@ -470,14 +477,14 @@ const HomePage: React.FC<HomePageProps> = ({
                     w-8 h-8         
                     flex items-center justify-center 
                     transition-transform duration-300 
-                    ${page !== 1 ? 'group-hover:scale-132' : ''}
+                    ${page !== 1 ? 'group-hover:scale-110' : ''}
                     `}
                   >
                     <IoMdArrowRoundBack />
                   </span>
                 </button>
 
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-gray-700 font-medium">
                   Página {page} / {Math.ceil(totalProducts / pageSize) || 1}
                 </span>
 
@@ -487,7 +494,7 @@ const HomePage: React.FC<HomePageProps> = ({
                   className="
                     px-4 py-2 
                     duration-300
-                    hover:text-zatobox-500 
+                    hover:text-[#F88612] 
                     disabled:opacity-50 
                     disabled:hover:text-inherit
                     group 
@@ -501,7 +508,7 @@ const HomePage: React.FC<HomePageProps> = ({
                     transition-transform duration-300 
                     ${
                       page * pageSize < totalProducts
-                        ? 'group-hover:scale-132'
+                        ? 'group-hover:scale-110'
                         : ''
                     }
                     `}

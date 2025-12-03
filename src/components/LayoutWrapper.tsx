@@ -40,6 +40,7 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
     '/success',
     '/swagger',
     '/upgrade',
+    '/wallet-withdraw',
   ];
 
   const isExisting = (path: string) => {

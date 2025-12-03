@@ -52,8 +52,10 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
   };
 
   useEffect(() => {
-    if (isOpen && paymentUrl && canvasRef.current) {
-      generateQR(paymentUrl);
+    if (isOpen && canvasRef.current) {
+      if (paymentUrl) {
+        generateQR(paymentUrl);
+      }
     }
   }, [isOpen, paymentUrl]);
 
@@ -178,7 +180,7 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
                     <button
                       onClick={handleCopy}
                       className="p-2 hover:bg-[#FEF9EC] rounded-lg transition-colors flex-shrink-0"
-                      title="Copiar dirección"
+                      title={'Copiar dirección'}
                     >
                       {copied ? (
                         <Check size={16} className="text-green-600" />

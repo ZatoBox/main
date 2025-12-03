@@ -18,21 +18,42 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     );
 
     const body = await req.json();
-    const { xpub } = body;
+    const { publicKey, storeName, createStore } = body;
 
-    if (!xpub || typeof xpub !== 'string' || !xpub.trim()) {
-      return NextResponse.json(
-        { success: false, message: 'Valid XPUB is required' },
-        { status: 400 }
-      );
+    if (publicKey && typeof publicKey === 'string' && publicKey.trim()) {
+      const result = await btcpayService.configureUserStore(userId, {
+        publicKey: publicKey.trim(),
+        storeName: typeof storeName === 'string' ? storeName : undefined,
+      });
+
+      return NextResponse.json({
+        success: true,
+        storeId: result.storeId,
+        xpub: result.xpub,
+        webhookCreated: result.webhookCreated,
+        xpubChanged: result.xpubChanged,
+      });
+    } else if (createStore === true) {
+      const result = await btcpayService.ensureUserStore(userId);
+      return NextResponse.json({
+        success: true,
+        storeId: result.storeId,
+        webhookCreated: true,
+      });
+    } else {
+      const store = await btcpayService.getUserStore(userId);
+      if (store?.btcpay_store_id) {
+        return NextResponse.json({
+          success: true,
+          storeId: store.btcpay_store_id,
+        });
+      } else {
+        return NextResponse.json({
+          success: false,
+          message: 'Store not configured',
+        });
+      }
     }
-
-    await btcpayService.saveUserXpub(userId, xpub.trim());
-
-    return NextResponse.json({
-      success: true,
-      message: 'XPUB saved successfully',
-    });
   } catch (error: any) {
     return NextResponse.json(
       {
@@ -59,11 +80,24 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
       userId
     );
 
-    const userXpub = await btcpayService.getUserXpub(userId);
+    const store = await btcpayService.getUserStore(userId);
+    let xpub: string | null = null;
+    if (store?.xpub) {
+      try {
+        xpub = await btcpayService.getUserXpub(userId);
+      } catch (error) {
+        xpub = null;
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      xpub: userXpub || null,
+      xpub,
+      store: store && {
+        id: store.btcpay_store_id,
+        name: store.store_name,
+        webhookConfigured: Boolean(store.webhook_secret),
+      },
     });
   } catch (error: any) {
     return NextResponse.json(

@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   } catch (err: any) {
     return NextResponse.json(
       { success: false, message: String(err?.message ?? err) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
