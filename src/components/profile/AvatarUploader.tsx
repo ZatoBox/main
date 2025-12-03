@@ -65,7 +65,7 @@ const AvatarUploader: React.FC<Props> = ({
 
   return (
     <>
-      {uploading && <Loader fullScreen size="large" />}
+      {uploading && <Loader fullScreen />}
       <div className="flex items-center space-x-4">
         <div className="relative group">
           <div className="flex items-center justify-center w-32 h-32 rounded-full bg-orange-100 border border-orange-200">
