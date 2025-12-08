@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface Props {
   count: number;
@@ -6,14 +7,17 @@ interface Props {
 }
 
 const HomeStats: React.FC<Props> = ({ count, searchTerm }) => {
+  const { t } = useTranslation();
+
   return (
-    <p className='text-gray-500 animate-slide-in-right'>
+    <p className="text-gray-500 animate-slide-in-right">
       {searchTerm ? (
         <>
-          Mostrando {count} resultados{count !== 1 ? 's' : ''} para "{searchTerm}"
+          {t('home.stats.showingResults')} {count} {t('home.stats.resultsFor')}{' '}
+          "{searchTerm}"
         </>
       ) : (
-        'Selecciona productos para crear pedidos de venta rápidamente'
+        t('home.stats.selectProducts')
       )}
     </p>
   );

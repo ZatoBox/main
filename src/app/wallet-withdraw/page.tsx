@@ -9,6 +9,7 @@ import Loader from '@/components/ui/Loader';
 import WalletSetup from '@/components/wallet/WalletSetup';
 import WalletSend from '@/components/wallet/WalletSend';
 import WalletHeader from '@/components/wallet/WalletHeader';
+import { useTranslation } from '@/hooks/use-translation';
 
 const WalletPage: React.FC = () => {
   const router = useRouter();
@@ -17,6 +18,7 @@ const WalletPage: React.FC = () => {
   const [hasWallet, setHasWallet] = useState(false);
   const [storeId, setStoreId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (initialized && !token) {
@@ -46,14 +48,14 @@ const WalletPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Error loading store:', err);
-      setError('Error al cargar la configuración de la wallet');
+      setError(t('wallet.errors.loadConfig'));
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <Loader text="Cargando wallet..." />;
+    return <Loader text={t('wallet.loading')} />;
   }
 
   return (
@@ -69,7 +71,7 @@ const WalletPage: React.FC = () => {
               onClick={loadStore}
               className="ml-auto text-sm font-semibold hover:underline"
             >
-              Reintentar
+              {t('wallet.retry')}
             </button>
           </div>
         )}

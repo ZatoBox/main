@@ -12,6 +12,7 @@ import ResultOverview from '@/components/ocr-result/ResultOverview';
 import ItemsTable from '@/components/ocr-result/ItemsTable';
 import ActionsBar from '@/components/ocr-result/ActionsBar';
 import Loader from '@/components/ui/Loader';
+import { useTranslation } from '@/hooks/use-translation';
 
 const OCRResultPage: React.FC = () => {
   const router = useRouter();
@@ -30,6 +31,7 @@ const OCRResultPage: React.FC = () => {
     rotation_correction: true,
     confidence_threshold: 0.25,
   });
+  const { t } = useTranslation();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -53,7 +55,7 @@ const OCRResultPage: React.FC = () => {
 
   const handleConfirmData = async () => {
     if (!result || !token) {
-      setError('No data to confirm or not authenticated');
+      setError(t('ocr.errors.noData'));
       return;
     }
     setIsAddingToInventory(true);
@@ -128,7 +130,7 @@ const OCRResultPage: React.FC = () => {
         .filter(Boolean);
 
       if (products.length === 0) {
-        setError('No valid products to create');
+        setError(t('ocr.errors.noValidProducts'));
         setIsAddingToInventory(false);
         return;
       }
@@ -139,7 +141,7 @@ const OCRResultPage: React.FC = () => {
 
       router.push('/inventory');
     } catch (err: any) {
-      setError(err.message || 'Error adding products to inventory');
+      setError(err.message || t('ocr.errors.addingProducts'));
     } finally {
       setIsAddingToInventory(false);
     }
@@ -449,7 +451,7 @@ const OCRResultPage: React.FC = () => {
   };
 
   if (pageLoading) {
-    return <Loader text="Cargando OCR..." />;
+    return <Loader text={t('ocr.loading')} />;
   }
 
   return (
@@ -472,7 +474,8 @@ const OCRResultPage: React.FC = () => {
                 <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg pointer-events-none">
                   <div className="flex items-center justify-center">
                     <span className="text-yellow-700">
-                      ⏳ Espera {remainingTime} antes de procesar otro documento
+                      ⏳ {t('ocr.cooldown.wait')} {remainingTime}{' '}
+                      {t('ocr.cooldown.waitMessage')}
                     </span>
                   </div>
                 </div>
@@ -485,11 +488,12 @@ const OCRResultPage: React.FC = () => {
                 {loading ? (
                   <>
                     <div className="w-4 h-4 mr-2 border-b-2 border-white rounded-full animate-spin md:h-5 md:w-5 md:mr-3"></div>
-                    Procesando documento...
+                    {t('ocr.buttons.processing')}
                   </>
                 ) : (
                   <>
-                    <span className="mr-2">🔍</span> Upload and process
+                    <span className="mr-2">🔍</span>
+                    {t('ocr.buttons.upload')}
                   </>
                 )}
               </button>
@@ -518,7 +522,7 @@ const OCRResultPage: React.FC = () => {
             {result.processed_image && (
               <div className="mb-6 md:mb-8">
                 <h3 className="mb-3 text-base font-semibold md:text-lg text-text-primary md:mb-4">
-                  🖼️ Imagen procesada con detecciones
+                  🖼️ {t('ocr.result.processedImage')}
                 </h3>
                 <div className="p-4 overflow-hidden rounded-lg bg-bg-surface">
                   <img
@@ -528,8 +532,7 @@ const OCRResultPage: React.FC = () => {
                     style={{ maxHeight: '500px', objectFit: 'contain' }}
                   />
                   <p className="mt-2 text-xs text-center text-gray-500">
-                    Imagen que muestra las detecciones de YOLO (cuadrículas
-                    verdes) y las regiones de la tabla (cuadrículas azules)
+                    {t('ocr.result.imageDescription')}
                   </p>
                 </div>
               </div>

@@ -13,6 +13,7 @@ import {
 import Loader from '@/components/ui/Loader';
 import { productsAPI } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
+import { useTranslation } from '@/hooks/use-translation';
 import type { Product } from '@/types';
 
 interface SelectedProduct extends Product {
@@ -22,6 +23,7 @@ interface SelectedProduct extends Product {
 const RestockPage: React.FC = () => {
   const router = useRouter();
   const { isAuthenticated, initialized, token } = useAuth();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -38,7 +40,7 @@ const RestockPage: React.FC = () => {
     if (!initialized) return;
 
     if (!isAuthenticated) {
-      setError('Debes iniciar sesión');
+      setError(t('restock.errors.loginRequired'));
       setIsLoading(false);
       return;
     }
@@ -56,7 +58,7 @@ const RestockPage: React.FC = () => {
         setFilteredProducts(response.products);
       }
     } catch (err) {
-      setError('Error cargando productos');
+      setError(t('restock.errors.loadProducts'));
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -102,7 +104,7 @@ const RestockPage: React.FC = () => {
 
   const handleSubmitRestock = async () => {
     if (selectedProducts.length === 0) {
-      setError('Selecciona al menos un producto');
+      setError(t('restock.errors.selectProduct'));
       return;
     }
 
@@ -110,7 +112,7 @@ const RestockPage: React.FC = () => {
       (p) => p.quantityToAdd > 0
     );
     if (!hasValidQuantities) {
-      setError('Ingresa cantidades a reabastecer');
+      setError(t('restock.errors.enterQuantities'));
       return;
     }
 
@@ -145,9 +147,9 @@ const RestockPage: React.FC = () => {
       setSelectedProducts([]);
       setSearchQuery('');
       await fetchProducts();
-      alert('¡Reabastecimiento completado!');
+      alert(t('restock.success'));
     } catch (err) {
-      setError((err as Error).message || 'Error al reabastecer');
+      setError((err as Error).message || t('restock.errors.restockError'));
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -165,17 +167,17 @@ const RestockPage: React.FC = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm text-[#64748B]">
-            <span>Inventario</span>
+            <span>{t('restock.breadcrumb.inventory')}</span>
             <ChevronRight size={14} />
-            <span className="text-[#F88612] font-medium">Restock</span>
+            <span className="text-[#F88612] font-medium">
+              {t('restock.breadcrumb.restock')}
+            </span>
           </div>
           <div>
             <h1 className="text-2xl font-bold text-[#1E293B]">
-              Reabastecer Inventario
+              {t('restock.title')}
             </h1>
-            <p className="text-[#64748B]">
-              Busca productos y agrega cantidades al stock
-            </p>
+            <p className="text-[#64748B]">{t('restock.description')}</p>
           </div>
         </div>
 
@@ -190,7 +192,7 @@ const RestockPage: React.FC = () => {
                   />
                   <input
                     type="text"
-                    placeholder="Buscar por nombre o SKU..."
+                    placeholder={t('restock.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 border border-[#E5E7EB] rounded-lg focus:outline-none focus:border-[#F88612] bg-white"
@@ -208,7 +210,7 @@ const RestockPage: React.FC = () => {
                 <Loader
                   fullScreen={false}
                   className="py-12"
-                  text="Cargando productos..."
+                  text={t('restock.loading')}
                 />
               ) : (
                 <div className="space-y-4">
@@ -251,7 +253,8 @@ const RestockPage: React.FC = () => {
                                   {product.name}
                                 </h3>
                                 <p className="text-sm text-[#9CA3AF]">
-                                  Stock actual: {product.stock} unidades
+                                  {t('restock.currentStock')}: {product.stock}{' '}
+                                  {t('restock.units')}
                                 </p>
                               </div>
 
@@ -276,8 +279,8 @@ const RestockPage: React.FC = () => {
                     ) : (
                       <div className="text-center py-12 text-[#9CA3AF]">
                         {searchQuery
-                          ? 'No se encontraron productos'
-                          : 'No hay productos'}
+                          ? t('restock.noProductsFound')
+                          : t('restock.noProducts')}
                       </div>
                     )}
                   </div>
@@ -291,11 +294,12 @@ const RestockPage: React.FC = () => {
                         disabled={currentPage === 1}
                         className="px-3 py-2 text-sm font-medium rounded-lg border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
-                        ← Anterior
+                        {t('restock.pagination.previous')}
                       </button>
 
                       <span className="text-sm text-[#9CA3AF]">
-                        Página {currentPage} de {totalPages}
+                        {t('restock.pagination.page')} {currentPage}{' '}
+                        {t('restock.pagination.of')} {totalPages}
                       </span>
 
                       <button
@@ -305,7 +309,7 @@ const RestockPage: React.FC = () => {
                         disabled={currentPage === totalPages}
                         className="px-3 py-2 text-sm font-medium rounded-lg border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
-                        Siguiente →
+                        {t('restock.pagination.next')}
                       </button>
                     </div>
                   )}
@@ -317,7 +321,7 @@ const RestockPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-sm sticky top-6">
               <h2 className="text-lg font-bold text-[#000000] mb-4">
-                Seleccionados ({selectedProducts.length})
+                {t('restock.selected')} ({selectedProducts.length})
               </h2>
 
               <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
@@ -333,7 +337,7 @@ const RestockPage: React.FC = () => {
                             {product.name}
                           </p>
                           <p className="text-xs text-[#9CA3AF]">
-                            Stock: {product.stock}
+                            {t('restock.stock')}: {product.stock}
                           </p>
                         </div>
                         <button
@@ -352,14 +356,14 @@ const RestockPage: React.FC = () => {
                             parseInt(e.target.value) || 0
                           )
                         }
-                        placeholder="Cantidad a agregar"
+                        placeholder={t('restock.quantityPlaceholder')}
                         className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:border-[#F88612] bg-white"
                       />
                     </div>
                   ))
                 ) : (
                   <p className="text-center text-[#9CA3AF] text-sm py-4">
-                    Selecciona productos para reabastecer
+                    {t('restock.selectToRestock')}
                   </p>
                 )}
               </div>
@@ -376,12 +380,12 @@ const RestockPage: React.FC = () => {
                 {isSubmitting ? (
                   <>
                     <Loader2 size={18} className="animate-spin" />
-                    Procesando...
+                    {t('restock.submit.processing')}
                   </>
                 ) : (
                   <>
                     <CheckCircle2 size={18} />
-                    Confirmar Restock
+                    {t('restock.submit.confirm')}
                   </>
                 )}
               </button>

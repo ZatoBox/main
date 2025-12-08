@@ -1,5 +1,6 @@
 import React from 'react';
 import { OCRLineItem } from '@/types/index';
+import { useTranslation } from '@/hooks/use-translation';
 
 type Props = {
   items: OCRLineItem[];
@@ -12,33 +13,35 @@ const ItemsTable: React.FC<Props> = ({
   isEditing = false,
   onChange,
 }) => {
+  const { t } = useTranslation();
+
   return (
-    <div className='mb-8'>
-      <h3 className='mb-4 text-sm font-semibold tracking-wide text-[#A94D14] uppercase'>
-        Items detectados
+    <div className="mb-8">
+      <h3 className="mb-4 text-sm font-semibold tracking-wide text-[#A94D14] uppercase">
+        {t('ocr.itemsTable.title')}
       </h3>
-      <div className='overflow-hidden bg-white border rounded-lg shadow-sm border-[#EDEDED]'>
-        <div className='overflow-x-auto'>
-          <table className='min-w-full text-sm'>
+      <div className="overflow-hidden bg-white border rounded-lg shadow-sm border-[#EDEDED]">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
             <thead>
-              <tr className='bg-[#FAF8F6]'>
-                <th className='px-4 py-3 text-left font-medium text-[#444444]'>
-                  Nombre
+              <tr className="bg-[#FAF8F6]">
+                <th className="px-4 py-3 text-left font-medium text-[#444444]">
+                  {t('ocr.itemsTable.name')}
                 </th>
-                <th className='px-4 py-3 text-left font-medium text-[#444444]'>
-                  Descripción
+                <th className="px-4 py-3 text-left font-medium text-[#444444]">
+                  {t('ocr.itemsTable.description')}
                 </th>
-                <th className='px-4 py-3 text-right font-medium text-[#444444]'>
-                  Cantidad
+                <th className="px-4 py-3 text-right font-medium text-[#444444]">
+                  {t('ocr.itemsTable.quantity')}
                 </th>
-                <th className='px-4 py-3 text-right font-medium text-[#444444]'>
-                  Precio Unitario
+                <th className="px-4 py-3 text-right font-medium text-[#444444]">
+                  {t('ocr.itemsTable.unitPrice')}
                 </th>
-                <th className='px-4 py-3 text-right font-medium text-[#444444]'>
-                  Total
+                <th className="px-4 py-3 text-right font-medium text-[#444444]">
+                  {t('ocr.itemsTable.total')}
                 </th>
-                <th className='px-4 py-3 text-center font-medium text-[#444444]'>
-                  Confidencialidad
+                <th className="px-4 py-3 text-center font-medium text-[#444444]">
+                  {t('ocr.itemsTable.confidence')}
                 </th>
               </tr>
             </thead>
@@ -54,45 +57,46 @@ const ItemsTable: React.FC<Props> = ({
                 return (
                   <tr
                     key={index}
-                    className='border-t border-[#F0F0F0] hover:bg-[#FFFAF5] transition-colors'
+                    className="border-t border-[#F0F0F0] hover:bg-[#FFFAF5] transition-colors"
                   >
-                    <td className='px-4 py-3 align-top'>
+                    <td className="px-4 py-3 align-top">
                       {isEditing ? (
                         <input
-                          type='text'
+                          type="text"
                           value={String(item.name ?? '')}
                           onChange={(e) =>
                             onChange && onChange(index, 'name', e.target.value)
                           }
-                          className='w-full px-2 py-1 border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none'
+                          className="w-full px-2 py-1 border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none"
                         />
                       ) : (
-                        <span className='font-medium text-[#1F1F1F]'>
-                          {item.name || 'Unnamed'}
+                        <span className="font-medium text-[#1F1F1F]">
+                          {item.name || t('ocr.itemsTable.unnamed')}
                         </span>
                       )}
                     </td>
-                    <td className='px-4 py-3 align-top'>
+                    <td className="px-4 py-3 align-top">
                       {isEditing ? (
                         <input
-                          type='text'
+                          type="text"
                           value={String(item.description ?? '')}
                           onChange={(e) =>
                             onChange &&
                             onChange(index, 'description', e.target.value)
                           }
-                          className='w-full px-2 py-1 border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none'
+                          className="w-full px-2 py-1 border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none"
                         />
                       ) : (
-                        <span className='text-[#1F1F1F]'>
-                          {item.description || 'No description'}
+                        <span className="text-[#1F1F1F]">
+                          {item.description ||
+                            t('ocr.itemsTable.noDescription')}
                         </span>
                       )}
                     </td>
-                    <td className='px-4 py-3 text-right'>
+                    <td className="px-4 py-3 text-right">
                       {isEditing ? (
                         <input
-                          type='number'
+                          type="number"
                           value={String(item.quantity ?? '')}
                           onChange={(e) =>
                             onChange &&
@@ -102,32 +106,32 @@ const ItemsTable: React.FC<Props> = ({
                               parseInt(e.target.value) || 0
                             )
                           }
-                          className='w-20 px-2 py-1 text-right border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none'
+                          className="w-20 px-2 py-1 text-right border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none"
                         />
                       ) : (
                         item.quantity
                       )}
                     </td>
-                    <td className='px-4 py-3 text-right'>
+                    <td className="px-4 py-3 text-right">
                       {isEditing ? (
                         <input
-                          type='text'
+                          type="text"
                           value={String(item.unit_price ?? '')}
                           onChange={(e) =>
                             onChange &&
                             onChange(index, 'unit_price', e.target.value)
                           }
-                          className='w-24 px-2 py-1 text-right border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none'
+                          className="w-24 px-2 py-1 text-right border rounded-md border-[#D8D8D8] focus:ring-2 focus:ring-[#F88612] focus:outline-none"
                         />
                       ) : (
                         item.unit_price
                       )}
                     </td>
-                    <td className='px-4 py-3 text-right font-semibold text-[#1F1F1F]'>
+                    <td className="px-4 py-3 text-right font-semibold text-[#1F1F1F]">
                       {rowTotal}
                     </td>
-                    <td className='px-4 py-3 text-center'>
-                      <span className='px-2 py-1 text-xs font-medium rounded-md bg-[#FFF1E4] text-[#A94D14]'>
+                    <td className="px-4 py-3 text-center">
+                      <span className="px-2 py-1 text-xs font-medium rounded-md bg-[#FFF1E4] text-[#A94D14]">
                         {item?.confidence
                           ? (item.confidence * 100).toFixed(0)
                           : '85'}

@@ -10,6 +10,7 @@ import * as Yup from 'yup';
 import ImagesUploader from '@/components/new-product/ImagesUploader';
 import EditHeader from '@/components/edit-product/EditHeader';
 import Loader from '@/components/ui/Loader';
+import { useTranslation } from '@/hooks/use-translation';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 const MAX_FILES = 4;
@@ -20,6 +21,7 @@ const EditProductPage: React.FC = () => {
   const params = useParams();
   const { isAuthenticated } = useAuth();
   const id = (params as any)?.id as string | undefined;
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -32,7 +34,7 @@ const EditProductPage: React.FC = () => {
 
   useEffect(() => {
     if (!id) {
-      setError('Product ID is required');
+      setError(t('editProduct.idRequired'));
       setLoading(false);
       return;
     }
@@ -50,10 +52,14 @@ const EditProductPage: React.FC = () => {
         setExistingImages(product.images || []);
         setUnlimitedStock(product.unlimited_stock || false);
       } else {
-        setError('Producto no encontrado');
+        setError(t('editProduct.notFound'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar producto');
+      setError(
+        err instanceof Error
+          ? err.message
+          : t('editProduct.errors.updateProduct')
+      );
     } finally {
       setLoading(false);
     }
@@ -82,7 +88,7 @@ const EditProductPage: React.FC = () => {
     setSaving(true);
     setError(null);
     if (!isAuthenticated) {
-      setError('Debes iniciar sesión para actualizar productos');
+      setError(t('editProduct.errors.loginRequired'));
       setSaving(false);
       return;
     }
@@ -96,7 +102,7 @@ const EditProductPage: React.FC = () => {
           newImageUrls.push(...urls);
         } catch (uploadError) {
           console.error('Error uploading images:', uploadError);
-          setError('Error al subir las imágenes');
+          setError(t('editProduct.errors.uploadImages'));
           setSaving(false);
           return;
         }
@@ -130,7 +136,9 @@ const EditProductPage: React.FC = () => {
       router.push('/inventory');
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : 'Error al actualizar producto'
+        err instanceof Error
+          ? err.message
+          : t('editProduct.errors.updateProduct')
       );
     } finally {
       setSaving(false);
@@ -151,7 +159,7 @@ const EditProductPage: React.FC = () => {
       setError(
         err instanceof Error
           ? err.message
-          : 'Error al actualizar estado del producto'
+          : t('editProduct.errors.updateStatus')
       );
     } finally {
       setTogglingStatus(false);
@@ -169,7 +177,9 @@ const EditProductPage: React.FC = () => {
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Error al archivar producto'
+        err instanceof Error
+          ? err.message
+          : t('editProduct.errors.archiveProduct')
       );
     } finally {
       setTogglingStatus(false);
@@ -177,24 +187,25 @@ const EditProductPage: React.FC = () => {
   };
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string().required('El nombre es requerido'),
+    name: Yup.string().required(t('newProduct.validation.nameRequired')),
     price: Yup.number()
-      .typeError('El precio debe ser un número')
-      .min(0, 'El precio debe ser 0 o mayor')
-      .required('El precio es requerido'),
+      .typeError(t('newProduct.validation.priceNumber'))
+      .min(0, t('newProduct.validation.priceMin'))
+      .required(t('newProduct.validation.priceRequired')),
     stock: Yup.number()
-      .typeError('El stock debe ser un número')
-      .integer('El stock debe ser un número entero')
-      .min(0, 'El stock debe ser 0 o mayor')
+      .typeError(t('newProduct.validation.stockNumber'))
+      .integer(t('newProduct.validation.stockInteger'))
+      .min(0, t('newProduct.validation.stockMin'))
       .when([], {
         is: () => !unlimitedStock,
-        then: (schema) => schema.required('El stock es requerido'),
+        then: (schema) =>
+          schema.required(t('newProduct.validation.stockRequired')),
         otherwise: (schema) => schema.notRequired(),
       }),
   });
 
   if (loading) {
-    return <Loader text="Cargando producto..." />;
+    return <Loader text={t('editProduct.loading')} />;
   }
 
   if (!productData) {
@@ -202,7 +213,7 @@ const EditProductPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen bg-bg-main">
         <div className="text-center">
           <p className="text-text-secondary">
-            {error || 'Producto no encontrado'}
+            {error || t('editProduct.notFound')}
           </p>
         </div>
       </div>
@@ -246,7 +257,7 @@ const EditProductPage: React.FC = () => {
                     {existingImages.length > 0 && (
                       <div className="p-6 border rounded-lg shadow-sm bg-white border-[#CBD5E1]">
                         <h3 className="mb-3 text-sm font-medium text-black">
-                          Imágenes actuales
+                          {t('editProduct.labels.currentImages')}
                         </h3>
                         <div className="grid grid-cols-2 gap-3">
                           {existingImages.map((img, idx) => (
@@ -278,7 +289,7 @@ const EditProductPage: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Descripción
+                            {t('editProduct.labels.description')}
                           </label>
                           <textarea
                             name="description"
@@ -290,7 +301,7 @@ const EditProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Categoría
+                            {t('editProduct.labels.category')}
                           </label>
                           <input
                             name="category"
@@ -301,7 +312,7 @@ const EditProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            SKU
+                            {t('editProduct.labels.sku')}
                           </label>
                           <input
                             name="sku"
@@ -318,7 +329,7 @@ const EditProductPage: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Nombre *
+                            {t('editProduct.labels.name')}
                           </label>
                           <input
                             name="name"
@@ -334,7 +345,7 @@ const EditProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Precio *
+                            {t('editProduct.labels.price')}
                           </label>
                           <input
                             name="price"
@@ -365,13 +376,13 @@ const EditProductPage: React.FC = () => {
                               className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                             />
                             <span className="text-sm font-medium text-black">
-                              Stock Ilimitado
+                              {t('editProduct.labels.unlimitedStock')}
                             </span>
                           </label>
                           {!unlimitedStock && (
                             <>
                               <label className="block mb-2 text-sm font-medium text-black">
-                                Stock *
+                                {t('editProduct.labels.stock')}
                               </label>
                               <input
                                 name="stock"

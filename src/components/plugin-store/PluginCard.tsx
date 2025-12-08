@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface PluginCardProps {
   plugin: any;
@@ -13,6 +16,8 @@ const PluginCard: React.FC<PluginCardProps> = ({
   getStatusBadge,
   getPriceBadge,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="w-full min-w-0 overflow-hidden transition-shadow bg-white rounded-lg shadow-lg hover:shadow-xl">
       {plugin.screenshot && (
@@ -67,7 +72,7 @@ const PluginCard: React.FC<PluginCardProps> = ({
             ))}
             {plugin.features.length > 2 && (
               <span className="px-2 py-1 text-xs text-zatobox-700 bg-zatobox-100 rounded">
-                +{plugin.features.length - 2} more
+                +{plugin.features.length - 2} {t('pluginStore.more')}
               </span>
             )}
           </div>
@@ -79,14 +84,14 @@ const PluginCard: React.FC<PluginCardProps> = ({
               disabled
               className="w-full px-4 py-2 font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed"
             >
-              En Desarrollo
+              {t('pluginStore.buttons.inDevelopment')}
             </button>
           ) : plugin.status === 'maintenance' ? (
             <button
               disabled
               className="w-full px-4 py-2 font-medium text-yellow-800 bg-yellow-100 rounded-lg cursor-not-allowed"
             >
-              En Mantenimiento
+              {t('pluginStore.buttons.inMaintenance')}
             </button>
           ) : (
             <button
@@ -97,7 +102,9 @@ const PluginCard: React.FC<PluginCardProps> = ({
                   : 'text-green-800 bg-green-100 hover:bg-green-200'
               }`}
             >
-              {plugin.status === 'active' ? 'Desactivar' : 'Activar'}
+              {plugin.status === 'active'
+                ? t('pluginStore.buttons.deactivate')
+                : t('pluginStore.buttons.activate')}
             </button>
           )}
         </div>

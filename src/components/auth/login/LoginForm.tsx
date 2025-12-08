@@ -7,19 +7,23 @@ import { useAuthStore } from '@/context/auth-store';
 import SocialButtons from './SocialButtons';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-
-const validationSchema = Yup.object().shape({
-  email: Yup.string().email('Invalid email').required('Email is required'),
-  password: Yup.string()
-    .min(8, 'Password must be at least 8 characters')
-    .required('Password is required'),
-});
+import { useTranslation } from '@/hooks/use-translation';
 
 const LoginForm: React.FC = () => {
   const router = useRouter();
   const { login, loading, error: authError } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
+
+  const validationSchema = Yup.object().shape({
+    email: Yup.string()
+      .email(t('auth.validation.invalidEmail'))
+      .required(t('auth.validation.emailRequired')),
+    password: Yup.string()
+      .min(8, t('auth.validation.passwordMin'))
+      .required(t('auth.validation.passwordRequired')),
+  });
 
   const handleSubmit = async (values: {
     email: string;
@@ -31,7 +35,7 @@ const LoginForm: React.FC = () => {
       await login(values.email, values.password);
       router.push('/home');
     } catch (err: any) {
-      setError(err?.message || 'Error logging in');
+      setError(err?.message || t('auth.login.errorLoggingIn'));
     }
   };
 
@@ -47,7 +51,7 @@ const LoginForm: React.FC = () => {
             <Field
               name="email"
               type="email"
-              placeholder="Example@email.com"
+              placeholder={t('auth.login.emailPlaceholder')}
               className="w-full h-12 px-4 transition-all duration-150 ease-in-out border rounded border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-white text-black placeholder-[#888888] hover:shadow-sm"
             />
             <div className="mt-1 text-sm text-error-700">
@@ -59,7 +63,7 @@ const LoginForm: React.FC = () => {
             <Field
               name="password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="at least 8 characters"
+              placeholder={t('auth.login.passwordPlaceholder')}
               className="w-full h-12 px-4 transition-all duration-150 ease-in-out border rounded border-[#CBD5E1] focus:ring-2 focus:ring-zatobox-500 focus:border-transparent bg-white text-black placeholder-[#888888] hover:shadow-sm"
             />
             <button
@@ -81,13 +85,13 @@ const LoginForm: React.FC = () => {
                 name="remember"
                 className="w-4 h-4 border-gray-300 rounded text-black focus:ring-zatobox-500"
               />
-              <span>Recordarme</span>
+              <span>{t('auth.login.rememberMe')}</span>
             </label>
             <button
               type="button"
               className="text-sm transition-colors text-zatobox-500 hover:text-zatobox-600"
             >
-              Olvidaste tu contraseña?
+              {t('auth.login.forgotPassword')}
             </button>
           </div>
 
@@ -96,15 +100,15 @@ const LoginForm: React.FC = () => {
               {/Acceso restringido/i.test(error || authError || '') ||
               /HTTP error 403/i.test(error || authError || '') ? (
                 <>
-                  Acceso restringido. Requiere plan Premium. Ve a{' '}
+                  {t('auth.login.restrictedAccess')}{' '}
                   <button
                     type="button"
                     onClick={() => router.push('/upgrade')}
                     className="underline font-medium text-red-700 hover:text-red-800"
                   >
-                    mejorar
+                    {t('auth.login.upgrade')}
                   </button>{' '}
-                  para mejorar tu plan.
+                  {t('auth.login.toUpgradePlan')}
                 </>
               ) : (
                 <>{error || authError}</>
@@ -117,7 +121,7 @@ const LoginForm: React.FC = () => {
             disabled={loading}
             className="w-full h-12 font-medium text-white transition-all duration-150 ease-in-out rounded-lg bg-zatobox-500 hover:bg-zatobox-600 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-sm"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? t('auth.login.signingIn') : t('auth.login.signIn')}
           </button>
         </Form>
       </Formik>
@@ -127,7 +131,9 @@ const LoginForm: React.FC = () => {
           <div className="w-full border-t border-[#CBD5E1]"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-black">O continuar con</span>
+          <span className="px-2 bg-white text-black">
+            {t('auth.login.orContinueWith')}
+          </span>
         </div>
       </div>
 
@@ -135,12 +141,12 @@ const LoginForm: React.FC = () => {
 
       <div className="mt-4 text-center">
         <p className="text-[#888888]">
-          No tienes una cuenta?{' '}
+          {t('auth.login.noAccount')}{' '}
           <button
             onClick={() => router.push('/register')}
             className="font-medium transition-colors text-black hover:text-zatobox-600"
           >
-            Regístrate
+            {t('auth.login.signUp')}
           </button>
         </p>
       </div>

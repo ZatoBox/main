@@ -13,6 +13,7 @@ import {
 import PrintableReceiptModal from './PrintableReceiptModal';
 import { buildReceiptHtml } from '@/utils/print-receipt';
 import type { ReceiptItem } from '@/types';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface Props {
   id: string;
@@ -44,6 +45,7 @@ const ReceiptCard: React.FC<Props> = ({
   );
   const [isLoading, setIsLoading] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(status);
+  const { t } = useTranslation();
 
   const handleImageError = (idx: number) => {
     setImageErrors((prev) => ({ ...prev, [idx]: true }));
@@ -73,7 +75,9 @@ const ReceiptCard: React.FC<Props> = ({
       onStatusChange?.('cancelled');
     } catch (error) {
       console.error('Error updating order:', error);
-      alert('Error al actualizar el pedido: ' + (error as Error).message);
+      alert(
+        t('receipts.detail.errorUpdating') + ': ' + (error as Error).message
+      );
     } finally {
       setIsLoading(false);
     }
@@ -99,17 +103,20 @@ const ReceiptCard: React.FC<Props> = ({
   };
 
   const getStatusLabel = (status: string) => {
-    const labels: { [key: string]: string } = {
-      completed: 'Completado',
-      pending: 'Pendiente',
-      cancelled: 'Cancelado',
-    };
-    return labels[status] || status;
+    switch (status) {
+      case 'completed':
+        return t('receipts.detail.completed');
+      case 'pending':
+        return t('receipts.detail.pending');
+      case 'cancelled':
+        return t('receipts.detail.cancelled');
+      default:
+        return status;
+    }
   };
 
   return (
     <div className="border rounded-lg shadow-sm transition-all duration-300 bg-white border-[#E5E7EB] hover:shadow-md hover:border-[#D1D5DB] hover:-translate-y-1">
-      {/* Main Content */}
       <div className="p-4 sm:p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -119,7 +126,7 @@ const ReceiptCard: React.FC<Props> = ({
               </div>
               <div>
                 <h3 className="font-semibold text-[#000000]">
-                  Recibo #{receiptNumber}
+                  {t('receipts.detail.receipt')} #{receiptNumber}
                 </h3>
                 <p className="text-xs text-[#9CA3AF]">{formattedDate}</p>
               </div>
@@ -127,32 +134,40 @@ const ReceiptCard: React.FC<Props> = ({
 
             <div className="grid grid-cols-3 gap-4 mt-4 sm:grid-cols-4">
               <div>
-                <p className="text-xs text-[#9CA3AF] mb-1">Artículos</p>
+                <p className="text-xs text-[#9CA3AF] mb-1">
+                  {t('receipts.detail.items')}
+                </p>
                 <p className="font-semibold text-[#000000]">{itemCount}</p>
               </div>
               <div>
-                <p className="text-xs text-[#9CA3AF] mb-1">Total</p>
+                <p className="text-xs text-[#9CA3AF] mb-1">
+                  {t('receipts.detail.total')}
+                </p>
                 <p className="font-semibold text-[#F88612]">
                   ${total.toFixed(2)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-[#9CA3AF] mb-1">Método</p>
+                <p className="text-xs text-[#9CA3AF] mb-1">
+                  {t('receipts.detail.method')}
+                </p>
                 {paymentMethod === 'cash' && (
                   <div className="flex items-center gap-2 text-sm font-semibold uppercase text-[#10B981]">
                     <Banknote size={14} />
-                    <span>EFECTIVO</span>
+                    <span>{t('receipts.detail.cash')}</span>
                   </div>
                 )}
                 {paymentMethod === 'bitcoin' && (
                   <div className="flex items-center gap-2 text-sm font-semibold uppercase text-[#F88612]">
                     <Bitcoin size={14} />
-                    <span>BITCOIN</span>
+                    <span>{t('receipts.detail.bitcoin')}</span>
                   </div>
                 )}
               </div>
               <div>
-                <p className="text-xs text-[#9CA3AF]">Estado</p>
+                <p className="text-xs text-[#9CA3AF]">
+                  {t('receipts.detail.status')}
+                </p>
                 <span
                   className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
                     currentStatus
@@ -164,7 +179,6 @@ const ReceiptCard: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Expand Button */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="p-2 transition-colors rounded-lg hover:bg-[#F3F4F6] ml-4"
@@ -187,22 +201,22 @@ const ReceiptCard: React.FC<Props> = ({
           </button>
         </div>
 
-        {/* Expanded Details */}
         {isExpanded && (
           <div className="mt-6 pt-6 border-t border-[#E5E7EB]">
-            {/* Receipt Header */}
             <div className="mb-6 p-4 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h4 className="font-semibold text-[#000000]">
-                    Recibo de Compra
+                    {t('receipts.detail.purchaseReceipt')}
                   </h4>
                   <p className="text-xs text-[#9CA3AF]">
                     #{receiptNumber} • {formattedDate}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-[#9CA3AF]">Total</p>
+                  <p className="text-xs text-[#9CA3AF]">
+                    {t('receipts.detail.total')}
+                  </p>
                   <p className="text-2xl font-bold text-[#F88612]">
                     ${total.toFixed(2)}
                   </p>
@@ -210,10 +224,9 @@ const ReceiptCard: React.FC<Props> = ({
               </div>
             </div>
 
-            {/* Items Details */}
             <div className="mb-4">
               <h4 className="font-semibold text-[#000000] mb-3">
-                Detalles del pedido
+                {t('receipts.detail.orderDetails')}
               </h4>
               <div className="space-y-2">
                 {items && items.length > 0 ? (
@@ -242,7 +255,7 @@ const ReceiptCard: React.FC<Props> = ({
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-[#000000] truncate">
-                              {item.productName || 'Producto'}
+                              {item.productName || t('receipts.detail.product')}
                             </p>
                             <p className="text-xs text-[#9CA3AF]">
                               {quantity} x ${price.toFixed(2)}
@@ -262,10 +275,11 @@ const ReceiptCard: React.FC<Props> = ({
                       );
                     })}
 
-                    {/* Summary Line */}
                     <div className="mt-4 pt-3 border-t border-[#E5E7EB]">
                       <div className="flex items-center justify-between p-3 bg-[#F9FAFB] rounded-lg">
-                        <p className="font-bold text-[#000000]">Subtotal</p>
+                        <p className="font-bold text-[#000000]">
+                          {t('receipts.detail.subtotal')}
+                        </p>
                         <p className="font-bold text-[#F88612]">
                           ${total.toFixed(2)}
                         </p>
@@ -274,26 +288,29 @@ const ReceiptCard: React.FC<Props> = ({
                   </>
                 ) : (
                   <p className="text-sm text-[#9CA3AF]">
-                    No hay detalles disponibles
+                    {t('receipts.detail.noDetails')}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Additional Info */}
             <div className="grid grid-cols-2 gap-3 mb-4 p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
               <div>
-                <p className="text-xs text-[#9CA3AF]">Método de Pago</p>
+                <p className="text-xs text-[#9CA3AF]">
+                  {t('receipts.detail.paymentMethod')}
+                </p>
                 <p className="text-sm font-semibold text-[#000000]">
                   {paymentMethod === 'cash'
-                    ? 'Efectivo'
+                    ? t('receipts.detail.cashLabel')
                     : paymentMethod === 'crypto'
-                    ? 'Criptomoneda'
+                    ? t('receipts.detail.cryptoLabel')
                     : paymentMethod}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-[#9CA3AF]">Estado</p>
+                <p className="text-xs text-[#9CA3AF]">
+                  {t('receipts.detail.status')}
+                </p>
                 <p
                   className={`text-sm font-semibold ${
                     currentStatus === 'completed'
@@ -303,16 +320,11 @@ const ReceiptCard: React.FC<Props> = ({
                       : 'text-[#991B1B]'
                   }`}
                 >
-                  {currentStatus === 'completed'
-                    ? 'Completado'
-                    : currentStatus === 'pending'
-                    ? 'Pendiente'
-                    : 'Cancelado'}
+                  {getStatusLabel(currentStatus)}
                 </p>
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex flex-wrap gap-2 pt-4 border-t border-[#E5E7EB]">
               <button
                 onClick={() => {
@@ -346,7 +358,9 @@ const ReceiptCard: React.FC<Props> = ({
                 className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB] hover:border-[#D1D5DB]"
               >
                 <Eye size={16} />
-                <span className="hidden sm:inline">Ver</span>
+                <span className="hidden sm:inline">
+                  {t('receipts.detail.view')}
+                </span>
               </button>
               <button
                 onClick={async () => {
@@ -426,7 +440,9 @@ const ReceiptCard: React.FC<Props> = ({
                 className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-[#F88612] text-white hover:bg-[#E07A0A] shadow-sm hover:shadow-md"
               >
                 <Download size={16} />
-                <span className="hidden sm:inline">Descargar</span>
+                <span className="hidden sm:inline">
+                  {t('receipts.detail.download')}
+                </span>
               </button>
               {currentStatus !== 'cancelled' && (
                 <button
@@ -435,7 +451,9 @@ const ReceiptCard: React.FC<Props> = ({
                   className="flex items-center justify-center space-x-2 flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <RotateCcw size={16} />
-                  <span className="hidden sm:inline">Reembolsar</span>
+                  <span className="hidden sm:inline">
+                    {t('receipts.detail.refund')}
+                  </span>
                 </button>
               )}
             </div>
@@ -443,7 +461,6 @@ const ReceiptCard: React.FC<Props> = ({
         )}
       </div>
 
-      {/* Printable Receipt Modal */}
       <PrintableReceiptModal
         open={showPrintModal}
         onClose={() => setShowPrintModal(false)}
