@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { DollarSign, FileText, TrendingUp } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface Props {
   totalReceipts: number;
@@ -14,21 +15,23 @@ const ReceiptsStats: React.FC<Props> = ({
   totalAmount,
   completedReceipts,
 }) => {
+  const { t } = useTranslation();
+
   const stats = [
     {
-      label: 'Recibos Totales',
+      label: t('receipts.statsLabels.totalReceipts'),
       value: totalReceipts,
       icon: FileText,
       textColor: 'text-[#F88612]',
     },
     {
-      label: 'Monto Total',
+      label: t('receipts.statsLabels.totalAmount'),
       value: `$${totalAmount.toFixed(2)}`,
       icon: DollarSign,
       textColor: 'text-[#F88612]',
     },
     {
-      label: 'Completados',
+      label: t('receipts.statsLabels.completed'),
       value: completedReceipts,
       icon: TrendingUp,
       textColor: 'text-[#F88612]',

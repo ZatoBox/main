@@ -693,6 +693,38 @@ export const translations = {
         errorUpdating: 'Error al actualizar el pedido',
         product: 'Producto',
       },
+      grid: {
+        loading: 'Cargando recibos...',
+        noReceipts: 'No se encontraron recibos',
+        noReceiptsDesc:
+          'Los recibos de pago aparecerán aquí cuando realices transacciones.',
+      },
+      statsLabels: {
+        totalReceipts: 'Recibos Totales',
+        totalAmount: 'Monto Total',
+        completed: 'Completados',
+      },
+      crypto: {
+        title: 'Recibos de Criptomoneda',
+        description:
+          'Esta sección está habilitada pero aún no hay recibos de criptomoneda.',
+        comingSoon: 'Próximamente',
+      },
+      printModal: {
+        title: 'Vista Previa del Recibo',
+        purchaseReceipt: 'RECIBO DE COMPRA',
+        date: 'Fecha',
+        status: 'Estado',
+        product: 'Producto',
+        quantity: 'Cantidad',
+        unitPrice: 'Precio Unit.',
+        total: 'Total',
+        noItems: 'No hay artículos',
+        thanks: 'Gracias por tu compra',
+        close: 'Cerrar',
+        download: 'Descargar',
+        print: 'Imprimir',
+      },
     },
 
     // Plugin Store
@@ -1540,6 +1572,38 @@ export const translations = {
         refund: 'Refund',
         errorUpdating: 'Error updating order',
         product: 'Product',
+      },
+      grid: {
+        loading: 'Loading receipts...',
+        noReceipts: 'No receipts found',
+        noReceiptsDesc:
+          'Payment receipts will appear here when you make transactions.',
+      },
+      statsLabels: {
+        totalReceipts: 'Total Receipts',
+        totalAmount: 'Total Amount',
+        completed: 'Completed',
+      },
+      crypto: {
+        title: 'Cryptocurrency Receipts',
+        description:
+          'This section is enabled but there are no cryptocurrency receipts yet.',
+        comingSoon: 'Coming Soon',
+      },
+      printModal: {
+        title: 'Receipt Preview',
+        purchaseReceipt: 'PURCHASE RECEIPT',
+        date: 'Date',
+        status: 'Status',
+        product: 'Product',
+        quantity: 'Quantity',
+        unitPrice: 'Unit Price',
+        total: 'Total',
+        noItems: 'No items',
+        thanks: 'Thank you for your purchase',
+        close: 'Close',
+        download: 'Download',
+        print: 'Print',
       },
     },
 
