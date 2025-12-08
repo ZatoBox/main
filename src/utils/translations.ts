@@ -428,6 +428,35 @@ export const translations = {
         enableSelected: 'Habilitar',
         disableSelected: 'Deshabilitar',
       },
+      jsonImporter: {
+        title: 'Importador JSON Rápido',
+        description:
+          'Pega tu código JSON aquí para crear múltiples productos a la vez. Sigue la estructura requerida.',
+        placeholder: 'Pega tu lista de productos en formato JSON aquí...',
+        validate: 'Validar JSON',
+        cancel: 'Cancelar',
+        create: 'Crear Productos',
+        creating: 'Creando...',
+        success: '¡Productos creados exitosamente!',
+        validationError: 'JSON inválido, revisa la sintaxis.',
+        structureError:
+          'Estructura inválida. Asegúrate de usar el formato correcto.',
+        previewTitle: 'Vista Previa de Productos',
+        detectedItems: 'ítems detectados',
+        status: {
+          valid: 'Válido',
+          invalid: 'Inválido',
+        },
+        headers: {
+          name: 'Nombre',
+          price: 'Precio',
+          stock: 'Stock',
+          status: 'Estado',
+        },
+        example: 'Ver ejemplo',
+        copyExample: 'Copiar ejemplo',
+        exampleCopied: '¡Copiado!',
+      },
       card: {
         outOfStock: 'Sin stock',
         unlimited: 'Ilimitado',
@@ -454,203 +483,7 @@ export const translations = {
         selected: 'seleccionado',
       },
     },
-
-    // New Product
-    newProduct: {
-      errors: {
-        loginRequired: 'Debes iniciar sesión para crear productos',
-        uploadImages: 'Error al subir las imágenes',
-        createProduct: 'Error al crear producto',
-      },
-      labels: {
-        description: 'Descripción',
-        category: 'Categoría',
-        sku: 'SKU',
-        name: 'Nombre *',
-        price: 'Precio *',
-        stock: 'Stock *',
-        unlimitedStock: 'Stock Ilimitado',
-      },
-      validation: {
-        nameRequired: 'El nombre es requerido',
-        priceNumber: 'El precio debe ser un número',
-        priceMin: 'El precio debe ser 0 o mayor',
-        priceRequired: 'El precio es requerido',
-        stockNumber: 'El stock debe ser un número',
-        stockInteger: 'El stock debe ser un número entero',
-        stockMin: 'El stock debe ser 0 o mayor',
-        stockRequired: 'El stock es requerido',
-      },
-      header: {
-        title: 'Nuevo Producto',
-        saving: 'Guardando...',
-        save: 'Guardar',
-      },
-      uploader: {
-        title: 'Imágenes del Producto',
-        dragDrop: 'Arrastra y suelta imágenes aquí',
-        clickSelect: 'o haz clic para seleccionar archivos',
-      },
-    },
-
-    // Edit Product
-    editProduct: {
-      loading: 'Cargando producto...',
-      notFound: 'Producto no encontrado',
-      idRequired: 'Se requiere ID del producto',
-      errors: {
-        loginRequired: 'Debes iniciar sesión para actualizar productos',
-        uploadImages: 'Error al subir las imágenes',
-        updateProduct: 'Error al actualizar producto',
-        updateStatus: 'Error al actualizar estado del producto',
-        archiveProduct: 'Error al archivar producto',
-      },
-      labels: {
-        currentImages: 'Imágenes actuales',
-        description: 'Descripción',
-        category: 'Categoría',
-        sku: 'SKU',
-        name: 'Nombre *',
-        price: 'Precio *',
-        stock: 'Stock *',
-        unlimitedStock: 'Stock Ilimitado',
-      },
-      header: {
-        title: 'Editar Producto',
-        updating: 'Actualizando...',
-        update: 'Actualizar',
-        active: 'Activo',
-        inactive: 'Inactivo',
-        archive: 'Archivar',
-        archiving: 'Archivando...',
-      },
-      uploader: {
-        title: 'Imágenes del Producto',
-        dragDrop: 'Arrastra y suelta imágenes aquí',
-        clickSelect: 'o haz clic para seleccionar archivos',
-        existing: 'Existente',
-        new: 'Nueva',
-        replaceAll: 'Reemplazar todas las imágenes',
-      },
-      form: {
-        productName: 'Nombre del Producto *',
-        description: 'Descripción',
-        locations: 'Ubicaciones',
-        locationPlaceholder: 'Ubicación física opcional',
-      },
-      inventoryPanel: {
-        title: 'Inventario',
-        quantity: 'Cantidad de inventario',
-        lowStockAlert: 'Alerta de bajo inventario',
-      },
-      categorization: {
-        title: 'Categorías',
-        loading: 'Cargando...',
-        searchPlaceholder: 'Buscar categorías...',
-        noMatches: 'Sin coincidencias',
-      },
-      unitsPanel: {
-        title: 'Unidades',
-        unit: 'Unidad',
-        unitPlaceholder: '-- Déjalo en blanco para mantener el actual --',
-        productType: 'Tipo de Producto',
-        weight: 'Peso (kg)',
-        price: 'Precio (requerido)',
-        addUnit: 'Añadir unidad adicional',
-      },
-    },
-
-    // OCR
-    ocr: {
-      loading: 'Cargando OCR...',
-      errors: {
-        noData: 'No hay datos para confirmar o no estás autenticado',
-        noValidProducts: 'No hay productos válidos para crear',
-        addingProducts: 'Error al agregar productos al inventario',
-        processing: 'Error procesando documento. Por favor intenta de nuevo.',
-      },
-      cooldown: {
-        wait: 'Espera',
-        waitMessage: 'antes de procesar otro documento',
-      },
-      buttons: {
-        processing: 'Procesando documento...',
-        upload: 'Subir y procesar',
-        processAnother: 'Procesar otro',
-      },
-      result: {
-        processedImage: 'Imagen procesada con detecciones',
-        imageDescription:
-          'Imagen que muestra las detecciones de YOLO (cuadrículas verdes) y las regiones de la tabla (cuadrículas azules)',
-        successMessage: 'Documento procesado exitosamente',
-      },
-      header: {
-        title: 'Procesado OCR',
-        breadcrumbTools: 'Herramientas',
-        breadcrumbOcr: 'OCR',
-        description: 'Escanee su documento para ver el texto reconocido',
-      },
-      fileUploader: {
-        selectDocument: 'Seleccionar documento',
-        selected: 'Seleccionado',
-        selectFile: 'Seleccionar un archivo',
-        formats: 'PNG, WEBP, JPG, JPEG (max 5MB)',
-      },
-      actionsBar: {
-        saveChanges: 'Guardar cambios',
-        cancel: 'Cancelar',
-        editResult: 'Editar resultado',
-        confirmData: 'Confirmar datos',
-        adding: 'Agregando...',
-      },
-      itemsTable: {
-        title: 'Items detectados',
-        name: 'Nombre',
-        description: 'Descripción',
-        quantity: 'Cantidad',
-        unitPrice: 'Precio Unitario',
-        total: 'Total',
-        confidence: 'Confidencialidad',
-        unnamed: 'Sin nombre',
-        noDescription: 'Sin descripción',
-      },
-      resultOverview: {
-        title: 'Resultados de procesado OCR',
-        processedSuccess: 'Documento procesado exitosamente',
-        file: 'archivo',
-        documentInfo: 'Información del documento',
-        type: 'Tipo',
-        invoice: 'Factura',
-        supplier: 'Proveedor',
-        date: 'Fecha',
-        number: 'Número',
-        noDocumentInfo: 'No se encontró información en el documento',
-        financialSummary: 'Resumen Financiero',
-        subtotal: 'Subtotal',
-        taxes: 'Impuestos',
-        noFinancialSummary: 'No se encontró resumen financiero',
-      },
-    },
-
-    // Receipts
     receipts: {
-      loading: 'Cargando recibos...',
-      errors: {
-        loginRequired: 'Debes iniciar sesión para ver los recibos',
-        loadError: 'Error al cargar recibos',
-      },
-      retry: 'Reintentar',
-      header: {
-        title: 'Recibos',
-        breadcrumbFinances: 'Finanzas',
-        breadcrumbReceipts: 'Recibos',
-        description: 'Historial de transacciones y comprobantes',
-      },
-      stats: {
-        total: 'Total',
-        completed: 'Completados',
-        pending: 'Pendientes',
-      },
       card: {
         order: 'Pedido',
         items: 'artículos',
@@ -1439,6 +1272,35 @@ export const translations = {
         selectAll: 'Select all',
         selected: 'selected',
       },
+      jsonImporter: {
+        title: 'Quick JSON Importer',
+        description:
+          'Paste your JSON code here to create multiple products at once. Follow the required structure.',
+        placeholder: 'Paste your product list in JSON format here...',
+        validate: 'Validate JSON',
+        cancel: 'Cancel',
+        create: 'Create Products',
+        creating: 'Creating...',
+        success: 'Products created successfully!',
+        validationError: 'Invalid JSON, check syntax.',
+        structureError:
+          'Invalid structure. Make sure to use the correct format.',
+        previewTitle: 'Product Preview',
+        detectedItems: 'detected items',
+        status: {
+          valid: 'Valid',
+          invalid: 'Invalid',
+        },
+        headers: {
+          name: 'Name',
+          price: 'Price',
+          stock: 'Stock',
+          status: 'Status',
+        },
+        example: 'View Example',
+        copyExample: 'Copy Example',
+        exampleCopied: 'Copied!',
+      },
     },
 
     // New Product
@@ -1983,13 +1845,18 @@ export const translations = {
 
 export function getTranslation(language: Language, key: string) {
   const keys = key.split('.');
-  let value: any = translations[language];
+  const translationObj = translations as Record<string, any>;
+  let value: any = translationObj[language];
+
+  if (!value) {
+    return key;
+  }
 
   for (const k of keys) {
     if (value && typeof value === 'object' && k in value) {
       value = value[k];
     } else {
-      return key; // Fallback to key if translation not found
+      return key;
     }
   }
 

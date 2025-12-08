@@ -12,6 +12,7 @@ interface Props {
   selectedStatus?: boolean;
   onBulkDelete?: () => void;
   deletingItems?: boolean;
+  onImportJson?: () => void;
 }
 
 const InventoryHeader: React.FC<Props> = ({
@@ -23,6 +24,7 @@ const InventoryHeader: React.FC<Props> = ({
   selectedStatus = false,
   onBulkDelete,
   deletingItems = false,
+  onImportJson,
 }) => {
   const { t } = useTranslation();
 
@@ -141,6 +143,21 @@ const InventoryHeader: React.FC<Props> = ({
                 </button>
               )}
             </>
+          )}
+          {onImportJson && (
+            <button
+              onClick={onImportJson}
+              className={`relative px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200
+                       flex items-center justify-center space-x-2 group
+                       bg-white border text-gray-700 border-gray-200
+                       hover:bg-gray-50 hover:border-gray-300
+                       shadow-sm hover:shadow-md
+                       active:scale-95`}
+              title={t('inventory.jsonImporter.title')}
+            >
+              <FaRegFolder size={18} className="text-[#F88612]" />
+              <span className="hidden sm:inline">JSON</span>
+            </button>
           )}
           <button
             onClick={onCreate}

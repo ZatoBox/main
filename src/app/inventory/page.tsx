@@ -12,6 +12,7 @@ import InventoryGrid from '@/components/inventory/InventoryGrid';
 import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/hooks/use-translation';
+import JsonImporterModal from '@/components/inventory/JsonImporterModal';
 import Loader from '@/components/ui/Loader';
 
 const InventoryPage: React.FC = () => {
@@ -31,8 +32,23 @@ const InventoryPage: React.FC = () => {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingItems, setDeletingItems] = useState(false);
+  const [showJsonImporter, setShowJsonImporter] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  const handleImportSuccess = async () => {
+    setLoading(true);
+    try {
+      const response = await productsAPI.list(true);
+      if (response && response.success && Array.isArray(response.products)) {
+        setInventoryItems(response.products);
+      }
+    } catch (error) {
+      console.error('Error refreshing inventory:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -120,7 +136,7 @@ const InventoryPage: React.FC = () => {
   };
 
   const handleEditProduct = (id: string) => {
-    router.push(`/edit-product/${id}`);
+    router.push(`/inventory/edit/${id}`);
   };
 
   const handleDeleteClick = (id: string, event?: React.MouseEvent) => {
@@ -372,6 +388,7 @@ const InventoryPage: React.FC = () => {
           onToggleSelectedStatus={handleToggleSelectedStatus}
           onBulkDelete={handleBulkDelete}
           deletingItems={deletingItems}
+          onImportJson={() => setShowJsonImporter(true)}
           selectedStatus={
             selectedItems.length > 0 &&
             inventoryItems.some(
@@ -453,6 +470,12 @@ const InventoryPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <JsonImporterModal
+        isOpen={showJsonImporter}
+        onClose={() => setShowJsonImporter(false)}
+        onSuccess={handleImportSuccess}
+      />
     </div>
   );
 };
