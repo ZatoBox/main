@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Search } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface Props {
   searchTerm: string;
@@ -16,16 +17,17 @@ const ReceiptsFilters: React.FC<Props> = ({
   statusFilter,
   onStatusChange,
 }) => {
+  const { t } = useTranslation();
+
   const statuses = [
-    { value: 'all', label: 'Todos' },
-    { value: 'completed', label: 'Completados' },
-    { value: 'pending', label: 'Pendientes' },
-    { value: 'cancelled', label: 'Cancelados' },
+    { value: 'all', label: t('receipts.filters.allStatuses') },
+    { value: 'completed', label: t('receipts.filters.completed') },
+    { value: 'pending', label: t('receipts.filters.pending') },
+    { value: 'cancelled', label: t('receipts.filters.cancelled') },
   ];
 
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white border border-[#E5E7EB] rounded-lg p-4">
-      {/* Search */}
       <div className="flex-1 relative">
         <Search
           size={18}
@@ -33,14 +35,13 @@ const ReceiptsFilters: React.FC<Props> = ({
         />
         <input
           type="text"
-          placeholder="Buscar recibos..."
+          placeholder={t('receipts.filters.searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F88612] focus:border-transparent transition-all bg-white text-[#000000] placeholder-[#9CA3AF]"
         />
       </div>
 
-      {/* Status Filter */}
       <div className="flex gap-2 flex-wrap md:flex-nowrap">
         {statuses.map((status) => (
           <button

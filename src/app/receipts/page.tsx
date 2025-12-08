@@ -10,6 +10,7 @@ import ReceiptsFilters from '@/components/receipts/ReceiptsFilters';
 import ReceiptsGrid from '@/components/receipts/ReceiptsGrid';
 import ReceiptsStats from '@/components/receipts/ReceiptsStats';
 import Loader from '@/components/ui/Loader';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface Receipt {
   id: string;
@@ -31,13 +32,14 @@ const ReceiptsPage: React.FC = () => {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchAllOrders = async () => {
       if (!initialized) return;
 
       if (!isAuthenticated) {
-        setError('Debes iniciar sesión para ver los recibos');
+        setError(t('receipts.errors.loginRequired'));
         setLoading(false);
         return;
       }
@@ -70,7 +72,7 @@ const ReceiptsPage: React.FC = () => {
       } catch (err: any) {
         console.error('Error loading receipts:', err);
         setReceipts([]);
-        setError(err?.message || 'Error al cargar recibos');
+        setError(err?.message || t('receipts.errors.loadError'));
       } finally {
         setLoading(false);
       }
@@ -127,7 +129,7 @@ const ReceiptsPage: React.FC = () => {
   ).length;
 
   if (loading && initialized && isAuthenticated) {
-    return <Loader text="Cargando recibos..." />;
+    return <Loader text={t('receipts.loading')} />;
   }
 
   if (error && initialized && isAuthenticated) {
@@ -154,7 +156,7 @@ const ReceiptsPage: React.FC = () => {
             onClick={() => window.location.reload()}
             className="px-4 py-2 font-medium text-white transition-colors rounded-lg bg-[#F88612] hover:bg-[#d17110]"
           >
-            Reintentar
+            {t('receipts.retry')}
           </button>
         </div>
       </div>

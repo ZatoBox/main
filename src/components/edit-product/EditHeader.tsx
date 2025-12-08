@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaRegFolder } from 'react-icons/fa6';
 import { IoMdArrowRoundBack } from 'react-icons/io';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface Props {
   onBack: () => void;
@@ -20,6 +21,8 @@ const EditHeader: React.FC<Props> = ({
   saving,
   togglingStatus,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="border-b bg-[#FFFFFF] border-[#CBD5E1]">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -32,7 +35,7 @@ const EditHeader: React.FC<Props> = ({
               <IoMdArrowRoundBack size={20} className="text-[#000000]" />
             </button>
             <h1 className="hidden text-xl font-bold text-[#000000] md:block">
-              Editar producto
+              {t('editProduct.header.title')}
             </h1>
           </div>
           <div className="flex items-center space-x-4">
@@ -71,7 +74,9 @@ const EditHeader: React.FC<Props> = ({
                   status === 'active' ? 'text-[#F88612]' : 'text-[#64748B]'
                 }`}
               >
-                Activado
+                {status === 'active'
+                  ? t('editProduct.header.active')
+                  : t('editProduct.header.inactive')}
               </span>
             </label>
             <button
@@ -89,12 +94,12 @@ const EditHeader: React.FC<Props> = ({
               {saving ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Guardando...</span>
+                  <span>{t('editProduct.header.updating')}</span>
                 </div>
               ) : (
                 <>
                   <FaRegFolder className="w-4 h-4" />
-                  <span>Guardar</span>
+                  <span>{t('editProduct.header.update')}</span>
                 </>
               )}
             </button>

@@ -11,6 +11,7 @@ import { getActiveProducts } from '@/services/api.service';
 import { btcpayAPI } from '@/services/btcpay.service';
 import { confirmCryptoOrder } from '@/services/crypto-payments.service';
 import { useBTCPayCheckout } from '@/hooks/use-btcpay-checkout';
+import { useTranslation } from '@/hooks/use-translation';
 import type { Product } from '@/types/index';
 import { useAuth } from '@/context/auth-store';
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io';
@@ -59,6 +60,7 @@ const HomePage: React.FC<HomePageProps> = ({
     startPolling,
     closeModal,
   } = useBTCPayCheckout();
+  const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSKUModalOpen, setIsSKUModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -333,7 +335,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   // Estados de carga / error
   if (loading) {
-    return <Loader text="Loading products..." />;
+    return <Loader text={t('home.loading')} />;
   }
 
   if (error === 'polar_not_configured') {
@@ -351,8 +353,8 @@ const HomePage: React.FC<HomePageProps> = ({
           isCartOpen={isDrawerOpen}
         />
         <PolarSetupPrompt
-          title="Bienvenido a ZatoBox!"
-          subtitle="Para comenzar a gestionar tus productos e inventario, por favor configura tus credenciales de API de Polar en la configuración de tu perfil."
+          title={t('home.polarSetup.title')}
+          subtitle={t('home.polarSetup.subtitle')}
         />
       </div>
     );
@@ -384,7 +386,7 @@ const HomePage: React.FC<HomePageProps> = ({
             onClick={() => window.location.reload()}
             className="px-4 py-2 font-medium text-black transition-all duration-300 rounded-lg bg-primary hover:bg-primary-600 hover:scale-105 hover:shadow-lg btn-animate"
           >
-            Reintentar
+            {t('home.retry')}
           </button>
         </div>
       </div>
@@ -426,16 +428,15 @@ const HomePage: React.FC<HomePageProps> = ({
                 </svg>
                 <div className="flex-1">
                   <h3 className="font-semibold text-yellow-800">
-                    ⚠️ Wallet no configurada
+                    {t('home.wallet.notConfigured')}
                   </h3>
                   <p className="text-sm text-yellow-700 mt-1">
-                    Para recibir pagos en Bitcoin, debes configurar tu XPUB en
-                    tu perfil.{' '}
+                    {t('home.wallet.configureXpub')}{' '}
                     <a
                       href="/profile"
                       className="font-semibold underline hover:text-yellow-900"
                     >
-                      Ir a perfil →
+                      {t('home.wallet.goToProfile')}
                     </a>
                   </p>
                 </div>
@@ -485,7 +486,8 @@ const HomePage: React.FC<HomePageProps> = ({
                 </button>
 
                 <span className="text-sm text-gray-700 font-medium">
-                  Página {page} / {Math.ceil(totalProducts / pageSize) || 1}
+                  {t('home.pagination.page')} {page} {t('home.pagination.of')}{' '}
+                  {Math.ceil(totalProducts / pageSize) || 1}
                 </span>
 
                 <button

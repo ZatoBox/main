@@ -1,5 +1,6 @@
 import React from 'react';
 import { OCRResponse } from '@/types/index';
+import { useTranslation } from '@/hooks/use-translation';
 
 type Props = {
   result?: OCRResponse | null;
@@ -7,34 +8,43 @@ type Props = {
 };
 
 const ResultOverview: React.FC<Props> = ({ result, fileName }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="mb-6">
       <div className="mb-10 text-center">
         <h2 className="text-2xl font-bold text-[#1F1F1F] md:text-3xl">
-          Resultados de procesado OCR
+          {t('ocr.resultOverview.title')}
         </h2>
         <p className="mt-2 text-sm text-[#666666] md:text-base">
-          Documento procesado exitosamente
+          {t('ocr.resultOverview.processedSuccess')}
         </p>
         {fileName && (
           <div className="inline-block px-4 py-2 mt-4 text-sm border rounded-md border-[#E5E7EB] bg-white text-[#1F1F1F]">
-            <span className="mr-1">📄</span> archivo: {fileName}
+            <span className="mr-1">📄</span>
+            {t('ocr.resultOverview.file')}: {fileName}
           </div>
         )}
       </div>
       <div className="grid gap-6 mb-8 md:grid-cols-2">
         <div className="p-5 bg-white border rounded-lg shadow-sm md:p-6 border-[#EFEFEF]">
           <h3 className="mb-4 text-base font-semibold text-[#1F1F1F] md:text-lg">
-            Document Information
+            {t('ocr.resultOverview.documentInfo')}
           </h3>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-[#555555]">Tipo:</span>
-              <span className="font-medium text-[#1F1F1F]">Factura</span>
+              <span className="text-[#555555]">
+                {t('ocr.resultOverview.type')}:
+              </span>
+              <span className="font-medium text-[#1F1F1F]">
+                {t('ocr.resultOverview.invoice')}
+              </span>
             </div>
             {result?.metadata?.company_name && (
               <div className="flex justify-between text-sm">
-                <span className="text-[#555555]">Proveedor:</span>
+                <span className="text-[#555555]">
+                  {t('ocr.resultOverview.supplier')}:
+                </span>
                 <span className="font-medium text-[#1F1F1F]">
                   {result.metadata.company_name}
                 </span>
@@ -42,7 +52,9 @@ const ResultOverview: React.FC<Props> = ({ result, fileName }) => {
             )}
             {result?.metadata?.date && (
               <div className="flex justify-between text-sm">
-                <span className="text-[#555555]">Fecha:</span>
+                <span className="text-[#555555]">
+                  {t('ocr.resultOverview.date')}:
+                </span>
                 <span className="font-medium text-[#1F1F1F]">
                   {result.metadata.date}
                 </span>
@@ -50,7 +62,9 @@ const ResultOverview: React.FC<Props> = ({ result, fileName }) => {
             )}
             {result?.metadata?.invoice_number && (
               <div className="flex justify-between text-sm">
-                <span className="text-[#555555]">Número:</span>
+                <span className="text-[#555555]">
+                  {t('ocr.resultOverview.number')}:
+                </span>
                 <span className="font-medium text-[#1F1F1F]">
                   {result.metadata.invoice_number}
                 </span>
@@ -60,19 +74,21 @@ const ResultOverview: React.FC<Props> = ({ result, fileName }) => {
               !result?.metadata?.date &&
               !result?.metadata?.invoice_number && (
                 <div className="text-sm text-center text-[#888888] py-4">
-                  No se encontró informacion en el documento
+                  {t('ocr.resultOverview.noDocumentInfo')}
                 </div>
               )}
           </div>
         </div>
         <div className="p-5 bg-white border rounded-lg shadow-sm md:p-6 border-[#EFEFEF]">
           <h3 className="mb-4 text-base font-semibold text-[#1F1F1F] md:text-lg">
-            Resumen Financiero
+            {t('ocr.resultOverview.financialSummary')}
           </h3>
           <div className="space-y-2">
             {result?.metadata?.subtotal && (
               <div className="flex justify-between text-sm">
-                <span className="text-[#555555]">Subtotal:</span>
+                <span className="text-[#555555]">
+                  {t('ocr.resultOverview.subtotal')}:
+                </span>
                 <span className="font-medium text-[#1F1F1F]">
                   {result.metadata.subtotal}
                 </span>
@@ -80,7 +96,9 @@ const ResultOverview: React.FC<Props> = ({ result, fileName }) => {
             )}
             {result?.metadata?.iva && (
               <div className="flex justify-between text-sm">
-                <span className="text-[#555555]">Taxes:</span>
+                <span className="text-[#555555]">
+                  {t('ocr.resultOverview.taxes')}:
+                </span>
                 <span className="font-medium text-[#1F1F1F]">
                   {result.metadata.iva}
                 </span>
@@ -98,7 +116,7 @@ const ResultOverview: React.FC<Props> = ({ result, fileName }) => {
               !result?.metadata?.iva &&
               !result?.metadata?.total && (
                 <div className="text-sm text-center text-[#888888] py-4">
-                  No se encontró resumen financiero
+                  {t('ocr.resultOverview.noFinancialSummary')}
                 </div>
               )}
           </div>

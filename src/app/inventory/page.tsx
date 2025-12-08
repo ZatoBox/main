@@ -11,6 +11,7 @@ import InventoryFilters from '@/components/inventory/InventoryFilters';
 import InventoryGrid from '@/components/inventory/InventoryGrid';
 import DeleteConfirmModal from '@/components/inventory/DeleteConfirmModal';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/hooks/use-translation';
 import Loader from '@/components/ui/Loader';
 
 const InventoryPage: React.FC = () => {
@@ -31,6 +32,7 @@ const InventoryPage: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingItems, setDeletingItems] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -39,7 +41,7 @@ const InventoryPage: React.FC = () => {
       }
 
       if (!isAuthenticated) {
-        setError('Debes iniciar sesión para ver el inventario');
+        setError(t('inventory.loginRequired'));
         setLoading(false);
         return;
       }
@@ -148,17 +150,20 @@ const InventoryPage: React.FC = () => {
           prevSelected.filter((itemId) => itemId !== deleteConfirmId)
         );
         toast({
-          title: 'Producto eliminado',
-          description: 'El producto se eliminó correctamente.',
+          title: t('inventory.toast.productDeleted'),
+          description: t('inventory.toast.productDeletedDesc'),
         });
         setError(null);
       } else {
-        setError('Error al eliminar producto: ' + response.message);
+        setError(t('inventory.errors.deleteError') + ': ' + response.message);
       }
     } catch (err) {
       setError(
-        'Error al eliminar producto: ' +
-          (err instanceof Error ? err.message : 'Error desconocido')
+        t('inventory.errors.deleteError') +
+          ': ' +
+          (err instanceof Error
+            ? err.message
+            : t('inventory.errors.unknownError'))
       );
     } finally {
       setIsDeleting(false);
@@ -196,15 +201,19 @@ const InventoryPage: React.FC = () => {
           prev.filter((item) => !successful.some((s) => s.id === item.id))
         );
         toast({
-          title: 'Productos eliminados',
-          description: `${successful.length} producto(s) eliminado(s) correctamente.`,
+          title: t('inventory.toast.productsDeleted'),
+          description: `${successful.length} ${t(
+            'inventory.toast.productsDeletedDesc'
+          )}`,
         });
       }
 
       if (failed.length > 0) {
         toast({
-          title: 'Algunos productos no se eliminaron',
-          description: `${failed.length} producto(s) no pudieron eliminarse.`,
+          title: t('inventory.toast.someNotDeleted'),
+          description: `${failed.length} ${t(
+            'inventory.toast.someNotDeletedDesc'
+          )}`,
           variant: 'destructive',
         });
       }
@@ -212,11 +221,11 @@ const InventoryPage: React.FC = () => {
       setSelectedItems([]);
     } catch (err) {
       toast({
-        title: 'Error al eliminar',
+        title: t('inventory.toast.deleteError'),
         description:
           err instanceof Error
             ? err.message
-            : 'No se pudieron eliminar los productos seleccionados.',
+            : t('inventory.toast.deleteErrorDesc'),
         variant: 'destructive',
       });
     } finally {
@@ -254,15 +263,19 @@ const InventoryPage: React.FC = () => {
           })
         );
         toast({
-          title: 'Estado actualizado',
-          description: `${successful.length} productos actualizados correctamente.`,
+          title: t('inventory.toast.statusUpdated'),
+          description: `${successful.length} ${t(
+            'inventory.toast.statusUpdatedDesc'
+          )}`,
         });
       }
 
       if (failed.length > 0) {
         toast({
-          title: 'Algunos productos no se actualizaron',
-          description: `${failed.length} productos no pudieron actualizarse.`,
+          title: t('inventory.toast.someNotUpdated'),
+          description: `${failed.length} ${t(
+            'inventory.toast.someNotUpdatedDesc'
+          )}`,
           variant: 'destructive',
         });
       }
@@ -270,11 +283,11 @@ const InventoryPage: React.FC = () => {
       setSelectedItems([]);
     } catch (err) {
       toast({
-        title: 'Error al actualizar',
+        title: t('inventory.toast.updateError'),
         description:
           err instanceof Error
             ? err.message
-            : 'No se pudieron actualizar los productos seleccionados.',
+            : t('inventory.toast.updateErrorDesc'),
         variant: 'destructive',
       });
     }
@@ -298,7 +311,7 @@ const InventoryPage: React.FC = () => {
     const categoryDisplay =
       Array.isArray(p.categories) && p.categories.length > 0
         ? p.categories.join(', ')
-        : 'Sin categoría';
+        : t('inventory.noCategory');
 
     return {
       id: p.id,
@@ -315,7 +328,7 @@ const InventoryPage: React.FC = () => {
   });
 
   if (loading) {
-    return <Loader text="Cargando productos..." />;
+    return <Loader text={t('inventory.loading')} />;
   }
 
   if (error) {
@@ -342,7 +355,7 @@ const InventoryPage: React.FC = () => {
             onClick={() => window.location.reload()}
             className="px-4 py-2 font-medium text-black transition-colors rounded-lg bg-primary hover:bg-primary-600"
           >
-            Reintentar
+            {t('inventory.retry')}
           </button>
         </div>
       </div>
@@ -404,7 +417,7 @@ const InventoryPage: React.FC = () => {
                         onClick={() => setError(null)}
                         className="bg-red-50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 hover:bg-red-100"
                       >
-                        Descartar
+                        {t('inventory.dismiss')}
                       </button>
                     </div>
                   </div>
@@ -425,11 +438,9 @@ const InventoryPage: React.FC = () => {
               <div className="p-12 text-center border border-gray-200 rounded-2xl shadow-sm bg-white">
                 <Package size={48} className="mx-auto mb-4 text-gray-300" />
                 <h3 className="mb-2 text-lg font-medium text-gray-900">
-                  No se encontraron elementos
+                  {t('inventory.noItemsFound')}
                 </h3>
-                <p className="text-gray-500">
-                  Intenta ajustar los filtros o crear un nuevo elemento.
-                </p>
+                <p className="text-gray-500">{t('inventory.noItemsHint')}</p>
               </div>
             )}
 

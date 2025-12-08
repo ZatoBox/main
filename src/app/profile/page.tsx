@@ -8,6 +8,8 @@ import CryptoStoreSetup from '@/components/profile/CryptoStoreSetup';
 import { profileAPI, authAPI } from '@/services/api.service';
 import Loader from '@/components/ui/Loader';
 import { useAuth } from '@/context/auth-store';
+import { useTranslation } from '@/hooks/use-translation';
+import { useLanguage } from '@/context/language-context';
 import {
   Bitcoin,
   User,
@@ -20,6 +22,7 @@ import {
   AlertTriangle,
   Lock,
   LogOut,
+  Globe,
 } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
@@ -34,6 +37,8 @@ const ProfilePage: React.FC = () => {
   );
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const { user, initialized, setUser, logout } = useAuth();
+  const { t } = useTranslation();
+  const { language, setLanguage } = useLanguage();
 
   useEffect(() => {
     let canceled = false;
@@ -92,7 +97,7 @@ const ProfilePage: React.FC = () => {
       });
 
       if (Object.keys(payload).length === 0) {
-        setSuccess('No changes to save');
+        setSuccess(t('profile.noChanges'));
         setTimeout(() => setSuccess(null), 3000);
         return;
       }
@@ -104,7 +109,7 @@ const ProfilePage: React.FC = () => {
         setUser(updated as any);
         setEditingFields({});
         setEditValues({});
-        setSuccess('Profile updated successfully');
+        setSuccess(t('profile.updateSuccess'));
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
@@ -126,7 +131,7 @@ const ProfilePage: React.FC = () => {
       setProfileData(updated);
       setUser(updated as any);
     }
-    setSuccess('Avatar updated successfully');
+    setSuccess(t('profile.avatarSuccess'));
     setTimeout(() => setSuccess(null), 3000);
   };
 
@@ -196,7 +201,7 @@ const ProfilePage: React.FC = () => {
                 className="opacity-0 group-hover:opacity-100 transition-opacity text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
               >
                 <Edit className="w-3 h-3" />
-                <span>Editar</span>
+                <span>{t('profile.edit')}</span>
               </button>
             )}
           </div>
@@ -223,13 +228,13 @@ const ProfilePage: React.FC = () => {
                   onClick={() => cancelEditing(field)}
                   className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
                 >
-                  Cancelar
+                  {t('profile.cancel')}
                 </button>
                 <button
                   onClick={handleSave}
                   className="px-4 py-2 bg-orange-500 text-white text-sm rounded-md hover:bg-orange-600 transition-colors"
                 >
-                  Guardar
+                  {t('profile.save')}
                 </button>
               </div>
             </div>
@@ -240,18 +245,20 @@ const ProfilePage: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <span className="font-mono text-gray-500">•••••••</span>
                     <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                      Configurado
+                      {t('profile.configured')}
                     </span>
                   </div>
                 ) : (
                   <span className="text-gray-400 italic flex items-center space-x-2">
                     <AlertTriangle className="w-4 h-4" />
-                    <span>No está configurado</span>
+                    <span>{t('profile.notConfigured')}</span>
                   </span>
                 )
               ) : (
                 currentValue || (
-                  <span className="text-gray-400 italic">No proporcionado</span>
+                  <span className="text-gray-400 italic">
+                    {t('profile.notProvided')}
+                  </span>
                 )
               )}
             </div>
@@ -262,7 +269,7 @@ const ProfilePage: React.FC = () => {
   };
 
   if (loading) {
-    return <Loader text="Cargando perfil..." />;
+    return <Loader text={t('profile.loading')} />;
   }
 
   return (
@@ -273,7 +280,7 @@ const ProfilePage: React.FC = () => {
         <div className="fixed inset-0 pointer-events-none flex items-start justify-center pt-8">
           <div className="flex items-center space-x-3 px-4 py-2 bg-white/90 border border-gray-200 rounded-lg shadow-sm">
             <div className="w-4 h-4 border-b-2 rounded-full animate-spin border-gray-400"></div>
-            <span className="text-sm text-gray-700">Guardando...</span>
+            <span className="text-sm text-gray-700">{t('profile.saving')}</span>
           </div>
         </div>
       )}
@@ -292,7 +299,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-red-800">
-                        Error editando perfil
+                        {t('profile.errorEditing')}
                       </h3>
                       <p className="text-sm text-red-700 mt-1">{error}</p>
                     </div>
@@ -308,7 +315,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-green-800">
-                        ¡Éxito!
+                        {t('profile.success')}
                       </h3>
                       <p className="text-sm text-green-700 mt-1">{success}</p>
                     </div>
@@ -330,7 +337,7 @@ const ProfilePage: React.FC = () => {
                       </h1>
                       <p className="text-gray-600 mb-1 flex items-center justify-center md:justify-start">
                         <Mail className="w-4 h-4 mr-2 text-gray-400" />
-                        {profileData.email || 'No email provided'}
+                        {profileData.email || t('profile.noEmail')}
                       </p>
                       {profileData.role && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 capitalize">
@@ -347,7 +354,53 @@ const ProfilePage: React.FC = () => {
                         className="flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
-                        Cerrar Sesión
+                        {t('profile.logout')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                          <Globe className="w-5 h-5 mr-2 text-orange-500" />
+                          {t('profile.language.title')}
+                        </h2>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {t('profile.language.description')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => setLanguage('es')}
+                        className={`flex-1 flex items-center justify-center px-4 py-3 rounded-lg border-2 transition-all ${
+                          language === 'es'
+                            ? 'border-orange-500 bg-orange-50 text-orange-700'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="text-xl mr-2">🇪🇸</span>
+                        <span className="font-medium">
+                          {t('profile.language.spanish')}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setLanguage('en')}
+                        className={`flex-1 flex items-center justify-center px-4 py-3 rounded-lg border-2 transition-all ${
+                          language === 'en'
+                            ? 'border-orange-500 bg-orange-50 text-orange-700'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="text-xl mr-2">🇺🇸</span>
+                        <span className="font-medium">
+                          {t('profile.language.english')}
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -357,14 +410,14 @@ const ProfilePage: React.FC = () => {
                   <div className="px-6 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                       <User className="w-5 h-5 mr-2 text-orange-500" />
-                      Información Personal
+                      {t('profile.sections.personalInfo')}
                     </h2>
                   </div>
                   <div className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {renderField('full_name', 'Nombre Completo')}
-                      {renderField('email', 'Correo Electrónico', 'email')}
-                      {renderField('phone', 'Número de Teléfono')}
+                      {renderField('full_name', t('profile.fields.fullName'))}
+                      {renderField('email', t('profile.fields.email'), 'email')}
+                      {renderField('phone', t('profile.fields.phone'))}
                       <div className="md:col-span-2"></div>
                     </div>
                   </div>
@@ -376,11 +429,10 @@ const ProfilePage: React.FC = () => {
                       <div>
                         <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                           <Bitcoin className="w-5 h-5 mr-2 text-orange-500" />
-                          Pagos con Crypto
+                          {t('profile.sections.cryptoPayments')}
                         </h2>
                         <p className="text-sm text-gray-500 mt-1">
-                          Configura tu tienda BTCPay Server para recibir pagos
-                          en Bitcoin
+                          {t('profile.sections.cryptoDescription')}
                         </p>
                       </div>
                     </div>
@@ -394,7 +446,7 @@ const ProfilePage: React.FC = () => {
                   <div className="px-6 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                       <Lock className="w-5 h-5 mr-2 text-orange-500" />
-                      Cuenta
+                      {t('profile.sections.account')}
                     </h2>
                   </div>
                   <div className="p-6">
@@ -406,7 +458,7 @@ const ProfilePage: React.FC = () => {
                       className="w-full flex items-center justify-center px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                     >
                       <LogOut className="w-5 h-5 mr-2" />
-                      Cerrar Sesión
+                      {t('profile.logout')}
                     </button>
                   </div>
                 </div>

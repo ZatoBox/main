@@ -8,6 +8,7 @@ import { usePlugins } from '@/context/plugin-context';
 import PluginGrid from '@/components/plugin-store/PluginGrid';
 import PluginNotification from '@/components/plugin-store/PluginNotification';
 import Loader from '@/components/ui/Loader';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface IPlugin {
   id: string;
@@ -38,6 +39,7 @@ const PluginStorePage: React.FC = () => {
   const [notificationType, setNotificationType] = useState<'success' | 'info'>(
     'info'
   );
+  const { t } = useTranslation();
 
   const mockPlugins: IPlugin[] = [
     {
@@ -168,7 +170,7 @@ const PluginStorePage: React.FC = () => {
 
   const handlePluginToggle = async (pluginId: string) => {
     if (!token) {
-      alert('Please log in to manage plugins');
+      alert(t('pluginStore.loginRequired'));
       return;
     }
 
@@ -198,25 +200,25 @@ const PluginStorePage: React.FC = () => {
       case 'active':
         return (
           <span className="px-2 py-1 text-xs text-green-800 bg-green-100 rounded-full">
-            Activo
+            {t('pluginStore.status.active')}
           </span>
         );
       case 'inactive':
         return (
           <span className="px-2 py-1 text-xs text-gray-800 bg-gray-100 rounded-full">
-            Inactivo
+            {t('pluginStore.status.inactive')}
           </span>
         );
       case 'coming-soon':
         return (
           <span className="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-full">
-            Próximamente
+            {t('pluginStore.status.comingSoon')}
           </span>
         );
       case 'maintenance':
         return (
           <span className="px-2 py-1 text-xs text-yellow-800 bg-yellow-100 rounded-full">
-            Mantenimiento
+            {t('pluginStore.status.maintenance')}
           </span>
         );
       default:
@@ -227,17 +229,17 @@ const PluginStorePage: React.FC = () => {
   const getPriceBadge = (price: string) => {
     return price === 'free' ? (
       <span className="px-2 py-1 text-xs text-green-800 bg-green-100 rounded-full">
-        Gratis
+        {t('pluginStore.price.free')}
       </span>
     ) : (
       <span className="px-2 py-1 text-xs text-purple-800 bg-purple-100 rounded-full">
-        Premium
+        {t('pluginStore.price.premium')}
       </span>
     );
   };
 
   if (loading) {
-    return <Loader text="Cargando tienda de plugins..." />;
+    return <Loader text={t('pluginStore.loading')} />;
   }
 
   return (
@@ -247,17 +249,17 @@ const PluginStorePage: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 text-sm text-[#64748B]">
-                <span>Herramientas</span>
+                <span>{t('pluginStore.breadcrumb.tools')}</span>
                 <ChevronRight size={14} />
-                <span className="text-[#F88612] font-medium">Plugins</span>
+                <span className="text-[#F88612] font-medium">
+                  {t('pluginStore.breadcrumb.plugins')}
+                </span>
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-[#1E293B]">
-                  Tienda de Plugins
+                  {t('pluginStore.title')}
                 </h1>
-                <p className="text-[#64748B]">
-                  Explora y gestiona los módulos comerciales de ZatoBox
-                </p>
+                <p className="text-[#64748B]">{t('pluginStore.description')}</p>
               </div>
             </div>
 
@@ -268,7 +270,7 @@ const PluginStorePage: React.FC = () => {
               />
               <input
                 type="text"
-                placeholder="Buscar plugins..."
+                placeholder={t('pluginStore.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full py-2.5 pl-10 pr-4 text-sm bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#F88612]/20 focus:border-[#F88612] outline-none transition-all placeholder-gray-400"
@@ -288,9 +290,11 @@ const PluginStorePage: React.FC = () => {
           <div className="py-12 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
             <div className="mb-4 text-4xl">🔍</div>
             <h3 className="mb-2 text-lg font-semibold text-[#1E293B]">
-              No se encontraron plugins
+              {t('pluginStore.noPlugins.title')}
             </h3>
-            <p className="text-[#64748B]">Intenta ajustar tu búsqueda</p>
+            <p className="text-[#64748B]">
+              {t('pluginStore.noPlugins.description')}
+            </p>
           </div>
         )}
 

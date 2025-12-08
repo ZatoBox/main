@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Package } from 'lucide-react';
 import { Product } from '@/types/index';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface ProductCardProps {
   product: Product;
@@ -32,6 +33,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   const fallbackImg = '/images/placeholder-product.png';
   const [index, setIndex] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { t } = useTranslation();
 
   const startSlide = () => {
     if (images.length <= 1) return;
@@ -83,7 +85,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
                   : 'bg-[#d9534f]'
               }`}
             ></div>
-            {product.stock} in stock
+            {product.stock} {t('home.productCard.inStock')}
           </span>
         )}
       </div>

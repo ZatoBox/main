@@ -1,11 +1,11 @@
 import React from 'react';
 import { ArrowLeft, Plus, ChevronRight } from 'lucide-react';
 import { FaRegFolder } from 'react-icons/fa6';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface Props {
   onBack: () => void;
   onCreate: () => void;
-  title?: string;
   selectedCount?: number;
   onToggleSelectedStatus?: () => void;
   togglingSelectedStatus?: boolean;
@@ -17,7 +17,6 @@ interface Props {
 const InventoryHeader: React.FC<Props> = ({
   onBack,
   onCreate,
-  title = 'Inventario',
   selectedCount = 0,
   onToggleSelectedStatus,
   togglingSelectedStatus = false,
@@ -25,14 +24,18 @@ const InventoryHeader: React.FC<Props> = ({
   onBulkDelete,
   deletingItems = false,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-6 mb-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm text-[#64748B]">
-            <span>Inventario</span>
+            <span>{t('inventory.header.breadcrumbTools')}</span>
             <ChevronRight size={14} />
-            <span className="text-[#F88612] font-medium">Gestión</span>
+            <span className="text-[#F88612] font-medium">
+              {t('inventory.header.breadcrumbInventory')}
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -42,9 +45,11 @@ const InventoryHeader: React.FC<Props> = ({
               <ArrowLeft size={20} className="text-gray-600" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-[#1E293B]">{title}</h1>
+              <h1 className="text-2xl font-bold text-[#1E293B]">
+                {t('inventory.header.title')}
+              </h1>
               <p className="text-[#64748B]">
-                Gestiona tu catálogo de productos y stock
+                {t('inventory.header.description')}
               </p>
             </div>
           </div>
@@ -88,7 +93,10 @@ const InventoryHeader: React.FC<Props> = ({
                     selectedStatus ? 'text-[#F88612]' : 'text-[#64748B]'
                   }`}
                 >
-                  {selectedStatus ? 'Desactivar' : 'Activar'} ({selectedCount})
+                  {selectedStatus
+                    ? t('inventory.filters.disableSelected')
+                    : t('inventory.filters.enableSelected')}{' '}
+                  ({selectedCount})
                 </span>
               </label>
               {onBulkDelete && (
@@ -125,8 +133,10 @@ const InventoryHeader: React.FC<Props> = ({
                   </svg>
                   <span className="hidden sm:inline">
                     {deletingItems
-                      ? 'Eliminando...'
-                      : `Eliminar (${selectedCount})`}
+                      ? `${t('inventory.filters.deleteSelected')}...`
+                      : `${t(
+                          'inventory.filters.deleteSelected'
+                        )} (${selectedCount})`}
                   </span>
                 </button>
               )}
@@ -142,7 +152,9 @@ const InventoryHeader: React.FC<Props> = ({
                      active:scale-95`}
           >
             <Plus size={20} />
-            <span className="hidden sm:inline">Crear</span>
+            <span className="hidden sm:inline">
+              {t('inventory.header.addProduct')}
+            </span>
           </button>
         </div>
       </div>
