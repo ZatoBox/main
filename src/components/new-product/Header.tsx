@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaRegFolder } from 'react-icons/fa6';
 import { IoMdArrowRoundBack } from 'react-icons/io';
+import { useTranslation } from '@/hooks/use-translation';
 
 type Props = {
   onBack: () => void;
@@ -10,6 +11,8 @@ type Props = {
 };
 
 const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="border-b bg-[#FFFFFF] border-[#CBD5E1]">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -21,7 +24,9 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
             >
               <IoMdArrowRoundBack size={20} className="text-[#000000]" />
             </button>
-            <h1 className="text-xl font-bold text-[#000000]">Nuevo Producto</h1>
+            <h1 className="text-xl font-bold text-[#000000]">
+              {t('newProduct.header.title')}
+            </h1>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -43,12 +48,12 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
               {saving ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Guardando...</span>
+                  <span>{t('newProduct.header.saving')}</span>
                 </div>
               ) : (
                 <>
                   <FaRegFolder className="w-4 h-4" />
-                  <span>Guardar</span>
+                  <span>{t('newProduct.header.save')}</span>
                 </>
               )}
             </button>

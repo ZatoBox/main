@@ -21,6 +21,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { useAuth } from '../context/auth-store';
+import { useTranslation } from '@/hooks/use-translation';
 
 const SideMenu: React.FC = () => {
   const router = useRouter();
@@ -29,6 +30,70 @@ const SideMenu: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
   const [animatingItems, setAnimatingItems] = useState<Set<string>>(new Set());
+  const { t } = useTranslation();
+
+  const menuItems = [
+    {
+      id: 'home',
+      icon: Home,
+      path: '/home',
+      alwaysVisible: true,
+    },
+    {
+      id: 'inventory',
+      icon: Archive,
+      path: '/inventory',
+      alwaysVisible: true,
+    },
+    {
+      id: 'smartInventory',
+      icon: Brain,
+      path: '/smart-inventory',
+      pluginId: 'smart-inventory',
+      alwaysVisible: false,
+    },
+    {
+      id: 'ocr',
+      icon: Scan,
+      path: '/ocr-result',
+      pluginId: 'ocr-module',
+      alwaysVisible: false,
+    },
+    {
+      id: 'pos',
+      icon: Package,
+      path: '/pos-integration',
+      pluginId: 'pos-integration',
+      alwaysVisible: false,
+    },
+    {
+      id: 'receipts',
+      icon: FileText,
+      path: '/receipts',
+      pluginId: 'receipts',
+      alwaysVisible: false,
+    },
+    {
+      id: 'restock',
+      icon: RefreshCw,
+      path: '/restock',
+      pluginId: 'restock',
+      alwaysVisible: false,
+    },
+    {
+      id: 'wallet',
+      icon: Wallet,
+      path: '/wallet-withdraw',
+      pluginId: 'wallet',
+      alwaysVisible: false,
+    },
+    {
+      id: 'pluginStore',
+      icon: Store,
+      path: '/plugin-store',
+      alwaysVisible: true,
+    },
+  ];
 
   useEffect(() => {
     const initialVisibleItems = new Set<string>();
@@ -88,78 +153,6 @@ const SideMenu: React.FC = () => {
     });
   }, [user]);
 
-  const menuItems = [
-    {
-      name: 'Inicio',
-      icon: Home,
-      path: '/home',
-      description: 'Página principal',
-      alwaysVisible: true,
-    },
-    {
-      name: 'Inventario',
-      icon: Archive,
-      path: '/inventory',
-      description: 'Gestionar inventario',
-      alwaysVisible: true,
-    },
-    {
-      name: 'Inventario Inteligente',
-      icon: Brain,
-      path: '/smart-inventory',
-      description: 'AI para inventario',
-      pluginId: 'smart-inventory',
-      alwaysVisible: false,
-    },
-    {
-      name: 'Documentos OCR',
-      icon: Scan,
-      path: '/ocr-result',
-      description: 'Procesar documentos',
-      pluginId: 'ocr-module',
-      alwaysVisible: false,
-    },
-    {
-      name: 'Integración POS',
-      icon: Package,
-      path: '/pos-integration',
-      description: 'Integración con sistemas POS',
-      pluginId: 'pos-integration',
-      alwaysVisible: false,
-    },
-    {
-      name: 'Recibos',
-      icon: FileText,
-      path: '/receipts',
-      description: 'Ver recibos de compra',
-      pluginId: 'receipts',
-      alwaysVisible: false,
-    },
-    {
-      name: 'Restock',
-      icon: RefreshCw,
-      path: '/restock',
-      description: 'Reabastecer inventario',
-      pluginId: 'restock',
-      alwaysVisible: false,
-    },
-    {
-      name: 'Wallet',
-      icon: Wallet,
-      path: '/wallet-withdraw',
-      description: 'Gestiona tus fondos',
-      pluginId: 'wallet',
-      alwaysVisible: false,
-    },
-    {
-      name: 'Tienda de Plugins',
-      icon: Store,
-      path: '/plugin-store',
-      description: 'Buscar módulos',
-      alwaysVisible: true,
-    },
-  ];
-
   const handleNavigation = (path: string) => {
     router.push(path);
     setIsMobileMenuOpen(false);
@@ -199,6 +192,9 @@ const SideMenu: React.FC = () => {
         if (!isVisible && !isAnimating && !isNewItem) {
           return null;
         }
+
+        const name = t(`sideMenu.${item.id}.name`);
+        const description = t(`sideMenu.${item.id}.description`);
 
         return (
           <div
@@ -243,10 +239,10 @@ const SideMenu: React.FC = () => {
                     isActive ? 'text-[#F88612]' : 'text-text-primary'
                   }`}
                 >
-                  {item.name}
+                  {name}
                 </div>
                 <div className="text-xs transition-colors duration-300 text-[#475569]">
-                  {item.description}
+                  {description}
                 </div>
               </div>
             </button>
@@ -314,15 +310,16 @@ const SideMenu: React.FC = () => {
                   className="relative w-[223px] h-[115px] bg-[#F3F5F7] border-2 border-[#CBD5E1] rounded-xl p-3 flex flex-col items-start text-left overflow-hidden group hover:border-[#F88612] transition-colors duration-300"
                 >
                   <span className="text-black font-semibold text-xs leading-tight mb-1">
-                    Queremos tu opinión
+                    {t('sideMenu.feedback.title')}
                   </span>
                   <span className="text-[#6A7282] text-[11px] leading-tight mb-auto pr-4">
-                    Estamos mejorando tu experiencia y tu opinión es clave
-                    ayúdanos a construir la próxima mejora
+                    {t('sideMenu.feedback.description')}
                   </span>
                   <div className="flex items-center gap-1 text-[#F88612] mt-1 z-10">
                     <ArrowRight size={14} />
-                    <span className="font-bold text-xs">Dejar feedback</span>
+                    <span className="font-bold text-xs">
+                      {t('sideMenu.feedback.button')}
+                    </span>
                   </div>
                   <img
                     src="/images/feedback-geometric-shape.svg"
@@ -344,10 +341,10 @@ const SideMenu: React.FC = () => {
                 />
                 <div className="flex-1">
                   <div className="font-medium transition-colors duration-300 text-text-primary">
-                    Perfil
+                    {t('sideMenu.profile.name')}
                   </div>
                   <div className="text-xs transition-colors duration-300 text-[#475569]">
-                    Gestionar cuenta
+                    {t('sideMenu.profile.description')}
                   </div>
                 </div>
               </button>
@@ -384,15 +381,16 @@ const SideMenu: React.FC = () => {
                   className="relative w-[223px] h-[115px] bg-[#F3F5F7] border-2 border-[#CBD5E1] rounded-xl p-3 flex flex-col items-start text-left overflow-hidden group hover:border-[#F88612] transition-colors duration-300"
                 >
                   <span className="text-black font-semibold text-xs leading-tight mb-1">
-                    Queremos tu opinión
+                    {t('sideMenu.feedback.title')}
                   </span>
                   <span className="text-[#6A7282] text-[11px] leading-tight mb-auto pr-4">
-                    Estamos mejorando tu experiencia y tu opinión es clave
-                    ayúdanos a construir la próxima mejora
+                    {t('sideMenu.feedback.description')}
                   </span>
                   <div className="flex items-center gap-1 text-[#F88612] mt-1 z-10">
                     <ArrowRight size={14} />
-                    <span className="font-bold text-xs">Dejar feedback</span>
+                    <span className="font-bold text-xs">
+                      {t('sideMenu.feedback.button')}
+                    </span>
                   </div>
                   <img
                     src="/images/feedback-geometric-shape.svg"
@@ -414,10 +412,10 @@ const SideMenu: React.FC = () => {
                 />
                 <div className="flex-1">
                   <div className="font-medium transition-colors duration-300 text-text-primary">
-                    Perfil
+                    {t('sideMenu.profile.name')}
                   </div>
                   <div className="text-xs transition-colors duration-300 text-[#475569]">
-                    Gestionar cuenta
+                    {t('sideMenu.profile.description')}
                   </div>
                 </div>
               </button>

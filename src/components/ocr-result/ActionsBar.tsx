@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '@/hooks/use-translation';
 
 type Props = {
   isEditing: boolean;
@@ -26,21 +27,23 @@ const ActionsBar: React.FC<Props> = ({
   processAnotherDisabled,
   processAnotherLabel,
 }) => {
+  const { t } = useTranslation();
+
   return (
-    <div className='flex flex-col justify-center gap-3 sm:flex-row md:gap-4'>
+    <div className="flex flex-col justify-center gap-3 sm:flex-row md:gap-4">
       {isEditing ? (
         <>
           <button
             onClick={onSaveEdit}
             className={`${baseBtn} bg-[#F88612] hover:bg-[#A94D14] text-white`}
           >
-            Guardar cambios
+            {t('ocr.actionsBar.saveChanges')}
           </button>
           <button
             onClick={onCancelEdit}
             className={`${baseBtn} bg-[#ECECEC] hover:bg-[#E0E0E0] text-[#333333]`}
           >
-            Cancelar
+            {t('ocr.actionsBar.cancel')}
           </button>
         </>
       ) : (
@@ -50,13 +53,13 @@ const ActionsBar: React.FC<Props> = ({
             disabled={processAnotherDisabled}
             className={`${baseBtn} bg-white border border-[#E2E2E2] hover:bg-[#FFF5EC] text-[#A94D14]`}
           >
-            {processAnotherLabel || 'Process Another'}
+            {processAnotherLabel || t('ocr.buttons.processAnother')}
           </button>
           <button
             onClick={onEdit}
             className={`${baseBtn} bg-[#A94D14] hover:bg-[#8C3D0F] text-white`}
           >
-            Editar resultado
+            {t('ocr.actionsBar.editResult')}
           </button>
           <button
             onClick={onConfirm}
@@ -65,11 +68,11 @@ const ActionsBar: React.FC<Props> = ({
           >
             {isAdding ? (
               <>
-                <span className='inline-block w-4 h-4 mr-2 border-2 border-white border-b-transparent rounded-full animate-spin'></span>
-                Agregando...
+                <span className="inline-block w-4 h-4 mr-2 border-2 border-white border-b-transparent rounded-full animate-spin"></span>
+                {t('ocr.actionsBar.adding')}
               </>
             ) : (
-              'Confirm Data'
+              t('ocr.actionsBar.confirmData')
             )}
           </button>
         </>

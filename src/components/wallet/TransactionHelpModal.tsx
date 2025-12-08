@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { X, ArrowRight } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface TransactionHelpModalProps {
   isOpen: boolean;
@@ -12,6 +13,8 @@ const TransactionHelpModal: React.FC<TransactionHelpModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   return (
@@ -29,7 +32,7 @@ const TransactionHelpModal: React.FC<TransactionHelpModalProps> = ({
         <div className="px-6 pt-6 pb-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-[#1E293B] decoration-gray-300">
-              ¿No ves tu transacción?
+              {t('wallet.helpModal.title')}
             </h2>
             <button
               onClick={onClose}
@@ -42,9 +45,7 @@ const TransactionHelpModal: React.FC<TransactionHelpModalProps> = ({
 
         <div className="p-6 space-y-6">
           <p className="text-center font-bold text-xs text-[#1E293B]">
-            Puede que necesites ajustar el gap limit, el starting index o el
-            batch size en tu gestor de wallet para encontrar todas tus
-            direcciones
+            {t('wallet.helpModal.description')}
           </p>
 
           <div className="relative rounded-[20px] overflow-hidden">
@@ -63,12 +64,10 @@ const TransactionHelpModal: React.FC<TransactionHelpModalProps> = ({
           <div className="grid grid-cols-12 gap-3">
             <div className="col-span-7 relative w-full h-[115px] bg-[#F3F5F7] border-2 border-[#CBD5E1] rounded-xl p-3 flex flex-col items-start text-left overflow-hidden group hover:border-[#F88612] transition-colors duration-300">
               <span className="text-black font-semibold text-xs leading-tight mb-1">
-                ¿Necesitas ayuda?
+                {t('wallet.helpModal.needHelp.title')}
               </span>
               <span className="text-[#6A7282] text-[11px] leading-tight mb-auto pr-12">
-                Si tienes problemas con el rescaneo o no <br />
-                ves tu transacción, nuestro equipo puede <br />
-                ayudarte.
+                {t('wallet.helpModal.needHelp.description')}
               </span>
               <div className="flex items-center gap-1 text-[#F88612] mt-1 z-10">
                 <ArrowRight size={14} />
@@ -88,11 +87,10 @@ const TransactionHelpModal: React.FC<TransactionHelpModalProps> = ({
 
             <div className="col-span-5 relative w-full h-[115px] bg-[#F3F5F7] border-2 border-[#CBD5E1] rounded-xl p-3 flex flex-col items-start text-left overflow-hidden group hover:border-[#F88612] transition-colors duration-300">
               <span className="text-black font-semibold text-xs leading-tight mb-1">
-                Queremos tu opinión
+                {t('wallet.helpModal.feedback.title')}
               </span>
               <span className="text-[#6A7282] text-[11px] leading-tight mb-auto pr-4">
-                Estamos mejorando tu experiencia y tu opinión es clave ayúdanos
-                a construir la próxima mejora
+                {t('wallet.helpModal.feedback.description')}
               </span>
               <div className="flex items-center gap-1 text-[#F88612] mt-1 z-10">
                 <ArrowRight size={14} />
@@ -105,7 +103,7 @@ const TransactionHelpModal: React.FC<TransactionHelpModalProps> = ({
                   }
                   className="font-bold text-xs hover:underline"
                 >
-                  Dejar feedback
+                  {t('wallet.helpModal.feedback.button')}
                 </button>
               </div>
               <img
@@ -120,7 +118,7 @@ const TransactionHelpModal: React.FC<TransactionHelpModalProps> = ({
             onClick={onClose}
             className="w-full py-3 bg-[#F88612] text-white font-bold rounded-xl hover:bg-[#E67300] transition-all duration-300 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40"
           >
-            Hecho
+            {t('wallet.helpModal.done')}
           </button>
         </div>
       </div>

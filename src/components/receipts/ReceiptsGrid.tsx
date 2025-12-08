@@ -4,6 +4,7 @@ import React from 'react';
 import ReceiptCard from './ReceiptCard';
 import { FileText } from 'lucide-react';
 import type { ReceiptItem } from '@/types';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface Receipt {
   id: string;
@@ -22,12 +23,14 @@ interface Props {
 }
 
 const ReceiptsGrid: React.FC<Props> = ({ receipts, loading }) => {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-[#F88612]"></div>
-          <p className="text-text-secondary">Cargando recibos...</p>
+          <p className="text-text-secondary">{t('receipts.grid.loading')}</p>
         </div>
       </div>
     );
@@ -38,10 +41,10 @@ const ReceiptsGrid: React.FC<Props> = ({ receipts, loading }) => {
       <div className="p-12 text-center border border-[#CBD5E1] rounded-lg shadow-sm bg-[#FFFFFF]">
         <FileText size={48} className="mx-auto mb-4 text-[#CBD5E1]" />
         <h3 className="mb-2 text-lg font-medium text-text-primary">
-          No se encontraron recibos
+          {t('receipts.grid.noReceipts')}
         </h3>
         <p className="text-text-secondary">
-          Los recibos de pago aparecerán aquí cuando realices transacciones.
+          {t('receipts.grid.noReceiptsDesc')}
         </p>
       </div>
     );

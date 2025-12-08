@@ -1,5 +1,6 @@
 import React from 'react';
 import { Upload } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 type Props = {
   fileName?: string | null;
@@ -7,32 +8,34 @@ type Props = {
 };
 
 const FileUploader: React.FC<Props> = ({ fileName, onChange }) => {
+  const { t } = useTranslation();
+
   return (
-    <div className='mb-6'>
-      <label className='block mb-3 text-sm font-medium text-black'>
-        Seleccionar documento
+    <div className="mb-6">
+      <label className="block mb-3 text-sm font-medium text-black">
+        {t('ocr.fileUploader.selectDocument')}
       </label>
-      <div className='p-6 text-center transition-colors duration-300 border-2 border-dashed rounded-lg border-[#888888] md:p-8 hover:border-[#888888]'>
+      <div className="p-6 text-center transition-colors duration-300 border-2 border-dashed rounded-lg border-[#888888] md:p-8 hover:border-[#888888]">
         <input
-          id='file-upload'
-          type='file'
-          accept='.pdf,.png,.jpg,.jpeg,.tiff,.bmp'
+          id="file-upload"
+          type="file"
+          accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp"
           onChange={(e) => onChange(e.target.files ? e.target.files[0] : null)}
-          className='hidden'
+          className="hidden"
         />
-        <label htmlFor='file-upload' className='cursor-pointer'>
+        <label htmlFor="file-upload" className="cursor-pointer">
           <div>
             <Upload
               size={48}
-              className='mb-4 animate-bounce text-[#F88612] mx-auto'
+              className="mb-4 animate-bounce text-[#F88612] mx-auto"
             />
-            <p className='text-base font-medium md:text-lg text-[#888888]'>
+            <p className="text-base font-medium md:text-lg text-[#888888]">
               {fileName
-                ? `Selected: ${fileName}`
-                : 'Seleccionar un archivo'}
+                ? `${t('ocr.fileUploader.selected')}: ${fileName}`
+                : t('ocr.fileUploader.selectFile')}
             </p>
-            <p className='mt-2 text-xs md:text-sm text-[#888888]'>
-              PNG, WEBP, JPG, JPEG (max 5MB)
+            <p className="mt-2 text-xs md:text-sm text-[#888888]">
+              {t('ocr.fileUploader.formats')}
             </p>
           </div>
         </label>

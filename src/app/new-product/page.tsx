@@ -9,6 +9,7 @@ import { useAuth } from '@/context/auth-store';
 import { uploadMultipleImages } from '@/services/upload.service';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import { useTranslation } from '@/hooks/use-translation';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 const MAX_FILES = 4;
@@ -21,6 +22,7 @@ const NewProductPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [unlimitedStock, setUnlimitedStock] = useState(false);
+  const { t } = useTranslation();
 
   const handleAddFiles = (f: FileList | null) => {
     if (!f) return;
@@ -41,7 +43,7 @@ const NewProductPage: React.FC = () => {
     setSaving(true);
     setError(null);
     if (!isAuthenticated) {
-      setError('Debes iniciar sesión para crear productos');
+      setError(t('newProduct.errors.loginRequired'));
       setSaving(false);
       return;
     }
@@ -55,7 +57,7 @@ const NewProductPage: React.FC = () => {
           imageUrls.push(...urls);
         } catch (uploadError) {
           console.error('Error uploading images:', uploadError);
-          setError('Error al subir las imágenes');
+          setError(t('newProduct.errors.uploadImages'));
           setSaving(false);
           return;
         }
@@ -83,25 +85,30 @@ const NewProductPage: React.FC = () => {
       await productsAPI.create(payload);
       router.push('/inventory');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al crear producto');
+      setError(
+        err instanceof Error
+          ? err.message
+          : t('newProduct.errors.createProduct')
+      );
     } finally {
       setSaving(false);
     }
   };
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string().required('El nombre es requerido'),
+    name: Yup.string().required(t('newProduct.validation.nameRequired')),
     price: Yup.number()
-      .typeError('El precio debe ser un número')
-      .min(0, 'El precio debe ser 0 o mayor')
-      .required('El precio es requerido'),
+      .typeError(t('newProduct.validation.priceNumber'))
+      .min(0, t('newProduct.validation.priceMin'))
+      .required(t('newProduct.validation.priceRequired')),
     stock: Yup.number()
-      .typeError('El stock debe ser un número')
-      .integer('El stock debe ser un número entero')
-      .min(0, 'El stock debe ser 0 o mayor')
+      .typeError(t('newProduct.validation.stockNumber'))
+      .integer(t('newProduct.validation.stockInteger'))
+      .min(0, t('newProduct.validation.stockMin'))
       .when([], {
         is: () => !unlimitedStock,
-        then: (schema) => schema.required('El stock es requerido'),
+        then: (schema) =>
+          schema.required(t('newProduct.validation.stockRequired')),
         otherwise: (schema) => schema.notRequired(),
       }),
   });
@@ -146,7 +153,7 @@ const NewProductPage: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Descripción
+                            {t('newProduct.labels.description')}
                           </label>
                           <textarea
                             name="description"
@@ -158,7 +165,7 @@ const NewProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Categoría
+                            {t('newProduct.labels.category')}
                           </label>
                           <input
                             name="category"
@@ -169,7 +176,7 @@ const NewProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            SKU
+                            {t('newProduct.labels.sku')}
                           </label>
                           <input
                             name="sku"
@@ -186,7 +193,7 @@ const NewProductPage: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Nombre *
+                            {t('newProduct.labels.name')}
                           </label>
                           <input
                             name="name"
@@ -202,7 +209,7 @@ const NewProductPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block mb-2 text-sm font-medium text-black">
-                            Precio *
+                            {t('newProduct.labels.price')}
                           </label>
                           <input
                             name="price"
@@ -233,13 +240,13 @@ const NewProductPage: React.FC = () => {
                               className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                             />
                             <span className="text-sm font-medium text-black">
-                              Stock Ilimitado
+                              {t('newProduct.labels.unlimitedStock')}
                             </span>
                           </label>
                           {!unlimitedStock && (
                             <>
                               <label className="block mb-2 text-sm font-medium text-black">
-                                Stock *
+                                {t('newProduct.labels.stock')}
                               </label>
                               <input
                                 name="stock"

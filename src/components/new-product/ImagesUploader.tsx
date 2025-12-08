@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 type Props = {
   files: File[];
@@ -17,6 +18,7 @@ export default function ImagesUploader({
   isUploading = false,
 }: Props) {
   const [dragActive, setDragActive] = useState(false);
+  const { t } = useTranslation();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -36,7 +38,7 @@ export default function ImagesUploader({
   return (
     <div className="p-6 border rounded-lg shadow-sm bg-[#FFFFFF] border-[#CBD5E1]">
       <label className="block mb-4 text-sm font-medium text-[#000000]">
-        Imagenes del Producto
+        {t('newProduct.uploader.title')}
       </label>
       <div
         className={`relative border-2 border-dashed border-[#CBD5E1] rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer ${
@@ -73,10 +75,10 @@ export default function ImagesUploader({
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
           <p className="mb-2 text-[#88888888]">
-            Arrastra y suelta imágenes aquí
+            {t('newProduct.uploader.dragDrop')}
           </p>
           <p className="text-sm text-[#88888888]">
-            o haz clic para seleccionar archivos
+            {t('newProduct.uploader.clickSelect')}
           </p>
         </label>
         {isUploading && (
