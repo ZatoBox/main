@@ -842,10 +842,68 @@ export const translations = {
     // Wallet
     wallet: {
       loading: 'Cargando wallet...',
+      retry: 'Reintentar',
       errors: {
         loadConfig: 'Error al cargar la configuración de la wallet',
+        sendError: 'Error al enviar fondos',
+        connectionError: 'Error de conexión',
       },
-      retry: 'Reintentar',
+      header: {
+        finance: 'Finanzas',
+        wallet: 'Wallet',
+        title: 'Tu Billetera',
+        description: 'Gestiona tus fondos y realiza retiros seguros',
+      },
+      setup: {
+        title: 'Configura tu Billetera Bitcoin',
+        description:
+          'Para comenzar a recibir y gestionar pagos en Bitcoin, necesitas activar tu billetera. Este proceso creará una wallet segura y única para tu tienda.',
+        features: {
+          segwit: 'Wallet SegWit',
+          selfCustody: 'Custodia Propia',
+          autoPayments: 'Pagos Automáticos',
+        },
+        button: 'Activar Wallet',
+        securityNote:
+          'Tus llaves privadas se generan localmente y solo tú tienes acceso a ellas.',
+      },
+      send: {
+        title: 'Enviar Fondos',
+        activeWallet: 'Wallet Activa',
+        successTitle: '¡Transacción enviada con éxito!',
+        successMessage: 'Tu transacción ha sido transmitida a la red.',
+        totalBalance: 'Balance Total',
+        destinationLabel: 'Dirección de Destino',
+        amountLabel: 'Monto a Enviar',
+        maxAmount: 'Dejar vacío para enviar el máximo disponible',
+        subtractFees: 'Restar comisión del monto',
+        cantSeeTransaction: '¿No ves tu transacción?',
+        networkPriority: 'Prioridad de Red',
+        priorities: {
+          economic: 'Económica',
+          standard: 'Estándar',
+          fast: 'Rápida',
+        },
+        confirmButton: 'Confirmar Envío',
+        processing: 'Procesando...',
+      },
+      helpModal: {
+        title: '¿No ves tu transacción?',
+        description:
+          'Puede que necesites ajustar el gap limit, el starting index o el batch size en tu gestor de wallet para encontrar todas tus direcciones',
+        needHelp: {
+          title: '¿Necesitas ayuda?',
+          description:
+            'Si tienes problemas con el rescaneo o no ves tu transacción, nuestro equipo puede ayudarte.',
+        },
+        feedback: {
+          title: 'Queremos tu opinión',
+          description:
+            'Estamos mejorando tu experiencia y tu opinión es clave ayúdanos a construir la próxima mejora',
+          button: 'Dejar feedback',
+        },
+        done: 'Hecho',
+      },
     },
 
     // Crypto Store Setup
@@ -1770,10 +1828,68 @@ export const translations = {
     // Wallet
     wallet: {
       loading: 'Loading wallet...',
+      retry: 'Retry',
       errors: {
         loadConfig: 'Error loading wallet configuration',
+        sendError: 'Error sending funds',
+        connectionError: 'Connection error',
       },
-      retry: 'Retry',
+      header: {
+        finance: 'Finance',
+        wallet: 'Wallet',
+        title: 'Your Wallet',
+        description: 'Manage your funds and make secure withdrawals',
+      },
+      setup: {
+        title: 'Configure your Bitcoin Wallet',
+        description:
+          'To start receiving and managing Bitcoin payments, you need to activate your wallet. This process will create a unique and secure wallet for your store.',
+        features: {
+          segwit: 'SegWit Wallet',
+          selfCustody: 'Self Custody',
+          autoPayments: 'Automatic Payments',
+        },
+        button: 'Activate Wallet',
+        securityNote:
+          'Your private keys are generated locally and only you have access to them.',
+      },
+      send: {
+        title: 'Send Funds',
+        activeWallet: 'Active Wallet',
+        successTitle: 'Transaction sent successfully!',
+        successMessage: 'Your transaction has been broadcast to the network.',
+        totalBalance: 'Total Balance',
+        destinationLabel: 'Destination Address',
+        amountLabel: 'Amount to Send',
+        maxAmount: 'Leave empty to send maximum available',
+        subtractFees: 'Subtract fee from amount',
+        cantSeeTransaction: "Can't see your transaction?",
+        networkPriority: 'Network Priority',
+        priorities: {
+          economic: 'Economic',
+          standard: 'Standard',
+          fast: 'Fast',
+        },
+        confirmButton: 'Confirm Send',
+        processing: 'Processing...',
+      },
+      helpModal: {
+        title: "Can't see your transaction?",
+        description:
+          'You may need to adjust the gap limit, starting index, or batch size in your wallet manager to find all your addresses',
+        needHelp: {
+          title: 'Need help?',
+          description:
+            "If you have issues with rescanning or don't see your transaction, our team can help you.",
+        },
+        feedback: {
+          title: 'We want your feedback',
+          description:
+            'We are improving your experience and your feedback is key to helping us build the next improvement',
+          button: 'Leave feedback',
+        },
+        done: 'Done',
+      },
     },
 
     // Crypto Store Setup

@@ -12,6 +12,7 @@ import {
   Turtle,
 } from 'lucide-react';
 import TransactionHelpModal from './TransactionHelpModal';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface WalletSendProps {
   token: string;
@@ -28,6 +29,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
   const [successTx, setSuccessTx] = useState<string | null>(null);
   const [balance, setBalance] = useState<string>('0.00000000');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { t } = useTranslation();
 
   React.useEffect(() => {
     const fetchBalance = async () => {
@@ -69,10 +71,10 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
         setAmount('');
         if (onSuccess) onSuccess();
       } else {
-        setError(result.message || 'Error al enviar fondos');
+        setError(result.message || t('wallet.errors.sendError'));
       }
     } catch (err: any) {
-      setError(err.message || 'Error de conexión');
+      setError(err.message || t('wallet.errors.connectionError'));
     } finally {
       setLoading(false);
     }
@@ -82,11 +84,11 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
     <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden">
       <div className="border-b border-[#E2E8F0] px-8 py-5 flex items-center justify-between bg-[#F8FAFC]">
         <h2 className="text-lg font-bold text-[#1E293B] flex items-center gap-2">
-          Enviar Fondos
+          {t('wallet.send.title')}
         </h2>
         <div className="flex items-center gap-2 text-sm text-[#10B981] bg-[#ECFDF5] px-3 py-1 rounded-full border border-[#A7F3D0]">
           <div className="w-2 h-2 bg-[#10B981] rounded-full animate-pulse" />
-          Wallet Activa
+          {t('wallet.send.activeWallet')}
         </div>
       </div>
 
@@ -98,10 +100,10 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
             </div>
             <div className="overflow-hidden">
               <h3 className="text-green-800 font-bold text-lg">
-                ¡Transacción enviada con éxito!
+                {t('wallet.send.successTitle')}
               </h3>
               <p className="text-green-700 text-sm mt-1">
-                Tu transacción ha sido transmitida a la red.
+                {t('wallet.send.successMessage')}
               </p>
               <div className="mt-2 p-2 bg-white/50 rounded border border-green-200 font-mono text-xs text-green-800 break-all">
                 {successTx}
@@ -130,7 +132,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
               />
               <div className="relative z-10 h-full flex flex-col justify-center px-8 text-white">
                 <span className="text-sm font-medium opacity-90">
-                  Balance Total
+                  {t('wallet.send.totalBalance')}
                 </span>
                 <span className="text-3xl font-bold mt-1 tracking-tight">
                   {balance} BTC
@@ -140,7 +142,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
 
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-[#1E293B]">
-                Dirección de Destino
+                {t('wallet.send.destinationLabel')}
               </label>
               <input
                 type="text"
@@ -154,7 +156,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
 
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-[#1E293B]">
-                Monto a Enviar
+                {t('wallet.send.amountLabel')}
               </label>
               <div className="relative">
                 <input
@@ -171,7 +173,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs text-[#64748B] px-1">
-                  <span>Dejar vacío para enviar el máximo disponible</span>
+                  <span>{t('wallet.send.maxAmount')}</span>
                   <label className="flex items-center gap-2 cursor-pointer hover:text-[#F88612] transition-colors">
                     <input
                       type="checkbox"
@@ -179,7 +181,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
                       onChange={(e) => setSubtractFees(e.target.checked)}
                       className="rounded border-gray-300 text-[#F88612] focus:ring-[#F88612]"
                     />
-                    Restar comisión del monto
+                    {t('wallet.send.subtractFees')}
                   </label>
                 </div>
                 <div className="px-1">
@@ -188,7 +190,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
                     onClick={() => setIsModalOpen(true)}
                     className="text-xs text-[#64748B] hover:text-[#F88612] transition-colors underline"
                   >
-                    ¿No ves tu transacción?
+                    {t('wallet.send.cantSeeTransaction')}
                   </button>
                 </div>
               </div>
@@ -197,7 +199,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
 
           <div className="lg:col-span-1 bg-[#F8FAFC] rounded-xl p-6 border border-[#E2E8F0] h-fit">
             <h3 className="text-sm font-semibold text-[#1E293B] mb-4">
-              Prioridad de Red
+              {t('wallet.send.networkPriority')}
             </h3>
 
             <div className="space-y-3 mb-8">
@@ -222,7 +224,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
                   </div>
                   <div className="text-left">
                     <div className="text-sm font-medium text-[#1E293B]">
-                      Económica
+                      {t('wallet.send.priorities.economic')}
                     </div>
                     <div className="text-xs text-[#64748B]">~10-60 min</div>
                   </div>
@@ -251,7 +253,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
                   </div>
                   <div className="text-left">
                     <div className="text-sm font-medium text-[#1E293B]">
-                      Estándar
+                      {t('wallet.send.priorities.standard')}
                     </div>
                     <div className="text-xs text-[#64748B]">~10-30 min</div>
                   </div>
@@ -280,7 +282,7 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
                   </div>
                   <div className="text-left">
                     <div className="text-sm font-medium text-[#1E293B]">
-                      Rápida
+                      {t('wallet.send.priorities.fast')}
                     </div>
                     <div className="text-xs text-[#64748B]">~10 min</div>
                   </div>
@@ -299,11 +301,11 @@ const WalletSend: React.FC<WalletSendProps> = ({ token, onSuccess }) => {
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Procesando...</span>
+                  <span>{t('wallet.send.processing')}</span>
                 </>
               ) : (
                 <>
-                  <span>Confirmar Envío</span>
+                  <span>{t('wallet.send.confirmButton')}</span>
                   <ArrowRight size={20} />
                 </>
               )}
