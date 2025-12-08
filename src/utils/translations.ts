@@ -752,6 +752,54 @@ export const translations = {
         description: 'Intenta ajustar tu búsqueda',
       },
       loginRequired: 'Por favor inicia sesión para gestionar plugins',
+      buttons: {
+        activate: 'Activar',
+        deactivate: 'Desactivar',
+        inDevelopment: 'En Desarrollo',
+        inMaintenance: 'En Mantenimiento',
+      },
+      featured: {
+        title: '🔥 MAYORES INSTALACIONES por Popularidad',
+      },
+      more: 'más',
+    },
+
+    // Restock
+    restock: {
+      breadcrumb: {
+        inventory: 'Inventario',
+        restock: 'Restock',
+      },
+      title: 'Reabastecer Inventario',
+      description: 'Busca productos y agrega cantidades al stock',
+      searchPlaceholder: 'Buscar por nombre o SKU...',
+      loading: 'Cargando productos...',
+      errors: {
+        loginRequired: 'Debes iniciar sesión',
+        loadProducts: 'Error cargando productos',
+        selectProduct: 'Selecciona al menos un producto',
+        enterQuantities: 'Ingresa cantidades a reabastecer',
+        restockError: 'Error al reabastecer',
+      },
+      currentStock: 'Stock actual',
+      units: 'unidades',
+      noProducts: 'No hay productos',
+      noProductsFound: 'No se encontraron productos',
+      selected: 'Seleccionados',
+      stock: 'Stock',
+      quantityPlaceholder: 'Cantidad a agregar',
+      selectToRestock: 'Selecciona productos para reabastecer',
+      pagination: {
+        previous: '← Anterior',
+        next: 'Siguiente →',
+        page: 'Página',
+        of: 'de',
+      },
+      submit: {
+        processing: 'Procesando...',
+        confirm: 'Confirmar Restock',
+      },
+      success: '¡Reabastecimiento completado!',
     },
 
     // Profile
@@ -1632,6 +1680,54 @@ export const translations = {
         description: 'Try adjusting your search',
       },
       loginRequired: 'Please log in to manage plugins',
+      buttons: {
+        activate: 'Activate',
+        deactivate: 'Deactivate',
+        inDevelopment: 'In Development',
+        inMaintenance: 'In Maintenance',
+      },
+      featured: {
+        title: '🔥 MOST INSTALLATIONS by Popularity',
+      },
+      more: 'more',
+    },
+
+    // Restock
+    restock: {
+      breadcrumb: {
+        inventory: 'Inventory',
+        restock: 'Restock',
+      },
+      title: 'Restock Inventory',
+      description: 'Search products and add quantities to stock',
+      searchPlaceholder: 'Search by name or SKU...',
+      loading: 'Loading products...',
+      errors: {
+        loginRequired: 'You must log in',
+        loadProducts: 'Error loading products',
+        selectProduct: 'Select at least one product',
+        enterQuantities: 'Enter quantities to restock',
+        restockError: 'Error restocking',
+      },
+      currentStock: 'Current stock',
+      units: 'units',
+      noProducts: 'No products',
+      noProductsFound: 'No products found',
+      selected: 'Selected',
+      stock: 'Stock',
+      quantityPlaceholder: 'Quantity to add',
+      selectToRestock: 'Select products to restock',
+      pagination: {
+        previous: '← Previous',
+        next: 'Next →',
+        page: 'Page',
+        of: 'of',
+      },
+      submit: {
+        processing: 'Processing...',
+        confirm: 'Confirm Restock',
+      },
+      success: 'Restock completed!',
     },
 
     // Profile
