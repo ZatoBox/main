@@ -89,6 +89,40 @@ axiosInstance.interceptors.request.use((cfg) => {
   return cfg;
 });
 
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      const status = error.response.status;
+      const data = error.response.data || {};
+      const message = (data.message || data.error || '').toLowerCase();
+
+      const isAccessError =
+        status === 401 ||
+        status === 403 ||
+        message.includes('invalid token') ||
+        message.includes('acceso restringido') ||
+        message.includes('restricted') ||
+        message.includes('premium') ||
+        message.includes('upgrade');
+
+      if (isAccessError && typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        if (
+          currentPath !== '/upgrade' &&
+          currentPath !== '/login' &&
+          currentPath !== '/register' &&
+          currentPath !== '/'
+        ) {
+          window.location.href = '/upgrade';
+          return new Promise(() => {});
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 const apiRequest = async <T>(
   endpoint: string,
   config: AxiosRequestConfig = {}
