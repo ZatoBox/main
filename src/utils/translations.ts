@@ -825,6 +825,12 @@ export const translations = {
         button: 'Dejar feedback',
       },
     },
+
+    subscription: {
+      cancelTitle: 'Cancelar Suscripción',
+      cancelDescription: 'Para cancelar su suscripción, contáctese con:',
+      supportEmail: 'support@zatobox.com',
+    },
   },
 
   en: {
@@ -1839,6 +1845,12 @@ export const translations = {
           'We are improving your experience and your opinion is key help us build the next improvement',
         button: 'Leave feedback',
       },
+    },
+
+    subscription: {
+      cancelTitle: 'Cancel Subscription',
+      cancelDescription: 'To cancel your subscription, please contact:',
+      supportEmail: 'support@zatobox.com',
     },
   },
 };

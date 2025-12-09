@@ -294,7 +294,7 @@ const ProfilePage: React.FC = () => {
               {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
                   <div className="flex items-center space-x-3">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <AlertCircle className="w-5 h-5 text-red-400" />
                     </div>
                     <div>
@@ -310,7 +310,7 @@ const ProfilePage: React.FC = () => {
               {success && (
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
                   <div className="flex items-center space-x-3">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <CheckCircle className="w-5 h-5 text-green-400" />
                     </div>
                     <div>
@@ -324,7 +324,7 @@ const ProfilePage: React.FC = () => {
               )}
 
               <div className="space-y-8">
-                <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100">
+                <div className="bg-linear-to-r from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100">
                   <div className="flex flex-col items-center space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-8">
                     <AvatarUploader
                       imageUrl={profileData.profile_image || null}
@@ -460,6 +460,26 @@ const ProfilePage: React.FC = () => {
                       <LogOut className="w-5 h-5 mr-2" />
                       {t('profile.logout')}
                     </button>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                  <div className="flex items-start space-x-3">
+                    <Mail className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">
+                        {t('subscription.cancelTitle')}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {t('subscription.cancelDescription')}
+                      </p>
+                      <a
+                        href="mailto:support@zatobox.com"
+                        className="text-sm text-orange-500 hover:text-orange-600 font-medium mt-1 inline-block transition-colors"
+                      >
+                        {t('subscription.supportEmail')}
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
