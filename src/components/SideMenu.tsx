@@ -254,175 +254,165 @@ const SideMenu: React.FC = () => {
 
   return (
     <>
-      {user?.role === 'guest' ? null : (
-        <>
-          <div className="fixed z-50 md:hidden top-4 left-4">
+      <div className="fixed z-50 md:hidden top-4 left-4">
+        <button
+          onClick={toggleMobileMenu}
+          className="p-2 transition-colors border rounded-lg shadow-lg bg-white border-[#CBD5E1] hover:bg-gray-50"
+        >
+          {isMobileMenuOpen ? (
+            <X size={24} className="text-zatobox-900" />
+          ) : (
+            <Menu size={24} className="text-zatobox-900" />
+          )}
+        </button>
+      </div>
+
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      <div
+        className={`md:hidden fixed inset-y-0 left-0 w-64 bg-white border-r border-[#CBD5E1] z-50 transform transition-transform duration-300 ease-in-out ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
+          <div onClick={() => router.push('/home')} className="cursor-pointer">
+            <img
+              src="/images/logozato.png"
+              alt="ZatoBox Logo"
+              className="w-auto h-10"
+            />
+          </div>
+        </div>
+
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto sidebar-menu-container">
+          {renderMenuItems(menuItems)}
+        </nav>
+
+        <div className="px-4 py-2">
+          <div className="mb-2 flex justify-center">
             <button
-              onClick={toggleMobileMenu}
-              className="p-2 transition-colors border rounded-lg shadow-lg bg-white border-[#CBD5E1] hover:bg-gray-50"
+              onClick={() =>
+                window.open(
+                  'https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform',
+                  '_blank'
+                )
+              }
+              className="relative w-[223px] h-[115px] bg-[#F3F5F7] border-2 border-[#CBD5E1] rounded-xl p-3 flex flex-col items-start text-left overflow-hidden group hover:border-[#F88612] transition-colors duration-300"
             >
-              {isMobileMenuOpen ? (
-                <X size={24} className="text-zatobox-900" />
-              ) : (
-                <Menu size={24} className="text-zatobox-900" />
-              )}
+              <span className="text-black font-semibold text-xs leading-tight mb-1">
+                {t('sideMenu.feedback.title')}
+              </span>
+              <span className="text-[#6A7282] text-[11px] leading-tight mb-auto pr-4">
+                {t('sideMenu.feedback.description')}
+              </span>
+              <div className="flex items-center gap-1 text-[#F88612] mt-1 z-10">
+                <ArrowRight size={14} />
+                <span className="font-bold text-xs">
+                  {t('sideMenu.feedback.button')}
+                </span>
+              </div>
+              <img
+                src="/images/feedback-geometric-shape.svg"
+                alt=""
+                className="absolute bottom-0 right-0"
+              />
             </button>
           </div>
+        </div>
 
-          {isMobileMenuOpen && (
-            <div
-              className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-          )}
-
-          <div
-            className={`md:hidden fixed inset-y-0 left-0 w-64 bg-white border-r border-[#CBD5E1] z-50 transform transition-transform duration-300 ease-in-out ${
-              isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-            }`}
+        <div className="px-4 py-4 border-t border-[#CBD5E1]">
+          <button
+            onClick={() => handleNavigation('/profile')}
+            className="w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-300 group text-text-secondary hover:bg-gray-50 hover:text-text-primary hover:shadow-sm"
           >
-            <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
-              <div
-                onClick={() => router.push('/home')}
-                className="cursor-pointer"
-              >
-                <img
-                  src="/images/logozato.png"
-                  alt="ZatoBox Logo"
-                  className="w-auto h-10"
-                />
+            <User
+              size={20}
+              className="mr-3 transition-all duration-300 text-text-secondary group-hover:text-text-primary group-hover:scale-105"
+            />
+            <div className="flex-1">
+              <div className="font-medium transition-colors duration-300 text-text-primary">
+                {t('sideMenu.profile.name')}
+              </div>
+              <div className="text-xs transition-colors duration-300 text-[#475569]">
+                {t('sideMenu.profile.description')}
               </div>
             </div>
+          </button>
+        </div>
+      </div>
 
-            <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto sidebar-menu-container">
-              {renderMenuItems(menuItems)}
-            </nav>
-
-            <div className="px-4 py-2">
-              <div className="mb-2 flex justify-center">
-                <button
-                  onClick={() =>
-                    window.open(
-                      'https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform',
-                      '_blank'
-                    )
-                  }
-                  className="relative w-[223px] h-[115px] bg-[#F3F5F7] border-2 border-[#CBD5E1] rounded-xl p-3 flex flex-col items-start text-left overflow-hidden group hover:border-[#F88612] transition-colors duration-300"
-                >
-                  <span className="text-black font-semibold text-xs leading-tight mb-1">
-                    {t('sideMenu.feedback.title')}
-                  </span>
-                  <span className="text-[#6A7282] text-[11px] leading-tight mb-auto pr-4">
-                    {t('sideMenu.feedback.description')}
-                  </span>
-                  <div className="flex items-center gap-1 text-[#F88612] mt-1 z-10">
-                    <ArrowRight size={14} />
-                    <span className="font-bold text-xs">
-                      {t('sideMenu.feedback.button')}
-                    </span>
-                  </div>
-                  <img
-                    src="/images/feedback-geometric-shape.svg"
-                    alt=""
-                    className="absolute bottom-0 right-0"
-                  />
-                </button>
-              </div>
-            </div>
-
-            <div className="px-4 py-4 border-t border-[#CBD5E1]">
-              <button
-                onClick={() => handleNavigation('/profile')}
-                className="w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-300 group text-text-secondary hover:bg-gray-50 hover:text-text-primary hover:shadow-sm"
-              >
-                <User
-                  size={20}
-                  className="mr-3 transition-all duration-300 text-text-secondary group-hover:text-text-primary group-hover:scale-105"
-                />
-                <div className="flex-1">
-                  <div className="font-medium transition-colors duration-300 text-text-primary">
-                    {t('sideMenu.profile.name')}
-                  </div>
-                  <div className="text-xs transition-colors duration-300 text-[#475569]">
-                    {t('sideMenu.profile.description')}
-                  </div>
-                </div>
-              </button>
-            </div>
+      <div className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-white md:border-r md:border-[#CBD5E1] md:z-40">
+        <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
+          <div onClick={() => router.push('/home')} className="cursor-pointer">
+            <img
+              src="/images/logozato.png"
+              alt="ZatoBox Logo"
+              className="w-auto h-10"
+            />
           </div>
+        </div>
 
-          <div className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-white md:border-r md:border-[#CBD5E1] md:z-40">
-            <div className="flex items-center justify-center h-16 px-6 border-b border-[#CBD5E1]">
-              <div
-                onClick={() => router.push('/home')}
-                className="cursor-pointer"
-              >
-                <img
-                  src="/images/logozato.png"
-                  alt="ZatoBox Logo"
-                  className="w-auto h-10"
-                />
+        <nav className="flex-1 px-4 py-6 space-y-2 sidebar-menu-container">
+          {renderMenuItems(menuItems)}
+        </nav>
+
+        <div className="px-4 py-2">
+          <div className="mb-2 flex justify-center">
+            <button
+              onClick={() =>
+                window.open(
+                  'https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform',
+                  '_blank'
+                )
+              }
+              className="relative w-[223px] h-[115px] bg-[#F3F5F7] border-2 border-[#CBD5E1] rounded-xl p-3 flex flex-col items-start text-left overflow-hidden group hover:border-[#F88612] transition-colors duration-300"
+            >
+              <span className="text-black font-semibold text-xs leading-tight mb-1">
+                {t('sideMenu.feedback.title')}
+              </span>
+              <span className="text-[#6A7282] text-[11px] leading-tight mb-auto pr-4">
+                {t('sideMenu.feedback.description')}
+              </span>
+              <div className="flex items-center gap-1 text-[#F88612] mt-1 z-10">
+                <ArrowRight size={14} />
+                <span className="font-bold text-xs">
+                  {t('sideMenu.feedback.button')}
+                </span>
               </div>
-            </div>
-
-            <nav className="flex-1 px-4 py-6 space-y-2 sidebar-menu-container">
-              {renderMenuItems(menuItems)}
-            </nav>
-
-            <div className="px-4 py-2">
-              <div className="mb-2 flex justify-center">
-                <button
-                  onClick={() =>
-                    window.open(
-                      'https://docs.google.com/forms/d/e/1FAIpQLSfJTvb4AK999EZVWsvaJk_6nFMKw67WrRHDlYhKjfg0fCZoFw/viewform',
-                      '_blank'
-                    )
-                  }
-                  className="relative w-[223px] h-[115px] bg-[#F3F5F7] border-2 border-[#CBD5E1] rounded-xl p-3 flex flex-col items-start text-left overflow-hidden group hover:border-[#F88612] transition-colors duration-300"
-                >
-                  <span className="text-black font-semibold text-xs leading-tight mb-1">
-                    {t('sideMenu.feedback.title')}
-                  </span>
-                  <span className="text-[#6A7282] text-[11px] leading-tight mb-auto pr-4">
-                    {t('sideMenu.feedback.description')}
-                  </span>
-                  <div className="flex items-center gap-1 text-[#F88612] mt-1 z-10">
-                    <ArrowRight size={14} />
-                    <span className="font-bold text-xs">
-                      {t('sideMenu.feedback.button')}
-                    </span>
-                  </div>
-                  <img
-                    src="/images/feedback-geometric-shape.svg"
-                    alt=""
-                    className="absolute bottom-0 right-0"
-                  />
-                </button>
-              </div>
-            </div>
-
-            <div className="px-4 py-4 border-t border-[#CBD5E1]">
-              <button
-                onClick={() => handleNavigation('/profile')}
-                className="w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-300 group text-text-secondary hover:bg-gray-50 hover:text-text-primary hover:shadow-sm"
-              >
-                <User
-                  size={20}
-                  className="mr-3 transition-all duration-300 text-text-secondary group-hover:text-text-primary group-hover:scale-105"
-                />
-                <div className="flex-1">
-                  <div className="font-medium transition-colors duration-300 text-text-primary">
-                    {t('sideMenu.profile.name')}
-                  </div>
-                  <div className="text-xs transition-colors duration-300 text-[#475569]">
-                    {t('sideMenu.profile.description')}
-                  </div>
-                </div>
-              </button>
-            </div>
+              <img
+                src="/images/feedback-geometric-shape.svg"
+                alt=""
+                className="absolute bottom-0 right-0"
+              />
+            </button>
           </div>
-        </>
-      )}
+        </div>
+
+        <div className="px-4 py-4 border-t border-[#CBD5E1]">
+          <button
+            onClick={() => handleNavigation('/profile')}
+            className="w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-300 group text-text-secondary hover:bg-gray-50 hover:text-text-primary hover:shadow-sm"
+          >
+            <User
+              size={20}
+              className="mr-3 transition-all duration-300 text-text-secondary group-hover:text-text-primary group-hover:scale-105"
+            />
+            <div className="flex-1">
+              <div className="font-medium transition-colors duration-300 text-text-primary">
+                {t('sideMenu.profile.name')}
+              </div>
+              <div className="text-xs transition-colors duration-300 text-[#475569]">
+                {t('sideMenu.profile.description')}
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
     </>
   );
 };

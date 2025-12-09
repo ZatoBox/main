@@ -13,7 +13,6 @@ export enum RoleUser {
   ADMIN = 'admin',
   PREMIUM = 'premium',
   USER = 'user',
-  GUEST = 'guest',
 }
 
 export interface User {

@@ -10,7 +10,7 @@ import {
   getCookie,
   removeCookie,
 } from '@/services/cookies.service';
-import { User, RoleUser } from '@/types';
+import { User } from '@/types';
 
 const USER_COOKIE = 'zatobox_user';
 
@@ -163,19 +163,8 @@ export const useAuth = () => {
   const clearError = useAuthStore((s) => s.clearError);
   const isAuthenticated = !!user && !!token;
 
-  const guestUser: User = {
-    id: 'guest',
-    email: 'guest@zatobox.com',
-    full_name: 'Guest User',
-    role: RoleUser.GUEST,
-  };
-
-  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const isGuestLink = urlParams?.get('role') === 'guest';
-  const effectiveUser = isGuestLink ? guestUser : user;
-
   return {
-    user: effectiveUser,
+    user,
     token,
     initialized,
     loading,

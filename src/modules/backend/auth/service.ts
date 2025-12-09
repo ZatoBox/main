@@ -295,7 +295,6 @@ export class AuthService {
   ensureLoginAllowed(user: UserItem) {
     const role = (user.role || 'user').toString();
     if (role === 'admin') return;
-    if (role === 'guest') return;
     if (role === 'premium') {
       const until = user.premium_up_to ? Date.parse(user.premium_up_to) : NaN;
       if (!isNaN(until) && until > Date.now()) return;
