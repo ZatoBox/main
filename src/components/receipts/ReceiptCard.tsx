@@ -89,6 +89,11 @@ const ReceiptCard: React.FC<Props> = ({
     year: 'numeric',
   });
 
+  const formattedTime = new Date(date).toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
@@ -128,7 +133,9 @@ const ReceiptCard: React.FC<Props> = ({
                 <h3 className="font-semibold text-[#000000]">
                   {t('receipts.detail.receipt')} #{receiptNumber}
                 </h3>
-                <p className="text-xs text-[#9CA3AF]">{formattedDate}</p>
+                <p className="text-xs text-[#9CA3AF]">
+                  {formattedDate} • {formattedTime}
+                </p>
               </div>
             </div>
 
@@ -210,7 +217,7 @@ const ReceiptCard: React.FC<Props> = ({
                     {t('receipts.detail.purchaseReceipt')}
                   </h4>
                   <p className="text-xs text-[#9CA3AF]">
-                    #{receiptNumber} • {formattedDate}
+                    #{receiptNumber} • {formattedDate} • {formattedTime}
                   </p>
                 </div>
                 <div className="text-right">
