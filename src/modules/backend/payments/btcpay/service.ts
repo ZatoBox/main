@@ -431,6 +431,14 @@ export class BTCPayService {
     if (!items || items.length === 0) return;
 
     const supabase = await createClient();
+
+    const { data: existingOrder } = await supabase
+      .from('cash_orders')
+      .select('id')
+      .eq('metadata->>invoiceId', payload.invoiceId)
+      .single();
+
+    if (existingOrder) return;
     const orderItems: any[] = [];
     let totalAmount = 0;
 
@@ -670,6 +678,16 @@ export class BTCPayService {
     const storedInvoice = await this.repository.getInvoice(invoiceId);
     if (!storedInvoice) {
       throw new Error('Invoice not found');
+    }
+
+    const { data: existingOrder } = await supabase
+      .from('cash_orders')
+      .select('*')
+      .eq('metadata->>invoiceId', invoiceId)
+      .single();
+
+    if (existingOrder) {
+      return existingOrder;
     }
 
     const metadata = storedInvoice.metadata || {};

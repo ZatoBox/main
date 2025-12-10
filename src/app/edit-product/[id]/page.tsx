@@ -30,7 +30,6 @@ const EditProductPage: React.FC = () => {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [productData, setProductData] = useState<any>(null);
   const [togglingStatus, setTogglingStatus] = useState(false);
-  const [unlimitedStock, setUnlimitedStock] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -50,7 +49,6 @@ const EditProductPage: React.FC = () => {
         const product = res.product;
         setProductData(product);
         setExistingImages(product.images || []);
-        setUnlimitedStock(product.unlimited_stock || false);
       } else {
         setError(t('editProduct.notFound'));
       }
@@ -125,8 +123,8 @@ const EditProductPage: React.FC = () => {
             ? values.description
             : null,
         price: Number(values.price),
-        stock: unlimitedStock ? 0 : Number(values.stock),
-        unlimited_stock: unlimitedStock,
+        stock: Number(values.stock),
+        unlimited_stock: false,
         categories,
         sku: values.sku && values.sku.trim() !== '' ? values.sku : null,
         images: allImages,
@@ -196,12 +194,7 @@ const EditProductPage: React.FC = () => {
       .typeError(t('newProduct.validation.stockNumber'))
       .integer(t('newProduct.validation.stockInteger'))
       .min(0, t('newProduct.validation.stockMin'))
-      .when([], {
-        is: () => !unlimitedStock,
-        then: (schema) =>
-          schema.required(t('newProduct.validation.stockRequired')),
-        otherwise: (schema) => schema.notRequired(),
-      }),
+      .required(t('newProduct.validation.stockRequired')),
   });
 
   if (loading) {
@@ -363,41 +356,21 @@ const EditProductPage: React.FC = () => {
                           )}
                         </div>
                         <div>
-                          <label className="flex items-center mb-3">
-                            <input
-                              type="checkbox"
-                              checked={unlimitedStock}
-                              onChange={(e) => {
-                                setUnlimitedStock(e.target.checked);
-                                if (e.target.checked) {
-                                  formik.setFieldValue('stock', '');
-                                }
-                              }}
-                              className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <span className="text-sm font-medium text-black">
-                              {t('editProduct.labels.unlimitedStock')}
-                            </span>
+                          <label className="block mb-2 text-sm font-medium text-black">
+                            {t('editProduct.labels.stock')}
                           </label>
-                          {!unlimitedStock && (
-                            <>
-                              <label className="block mb-2 text-sm font-medium text-black">
-                                {t('editProduct.labels.stock')}
-                              </label>
-                              <input
-                                name="stock"
-                                type="number"
-                                min="0"
-                                value={formik.values.stock}
-                                onChange={formik.handleChange}
-                                className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
-                              />
-                              {formik.errors.stock && (
-                                <div className="mt-1 text-xs text-red-500">
-                                  {formik.errors.stock as any}
-                                </div>
-                              )}
-                            </>
+                          <input
+                            name="stock"
+                            type="number"
+                            min="0"
+                            value={formik.values.stock}
+                            onChange={formik.handleChange}
+                            className="w-full p-3 border rounded-lg border-[#CBD5E1] focus:ring-2 focus:ring-[#CBD5E1] focus:border-transparent"
+                          />
+                          {formik.errors.stock && (
+                            <div className="mt-1 text-xs text-red-500">
+                              {formik.errors.stock as any}
+                            </div>
                           )}
                         </div>
                       </div>

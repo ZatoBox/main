@@ -483,7 +483,97 @@ export const translations = {
         selected: 'seleccionado',
       },
     },
+
+    ocr: {
+      loading: 'Cargando OCR...',
+      errors: {
+        noData: 'No hay datos para confirmar o no estás autenticado',
+        noValidProducts: 'No hay productos válidos para crear',
+        addingProducts: 'Error al agregar productos al inventario',
+        processing:
+          'Error al procesar el documento. Por favor intenta de nuevo.',
+      },
+      cooldown: {
+        wait: 'Espera',
+        waitMessage: 'antes de procesar otro documento',
+      },
+      buttons: {
+        processing: 'Procesando documento...',
+        upload: 'Subir y procesar',
+        processAnother: 'Procesar Otro',
+      },
+      result: {
+        processedImage: 'Imagen procesada con detecciones',
+        imageDescription:
+          'Imagen mostrando detecciones YOLO (cuadrículas verdes) y regiones de tabla (cuadrículas azules)',
+        successMessage: 'Documento procesado exitosamente',
+      },
+      header: {
+        title: 'Procesamiento OCR',
+        breadcrumbTools: 'Herramientas',
+        breadcrumbOcr: 'OCR',
+        description: 'Escanea tu documento para ver el texto reconocido',
+      },
+      fileUploader: {
+        selectDocument: 'Seleccionar documento',
+        selected: 'Seleccionado',
+        selectFile: 'Selecciona un archivo',
+        formats: 'PNG, WEBP, JPG, JPEG (máx 5MB)',
+      },
+      actionsBar: {
+        saveChanges: 'Guardar cambios',
+        cancel: 'Cancelar',
+        editResult: 'Editar resultado',
+        confirmData: 'Confirmar Datos',
+        adding: 'Agregando...',
+      },
+      itemsTable: {
+        title: 'Ítems detectados',
+        name: 'Nombre',
+        description: 'Descripción',
+        quantity: 'Cantidad',
+        unitPrice: 'Precio Unitario',
+        total: 'Total',
+        confidence: 'Confianza',
+        unnamed: 'Sin nombre',
+        noDescription: 'Sin descripción',
+      },
+      resultOverview: {
+        title: 'Resultados del Procesamiento OCR',
+        processedSuccess: 'Documento procesado exitosamente',
+        file: 'archivo',
+        documentInfo: 'Información del Documento',
+        type: 'Tipo',
+        invoice: 'Factura',
+        supplier: 'Proveedor',
+        date: 'Fecha',
+        number: 'Número',
+        noDocumentInfo: 'No se encontró información del documento',
+        financialSummary: 'Resumen Financiero',
+        subtotal: 'Subtotal',
+        taxes: 'Impuestos',
+        noFinancialSummary: 'No se encontró resumen financiero',
+      },
+    },
+
     receipts: {
+      loading: 'Cargando recibos...',
+      errors: {
+        loginRequired: 'Debes iniciar sesión para ver los recibos',
+        loadError: 'Error al cargar los recibos',
+      },
+      retry: 'Reintentar',
+      header: {
+        title: 'Recibos',
+        breadcrumbFinances: 'Finanzas',
+        breadcrumbReceipts: 'Recibos',
+        description: 'Historial de transacciones y recibos',
+      },
+      stats: {
+        total: 'Total',
+        completed: 'Completados',
+        pending: 'Pendientes',
+      },
       card: {
         order: 'Pedido',
         items: 'artículos',
@@ -828,6 +918,11 @@ export const translations = {
 
     newProduct: {
       title: 'Nuevo Producto',
+      header: {
+        title: 'Nuevo Producto',
+        save: 'Guardar',
+        saving: 'Guardando...',
+      },
       uploader: {
         title: 'Imágenes del Producto',
         dragDrop: 'Arrastra y suelta las imágenes aquí',
@@ -1912,7 +2007,7 @@ export const translations = {
         description: 'Find modules',
       },
       profile: {
-        name: 'Profile',
+        name: 'My Profile',
         description: 'Manage account',
       },
       feedback: {
