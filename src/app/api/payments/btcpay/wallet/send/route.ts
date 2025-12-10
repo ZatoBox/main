@@ -40,12 +40,27 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     });
   } catch (error: any) {
     console.error('Error sending funds:', error);
+
+    let errorMessage = 'Failed to send funds';
+    if (error.response?.data) {
+      const data = error.response.data;
+      if (Array.isArray(data)) {
+        errorMessage = data.map((e: any) => e.message || e).join(', ');
+      } else if (data.message) {
+        errorMessage = data.message;
+      } else if (typeof data === 'string') {
+        errorMessage = data;
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to send funds',
+        message: errorMessage,
       },
-      { status: 500 }
+      { status: error.response?.status || 500 }
     );
   }
 });

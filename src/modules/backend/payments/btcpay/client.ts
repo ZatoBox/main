@@ -229,12 +229,12 @@ export class BTCPayClient {
 
   async createOnChainTransaction(
     storeId: string,
-    cryptoCode: string,
+    paymentMethodId: string,
     data: CreateOnChainTransactionRequest
   ): Promise<OnChainTransactionResponse> {
     return this.request<OnChainTransactionResponse>(
       'POST',
-      `/api/v1/stores/${storeId}/payment-methods/onchain/${cryptoCode}/wallet/transactions`,
+      `/api/v1/stores/${storeId}/payment-methods/${paymentMethodId}/wallet/transactions`,
       data
     );
   }
