@@ -121,7 +121,7 @@ export class BTCPayService {
     let wallet;
     try {
       wallet = await this.client.generateWallet(storeId, 'BTC-CHAIN', {
-        savePrivateKeys: false,
+        savePrivateKeys: true,
         importKeysToRPC: false,
         wordCount: 12,
       });
@@ -133,7 +133,7 @@ export class BTCPayService {
       try {
         await this.client.deleteOnChainPaymentMethod(storeId, 'BTC');
         wallet = await this.client.generateWallet(storeId, 'BTC-CHAIN', {
-          savePrivateKeys: false,
+          savePrivateKeys: true,
           importKeysToRPC: false,
           wordCount: 12,
         });
@@ -636,18 +636,30 @@ export class BTCPayService {
       throw new Error('User store not found');
     }
 
+    const destinationObj: {
+      destination: string;
+      amount?: string;
+      subtractFromAmount?: boolean;
+    } = {
+      destination: request.destination,
+    };
+
+    if (request.amount && request.amount.trim() !== '') {
+      destinationObj.amount = request.amount;
+      if (request.subtractFromAmount) {
+        destinationObj.subtractFromAmount = true;
+      }
+    } else {
+      destinationObj.subtractFromAmount = true;
+    }
+
     return this.client.createOnChainTransaction(
       userStore.btcpay_store_id,
-      'BTC',
+      'BTC-CHAIN',
       {
-        destinations: [
-          {
-            destination: request.destination,
-            amount: request.amount,
-            subtractFromAmount: request.subtractFromAmount,
-          },
-        ],
+        destinations: [destinationObj],
         feeRate: request.feeRate,
+        proceedWithBroadcast: true,
       }
     );
   }

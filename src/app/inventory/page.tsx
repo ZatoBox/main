@@ -136,7 +136,7 @@ const InventoryPage: React.FC = () => {
   };
 
   const handleEditProduct = (id: string) => {
-    router.push(`/inventory/edit/${id}`);
+    router.push(`/edit-product/${id}`);
   };
 
   const handleDeleteClick = (id: string, event?: React.MouseEvent) => {
