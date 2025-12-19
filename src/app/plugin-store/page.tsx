@@ -39,14 +39,13 @@ const PluginStorePage: React.FC = () => {
   const [notificationType, setNotificationType] = useState<'success' | 'info'>(
     'info'
   );
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   const mockPlugins: IPlugin[] = [
     {
       id: 'ocr-module',
-      name: 'Escáner de Documentos OCR',
-      description:
-        'Escanea y extrae datos de facturas, recibos y documentos automáticamente',
+      name: t('pluginStore.plugins.ocrModule.name'),
+      description: t('pluginStore.plugins.ocrModule.description'),
       category: 'productivity',
       icon: '🔍',
       status: 'active',
@@ -56,18 +55,18 @@ const PluginStorePage: React.FC = () => {
       installs: 1250,
       price: 'free',
       features: [
-        'Escaneo de documentos',
-        'Extracción de datos',
-        'Procesamiento de facturas',
-        'Gestión de recibos',
+        t('pluginStore.plugins.ocrModule.features.scanning'),
+        t('pluginStore.plugins.ocrModule.features.extraction'),
+        t('pluginStore.plugins.ocrModule.features.processing'),
+        t('pluginStore.plugins.ocrModule.features.management'),
       ],
       screenshot:
         'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop',
     },
     {
       id: 'receipts',
-      name: 'Recibos',
-      description: 'Gestión y visualización de recibos de compra',
+      name: t('pluginStore.plugins.receipts.name'),
+      description: t('pluginStore.plugins.receipts.description'),
       category: 'productivity',
       icon: '🧾',
       status: 'active',
@@ -77,17 +76,17 @@ const PluginStorePage: React.FC = () => {
       installs: 420,
       price: 'free',
       features: [
-        'Almacenamiento de recibos',
-        'Búsqueda por cliente',
-        'Exportar PDF',
+        t('pluginStore.plugins.receipts.features.storage'),
+        t('pluginStore.plugins.receipts.features.search'),
+        t('pluginStore.plugins.receipts.features.export'),
       ],
       screenshot:
         'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=400&h=300&fit=crop',
     },
     {
       id: 'restock',
-      name: 'Restock',
-      description: 'Automatiza reabastecimiento y alertas de stock',
+      name: t('pluginStore.plugins.restock.name'),
+      description: t('pluginStore.plugins.restock.description'),
       category: 'inventory',
       icon: '📦',
       status: 'active',
@@ -97,17 +96,17 @@ const PluginStorePage: React.FC = () => {
       installs: 300,
       price: 'free',
       features: [
-        'Alertas de bajo stock',
-        'Sugerencias de reorden',
-        'Pedidos automáticos',
+        t('pluginStore.plugins.restock.features.alerts'),
+        t('pluginStore.plugins.restock.features.suggestions'),
+        t('pluginStore.plugins.restock.features.orders'),
       ],
       screenshot:
         'https://assets.bwbx.io/images/users/iqjWHBFdfxIU/ifqONX8Chb7o/v1/715x-1.jpg',
     },
     {
       id: 'wallet',
-      name: 'Wallet',
-      description: 'Gestiona tus fondos y realiza pagos',
+      name: t('pluginStore.plugins.wallet.name'),
+      description: t('pluginStore.plugins.wallet.description'),
       category: 'sales',
       icon: <Wallet size={24} />,
       status: 'inactive',
@@ -116,7 +115,11 @@ const PluginStorePage: React.FC = () => {
       rating: 4.9,
       installs: 1500,
       price: 'free',
-      features: ['Gestiona tus fondos', 'Retiros', 'Historial'],
+      features: [
+        t('pluginStore.plugins.wallet.features.funds'),
+        t('pluginStore.plugins.wallet.features.withdrawals'),
+        t('pluginStore.plugins.wallet.features.history'),
+      ],
       screenshot:
         'https://i.pinimg.com/736x/f1/5e/71/f15e71b099330088cfd2902f56280782.jpg',
     },
@@ -139,7 +142,7 @@ const PluginStorePage: React.FC = () => {
       setFilteredPlugins(syncedPlugins);
       setLoading(false);
     }, 1000);
-  }, [activePlugins]);
+  }, [activePlugins, language]);
 
   useEffect(() => {
     let filtered = plugins;

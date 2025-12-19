@@ -685,6 +685,46 @@ export const translations = {
         title: '🔥 MAYORES INSTALACIONES por Popularidad',
       },
       more: 'más',
+      plugins: {
+        ocrModule: {
+          name: 'Escáner de Documentos OCR',
+          description:
+            'Escanea y extrae datos de facturas, recibos y documentos automáticamente',
+          features: {
+            scanning: 'Escaneo de documentos',
+            extraction: 'Extracción de datos',
+            processing: 'Procesamiento de facturas',
+            management: 'Gestión de recibos',
+          },
+        },
+        receipts: {
+          name: 'Recibos',
+          description: 'Gestión y visualización de recibos de compra',
+          features: {
+            storage: 'Almacenamiento de recibos',
+            search: 'Búsqueda por cliente',
+            export: 'Exportar PDF',
+          },
+        },
+        restock: {
+          name: 'Restock',
+          description: 'Automatiza reabastecimiento y alertas de stock',
+          features: {
+            alerts: 'Alertas de bajo stock',
+            suggestions: 'Sugerencias de reorden',
+            orders: 'Pedidos automáticos',
+          },
+        },
+        wallet: {
+          name: 'Wallet',
+          description: 'Gestiona tus fondos y realiza pagos',
+          features: {
+            funds: 'Gestiona tus fondos',
+            withdrawals: 'Retiros',
+            history: 'Historial',
+          },
+        },
+      },
     },
 
     // Restock
@@ -1787,6 +1827,46 @@ export const translations = {
         title: '🔥 MOST INSTALLATIONS by Popularity',
       },
       more: 'more',
+      plugins: {
+        ocrModule: {
+          name: 'OCR Document Scanner',
+          description:
+            'Automatically scan and extract data from invoices, receipts and documents',
+          features: {
+            scanning: 'Document scanning',
+            extraction: 'Data extraction',
+            processing: 'Invoice processing',
+            management: 'Receipt management',
+          },
+        },
+        receipts: {
+          name: 'Receipts',
+          description: 'Management and viewing of purchase receipts',
+          features: {
+            storage: 'Receipt storage',
+            search: 'Search by customer',
+            export: 'Export PDF',
+          },
+        },
+        restock: {
+          name: 'Restock',
+          description: 'Automates restocking and stock alerts',
+          features: {
+            alerts: 'Low stock alerts',
+            suggestions: 'Reorder suggestions',
+            orders: 'Automatic orders',
+          },
+        },
+        wallet: {
+          name: 'Wallet',
+          description: 'Manage your funds and make payments',
+          features: {
+            funds: 'Manage your funds',
+            withdrawals: 'Withdrawals',
+            history: 'History',
+          },
+        },
+      },
     },
 
     // Restock
