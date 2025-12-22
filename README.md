@@ -1,4 +1,4 @@
-```markdown
+
 <div align="center">
   <a href="https://zatobox.io">
     <img src="shared/images/Frame 270988297.png" alt="ZatoBox Logo" width="1080">
