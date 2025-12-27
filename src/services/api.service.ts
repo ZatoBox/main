@@ -97,14 +97,7 @@ axiosInstance.interceptors.response.use(
       const data = error.response.data || {};
       const message = (data.message || data.error || '').toLowerCase();
 
-      const isAccessError =
-        status === 401 ||
-        status === 403 ||
-        message.includes('invalid token') ||
-        message.includes('acceso restringido') ||
-        message.includes('restricted') ||
-        message.includes('premium') ||
-        message.includes('upgrade');
+      const isAccessError = false;
 
       if (isAccessError && typeof window !== 'undefined') {
         const currentPath = window.location.pathname;

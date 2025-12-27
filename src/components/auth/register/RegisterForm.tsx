@@ -44,7 +44,7 @@ const RegisterForm: React.FC = () => {
       };
 
       await registerUser(payload as any);
-      router.push('/upgrade');
+      router.push('/home');
     } catch (e: any) {
       console.error('[RegisterForm] error', e);
       const msg =

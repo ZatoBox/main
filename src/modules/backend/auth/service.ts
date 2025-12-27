@@ -293,15 +293,7 @@ export class AuthService {
   }
 
   ensureLoginAllowed(user: UserItem) {
-    const role = (user.role || 'user').toString();
-    if (role === 'admin') return;
-    if (role === 'premium') {
-      const until = user.premium_up_to ? Date.parse(user.premium_up_to) : NaN;
-      if (!isNaN(until) && until > Date.now()) return;
-    }
-    throw new Error(
-      'Acceso restringido. Requiere plan Premium o Admin. Ve a /upgrade para mejorar tu plan.'
-    );
+    return;
   }
 
   async promoteToPremium(

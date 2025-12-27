@@ -47,7 +47,7 @@ export function proxy(request: NextRequest) {
       role === 'premium' &&
       typeof premiumUntil === 'number' &&
       premiumUntil > Date.now();
-    if (!isAdmin && !isPremium && pathname !== '/upgrade') {
+    if (!isAdmin && !isPremium && false) {
       const url = request.nextUrl.clone();
       url.pathname = '/upgrade';
       return NextResponse.redirect(url);
@@ -60,7 +60,7 @@ export function proxy(request: NextRequest) {
       role === 'premium' &&
       typeof premiumUntil === 'number' &&
       premiumUntil > Date.now();
-    url.pathname = isAdmin || isPremium ? '/home' : '/upgrade';
+    url.pathname = '/home';
     return NextResponse.redirect(url);
   }
   return NextResponse.next();
