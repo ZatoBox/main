@@ -2,8 +2,6 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-const isReactReady = typeof window !== 'undefined';
-
 const resources = {
   en: {
     translation: {
@@ -382,21 +380,27 @@ const resources = {
   },
 };
 
-if (isReactReady && !i18n.isInitialized) {
-  i18n
-    .use(LanguageDetector)
-    .use(initReactI18next)
-    .init({
-      resources,
-      fallbackLng: 'en',
-      interpolation: {
-        escapeValue: false,
-      },
-      detection: {
-        order: ['navigator', 'htmlTag', 'path', 'subdomain'],
-        caches: ['localStorage'],
-      },
-    });
+const isClient = typeof window !== 'undefined';
+
+if (!i18n.isInitialized) {
+  if (isClient) {
+    i18n.use(LanguageDetector);
+  }
+
+  i18n.use(initReactI18next).init({
+    resources,
+    lng: isClient ? undefined : 'es',
+    fallbackLng: 'es',
+    interpolation: {
+      escapeValue: false,
+    },
+    detection: isClient
+      ? {
+          order: ['navigator', 'htmlTag', 'path', 'subdomain'],
+          caches: ['localStorage'],
+        }
+      : undefined,
+  });
 }
 
 export default i18n;

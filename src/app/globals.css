@@ -1,126 +1,106 @@
 @import 'tailwindcss';
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-}
-
-#__next {
-  overflow-x: hidden;
-  width: 100%;
-}
-
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 265 4% 12.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 265 4% 12.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 265 4% 12.9%;
-
-    --primary: 35 97% 49%;
-    --primary-foreground: 265 4% 12.9%;
-
-    --secondary: 248 0.7% 96.8%;
-    --secondary-foreground: 266 4% 20.8%;
-
-    --muted: 248 0.7% 96.8%;
-    --muted-foreground: 257 6% 40%;
-
-    --accent: 248 0.7% 96.8%;
-    --accent-foreground: 266 4% 20.8%;
-
-    --destructive: 27 24.5% 57.7%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 256 1.3% 92.9%;
-    --input: 256 1.3% 92.9%;
-    --ring: 257 4% 70.4%;
-
-    --radius: 0.375rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 265 4% 12.9%;
-    --sidebar-primary: 266 4% 20.8%;
-    --sidebar-primary-foreground: 248 0.3% 98.4%;
-    --sidebar-accent: 248 0.7% 96.8%;
-    --sidebar-accent-foreground: 266 4% 20.8%;
-    --sidebar-border: 256 1.3% 92.9%;
-    --sidebar-ring: 257 4% 70.4%;
-
-    --chart-1: 41 22.2% 64.6%;
-    --chart-2: 185 11.8% 60%;
-    --chart-3: 227 7% 39.8%;
-    --chart-4: 84 18.9% 82.8%;
-    --chart-5: 70 18.8% 76.9%;
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
 
-  .dark {
-    --background: 0 0% 15%;
-    --foreground: 248 0.3% 98.4%;
-
-    --card: 266 4% 20.8%;
-    --card-foreground: 248 0.3% 98.4%;
-
-    --popover: 266 4% 20.8%;
-    --popover-foreground: 248 0.3% 98.4%;
-
-    --primary: 256 1.3% 92.9%;
-    --primary-foreground: 266 4% 20.8%;
-
-    --secondary: 260 4.1% 27.9%;
-    --secondary-foreground: 248 0.3% 98.4%;
-
-    --muted: 260 4.1% 27.9%;
-    --muted-foreground: 257 4% 70.4%;
-
-    --accent: 260 4.1% 27.9%;
-    --accent-foreground: 248 0.3% 98.4%;
-
-    --destructive: 22 19.1% 70.4%;
-    --destructive-foreground: 248 0.3% 98.4%;
-
-    --border: 0 0% 100% / 10%;
-    --input: 0 0% 100% / 15%;
-    --ring: 264 2.7% 55.1%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 248 0.3% 98.4%;
-    --sidebar-primary: 264 24.3% 48.8%;
-    --sidebar-primary-foreground: 248 0.3% 98.4%;
-    --sidebar-accent: 260 4.1% 27.9%;
-    --sidebar-accent-foreground: 248 0.3% 98.4%;
-    --sidebar-border: 0 0% 100% / 10%;
-    --sidebar-ring: 264 2.7% 55.1%;
-    --chart-1: 264 24.3% 48.8%;
-    --chart-2: 162 17% 69.6%;
-    --chart-3: 70 18.8% 76.9%;
-    --chart-4: 304 26.5% 62.7%;
-    --chart-5: 16 24.6% 64.5%;
+  html,
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
   }
-}
 
-@layer base {
+  #__next {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
   * {
-    @apply border-border;
+    border-color: var(--color-border);
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
   }
 }
 
-@theme {
+:root {
+  --background: 0 0% 100%;
+  --foreground: 265 4% 12.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 265 4% 12.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 265 4% 12.9%;
+  --primary: 35 97% 49%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 248 0.7% 96.8%;
+  --secondary-foreground: 266 4% 20.8%;
+  --muted: 248 0.7% 96.8%;
+  --muted-foreground: 257 6% 40%;
+  --accent: 248 0.7% 96.8%;
+  --accent-foreground: 266 4% 20.8%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 256 1.3% 92.9%;
+  --input: 256 1.3% 92.9%;
+  --ring: 35 97% 49%;
+  --radius: 0.5rem;
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 265 4% 12.9%;
+  --sidebar-primary: 266 4% 20.8%;
+  --sidebar-primary-foreground: 248 0.3% 98.4%;
+  --sidebar-accent: 248 0.7% 96.8%;
+  --sidebar-accent-foreground: 266 4% 20.8%;
+  --sidebar-border: 256 1.3% 92.9%;
+  --sidebar-ring: 257 4% 70.4%;
+  --chart-1: 41 22.2% 64.6%;
+  --chart-2: 185 11.8% 60%;
+  --chart-3: 227 7% 39.8%;
+  --chart-4: 84 18.9% 82.8%;
+  --chart-5: 70 18.8% 76.9%;
+}
+
+.dark {
+  --background: 0 0% 9%;
+  --foreground: 248 0.3% 98.4%;
+  --card: 0 0% 12%;
+  --card-foreground: 248 0.3% 98.4%;
+  --popover: 0 0% 12%;
+  --popover-foreground: 248 0.3% 98.4%;
+  --primary: 35 97% 49%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 260 4.1% 20%;
+  --secondary-foreground: 248 0.3% 98.4%;
+  --muted: 260 4.1% 20%;
+  --muted-foreground: 257 4% 70.4%;
+  --accent: 260 4.1% 20%;
+  --accent-foreground: 248 0.3% 98.4%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 248 0.3% 98.4%;
+  --border: 0 0% 20%;
+  --input: 0 0% 25%;
+  --ring: 35 97% 49%;
+  --sidebar-background: 240 5.9% 10%;
+  --sidebar-foreground: 248 0.3% 98.4%;
+  --sidebar-primary: 35 97% 49%;
+  --sidebar-primary-foreground: 248 0.3% 98.4%;
+  --sidebar-accent: 260 4.1% 27.9%;
+  --sidebar-accent-foreground: 248 0.3% 98.4%;
+  --sidebar-border: 0 0% 20%;
+  --sidebar-ring: 264 2.7% 55.1%;
+  --chart-1: 264 24.3% 48.8%;
+  --chart-2: 162 17% 69.6%;
+  --chart-3: 70 18.8% 76.9%;
+  --chart-4: 304 26.5% 62.7%;
+  --chart-5: 16 24.6% 64.5%;
+}
+
+@theme inline {
   --color-zatobox-50: #fef9ec;
   --color-zatobox-100: #fbefca;
   --color-zatobox-200: #f6de91;
@@ -133,34 +113,39 @@ body {
   --color-zatobox-900: #723315;
   --color-zatobox-950: #411807;
 
-  --background: hsl(var(--background));
-  --foreground: hsl(var(--foreground));
-  --card: hsl(var(--card));
-  --card-foreground: hsl(var(--card-foreground));
-  --popover: hsl(var(--popover));
-  --popover-foreground: hsl(var(--popover-foreground));
-  --primary: hsl(var(--primary));
-  --primary-foreground: hsl(var(--primary-foreground));
-  --secondary: hsl(var(--secondary));
-  --secondary-foreground: hsl(var(--secondary-foreground));
-  --muted: hsl(var(--muted));
-  --muted-foreground: hsl(var(--muted-foreground));
-  --accent: hsl(var(--accent));
-  --accent-foreground: hsl(var(--accent-foreground));
-  --destructive: hsl(var(--destructive));
-  --destructive-foreground: hsl(var(--destructive-foreground));
-  --border: hsl(var(--border));
-  --input: hsl(var(--input));
-  --ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
   --radius: 0.5rem;
-  --sidebar-background: hsl(var(--sidebar-background));
-  --sidebar-foreground: hsl(var(--sidebar-foreground));
-  --sidebar-primary: hsl(var(--sidebar-primary));
-  --sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
-  --sidebar-accent: hsl(var(--sidebar-accent));
-  --sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-  --sidebar-border: hsl(var(--sidebar-border));
-  --sidebar-ring: hsl(var(--sidebar-ring));
+  --color-sidebar-background: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
 }
 
 .custom-checkbox {

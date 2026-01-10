@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,11 @@ import '@/lib/i18n';
 
 const LandingHeader = () => {
   const { t, i18n } = useTranslation();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -30,14 +36,14 @@ const LandingHeader = () => {
             <button className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted transition-colors">
               <Globe className="w-4 h-4" />
               <span className="hidden sm:inline">
-                {i18n.language === 'es' ? 'ES' : 'EN'}
+                {isMounted ? (i18n.language === 'es' ? 'ES' : 'EN') : 'ES'}
               </span>
             </button>
             <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 min-w-[120px]">
               <button
                 onClick={() => changeLanguage('en')}
                 className={`w-full text-left px-4 py-2 hover:bg-muted transition-colors ${
-                  i18n.language === 'en' ? 'bg-muted' : ''
+                  isMounted && i18n.language === 'en' ? 'bg-muted' : ''
                 }`}
               >
                 English
@@ -45,7 +51,7 @@ const LandingHeader = () => {
               <button
                 onClick={() => changeLanguage('es')}
                 className={`w-full text-left px-4 py-2 hover:bg-muted transition-colors ${
-                  i18n.language === 'es' ? 'bg-muted' : ''
+                  !isMounted || i18n.language === 'es' ? 'bg-muted' : ''
                 }`}
               >
                 Español
@@ -59,12 +65,12 @@ const LandingHeader = () => {
             rel="noopener noreferrer"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
           >
-            {t('header.sendFeedback')}
+            {isMounted ? t('header.sendFeedback') : 'Enviar Comentarios'}
           </a>
 
           <Link href="/login">
             <Button variant="default" size="sm" className="rounded-full px-5">
-              {t('header.joinBeta')}
+              {isMounted ? t('header.joinBeta') : 'Probar gratis'}
             </Button>
           </Link>
         </div>
