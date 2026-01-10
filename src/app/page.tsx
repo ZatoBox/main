@@ -1,7 +1,5 @@
-import Landing from './landing/page';
+import NewLandingPage from '@/components/new-landing';
 
 export default function Home() {
-  return (
-    <Landing />
-  );
+  return <NewLandingPage />;
 }

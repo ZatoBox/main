@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 
-/* Prevent horizontal overflow globally */
 *,
 *::before,
 *::after {
@@ -19,8 +18,109 @@ body {
   width: 100%;
 }
 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 265 4% 12.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 265 4% 12.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 265 4% 12.9%;
+
+    --primary: 35 97% 49%;
+    --primary-foreground: 265 4% 12.9%;
+
+    --secondary: 248 0.7% 96.8%;
+    --secondary-foreground: 266 4% 20.8%;
+
+    --muted: 248 0.7% 96.8%;
+    --muted-foreground: 257 6% 40%;
+
+    --accent: 248 0.7% 96.8%;
+    --accent-foreground: 266 4% 20.8%;
+
+    --destructive: 27 24.5% 57.7%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 256 1.3% 92.9%;
+    --input: 256 1.3% 92.9%;
+    --ring: 257 4% 70.4%;
+
+    --radius: 0.375rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 265 4% 12.9%;
+    --sidebar-primary: 266 4% 20.8%;
+    --sidebar-primary-foreground: 248 0.3% 98.4%;
+    --sidebar-accent: 248 0.7% 96.8%;
+    --sidebar-accent-foreground: 266 4% 20.8%;
+    --sidebar-border: 256 1.3% 92.9%;
+    --sidebar-ring: 257 4% 70.4%;
+
+    --chart-1: 41 22.2% 64.6%;
+    --chart-2: 185 11.8% 60%;
+    --chart-3: 227 7% 39.8%;
+    --chart-4: 84 18.9% 82.8%;
+    --chart-5: 70 18.8% 76.9%;
+  }
+
+  .dark {
+    --background: 0 0% 15%;
+    --foreground: 248 0.3% 98.4%;
+
+    --card: 266 4% 20.8%;
+    --card-foreground: 248 0.3% 98.4%;
+
+    --popover: 266 4% 20.8%;
+    --popover-foreground: 248 0.3% 98.4%;
+
+    --primary: 256 1.3% 92.9%;
+    --primary-foreground: 266 4% 20.8%;
+
+    --secondary: 260 4.1% 27.9%;
+    --secondary-foreground: 248 0.3% 98.4%;
+
+    --muted: 260 4.1% 27.9%;
+    --muted-foreground: 257 4% 70.4%;
+
+    --accent: 260 4.1% 27.9%;
+    --accent-foreground: 248 0.3% 98.4%;
+
+    --destructive: 22 19.1% 70.4%;
+    --destructive-foreground: 248 0.3% 98.4%;
+
+    --border: 0 0% 100% / 10%;
+    --input: 0 0% 100% / 15%;
+    --ring: 264 2.7% 55.1%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 248 0.3% 98.4%;
+    --sidebar-primary: 264 24.3% 48.8%;
+    --sidebar-primary-foreground: 248 0.3% 98.4%;
+    --sidebar-accent: 260 4.1% 27.9%;
+    --sidebar-accent-foreground: 248 0.3% 98.4%;
+    --sidebar-border: 0 0% 100% / 10%;
+    --sidebar-ring: 264 2.7% 55.1%;
+    --chart-1: 264 24.3% 48.8%;
+    --chart-2: 162 17% 69.6%;
+    --chart-3: 70 18.8% 76.9%;
+    --chart-4: 304 26.5% 62.7%;
+    --chart-5: 16 24.6% 64.5%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
 @theme {
-  /* Principal Colors */
   --color-zatobox-50: #fef9ec;
   --color-zatobox-100: #fbefca;
   --color-zatobox-200: #f6de91;
@@ -33,50 +133,58 @@ body {
   --color-zatobox-900: #723315;
   --color-zatobox-950: #411807;
 
-  /* Semantic Component Colors */
-  --background: #fef9ec;
-  --foreground: #411807;
-  --card: #fef9ec;
-  --card-foreground: #411807;
-  --popover: #fef9ec;
-  --popover-foreground: #411807;
-  --primary: #723315;
-  --primary-foreground: #fef9ec;
-  --secondary: #fbefca;
-  --secondary-foreground: #723315;
-  --muted: #fbefca;
-  --muted-foreground: #a94d14;
-  --accent: #f6de91;
-  --accent-foreground: #723315;
-  --destructive: #cc6e13;
-  --destructive-foreground: #fef9ec;
-  --border: #f6de91;
-  --input: #fbefca;
-  --ring: #e28e18;
-  --chart-1: #eeb131;
-  --chart-2: #cc6e13;
-  --chart-3: #8a3d16;
-  --chart-4: #f6de91;
-  --chart-5: #fbefca;
+  --background: hsl(var(--background));
+  --foreground: hsl(var(--foreground));
+  --card: hsl(var(--card));
+  --card-foreground: hsl(var(--card-foreground));
+  --popover: hsl(var(--popover));
+  --popover-foreground: hsl(var(--popover-foreground));
+  --primary: hsl(var(--primary));
+  --primary-foreground: hsl(var(--primary-foreground));
+  --secondary: hsl(var(--secondary));
+  --secondary-foreground: hsl(var(--secondary-foreground));
+  --muted: hsl(var(--muted));
+  --muted-foreground: hsl(var(--muted-foreground));
+  --accent: hsl(var(--accent));
+  --accent-foreground: hsl(var(--accent-foreground));
+  --destructive: hsl(var(--destructive));
+  --destructive-foreground: hsl(var(--destructive-foreground));
+  --border: hsl(var(--border));
+  --input: hsl(var(--input));
+  --ring: hsl(var(--ring));
   --radius: 0.5rem;
-  --sidebar-background: #fbefca;
-  --sidebar-foreground: #411807;
-  --sidebar-primary: #723315;
-  --sidebar-primary-foreground: #fef9ec;
-  --sidebar-accent: #f6de91;
-  --sidebar-accent-foreground: #723315;
-  --sidebar-border: #f1c658;
-  --sidebar-ring: #e28e18;
+  --sidebar-background: hsl(var(--sidebar-background));
+  --sidebar-foreground: hsl(var(--sidebar-foreground));
+  --sidebar-primary: hsl(var(--sidebar-primary));
+  --sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --sidebar-accent: hsl(var(--sidebar-accent));
+  --sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --sidebar-border: hsl(var(--sidebar-border));
+  --sidebar-ring: hsl(var(--sidebar-ring));
 }
 
 .custom-checkbox {
-  accent-color: #E28E18; 
+  accent-color: #e28e18;
   width: 1rem;
   height: 1rem;
   border-radius: 0.25rem;
-  
 }
 
 .custom-checkbox:checked {
-  color: #E28E18; 
+  color: #e28e18;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
 }
