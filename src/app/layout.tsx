@@ -13,25 +13,37 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://zatobox.io'),
-  title: 'ZatoBox',
+  title: 'ZatoBox - Free POS & Inventory System for Small Stores',
   description:
-    'ZatoBox is an all-in-one platform to digitalize and automate businesses. It integrates point of sale, smart inventory, and Bitcoin-fiat payments into a modular, open ecosystem built to scale with your company.',
+    'ZatoBox is a free point of sale for small physical stores. Track sales, manage stock in real time, with optional Bitcoin payments.',
   generator: 'ZatoBox',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
-    title: 'ZatoBox',
+    title: 'ZatoBox - Free POS & Inventory System for Small Stores',
     description:
-      'ZatoBox is an all-in-one platform to digitalize and automate businesses. It integrates point of sale, smart inventory, and Bitcoin-fiat payments into a modular, open ecosystem built to scale with your company.',
+      'ZatoBox is a free point of sale for small physical stores. Track sales, manage stock in real time, with optional Bitcoin payments.',
     url: 'https://zatobox.io',
     siteName: 'ZatoBox',
     images: [
       {
-        url: 'images/logo.png',
-        width: 800,
-        height: 600,
-        alt: 'ZatoBox Logo',
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'ZatoBox - Free POS & Inventory System',
       },
     ],
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ZatoBox - Free POS & Inventory System for Small Stores',
+    description:
+      'ZatoBox is a free point of sale for small physical stores. Track sales, manage stock in real time, with optional Bitcoin payments.',
+    images: ['/og-image.png'],
   },
 };
 
