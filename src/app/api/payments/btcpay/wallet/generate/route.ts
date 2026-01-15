@@ -32,6 +32,7 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
       xpub: wallet.xpub,
       mnemonic: wallet.mnemonic,
       fingerprint: wallet.fingerprint,
+      accountKeyPath: wallet.accountKeyPath,
       message: 'XPUB generated successfully',
     });
   } catch (error: any) {

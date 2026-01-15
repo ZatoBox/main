@@ -114,6 +114,7 @@ export class BTCPayService {
     storeId: string;
     mnemonic?: string;
     fingerprint?: string;
+    accountKeyPath?: string;
   }> {
     const name = storeName?.trim() || `User Store ${userId.substring(0, 8)}`;
     const { storeId, store } = await this.ensureStore(userId, name);
@@ -180,15 +181,27 @@ export class BTCPayService {
 
     await this.ensureWebhook(userId, storeId, store?.webhook_secret);
 
-    const HDKey = require('hdkey');
     let fingerprint: string | undefined;
-    try {
-      const hd = HDKey.fromExtendedKey(xpub);
-      if (hd.identifier) {
-        fingerprint = hd.identifier.slice(0, 4).toString('hex');
+    let accountKeyPath: string | undefined;
+
+    if (wallet.accountKeyPath) {
+      accountKeyPath = wallet.accountKeyPath;
+      const pathParts = wallet.accountKeyPath.split('/');
+      if (pathParts.length > 0 && pathParts[0].length === 8) {
+        fingerprint = pathParts[0];
       }
-    } catch (e) {
-      console.warn('Failed to derive fingerprint from xpub:', e);
+    }
+
+    if (!fingerprint) {
+      const HDKey = require('hdkey');
+      try {
+        const hd = HDKey.fromExtendedKey(xpub);
+        if (hd.identifier) {
+          fingerprint = hd.identifier.slice(0, 4).toString('hex');
+        }
+      } catch (e) {
+        console.warn('Failed to derive fingerprint from xpub:', e);
+      }
     }
 
     return {
@@ -196,6 +209,7 @@ export class BTCPayService {
       storeId,
       mnemonic,
       fingerprint,
+      accountKeyPath,
     };
   }
 

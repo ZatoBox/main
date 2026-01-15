@@ -119,6 +119,8 @@ class BTCPayAPIService {
     success: boolean;
     xpub?: string;
     mnemonic?: string;
+    fingerprint?: string;
+    accountKeyPath?: string;
     message?: string;
   }> {
     const headers: Record<string, string> = {

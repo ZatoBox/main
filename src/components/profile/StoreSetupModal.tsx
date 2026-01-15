@@ -37,6 +37,8 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [fingerprint, setFingerprint] = useState<string | null>(null);
+  const [xpub, setXpub] = useState<string | null>(null);
+  const [accountKeyPath, setAccountKeyPath] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -91,6 +93,12 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
       }
       if (data.fingerprint) {
         setFingerprint(data.fingerprint);
+      }
+      if (data.xpub) {
+        setXpub(data.xpub);
+      }
+      if (data.accountKeyPath) {
+        setAccountKeyPath(data.accountKeyPath);
       }
 
       setCurrentStep('security-warning');
@@ -343,18 +351,38 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
                 </div>
               </div>
 
-              {fingerprint && (
-                <div className="flex flex-col items-center justify-center space-y-2">
-                  <span className="text-base text-gray-500 font-medium">
-                    Master Fingerprint
-                  </span>
-                  <div className="px-4 py-2 rounded-lg">
-                    <code className="text-lg font-mono text-gray-900 tracking-wider">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 w-full max-w-md space-y-4">
+                {fingerprint && (
+                  <div className="flex flex-col items-center justify-center space-y-1">
+                    <span className="text-sm text-gray-500 font-medium">
+                      Master Fingerprint
+                    </span>
+                    <code className="text-base font-mono text-gray-900 tracking-wider bg-white px-3 py-1 rounded border border-gray-200">
                       {fingerprint.toUpperCase()}
                     </code>
                   </div>
-                </div>
-              )}
+                )}
+                {accountKeyPath && (
+                  <div className="flex flex-col items-center justify-center space-y-1">
+                    <span className="text-sm text-gray-500 font-medium">
+                      Derivation Path
+                    </span>
+                    <code className="text-sm font-mono text-gray-900 tracking-wider bg-white px-3 py-1 rounded border border-gray-200">
+                      m/{accountKeyPath.split('/').slice(1).join('/')}
+                    </code>
+                  </div>
+                )}
+                {xpub && (
+                  <div className="flex flex-col items-center justify-center space-y-1">
+                    <span className="text-sm text-gray-500 font-medium">
+                      XPUB (Extended Public Key)
+                    </span>
+                    <code className="text-xs font-mono text-gray-900 bg-white px-3 py-2 rounded border border-gray-200 break-all text-center leading-relaxed">
+                      {xpub}
+                    </code>
+                  </div>
+                )}
+              </div>
 
               <div className="text-center text-sm text-gray-500 leading-relaxed space-y-2 max-w-lg mx-auto">
                 <p>
