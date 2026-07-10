@@ -99,7 +99,6 @@ export async function processImageFile(params: {
   const last = userLastRequest.get(userId) ?? 0;
   if (now - last < RATE_LIMIT_SECONDS)
     throw { status: 429, message: 'rate_limited' };
-  userLastRequest.set(userId, now);
 
   if (!ALLOWED_TYPES.includes(file.type))
     throw { status: 400, message: 'invalid_type' };
@@ -122,6 +121,7 @@ export async function processImageFile(params: {
 
   const model = client.getGenerativeModel({ model: 'gemini-2.0-flash-001' });
   const result = await model.generateContent(parts);
+  userLastRequest.set(userId, now);
   const response = result.response;
 
   let extractedText = response.text();
