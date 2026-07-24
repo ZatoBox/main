@@ -1,6 +1,6 @@
 import { createGeminiClient } from './client';
 
-const RATE_LIMIT_SECONDS = 300;
+const RATE_LIMIT_SECONDS = 30;
 const userLastRequest: Map<string, number> = new Map();
 
 export type OCRResponse = {
@@ -119,8 +119,16 @@ export async function processImageFile(params: {
     { inlineData: { mimeType: file.type, data: base64Data } },
   ];
 
-  const model = client.getGenerativeModel({ model: 'gemini-2.0-flash-001' });
-  const result = await model.generateContent(parts);
+  const model = client.getGenerativeModel({ model: 'gemini-flash-latest' });
+  let result;
+  try {
+    result = await model.generateContent(parts);
+  } catch (e: any) {
+    throw {
+      status: 502,
+      message: `Gemini error ${e?.status ?? ''}: ${e?.message ?? e}`,
+    };
+  }
   userLastRequest.set(userId, now);
   const response = result.response;
 

@@ -376,7 +376,7 @@ const OCRResultPage: React.FC = () => {
 
       setResult(normalized);
       if (normalized.success) {
-        setCooldown(Date.now() + 5 * 60 * 1000);
+        setCooldown(Date.now() + 30 * 1000);
       }
     } catch (err: any) {
       const errorMessage = err.message || '';
@@ -384,7 +384,7 @@ const OCRResultPage: React.FC = () => {
         errorMessage.includes('429') ||
         errorMessage.includes('Too Many Requests')
       ) {
-        setCooldown(Date.now() + 5 * 60 * 1000);
+        setCooldown(Date.now() + 30 * 1000);
         setError('');
       } else {
         setError(
