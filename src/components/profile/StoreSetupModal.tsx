@@ -464,7 +464,7 @@ const StoreSetupModal: React.FC<StoreSetupModalProps> = ({
             {currentStep !== 'show-mnemonic' && currentStep !== 'complete' && (
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="absolute top-4 right-4 flex items-center justify-center w-11 h-11 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <X size={20} className="text-gray-500" />
               </button>

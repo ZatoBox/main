@@ -1,65 +1,54 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/context/auth-store';
 import SideMenu from '@/components/SideMenu';
+import BottomTabBar from '@/components/BottomTabBar';
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const noSidebarPaths = [
-    '/',
-    '/login',
-    '/register',
-    '/upgrade',
-    '/landing',
-    '/auth/login',
-    '/auth/register',
-  ];
-  const existingPaths = [
-    '/',
-    '/auth/callback',
-    '/auth/login',
-    '/auth/register',
-    '/failure',
+  // Rutas de la app autenticada: reciben sidebar/nav (prefix-match para
+  // segmentos dinámicos como /edit-product/[id]).
+  const APP_ROUTES = [
     '/home',
     '/inventory',
-    '/landing',
-    '/new-product',
+    '/smart-inventory',
     '/ocr-result',
-    '/plugin-store',
-    '/polar-products',
-    '/profile',
     '/receipts',
     '/restock',
-    '/smart-inventory',
-    '/success',
-    '/swagger',
-    '/upgrade',
     '/wallet-withdraw',
+    '/plugin-store',
+    '/profile',
+    '/new-product',
+    '/edit-product',
+    '/success',
+    '/checkout',
   ];
 
-  const isExisting = (path: string) => {
-    if (existingPaths.includes(path)) return true;
-    return false;
-  };
-
-  const shouldShowSidebar =
-    isExisting(pathname || '/') && !noSidebarPaths.includes(pathname || '/');
-
-  const showSidebar = shouldShowSidebar;
+  const currentPath = pathname || '/';
+  const showSidebar = APP_ROUTES.some(
+    (r) => currentPath === r || currentPath.startsWith(r + '/')
+  );
 
   return (
     <div className="flex min-h-screen w-full overflow-x-hidden">
-      {showSidebar && <SideMenu />}
+      {showSidebar && (
+        <SideMenu
+          mobileOpen={mobileMenuOpen}
+          onMobileOpenChange={setMobileMenuOpen}
+        />
+      )}
+      {showSidebar && (
+        <BottomTabBar onMoreClick={() => setMobileMenuOpen(true)} />
+      )}
       <div
         className={`${
           showSidebar
-            ? 'flex-1 ml-0 md:ml-64 min-w-0 w-full overflow-x-hidden'
+            ? 'flex-1 md:ml-64 min-w-0 w-full overflow-x-hidden pb-tabbar md:pb-0'
             : 'flex-1 w-full min-w-0 overflow-x-hidden'
         }`}
       >

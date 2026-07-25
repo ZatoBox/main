@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from '@/hooks/use-translation';
 import {
-  X,
   FileJson,
   CheckCircle2,
   AlertCircle,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react';
 import { productsAPI } from '@/services/api.service';
 import { toast } from '@/hooks/use-toast';
+import ResponsiveModal from '@/components/ui/responsive-modal';
 
 interface JsonImporterModalProps {
   isOpen: boolean;
@@ -148,156 +148,45 @@ const JsonImporterModal: React.FC<JsonImporterModalProps> = ({
     setParsedProducts(null);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div
-        className="bg-white border border-gray-200 w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#F88612]/10 rounded-lg">
-              <FileJson className="w-5 h-5 text-[#F88612]" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">
-                {t('inventory.jsonImporter.title')}
-              </h2>
-              <p className="text-xs text-gray-500">
-                {t('inventory.jsonImporter.description')}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-600"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-          <div
-            className={`flex-1 flex flex-col border-b md:border-b-0 md:border-r border-gray-200 transition-all duration-300 ${
-              parsedProducts ? 'md:w-1/2' : 'w-full'
-            }`}
-          >
-            <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
-              <div className="flex items-center gap-2 text-xs font-mono text-gray-500">
-                <Code size={14} />
-                <span>JSON Input</span>
-              </div>
-              <button
-                onClick={handleCopyExample}
-                className="flex items-center gap-1.5 text-xs text-[#F88612] hover:text-[#d17110] transition-colors"
-                disabled={isCreating}
-              >
-                {copied ? <Check size={12} /> : <Copy size={12} />}
-                <span>
-                  {copied
-                    ? t('inventory.jsonImporter.exampleCopied')
-                    : t('inventory.jsonImporter.copyExample')}
-                </span>
-              </button>
-            </div>
-            <div className="flex-1 relative bg-white">
-              <textarea
-                value={jsonContent}
-                onChange={(e) => setJsonContent(e.target.value)}
-                placeholder={t('inventory.jsonImporter.placeholder')}
-                className="w-full h-full bg-white text-gray-800 font-mono text-sm p-4 resize-none focus:outline-none focus:ring-2 focus:ring-[#F88612]/20 selection:bg-[#F88612]/20"
-                spellCheck={false}
-                disabled={isCreating}
-              />
-            </div>
-          </div>
-
-          {parsedProducts && (
-            <div className="flex-1 flex flex-col bg-gray-50 animate-in slide-in-from-right-4 duration-300">
-              <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-white">
-                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-green-600" />
-                  {t('inventory.jsonImporter.previewTitle')}
-                </h3>
-                <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full border border-green-200">
-                  {parsedProducts.length}{' '}
-                  {t('inventory.jsonImporter.detectedItems')}
-                </span>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {parsedProducts.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 bg-white rounded-lg border border-gray-200 hover:border-[#F88612]/50 hover:shadow-sm transition-all group"
-                  >
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-bold text-gray-900 text-sm">
-                        {item.name}
-                      </span>
-                      <span className="font-mono text-[#F88612] text-xs font-medium">
-                        ${item.price.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
-                      <span>
-                        Stock:{' '}
-                        <span className="text-gray-700 font-medium">
-                          {item.stock}
-                        </span>
-                      </span>
-                      {item.sku && (
-                        <span>
-                          SKU:{' '}
-                          <span className="text-gray-700 font-medium">
-                            {item.sku}
-                          </span>
-                        </span>
-                      )}
-                    </div>
-                    {item.categories && item.categories.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {item.categories.map((cat, cIdx) => (
-                          <span
-                            key={cIdx}
-                            className="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] text-gray-600 font-medium"
-                          >
-                            {cat}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="p-4 bg-gray-50 border-t border-gray-200 flex flex-col gap-4">
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open && !isCreating) onClose();
+      }}
+      title={
+        <span className="flex items-center gap-3">
+          <span className="p-2 bg-[#F88612]/10 rounded-lg">
+            <FileJson className="w-5 h-5 text-[#F88612]" />
+          </span>
+          {t('inventory.jsonImporter.title')}
+        </span>
+      }
+      description={t('inventory.jsonImporter.description')}
+      desktopClassName="max-w-4xl"
+      footer={
+        <div className="flex w-full flex-col gap-3">
           {error && (
-            <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200 animate-in slide-in-from-bottom-2">
-              <AlertCircle size={16} />
+            <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+              <AlertCircle size={16} className="shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {isCreating && (
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-2 overflow-hidden">
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
               <div
-                className="bg-[#F88612] h-full transition-all duration-300 ease-out flex items-center justify-end"
+                className="bg-[#F88612] h-full transition-all duration-300 ease-out"
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
           )}
 
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
             <button
               onClick={onClose}
               disabled={isCreating}
-              className="px-4 py-2 text-sm text-gray-500 hover:text-gray-800 transition-colors disabled:opacity-50 font-medium"
+              className="w-full sm:w-auto px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-800 transition-colors disabled:opacity-50 font-medium"
             >
               {t('inventory.jsonImporter.cancel')}
             </button>
@@ -306,7 +195,7 @@ const JsonImporterModal: React.FC<JsonImporterModalProps> = ({
               <button
                 onClick={validateJson}
                 disabled={!jsonContent.trim() || isValidating}
-                className="px-6 py-2 bg-[#F88612] text-white text-sm font-bold rounded-lg hover:bg-[#E67300] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm hover:shadow-md"
+                className="w-full sm:w-auto px-6 py-2 min-h-11 bg-[#F88612] text-white text-sm font-bold rounded-lg hover:bg-[#E67300] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
               >
                 {isValidating && <Loader2 size={16} className="animate-spin" />}
                 {t('inventory.jsonImporter.validate')}
@@ -315,7 +204,7 @@ const JsonImporterModal: React.FC<JsonImporterModalProps> = ({
               <button
                 onClick={handleCreate}
                 disabled={isCreating}
-                className="px-6 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm hover:shadow-md"
+                className="w-full sm:w-auto px-6 py-2 min-h-11 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
               >
                 {isCreating ? (
                   <>
@@ -334,8 +223,100 @@ const JsonImporterModal: React.FC<JsonImporterModalProps> = ({
             )}
           </div>
         </div>
+      }
+    >
+      <div className="flex flex-col md:flex-row gap-4 pb-2">
+        <div className="flex-1 flex flex-col border border-gray-200 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
+            <div className="flex items-center gap-2 text-xs font-mono text-gray-500">
+              <Code size={14} />
+              <span>JSON Input</span>
+            </div>
+            <button
+              onClick={handleCopyExample}
+              className="flex items-center gap-1.5 min-h-9 text-xs text-[#F88612] hover:text-[#d17110] transition-colors"
+              disabled={isCreating}
+            >
+              {copied ? <Check size={12} /> : <Copy size={12} />}
+              <span>
+                {copied
+                  ? t('inventory.jsonImporter.exampleCopied')
+                  : t('inventory.jsonImporter.copyExample')}
+              </span>
+            </button>
+          </div>
+          <textarea
+            value={jsonContent}
+            onChange={(e) => setJsonContent(e.target.value)}
+            placeholder={t('inventory.jsonImporter.placeholder')}
+            className="w-full min-h-[40dvh] bg-white text-gray-800 font-mono text-sm p-4 resize-none focus:outline-none focus:ring-2 focus:ring-[#F88612]/20 selection:bg-[#F88612]/20"
+            spellCheck={false}
+            disabled={isCreating}
+          />
+        </div>
+
+        {parsedProducts && (
+          <div className="flex-1 flex flex-col bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-white">
+              <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
+                <CheckCircle2 size={16} className="text-green-600" />
+                {t('inventory.jsonImporter.previewTitle')}
+              </h3>
+              <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full border border-green-200">
+                {parsedProducts.length}{' '}
+                {t('inventory.jsonImporter.detectedItems')}
+              </span>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[40dvh]">
+              {parsedProducts.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 bg-white rounded-lg border border-gray-200 hover:border-[#F88612]/50 hover:shadow-sm transition-all group"
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-bold text-gray-900 text-sm">
+                      {item.name}
+                    </span>
+                    <span className="font-mono text-[#F88612] text-xs font-medium">
+                      ${item.price.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span>
+                      Stock:{' '}
+                      <span className="text-gray-700 font-medium">
+                        {item.stock}
+                      </span>
+                    </span>
+                    {item.sku && (
+                      <span>
+                        SKU:{' '}
+                        <span className="text-gray-700 font-medium">
+                          {item.sku}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                  {item.categories && item.categories.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {item.categories.map((cat, cIdx) => (
+                        <span
+                          key={cIdx}
+                          className="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] text-gray-600 font-medium"
+                        >
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </ResponsiveModal>
   );
 };
 

@@ -42,7 +42,7 @@ const InventoryHeader: React.FC<Props> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="p-2 -ml-2 transition-colors rounded-full hover:bg-gray-100 md:hidden"
+              className="flex items-center justify-center w-11 h-11 -ml-2 transition-colors rounded-full hover:bg-gray-100 md:hidden"
             >
               <ArrowLeft size={20} className="text-gray-600" />
             </button>
@@ -57,10 +57,10 @@ const InventoryHeader: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {selectedCount > 0 && (
             <>
-              <label className="flex items-center space-x-3 cursor-pointer group">
+              <label className="flex items-center gap-3 min-h-11 cursor-pointer group">
                 <div className="relative w-6 h-6">
                   <input
                     type="checkbox"
@@ -105,7 +105,7 @@ const InventoryHeader: React.FC<Props> = ({
                 <button
                   onClick={onBulkDelete}
                   disabled={deletingItems}
-                  className="flex items-center justify-center space-x-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg hover:from-red-600 hover:to-red-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center space-x-2 px-4 py-2.5 min-h-11 text-sm font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg hover:from-red-600 hover:to-red-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg
                     className={`w-5 h-5 ${deletingItems ? 'animate-spin' : ''}`}
@@ -147,7 +147,7 @@ const InventoryHeader: React.FC<Props> = ({
           {onImportJson && (
             <button
               onClick={onImportJson}
-              className={`relative px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200
+              className={`relative px-4 py-2.5 min-h-11 text-sm font-semibold rounded-xl transition-all duration-200
                        flex items-center justify-center space-x-2 group
                        bg-white border text-gray-700 border-gray-200
                        hover:bg-gray-50 hover:border-gray-300
@@ -161,7 +161,7 @@ const InventoryHeader: React.FC<Props> = ({
           )}
           <button
             onClick={onCreate}
-            className={`relative px-6 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200
+            className={`relative px-6 py-2.5 min-h-11 text-sm font-semibold rounded-xl transition-all duration-200
                      flex items-center justify-center space-x-2 group
                      bg-gradient-to-r from-[#F88612] to-[#d17110]
                      hover:from-[#d17110] hover:to-[#b85a0a]

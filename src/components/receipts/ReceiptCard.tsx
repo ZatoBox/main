@@ -188,7 +188,7 @@ const ReceiptCard: React.FC<Props> = ({
 
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 transition-colors rounded-lg hover:bg-[#F3F4F6] ml-4"
+            className="flex items-center justify-center w-11 h-11 transition-colors rounded-lg hover:bg-[#F3F4F6] ml-2"
           >
             <svg
               className={`w-5 h-5 text-[#F88612] transition-transform ${

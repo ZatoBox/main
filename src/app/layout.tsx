@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { LanguageProvider } from '@/context/language-context';
 import { PluginProvider } from '@/context/plugin-context';
@@ -10,6 +10,12 @@ import LayoutWrapper from '@/components/LayoutWrapper';
 import CashSuccessPortal from '@/components/CashSuccessPortal';
 import CryptoSuccessPortal from '@/components/CryptoSuccessPortal';
 import './globals.css';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://zatobox.io'),

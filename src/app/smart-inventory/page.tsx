@@ -9,7 +9,7 @@ const SmartInventoryPage: React.FC = () => {
 
   return (
     <div className='max-w-4xl p-6 mx-auto'>
-      <div className='p-8 bg-white rounded-lg shadow-lg'>
+      <div className='p-4 md:p-8 bg-white rounded-lg shadow-lg'>
         <div className='flex items-center mb-6'>
           <Brain className='w-8 h-8 mr-3 text-complement' />
           <h1 className='text-3xl font-bold text-text-primary'>

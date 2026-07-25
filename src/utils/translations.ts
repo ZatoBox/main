@@ -728,6 +728,24 @@ export const translations = {
     },
 
     // Restock
+    cart: {
+      title: 'Carrito de compras',
+      empty: 'Tu carrito está vacío',
+      emptyHint: 'Agrega productos para comenzar',
+      subtotal: 'Subtotal:',
+      total: 'Total:',
+      each: 'c/u',
+      stock: 'Stock:',
+      paymentMethod: 'Método de pago',
+      cash: 'Efectivo',
+      bitcoin: 'Bitcoin',
+      processing: 'Procesando...',
+      createCashOrder: 'Crear orden en efectivo',
+      payWithBitcoin: 'Pagar con Bitcoin',
+      clearCart: 'Vaciar carrito',
+      errorProcessing: 'Error al procesar el pago',
+    },
+
     restock: {
       breadcrumb: {
         inventory: 'Inventario',
@@ -761,6 +779,10 @@ export const translations = {
       submit: {
         processing: 'Procesando...',
         confirm: 'Confirmar Restock',
+      },
+      mobileBar: {
+        selected: 'seleccionados',
+        review: 'Revisar y confirmar',
       },
       success: '¡Reabastecimiento completado!',
     },
@@ -1870,6 +1892,24 @@ export const translations = {
     },
 
     // Restock
+    cart: {
+      title: 'Shopping Cart',
+      empty: 'Your cart is empty',
+      emptyHint: 'Add some products to get started',
+      subtotal: 'Subtotal:',
+      total: 'Total:',
+      each: 'each',
+      stock: 'Stock:',
+      paymentMethod: 'Payment Method',
+      cash: 'Cash',
+      bitcoin: 'Bitcoin',
+      processing: 'Processing...',
+      createCashOrder: 'Create Cash Order',
+      payWithBitcoin: 'Pay with Bitcoin',
+      clearCart: 'Clear Cart',
+      errorProcessing: 'Error processing payment',
+    },
+
     restock: {
       breadcrumb: {
         inventory: 'Inventory',
@@ -1903,6 +1943,10 @@ export const translations = {
       submit: {
         processing: 'Processing...',
         confirm: 'Confirm Restock',
+      },
+      mobileBar: {
+        selected: 'selected',
+        review: 'Review & confirm',
       },
       success: 'Restock completed!',
     },

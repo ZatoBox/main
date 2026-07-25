@@ -32,8 +32,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   const images = getImageUrls();
   const fallbackImg = '/images/placeholder-product.png';
   const [index, setIndex] = useState(0);
+  const [justAdded, setJustAdded] = useState(false);
+  const addedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { t } = useTranslation();
+
+  const handleClick = () => {
+    onClick(product);
+    setJustAdded(true);
+    if (addedTimeoutRef.current) clearTimeout(addedTimeoutRef.current);
+    addedTimeoutRef.current = setTimeout(() => setJustAdded(false), 200);
+  };
 
   const startSlide = () => {
     if (images.length <= 1) return;
@@ -54,16 +63,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   useEffect(
     () => () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      if (addedTimeoutRef.current) clearTimeout(addedTimeoutRef.current);
     },
     []
   );
 
   return (
     <div
-      onClick={() => onClick(product)}
+      onClick={handleClick}
       onMouseEnter={startSlide}
       onMouseLeave={stopSlide}
-      className="relative overflow-hidden transition-all duration-300 ease-in-out transform bg-white border rounded-lg cursor-pointer group border-gray-300 hover:scale-105 hover:shadow-lg hover:border-gray-300 animate-fade-in"
+      className={`relative overflow-hidden transition-all duration-150 ease-out transform bg-white border rounded-lg cursor-pointer group border-gray-300 md:hover:scale-105 hover:shadow-lg hover:border-gray-300 animate-fade-in ${
+        justAdded ? 'scale-95' : ''
+      }`}
     >
       <div className="absolute z-10 top-3 right-3 flex gap-2">
         {product.stock !== null && (
@@ -90,7 +102,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         )}
       </div>
 
-      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100">
+      <div className="relative h-32 sm:h-48 overflow-hidden bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100">
         {images.length > 0 ? (
           <div className="w-full h-full overflow-hidden">
             <div
@@ -98,7 +110,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
               style={{ transform: `translateX(-${index * 100}%)` }}
             >
               {images.map((src, i) => (
-                <div key={i} className="w-full h-48 shrink-0 relative">
+                <div key={i} className="w-full h-32 sm:h-48 shrink-0 relative">
                   <img
                     src={src || fallbackImg}
                     alt={product.name}
@@ -135,8 +147,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         <div className="absolute inset-0 transition-all duration-300 bg-black/0 group-hover:bg-black/10" />
       </div>
 
-      <div className="p-4 space-y-3">
-        <h3 className="text-lg font-semibold transition-colors duration-300 text-black/75 group-hover:text-black line-clamp-2">
+      <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
+        <h3 className="text-base sm:text-lg font-semibold transition-colors duration-300 text-black/75 group-hover:text-black line-clamp-2">
           {product.name}
         </h3>
 
@@ -147,7 +159,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         )}
 
         <div className="flex flex-col pt-2">
-          <span className="text-2xl font-bold transition-colors duration-300 text-black group-hover:text-zatobox-500">
+          <span className="text-xl sm:text-2xl font-bold transition-colors duration-300 text-black group-hover:text-zatobox-500">
             ${(product.price || 0).toFixed(2)}
           </span>
         </div>

@@ -50,10 +50,10 @@ const InventoryCard: React.FC<Props> = ({
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
               <button
-                className="inline text-sm font-medium truncate text-zatobox-900 hover:underline text-left max-w-max"
+                className="block w-full max-w-full text-sm font-medium truncate text-zatobox-900 hover:underline text-left"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit(item.id);
@@ -100,7 +100,7 @@ const InventoryCard: React.FC<Props> = ({
                   e.stopPropagation();
                   onEdit(item.id);
                 }}
-                className="p-1 transition-colors rounded hover:bg-[#FEF9EC]"
+                className="flex items-center justify-center w-11 h-11 transition-colors rounded hover:bg-[#FEF9EC]"
                 title={t('inventory.card.edit')}
               >
                 <svg
@@ -122,7 +122,7 @@ const InventoryCard: React.FC<Props> = ({
                   e.stopPropagation();
                   onDelete(item.id, e);
                 }}
-                className="p-1 transition-colors rounded hover:bg-red-100"
+                className="flex items-center justify-center w-11 h-11 transition-colors rounded hover:bg-red-100"
                 title={t('inventory.card.delete')}
               >
                 <svg

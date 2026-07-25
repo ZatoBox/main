@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { X, Minus, Plus, Trash2, ShoppingCart, Loader2 } from 'lucide-react';
 import { checkoutCashOrder } from '@/services/cash-payments.service';
 import { useCashSuccess } from '@/context/cash-success-context';
+import { useTranslation } from '@/hooks/use-translation';
 
 type PaymentMethod = 'cash' | 'crypto';
 
@@ -41,6 +42,7 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
   onPaymentSuccess,
 }) => {
   const { showModal } = useCashSuccess();
+  const { t } = useTranslation();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState<{
@@ -78,13 +80,13 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
         } else {
           setMessage({
             type: 'error',
-            text: response.message || 'Error al procesar el pago',
+            text: response.message || t('cart.errorProcessing'),
           });
         }
       } catch (error: any) {
         setMessage({
           type: 'error',
-          text: error.message || 'Error al procesar el pago',
+          text: error.message || t('cart.errorProcessing'),
         });
       } finally {
         setIsProcessing(false);
@@ -103,11 +105,11 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
       >
         <div className="flex items-center justify-between p-4 border-b border-[#CBD5E1] bg-[#F9FAFB]">
           <h2 className="text-lg font-semibold text-black animate-slide-in-left">
-            Shopping Cart
+            {t('cart.title')}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 transition-all duration-300 rounded-full hover:bg-gray-50 hover:scale-110 icon-bounce"
+            className="flex items-center justify-center w-11 h-11 transition-all duration-300 rounded-full hover:bg-gray-50 md:hover:scale-110 icon-bounce"
           >
             <X size={20} className="text-black" />
           </button>
@@ -135,7 +137,7 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                     </div>
                     <button
                       onClick={() => removeCartItem(item.id)}
-                      className="transition-colors duration-300 text-error hover:text-error-600 icon-bounce"
+                      className="flex items-center justify-center w-11 h-11 -mr-2 transition-colors duration-300 text-error hover:text-error-600 icon-bounce"
                     >
                       <Trash2 size={16} color="red" />
                     </button>
@@ -146,9 +148,9 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                       <button
                         onClick={() => updateCartItemQuantity(item.id, -1)}
                         disabled={item.quantity <= 1}
-                        className="flex items-center justify-center w-8 h-8 transition-all duration-300 bg-gray-100 rounded-full hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110"
+                        className="flex items-center justify-center w-11 h-11 transition-all duration-300 bg-gray-100 rounded-full hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed md:hover:scale-110"
                       >
-                        <Minus size={14} />
+                        <Minus size={16} />
                       </button>
                       <span className="w-8 font-medium text-center text-black">
                         {item.quantity}
@@ -159,9 +161,9 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                           item.quantity >=
                           (item.productData?.metadata?.quantity || item.stock)
                         }
-                        className="flex items-center justify-center w-8 h-8 transition-all duration-300 bg-gray-100 rounded-full hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110"
+                        className="flex items-center justify-center w-11 h-11 transition-all duration-300 bg-gray-100 rounded-full hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed md:hover:scale-110"
                       >
-                        <Plus size={14} />
+                        <Plus size={16} />
                       </button>
                     </div>
                     <div className="text-right">
@@ -169,10 +171,10 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
                         ${(item.price * item.quantity).toFixed(2)}
                       </div>
                       <div className="text-sm text-gray-500">
-                        ${item.price.toFixed(2)} each
+                        ${item.price.toFixed(2)} {t('cart.each')}
                       </div>
                       <div className="text-xs text-gray-400">
-                        Stock:{' '}
+                        {t('cart.stock')}{' '}
                         {item.productData?.metadata?.quantity || item.stock}
                       </div>
                     </div>
@@ -184,99 +186,99 @@ const SalesDrawer: React.FC<SalesDrawerProps> = ({
             <div className="py-12 text-center animate-fade-in">
               <ShoppingCart size={48} className="mx-auto mb-4 text-gray-300" />
               <h3 className="mb-2 text-lg font-medium text-black">
-                Your cart is empty
+                {t('cart.empty')}
               </h3>
-              <p className="text-gray-500">Add some products to get started</p>
-            </div>
-          )}
-
-          {/* Summary */}
-          {cartItems.length > 0 && (
-            <div className="mt-6 space-y-4 animate-fade-in">
-              <div className="p-4 border rounded-lg bg-gray-50 border-[#CBD5E1]">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[#CBD5E1]">Subtotal:</span>
-                    <span className="text-black">${subtotal.toFixed(2)}</span>
-                  </div>
-
-                  <div className="flex justify-between pt-2 text-lg font-bold border-t border-[#CBD5E1]">
-                    <span className="text-black">Total:</span>
-                    <span className="text-success">
-                      ${cartAmount.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-black">
-                  Payment Method
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setPaymentMethod('cash')}
-                    disabled={isProcessing}
-                    className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 disabled:opacity-50 ${
-                      paymentMethod === 'cash'
-                        ? 'bg-green-50 border-green-500 text-green-700'
-                        : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    Cash
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod('crypto')}
-                    disabled={isProcessing}
-                    className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 disabled:opacity-50 ${
-                      paymentMethod === 'crypto'
-                        ? 'bg-blue-50 border-blue-500 text-blue-700'
-                        : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    Bitcoin
-                  </button>
-                </div>
-              </div>
-
-              {message && (
-                <div
-                  className={`p-3 rounded-lg text-sm font-medium text-center transition-all ${
-                    message.type === 'success'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}
-                >
-                  {message.text}
-                </div>
-              )}
-
-              <button
-                onClick={handlePaymentClick}
-                disabled={isProcessing}
-                className="w-full py-4 font-medium text-white transition-all duration-300 bg-[#F88612] hover:bg-[#d17110] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    Processing...
-                  </>
-                ) : paymentMethod === 'cash' ? (
-                  'Create Cash Order'
-                ) : (
-                  'Pay with Bitcoin'
-                )}
-              </button>
-
-              <button
-                onClick={clearCart}
-                className="w-full py-3 font-medium transition-all duration-300 bg-gray-100 rounded-lg hover:bg-gray-200 text-black"
-              >
-                Clear Cart
-              </button>
+              <p className="text-gray-500">{t('cart.emptyHint')}</p>
             </div>
           )}
         </div>
+
+        {/* Summary */}
+        {cartItems.length > 0 && (
+          <div className="p-4 space-y-4 border-t border-[#CBD5E1] bg-white pb-safe animate-fade-in">
+            <div className="p-4 border rounded-lg bg-gray-50 border-[#CBD5E1]">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#CBD5E1]">{t('cart.subtotal')}</span>
+                  <span className="text-black">${subtotal.toFixed(2)}</span>
+                </div>
+
+                <div className="flex justify-between pt-2 text-lg font-bold border-t border-[#CBD5E1]">
+                  <span className="text-black">{t('cart.total')}</span>
+                  <span className="text-success">
+                    ${cartAmount.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-black">
+                {t('cart.paymentMethod')}
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setPaymentMethod('cash')}
+                  disabled={isProcessing}
+                  className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 disabled:opacity-50 ${
+                    paymentMethod === 'cash'
+                      ? 'bg-green-50 border-green-500 text-green-700'
+                      : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {t('cart.cash')}
+                </button>
+                <button
+                  onClick={() => setPaymentMethod('crypto')}
+                  disabled={isProcessing}
+                  className={`py-3 px-4 font-medium transition-all duration-300 rounded-lg border-2 disabled:opacity-50 ${
+                    paymentMethod === 'crypto'
+                      ? 'bg-blue-50 border-blue-500 text-blue-700'
+                      : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {t('cart.bitcoin')}
+                </button>
+              </div>
+            </div>
+
+            {message && (
+              <div
+                className={`p-3 rounded-lg text-sm font-medium text-center transition-all ${
+                  message.type === 'success'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                }`}
+              >
+                {message.text}
+              </div>
+            )}
+
+            <button
+              onClick={handlePaymentClick}
+              disabled={isProcessing}
+              className="w-full py-4 font-medium text-white transition-all duration-300 bg-[#F88612] hover:bg-[#d17110] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  {t('cart.processing')}
+                </>
+              ) : paymentMethod === 'cash' ? (
+                t('cart.createCashOrder')
+              ) : (
+                t('cart.payWithBitcoin')
+              )}
+            </button>
+
+            <button
+              onClick={clearCart}
+              className="w-full py-3 font-medium transition-all duration-300 bg-gray-100 rounded-lg hover:bg-gray-200 text-black"
+            >
+              {t('cart.clearCart')}
+            </button>
+          </div>
+        )}
       </aside>
     </>
   );

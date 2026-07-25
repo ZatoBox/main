@@ -6,19 +6,17 @@ import {
   Search,
   Package as PackageIcon,
   CheckCircle2,
-  Loader2,
-  X,
   ChevronRight,
 } from 'lucide-react';
 import Loader from '@/components/ui/Loader';
+import ResponsiveModal from '@/components/ui/responsive-modal';
+import RestockSummary, {
+  type SelectedProduct,
+} from '@/components/restock/RestockSummary';
 import { productsAPI } from '@/services/api.service';
 import { useAuth } from '@/context/auth-store';
 import { useTranslation } from '@/hooks/use-translation';
 import type { Product } from '@/types';
-
-interface SelectedProduct extends Product {
-  quantityToAdd: number;
-}
 
 const RestockPage: React.FC = () => {
   const router = useRouter();
@@ -34,6 +32,7 @@ const RestockPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -146,6 +145,7 @@ const RestockPage: React.FC = () => {
 
       setSelectedProducts([]);
       setSearchQuery('');
+      setIsSummaryOpen(false);
       await fetchProducts();
       alert(t('restock.success'));
     } catch (err) {
@@ -163,7 +163,11 @@ const RestockPage: React.FC = () => {
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
+    <div
+      className={`min-h-screen bg-[#F8F9FA] p-6 md:p-8 ${
+        selectedProducts.length > 0 ? 'pb-28 lg:pb-8' : ''
+      }`}
+    >
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm text-[#64748B]">
@@ -292,7 +296,7 @@ const RestockPage: React.FC = () => {
                           setCurrentPage(Math.max(1, currentPage - 1))
                         }
                         disabled={currentPage === 1}
-                        className="px-3 py-2 text-sm font-medium rounded-lg border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-3 py-2 min-h-11 text-sm font-medium rounded-lg border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         {t('restock.pagination.previous')}
                       </button>
@@ -307,7 +311,7 @@ const RestockPage: React.FC = () => {
                           setCurrentPage(Math.min(totalPages, currentPage + 1))
                         }
                         disabled={currentPage === totalPages}
-                        className="px-3 py-2 text-sm font-medium rounded-lg border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-3 py-2 min-h-11 text-sm font-medium rounded-lg border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         {t('restock.pagination.next')}
                       </button>
@@ -318,81 +322,52 @@ const RestockPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="hidden lg:block lg:col-span-1">
             <div className="bg-white rounded-lg border border-[#E5E7EB] p-6 shadow-sm sticky top-6">
-              <h2 className="text-lg font-bold text-[#000000] mb-4">
-                {t('restock.selected')} ({selectedProducts.length})
-              </h2>
-
-              <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
-                {selectedProducts.length > 0 ? (
-                  selectedProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      className="p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-[#000000] text-sm truncate">
-                            {product.name}
-                          </p>
-                          <p className="text-xs text-[#9CA3AF]">
-                            {t('restock.stock')}: {product.stock}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleSelectProduct(product)}
-                          className="ml-2 text-[#9CA3AF] hover:text-[#F88612] transition-colors"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-
-                      <input
-                        type="number"
-                        onChange={(e) =>
-                          handleQuantityChange(
-                            product.id,
-                            parseInt(e.target.value) || 0
-                          )
-                        }
-                        placeholder={t('restock.quantityPlaceholder')}
-                        className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:border-[#F88612] bg-white"
-                      />
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-[#9CA3AF] text-sm py-4">
-                    {t('restock.selectToRestock')}
-                  </p>
-                )}
-              </div>
-
-              <button
-                onClick={handleSubmitRestock}
-                disabled={
-                  isSubmitting ||
-                  selectedProducts.length === 0 ||
-                  !selectedProducts.some((p) => p.quantityToAdd > 0)
-                }
-                className="w-full py-3 bg-[#F88612] text-white rounded-lg font-medium transition-all hover:bg-[#E07A0A] disabled:bg-[#D1D5DB] disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    {t('restock.submit.processing')}
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 size={18} />
-                    {t('restock.submit.confirm')}
-                  </>
-                )}
-              </button>
+              <RestockSummary
+                selectedProducts={selectedProducts}
+                onRemove={handleSelectProduct}
+                onQuantityChange={handleQuantityChange}
+                onSubmit={handleSubmitRestock}
+                isSubmitting={isSubmitting}
+              />
             </div>
           </div>
         </div>
       </div>
+
+      {/* Móvil: barra fija con resumen + sheet de confirmación */}
+      {selectedProducts.length > 0 && (
+        <div className="fixed inset-x-0 bottom-tabbar z-20 lg:hidden bg-white border-t border-[#E5E7EB] px-4 py-3 flex items-center justify-between gap-3 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+          <span className="text-sm font-medium text-[#1E293B]">
+            {selectedProducts.length} {t('restock.mobileBar.selected')}
+          </span>
+          <button
+            onClick={() => setIsSummaryOpen(true)}
+            className="px-4 py-2 min-h-11 bg-[#F88612] text-white rounded-lg font-medium text-sm hover:bg-[#E07A0A] transition-colors flex items-center gap-2"
+          >
+            <CheckCircle2 size={16} />
+            {t('restock.mobileBar.review')}
+          </button>
+        </div>
+      )}
+
+      <ResponsiveModal
+        open={isSummaryOpen}
+        onOpenChange={setIsSummaryOpen}
+        title={`${t('restock.selected')} (${selectedProducts.length})`}
+      >
+        <div className="pb-4">
+          <RestockSummary
+            selectedProducts={selectedProducts}
+            onRemove={handleSelectProduct}
+            onQuantityChange={handleQuantityChange}
+            onSubmit={handleSubmitRestock}
+            isSubmitting={isSubmitting}
+            showTitle={false}
+          />
+        </div>
+      </ResponsiveModal>
     </div>
   );
 };

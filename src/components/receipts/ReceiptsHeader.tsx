@@ -25,7 +25,7 @@ const ReceiptsHeader: React.FC<Props> = ({ onBack }) => {
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="p-2 -ml-2 transition-colors rounded-full hover:bg-gray-100 md:hidden"
+              className="flex items-center justify-center w-11 h-11 -ml-2 transition-colors rounded-full hover:bg-gray-100 md:hidden"
             >
               <ArrowLeft size={20} className="text-gray-600" />
             </button>

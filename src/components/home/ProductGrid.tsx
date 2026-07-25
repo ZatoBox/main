@@ -32,7 +32,7 @@ const ProductGrid: React.FC<Props> = ({ products, onProductClick }) => {
   }
 
   return (
-    <div className="grid gap-4 sm:gap-6 animate-stagger grid-cols-[repeat(auto-fit,minmax(260px,260px))] justify-center">
+    <div className="grid gap-3 sm:gap-6 animate-stagger grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
       {products.map((product, index) => (
         <ProductCard
           key={`${product.id}-${index}`}

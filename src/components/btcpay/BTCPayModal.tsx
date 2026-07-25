@@ -72,6 +72,8 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
             light: '#FFFFFF',
           },
         });
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
         const dataUrl = canvas.toDataURL();
         setQrDataUrl(dataUrl);
       }
@@ -137,26 +139,26 @@ const BTCPayModal: React.FC<BTCPayModalProps> = ({
         onClick={onClose}
       />
 
-      <div className="fixed inset-0 flex items-center justify-center z-[70] pointer-events-none p-4">
+      <div className="fixed inset-0 flex items-end sm:items-center justify-center z-[70] pointer-events-none p-0 sm:p-4">
         <div
-          className="animate-scale-in pointer-events-auto transform transition-all"
+          className="animate-scale-in pointer-events-auto transform transition-all w-full sm:w-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+          <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 sm:p-8 pb-safe w-full sm:max-w-md max-h-[90dvh] overflow-y-auto mx-auto sm:w-full sm:min-w-[28rem]">
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="absolute top-4 right-4 flex items-center justify-center w-11 h-11 hover:bg-gray-100 rounded-full transition-colors"
             >
               <X size={20} className="text-gray-500" />
             </button>
 
-            <div className="flex flex-col items-center space-y-6">
-              <h2 className="text-2xl font-bold text-center text-gray-900">
+            <div className="flex flex-col items-center space-y-4 sm:space-y-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-center text-gray-900">
                 Pago con Bitcoin
               </h2>
 
-              <div className="bg-white p-4 rounded-xl border-2 border-gray-200">
-                <canvas ref={canvasRef} className="block" />
+              <div className="bg-white p-3 sm:p-4 rounded-xl border-2 border-gray-200 w-full max-w-[240px] sm:max-w-[280px] aspect-square mx-auto">
+                <canvas ref={canvasRef} className="block w-full h-full" />
               </div>
 
               <div className="w-full space-y-4">

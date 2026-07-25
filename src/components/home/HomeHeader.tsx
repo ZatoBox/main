@@ -62,8 +62,8 @@ const HomeHeader: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative w-full sm:w-64">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="relative basis-full sm:basis-auto sm:w-64">
             <Search
               size={20}
               className="absolute transform -translate-y-1/2 left-3 top-1/2 text-gray-400"
@@ -79,8 +79,9 @@ const HomeHeader: React.FC<Props> = ({
 
           <button
             onClick={onToggleSKU}
-            className="p-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:border-[#F88612] hover:text-[#F88612] transition-all duration-300"
+            className="flex items-center justify-center min-w-11 min-h-11 bg-white border border-gray-200 text-gray-700 rounded-xl hover:border-[#F88612] hover:text-[#F88612] transition-all duration-300"
             title={t('home.header.skuSearch')}
+            aria-label={t('home.header.skuSearch')}
           >
             <Hash size={20} />
           </button>
@@ -88,8 +89,9 @@ const HomeHeader: React.FC<Props> = ({
           <button
             onClick={onReload}
             disabled={loading}
-            className="p-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:border-[#F88612] hover:text-[#F88612] transition-all duration-300 disabled:opacity-50"
+            className="flex items-center justify-center min-w-11 min-h-11 bg-white border border-gray-200 text-gray-700 rounded-xl hover:border-[#F88612] hover:text-[#F88612] transition-all duration-300 disabled:opacity-50"
             title={t('home.header.refreshProducts')}
+            aria-label={t('home.header.refreshProducts')}
           >
             <RefreshCw
               size={20}
@@ -99,8 +101,9 @@ const HomeHeader: React.FC<Props> = ({
 
           <button
             onClick={onToggleCart}
-            className="relative p-2.5 bg-[#F88612] text-white rounded-xl hover:bg-[#E67300] transition-all duration-300 shadow-lg shadow-orange-500/20"
+            className="fixed top-4 right-4 z-40 sm:relative sm:top-auto sm:right-auto sm:z-auto flex items-center justify-center min-w-11 min-h-11 bg-[#F88612] text-white rounded-xl hover:bg-[#E67300] transition-all duration-300 shadow-lg shadow-orange-500/20"
             title={t('home.header.viewCart')}
+            aria-label={t('home.header.viewCart')}
           >
             <ShoppingCart size={20} />
             {cartItemsCount > 0 && (

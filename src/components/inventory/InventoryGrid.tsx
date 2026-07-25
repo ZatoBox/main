@@ -167,7 +167,7 @@ const InventoryGrid: React.FC<Props> = ({
                         e.stopPropagation();
                         onEditProduct(item.id);
                       }}
-                      className="p-1 transition-colors rounded hover:bg-[#FEF9EC]"
+                      className="flex items-center justify-center w-9 h-9 transition-colors rounded hover:bg-[#FEF9EC]"
                       title={t('inventory.card.edit')}
                     >
                       <svg
@@ -189,7 +189,7 @@ const InventoryGrid: React.FC<Props> = ({
                         e.stopPropagation();
                         onDeleteClick(item.id, e);
                       }}
-                      className="p-1 transition-colors rounded hover:bg-red-100"
+                      className="flex items-center justify-center w-9 h-9 transition-colors rounded hover:bg-red-100"
                       title={t('inventory.card.delete')}
                     >
                       <svg

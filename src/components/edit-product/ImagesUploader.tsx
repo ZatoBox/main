@@ -71,7 +71,7 @@ const ImagesUploader: React.FC<Props> = ({
                       <button
                         type="button"
                         onClick={() => onRemoveExisting(idx)}
-                        className="absolute top-0 right-0 p-1 text-white bg-black/50"
+                        className="absolute top-0 right-0 flex items-center justify-center w-9 h-9 text-white bg-black/50"
                       >
                         <X size={14} />
                       </button>
@@ -102,7 +102,7 @@ const ImagesUploader: React.FC<Props> = ({
                       <button
                         type="button"
                         onClick={() => onRemoveNew(idx)}
-                        className="absolute top-0 right-0 p-1 text-white bg-black/50"
+                        className="absolute top-0 right-0 flex items-center justify-center w-9 h-9 text-white bg-black/50"
                       >
                         <X size={14} />
                       </button>

@@ -11,7 +11,7 @@ const PluginNotification: React.FC<PluginNotificationProps> = ({
 }) => {
   return (
     <div
-      className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out ${
+      className={`fixed top-4 right-4 z-[80] p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out ${
         type === 'success'
           ? 'bg-green-500 text-white'
           : 'bg-blue-500 text-white'

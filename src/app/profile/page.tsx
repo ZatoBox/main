@@ -40,6 +40,11 @@ const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
   const { language, setLanguage } = useLanguage();
 
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
   useEffect(() => {
     let canceled = false;
     const load = async () => {
@@ -198,7 +203,7 @@ const ProfilePage: React.FC = () => {
             {!isEditing && !isEmailField && (
               <button
                 onClick={() => startEditing(field)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
+                className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity min-h-11 text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
               >
                 <Edit className="w-3 h-3" />
                 <span>{t('profile.edit')}</span>
@@ -347,11 +352,8 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <div className="hidden md:flex self-end">
                       <button
-                        onClick={() => {
-                          logout();
-                          router.push('/login');
-                        }}
-                        className="flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        onClick={handleLogout}
+                        className="flex items-center justify-center px-4 py-2 min-h-11 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         {t('profile.logout')}
@@ -451,11 +453,8 @@ const ProfilePage: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <button
-                      onClick={() => {
-                        logout();
-                        router.push('/login');
-                      }}
-                      className="w-full flex items-center justify-center px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      onClick={handleLogout}
+                      className="w-full flex items-center justify-center px-4 py-3 min-h-11 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                     >
                       <LogOut className="w-5 h-5 mr-2" />
                       {t('profile.logout')}

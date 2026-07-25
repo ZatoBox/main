@@ -96,7 +96,7 @@ const PluginCard: React.FC<PluginCardProps> = ({
           ) : (
             <button
               onClick={() => onToggle(plugin.id)}
-              className={`w-full px-4 py-2 font-medium transition-colors rounded-lg ${
+              className={`w-full px-4 py-2 min-h-11 font-medium transition-colors rounded-lg ${
                 plugin.status === 'active'
                   ? 'text-red-800 bg-red-100 hover:bg-red-200'
                   : 'text-green-800 bg-green-100 hover:bg-green-200'

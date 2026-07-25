@@ -181,7 +181,6 @@ const HomePage: React.FC<HomePageProps> = ({
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
-    setIsDrawerOpen(true);
     addToCart(product, 1);
   };
 
@@ -341,7 +340,7 @@ const HomePage: React.FC<HomePageProps> = ({
   if (error === 'polar_not_configured') {
     const PolarSetupPrompt = require('@/components/PolarSetupPrompt').default;
     return (
-      <div className="min-h-screen pt-16 bg-bg-main">
+      <div className="min-h-screen bg-bg-main">
         <HomeHeader
           searchValue={localSearchTerm}
           onSearchChange={handleLocalSearchChange}
@@ -362,7 +361,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen pt-16 bg-bg-main animate-fade-in">
+      <div className="flex items-center justify-center min-h-screen bg-bg-main animate-fade-in">
         <div className="text-center">
           <div className="mb-4 text-red-500 animate-bounce-in">
             <svg

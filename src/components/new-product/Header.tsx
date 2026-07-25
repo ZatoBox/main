@@ -20,7 +20,7 @@ const Header: React.FC<Props> = ({ onBack, onSave, saving, error }) => {
           <div className="flex items-center space-x-4">
             <button
               onClick={onBack}
-              className="p-2 transition-colors rounded-full hover:bg-gray-100"
+              className="flex items-center justify-center w-11 h-11 transition-colors rounded-full hover:bg-gray-100"
             >
               <IoMdArrowRoundBack size={20} className="text-[#000000]" />
             </button>
